@@ -15,7 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 
 public abstract class EnablingClass {
-    public void startLanguageManager(LanguageManager languageManager, JavaPlugin javaPlugin, boolean usePLHandler, File dataFile) {
+    public boolean startLanguageManager(LanguageManager languageManager, JavaPlugin javaPlugin, boolean usePLHandler, File dataFile) {
         if(usePLHandler) {
             FileConfiguration dataYML = YamlConfiguration.loadConfiguration(dataFile);
             languageManager.setPlhandler(new PerPlayerLanguageHandler(languageManager, dataFile, dataYML));
@@ -30,12 +30,14 @@ public abstract class EnablingClass {
         languageManager.setCurrentLang(languageManager.getLang(javaPlugin.getConfig().getString("Plugin.language"), true), true);
         if (languageManager.getCurrentLang() != null) {
             Bukkit.getServer().getConsoleSender().sendMessage(languageManager.getMessage("Plugin.EnablingMessage", null, true));
+            return true;
         } else {
             Bukkit.getServer().getConsoleSender().sendMessage(Utils.chat("&f[&aCool&eStuff&6Lib&f] &cLanguage Manager is not enabled, " +
                     "which means all the Items and Messages won't work! " +
                     "The Plugin will automatically unload! " +
                     "Look for Errors from " + javaPlugin.getName() + " or the CoolStuffLib in the Console!"));
             Bukkit.getPluginManager().disablePlugin(javaPlugin);
+            return false;
         }
     }
     public abstract void startCommandManagerRegistry();

@@ -23,6 +23,7 @@ import java.util.Objects;
 public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     private final LanguageManager lgm;
     private final Map<CommandManager, CommandData> commandManagers;
+    private boolean commandManagerRegistryReady = false;
 
     public CommandManagerRegistry(CoolStuffLib plugin) {
         this.lgm = plugin.getLanguageManager();
@@ -85,6 +86,7 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
 
     public boolean register(CommandManager cm) {
         if (commandManagers.containsKey(cm) || cm == null) return false;
+        if(!commandManagerRegistryReady) throw new RuntimeException("CommandManagerRegistry (CMR) not ready to use yet. The Start Method has not been called yet.");
 
         // Checking if the Command Manager has CommandData
 
@@ -114,6 +116,7 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
 
     public void unregister(CommandManager cm) {
         if (!commandManagers.containsKey(cm) || cm == null) return;
+        if(!commandManagerRegistryReady) throw new RuntimeException("CommandManagerRegistry (CMR) not ready to use yet. The Start Method has not been called yet.");
 
         JavaPlugin javaPlugin = cm.getJavaPlugin();
 
@@ -137,12 +140,14 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     }
 
     public void unregisterAll() {
+        if(!commandManagerRegistryReady) throw new RuntimeException("CommandManagerRegistry (CMR) not ready to use yet. The Start Method has not been called yet.");
         for (CommandManager cm : commandManagers.keySet()) {
             unregister(cm);
         }
     }
 
     public Map<CommandManager, CommandData> getCommandManagers() {
+        if(!commandManagerRegistryReady) throw new RuntimeException("CommandManagerRegistry (CMR) not ready to use yet. The Start Method has not been called yet.");
         return commandManagers;
     }
 
@@ -223,5 +228,13 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
             }
         }
         return null;
+    }
+
+    public void setCommandManagerRegistryReady(boolean cmrReady) {
+        this.commandManagerRegistryReady = cmrReady;
+    }
+
+    public boolean isCommandManagerRegistryReady() {
+        return commandManagerRegistryReady;
     }
 }
