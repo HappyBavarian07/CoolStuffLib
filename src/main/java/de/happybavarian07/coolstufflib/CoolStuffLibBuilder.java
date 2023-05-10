@@ -21,13 +21,13 @@ public class CoolStuffLibBuilder {
     private MenuAddonManager menuAddonManager = null;
     private boolean usePlayerLangHandler = false;
     private Consumer<Object[]> languageManagerStartingMethod = (args) -> {
-        if(args.length != 4) return;
+        if (args.length != 4) return;
         LanguageManager languageManager = (LanguageManager) args[0];
         JavaPlugin javaPluginUsingLib = (JavaPlugin) args[1];
         boolean usePlayerLangHandler = (boolean) args[2];
         File dataFile = (File) args[3];
 
-        if(usePlayerLangHandler) {
+        if (usePlayerLangHandler) {
             FileConfiguration dataYML = YamlConfiguration.loadConfiguration(dataFile);
             languageManager.setPlhandler(new PerPlayerLanguageHandler(languageManager, dataFile, dataYML));
         }
@@ -50,13 +50,15 @@ public class CoolStuffLibBuilder {
         }
     };
     private Consumer<Object[]> commandManagerRegistryStartingMethod = (args) -> {
-        if(args.length != 1) return;
+        if (args.length != 1) return;
         CommandManagerRegistry commandManagerRegistry = (CommandManagerRegistry) args[0];
         commandManagerRegistry.setCommandManagerRegistryReady(true);
 
     };
     private Consumer<Object[]> menuAddonManagerStartingMethod = (args) -> {
-
+        if (args.length != 1) return;
+        MenuAddonManager menuAddonManager = (MenuAddonManager) args[0];
+        menuAddonManager.setMenuAddonManagerReady(true);
     };
     private File dataFile = null;
 

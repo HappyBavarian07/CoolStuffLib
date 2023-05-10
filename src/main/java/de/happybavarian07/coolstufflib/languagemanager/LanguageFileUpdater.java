@@ -3,10 +3,11 @@ package de.happybavarian07.coolstufflib.languagemanager;/*
  * @Date 15.11.2021 | 17:59
  */
 
-import de.happybavarian07.adminpanel.configupdater.KeyBuilder;
+import de.happybavarian07.coolstufflib.configupdater.KeyBuilder;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -14,24 +15,24 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class LanguageFileUpdater {
-    private static AdminPanelMain plugin;
+    private static JavaPlugin javaPluginUsingThisLib;
     private static final char SEPARATOR = '.';
 
-    public LanguageFileUpdater(AdminPanelMain plugin) {
-        LanguageFileUpdater.plugin = plugin;
+    public LanguageFileUpdater(JavaPlugin javaPluginUsingThisLib) {
+        LanguageFileUpdater.javaPluginUsingThisLib = javaPluginUsingThisLib;
     }
 
     public static void update(String resourceName, File toUpdate) throws IOException {
-        if (plugin.getResource(resourceName) == null) {
-            if (plugin.getResource("languages/" + plugin.getConfig().getString("Plugin.languageForUpdates") + ".yml") != null) {
-                resourceName = "languages/" + plugin.getConfig().getString("Plugin.languageForUpdates") + ".yml";
+        if (javaPluginUsingThisLib.getResource(resourceName) == null) {
+            if (javaPluginUsingThisLib.getResource("languages/" + javaPluginUsingThisLib.getConfig().getString("Plugin.languageForUpdates") + ".yml") != null) {
+                resourceName = "languages/" + javaPluginUsingThisLib.getConfig().getString("Plugin.languageForUpdates") + ".yml";
             } else {
                 resourceName = "languages/en.yml";
             }
         }
-        FileConfiguration defaultConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(plugin.getResource(resourceName), StandardCharsets.UTF_8));
+        FileConfiguration defaultConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(javaPluginUsingThisLib.getResource(resourceName), StandardCharsets.UTF_8));
         FileConfiguration currentConfig = YamlConfiguration.loadConfiguration(toUpdate);
-        Map<String, String> comments = parseComments(plugin, resourceName, defaultConfig);
+        Map<String, String> comments = parseComments(javaPluginUsingThisLib, resourceName, defaultConfig);
     }
 
     //Returns a map of key comment pairs. If a key doesn't have any comments it won't be included in the map.

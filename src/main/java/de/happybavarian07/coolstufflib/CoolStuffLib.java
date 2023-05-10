@@ -16,12 +16,8 @@ public class CoolStuffLib {
     private static CoolStuffLib lib;
     private final JavaPlugin javaPluginUsingLib;
     private final LanguageManager languageManager;
-    private boolean languageManagerEnabled = false;
     private final CommandManagerRegistry commandManagerRegistry;
-    private boolean commandManagerRegistryEnabled = false;
     private final MenuAddonManager menuAddonManager;
-    private boolean menuAddonManagerEnabled = false;
-    private boolean placeholderAPIEnabled = false;
     // Directory of the Plugin using this Lib
     private final File workingDirectory;
     private final boolean usePlayerLangHandler;
@@ -29,6 +25,10 @@ public class CoolStuffLib {
     private final Consumer<Object[]> commandManagerRegistryStartingMethod;
     private final Consumer<Object[]> menuAddonManagerStartingMethod;
     private final File dataFile;
+    private boolean languageManagerEnabled = false;
+    private boolean commandManagerRegistryEnabled = false;
+    private boolean menuAddonManagerEnabled = false;
+    private boolean placeholderAPIEnabled = false;
 
 
     /**
@@ -83,13 +83,12 @@ public class CoolStuffLib {
         }
         if (commandManagerRegistry != null) {
             // Command Registry Enable Code
-            enablingClass.startCommandManagerRegistry();
-            executeMethod(commandManagerRegistryStartingMethod,);
+            executeMethod(commandManagerRegistryStartingMethod, commandManagerRegistry);
             commandManagerRegistryEnabled = true;
         }
         if (menuAddonManager != null) {
             // Menu Addon Manager Init Code
-            enablingClass.startMenuAddonManager();
+            executeMethod(menuAddonManagerStartingMethod, menuAddonManager);
             menuAddonManagerEnabled = true;
         }
     }
@@ -108,6 +107,26 @@ public class CoolStuffLib {
 
     public JavaPlugin getJavaPluginUsingLib() {
         return javaPluginUsingLib;
+    }
+
+    public File getDataFile() {
+        return dataFile;
+    }
+
+    public File getWorkingDirectory() {
+        return workingDirectory;
+    }
+
+    public Consumer<Object[]> getLanguageManagerStartingMethod() {
+        return languageManagerStartingMethod;
+    }
+
+    public Consumer<Object[]> getCommandManagerRegistryStartingMethod() {
+        return commandManagerRegistryStartingMethod;
+    }
+
+    public Consumer<Object[]> getMenuAddonManagerStartingMethod() {
+        return menuAddonManagerStartingMethod;
     }
 
     public boolean isLanguageManagerEnabled() {
