@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>de.happybavarian07.coolstufflib</groupId>
+    <groupId>io.github.happybavarian07</groupId>
     <artifactId>CoolStuffLib</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <name>CoolStuffLib</name>
     <description>The Library that houses my Command Manager And Menu Manager (Original Version from Kody Simpson on
@@ -15,9 +15,11 @@
     <url>https://github.com/HappyBavarian07/CoolStuffLib</url>
 
     <properties>
-        <maven.compiler.source>18</maven.compiler.source>
-        <maven.compiler.target>18</maven.compiler.target>
+        <java.version>11</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
     </properties>
+    <packaging>jar</packaging>
 
     <build>
         <plugins>
@@ -26,8 +28,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>18</source>
-                    <target>18</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -112,18 +114,18 @@
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
             <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
 
     <developers>
         <developer>
             <name>Quirin Hosse</name>
-            <organization>io.github.HappyBavarian07</organization>
+            <organization>io.github.happybavarian07</organization>
             <organizationUrl>https://github.com/HappyBavarian07/</organizationUrl>
         </developer>
     </developers>

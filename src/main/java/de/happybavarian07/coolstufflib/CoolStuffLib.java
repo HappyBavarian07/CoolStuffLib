@@ -102,9 +102,9 @@ public class CoolStuffLib {
         if (menuAddonManager != null) {
             // Menu Addon Manager Init Code
             executeMethod(menuAddonManagerStartingMethod, menuAddonManager);
-            Bukkit.getPluginManager().registerEvents(new MenuListener(), javaPluginUsingLib);
             menuAddonManagerEnabled = true;
         }
+        Bukkit.getPluginManager().registerEvents(new MenuListener(), javaPluginUsingLib);
     }
 
     public LanguageManager getLanguageManager() {
