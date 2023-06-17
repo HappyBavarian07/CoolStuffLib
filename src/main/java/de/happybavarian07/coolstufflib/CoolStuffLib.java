@@ -10,6 +10,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collections;
 import java.util.function.Consumer;
 
 public class CoolStuffLib {
@@ -69,21 +77,20 @@ public class CoolStuffLib {
         return lib;
     }
 
-    /**
-     * @param usePlHandler
-     */
     public void setup() {
         if (languageManager != null) {
             if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
                 placeholderAPIEnabled = true;
             }
             // Language Manager Enable Code
+            File langDir = new File(javaPluginUsingLib.getDataFolder(), "languages");
+            if (!langDir.isDirectory()) langDir.mkdirs();
             executeMethod(languageManagerStartingMethod, languageManager, javaPluginUsingLib, usePlayerLangHandler, dataFile);
             languageManagerEnabled = true;
         }
         if (commandManagerRegistry != null) {
             // Command Registry Enable Code
-            executeMethod(commandManagerRegistryStartingMethod, commandManagerRegistry);
+            executeMethod(commandManagerRegistryStartingMethod, commandManagerRegistry, languageManager);
             commandManagerRegistryEnabled = true;
         }
         if (menuAddonManager != null) {

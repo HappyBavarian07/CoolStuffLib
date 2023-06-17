@@ -21,12 +21,13 @@ import java.util.Map;
 import java.util.Objects;
 
 public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
-    private final LanguageManager lgm;
+    private JavaPlugin plugin;
+    private LanguageManager lgm;
     private final Map<CommandManager, CommandData> commandManagers;
     private boolean commandManagerRegistryReady = false;
 
-    public CommandManagerRegistry(CoolStuffLib plugin) {
-        this.lgm = plugin.getLanguageManager();
+    public CommandManagerRegistry(JavaPlugin plugin) {
+        this.plugin = plugin;
         this.commandManagers = new HashMap<>();
     }
 
@@ -236,5 +237,13 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
 
     public boolean isCommandManagerRegistryReady() {
         return commandManagerRegistryReady;
+    }
+
+    public void setLanguageManager(LanguageManager lgm) {
+        this.lgm = lgm;
+    }
+
+    public JavaPlugin getPlugin() {
+        return plugin;
     }
 }

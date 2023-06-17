@@ -33,13 +33,13 @@ public class CoolStuffLibBuilder {
         }
 
         // Language Manager Enabling
-        LanguageFile deLang = new LanguageFile(javaPluginUsingLib, "de");
-        LanguageFile enLang = new LanguageFile(javaPluginUsingLib, "en");
+        //LanguageFile deLang = new LanguageFile(javaPluginUsingLib, "de");
+        //LanguageFile enLang = new LanguageFile(javaPluginUsingLib, "en");
         languageManager.addLanguagesToList(true);
-        languageManager.addLang(deLang, deLang.getLangName());
-        languageManager.addLang(enLang, enLang.getLangName());
-        languageManager.setCurrentLang(languageManager.getLang(javaPluginUsingLib.getConfig().getString("Plugin.language"), true), true);
-        if (languageManager.getCurrentLang() != null) {
+        //languageManager.addLang(deLang, deLang.getLangName());
+        //languageManager.addLang(enLang, enLang.getLangName());
+        //languageManager.setCurrentLang(languageManager.getLang(javaPluginUsingLib.getConfig().getString("Plugin.language"), true), true);
+        /*if (languageManager.getCurrentLang() != null) {
             Bukkit.getServer().getConsoleSender().sendMessage(languageManager.getMessage("Plugin.EnablingMessage", null, true));
         } else {
             Bukkit.getServer().getConsoleSender().sendMessage(Utils.chat("&f[&aCool&eStuff&6Lib&f] &cLanguage Manager is not enabled, " +
@@ -47,11 +47,13 @@ public class CoolStuffLibBuilder {
                     "The Plugin will automatically unload! " +
                     "Look for Errors from " + javaPluginUsingLib.getName() + " or the CoolStuffLib in the Console!"));
             Bukkit.getPluginManager().disablePlugin(javaPluginUsingLib);
-        }
+        }*/
     };
     private Consumer<Object[]> commandManagerRegistryStartingMethod = (args) -> {
-        if (args.length != 1) return;
+        if (args.length != 2) return;
         CommandManagerRegistry commandManagerRegistry = (CommandManagerRegistry) args[0];
+        LanguageManager lgm = (LanguageManager) args[1];
+        commandManagerRegistry.setLanguageManager(lgm);
         commandManagerRegistry.setCommandManagerRegistryReady(true);
 
     };
