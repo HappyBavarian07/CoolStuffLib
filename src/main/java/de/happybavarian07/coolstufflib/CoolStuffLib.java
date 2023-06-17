@@ -6,6 +6,7 @@ package de.happybavarian07.coolstufflib;/*
 import de.happybavarian07.coolstufflib.commandmanagement.CommandManagerRegistry;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import de.happybavarian07.coolstufflib.menusystem.MenuAddonManager;
+import de.happybavarian07.coolstufflib.menusystem.MenuListener;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -40,13 +41,18 @@ public class CoolStuffLib {
 
 
     /**
-     * You can find a full Tutorial on this Lib under this Link: <a></a>.
-     * Here is a Video from me explaining it a bit more and showing one Example.</b>
+     * You can find a full Tutorial on this Lib under this Link: .
+     * Here is a Video from me explaining it a bit more and showing one Example.
      *
      * @param javaPluginUsingLib     You have to set your Java Plugin Here to make it work.
      * @param languageManager        The Language Manager Class
      * @param commandManagerRegistry The Command Manager Registry Class
      * @param menuAddonManager       The Menu Addon Manager Class
+     * @param usePlayerLangHandler Boolean if it should use a PlayerLangHandler
+     * @param languageManagerStartingMethod The Method that gets executed when Language Manager System is initiated
+     * @param commandManagerRegistryStartingMethod The Method that gets executed when Command Manager System is initiated
+     * @param menuAddonManagerStartingMethod The Method that gets executed when Menu Manager System is initiated
+     * @param dataFile Data File for important Data
      */
     protected CoolStuffLib(JavaPlugin javaPluginUsingLib,
                            LanguageManager languageManager,
@@ -96,6 +102,7 @@ public class CoolStuffLib {
         if (menuAddonManager != null) {
             // Menu Addon Manager Init Code
             executeMethod(menuAddonManagerStartingMethod, menuAddonManager);
+            Bukkit.getPluginManager().registerEvents(new MenuListener(), javaPluginUsingLib);
             menuAddonManagerEnabled = true;
         }
     }

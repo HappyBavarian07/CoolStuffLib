@@ -128,6 +128,13 @@
         </developer>
     </developers>
 
+    <scm>
+        <connection>scm:git:git://github.com/HappyBavarian07/CoolStuffLib.git</connection>
+        <developerConnection>scm:git:ssh://github.com:HappyBavarian07/CoolStuffLib.git</developerConnection>
+        <url>https://github.com/HappyBavarian07/CoolStuffLib</url>
+        <tag>HEAD</tag>
+    </scm>
+
     <repositories>
         <repository>
             <id>spigotmc-repo</id>
