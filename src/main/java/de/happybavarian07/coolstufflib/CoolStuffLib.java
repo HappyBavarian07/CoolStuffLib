@@ -11,14 +11,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Collections;
 import java.util.function.Consumer;
 
 public class CoolStuffLib {
@@ -44,15 +36,15 @@ public class CoolStuffLib {
      * You can find a full Tutorial on this Lib under this Link: .
      * Here is a Video from me explaining it a bit more and showing one Example.
      *
-     * @param javaPluginUsingLib     You have to set your Java Plugin Here to make it work.
-     * @param languageManager        The Language Manager Class
-     * @param commandManagerRegistry The Command Manager Registry Class
-     * @param menuAddonManager       The Menu Addon Manager Class
-     * @param usePlayerLangHandler Boolean if it should use a PlayerLangHandler
-     * @param languageManagerStartingMethod The Method that gets executed when Language Manager System is initiated
+     * @param javaPluginUsingLib                   You have to set your Java Plugin Here to make it work.
+     * @param languageManager                      The Language Manager Class
+     * @param commandManagerRegistry               The Command Manager Registry Class
+     * @param menuAddonManager                     The Menu Addon Manager Class
+     * @param usePlayerLangHandler                 Boolean if it should use a PlayerLangHandler
+     * @param languageManagerStartingMethod        The Method that gets executed when Language Manager System is initiated
      * @param commandManagerRegistryStartingMethod The Method that gets executed when Command Manager System is initiated
-     * @param menuAddonManagerStartingMethod The Method that gets executed when Menu Manager System is initiated
-     * @param dataFile Data File for important Data
+     * @param menuAddonManagerStartingMethod       The Method that gets executed when Menu Manager System is initiated
+     * @param dataFile                             Data File for important Data
      */
     protected CoolStuffLib(JavaPlugin javaPluginUsingLib,
                            LanguageManager languageManager,
@@ -68,6 +60,7 @@ public class CoolStuffLib {
         if (this.javaPluginUsingLib == null) {
             throw new RuntimeException("CoolStuffLib did not find a Plugin it got called from. Returning. Report the Issue to the Plugin Dev(s), that may have programmed the Plugin.");
         }
+        // TODO Add StartUpLogger API, MySQL API (with class that can be inherited and then added into this constructor, Maybe other Things
         this.workingDirectory = javaPluginUsingLib.getDataFolder();
         this.languageManager = languageManager;
         this.commandManagerRegistry = commandManagerRegistry;
@@ -89,9 +82,10 @@ public class CoolStuffLib {
                 placeholderAPIEnabled = true;
             }
             // Language Manager Enable Code
+            // TODO Add more customizablity for languages folder. Make it editable and make it use the instance of the language manager or smth
             File langDir = new File(javaPluginUsingLib.getDataFolder(), "languages");
             if (!langDir.isDirectory()) langDir.mkdirs();
-            executeMethod(languageManagerStartingMethod, languageManager, javaPluginUsingLib, usePlayerLangHandler, dataFile);
+            executeMethod(languageManagerStartingMethod, languageManager, javaPluginUsingLib, usePlayerLangHandler, dataFile, langDir);
             languageManagerEnabled = true;
         }
         if (commandManagerRegistry != null) {

@@ -30,9 +30,9 @@ public class Placeholder {
     }
 
     public String replace(String s) {
-        if(!stringContainsPlaceholder(s)) return s;
-        if(value == null) throw new NullPointerException("The Value of Key " + key + " is null");
-        if(value instanceof String) {
+        if (!stringContainsPlaceholder(s)) return s;
+        if (value == null) throw new NullPointerException("The Value of Key " + key + " is null");
+        if (value instanceof String) {
             return s.replace(key, Utils.chat(value + ChatColor.getLastColors(s.split(key)[0])));
         }
         return s.replace(key, value.toString());

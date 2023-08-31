@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
-    private JavaPlugin plugin;
+    private final JavaPlugin plugin;
     private LanguageManager lgm;
     private final Map<CommandManager, CommandData> commandManagers;
     private boolean commandManagerRegistryReady = false;

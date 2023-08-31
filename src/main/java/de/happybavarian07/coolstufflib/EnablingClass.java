@@ -16,14 +16,14 @@ import java.io.File;
 
 public abstract class EnablingClass {
     public boolean startLanguageManager(LanguageManager languageManager, JavaPlugin javaPlugin, boolean usePLHandler, File dataFile) {
-        if(usePLHandler) {
+        if (usePLHandler) {
             FileConfiguration dataYML = YamlConfiguration.loadConfiguration(dataFile);
-            languageManager.setPlhandler(new PerPlayerLanguageHandler(languageManager, dataFile, dataYML));
+            languageManager.setPLHandler(new PerPlayerLanguageHandler(languageManager, dataFile, dataYML));
         }
 
         // Language Manager Enabling
-        LanguageFile deLang = new LanguageFile(javaPlugin, "de");
-        LanguageFile enLang = new LanguageFile(javaPlugin, "en");
+        LanguageFile deLang = new LanguageFile(javaPlugin, languageManager.getLangFolder(), languageManager.getResourceDirectory(), "de");
+        LanguageFile enLang = new LanguageFile(javaPlugin, languageManager.getLangFolder(), languageManager.getResourceDirectory(), "en");
         languageManager.addLanguagesToList(true);
         languageManager.addLang(deLang, deLang.getLangName());
         languageManager.addLang(enLang, enLang.getLangName());
@@ -40,6 +40,8 @@ public abstract class EnablingClass {
             return false;
         }
     }
+
     public abstract void startCommandManagerRegistry();
+
     public abstract void startMenuAddonManager();
 }

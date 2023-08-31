@@ -1,12 +1,9 @@
 package de.happybavarian07.coolstufflib;
 
 import de.happybavarian07.coolstufflib.commandmanagement.CommandManagerRegistry;
-import de.happybavarian07.coolstufflib.languagemanager.LanguageFile;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import de.happybavarian07.coolstufflib.languagemanager.PerPlayerLanguageHandler;
 import de.happybavarian07.coolstufflib.menusystem.MenuAddonManager;
-import de.happybavarian07.coolstufflib.utils.Utils;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -29,7 +26,7 @@ public class CoolStuffLibBuilder {
 
         if (usePlayerLangHandler) {
             FileConfiguration dataYML = YamlConfiguration.loadConfiguration(dataFile);
-            languageManager.setPlhandler(new PerPlayerLanguageHandler(languageManager, dataFile, dataYML));
+            languageManager.setPLHandler(new PerPlayerLanguageHandler(languageManager, dataFile, dataYML));
         }
 
         // Language Manager Enabling

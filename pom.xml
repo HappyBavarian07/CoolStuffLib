@@ -6,7 +6,7 @@
 
     <groupId>io.github.happybavarian07</groupId>
     <artifactId>CoolStuffLib</artifactId>
-    <version>1.0.1</version>
+    <version>1.1.1</version>
 
     <name>CoolStuffLib</name>
     <description>The Library that houses my Command Manager And Menu Manager (Original Version from Kody Simpson on
@@ -144,7 +144,7 @@
         </repository>
         <repository>
             <id>placeholderapi</id>
-            <url>http://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
     </repositories>
 

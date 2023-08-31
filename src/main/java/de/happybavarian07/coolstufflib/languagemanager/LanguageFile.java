@@ -11,11 +11,11 @@ public class LanguageFile {
     private final String langName;
     private final LanguageConfig langConfig;
 
-    public LanguageFile(JavaPlugin plugin, String langName) {
+    public LanguageFile(JavaPlugin plugin, File langFolder, String resourceDirectory, String langName) {
         this.plugin = plugin;
-        this.langFile = new File(plugin.getDataFolder() + "/languages/" + langName + ".yml");
+        this.langFile = new File(langFolder,langName + ".yml");
         this.langName = langName;
-        this.langConfig = new LanguageConfig(this.langFile, this.langName, this.plugin);
+        this.langConfig = new LanguageConfig(this.langFile, langFolder, resourceDirectory, this.langName, this.plugin);
     }
 
     public File getLangFile() {

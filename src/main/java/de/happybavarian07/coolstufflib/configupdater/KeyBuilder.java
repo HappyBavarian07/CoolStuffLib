@@ -112,7 +112,7 @@ public class KeyBuilder implements Cloneable {
     }
 
     @Override
-    protected KeyBuilder clone() {
-        return new KeyBuilder(this);
+    protected KeyBuilder clone() throws CloneNotSupportedException {
+        return (KeyBuilder) super.clone();
     }
 }

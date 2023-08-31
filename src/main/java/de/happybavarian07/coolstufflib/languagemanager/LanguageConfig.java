@@ -16,11 +16,15 @@ public class LanguageConfig {
     private final String langName;
     private File file;
     private FileConfiguration config;
+    private final String resourceDirectory;
+    private final File langFolder;
 
-    public LanguageConfig(File langFile, String langName, JavaPlugin plugin) {
+    public LanguageConfig(File langFile, File langFolder, String resourceDirectory, String langName, JavaPlugin plugin) {
         this.plugin = plugin;
         this.langName = langName;
         this.file = langFile;
+        this.resourceDirectory = resourceDirectory;
+        this.langFolder = langFolder;
         //System.out.println("Creating Language Config: " + this.langName + "  |  " + this.file);
         saveDefaultConfig();
         this.config = YamlConfiguration.loadConfiguration(file);
@@ -28,12 +32,12 @@ public class LanguageConfig {
 
     public void reloadConfig() {
         if (this.file == null)
-            this.file = new File(this.plugin.getDataFolder() + "/languages", this.langName + ".yml");
+            this.file = new File(langFolder, this.langName + ".yml");
 
         this.config = YamlConfiguration.loadConfiguration(this.file);
 
-        if (this.plugin.getResource("languages/" + this.langName + ".yml") != null) {
-            InputStream defaultStream = this.plugin.getResource("languages/" + this.langName + ".yml");
+        if (this.plugin.getResource(resourceDirectory + "/" + this.langName + ".yml") != null) {
+            InputStream defaultStream = this.plugin.getResource(resourceDirectory + "/" + this.langName + ".yml");
             if (defaultStream != null) {
                 YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defaultStream));
                 this.config.setDefaults(defaultConfig);
@@ -61,10 +65,10 @@ public class LanguageConfig {
 
     public void saveDefaultConfig() {
         if (this.file == null)
-            this.file = new File(this.plugin.getDataFolder() + "/languages", this.langName + ".yml");
+            this.file = new File(langFolder, this.langName + ".yml");
 
         if (!this.file.exists()) {
-            this.plugin.saveResource("languages/" + this.langName + ".yml", false);
+            this.plugin.saveResource(resourceDirectory + "/" + this.langName + ".yml", false);
         }
     }
 

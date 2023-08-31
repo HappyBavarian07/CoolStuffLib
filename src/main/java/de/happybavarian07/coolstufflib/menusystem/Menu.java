@@ -13,11 +13,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
+import java.util.*;
 
 /*
     Defines the behavior and attributes of all menus in our plugin
@@ -92,11 +88,14 @@ public abstract class Menu implements InventoryHolder {
 
         inventory = Bukkit.createInventory(this, getSlots(), getMenuName());
         inventorys.add(inventory);
-
-        Map<String, MenuAddon> addonList = lib.getMenuAddonManager().getMenuAddons(this.getConfigMenuAddonFeatureName());
+        Map<String, MenuAddon> addonList = new HashMap<>();
+        if (lib.getMenuAddonManager() != null) {
+            addonList = lib.getMenuAddonManager().getMenuAddons(this.getConfigMenuAddonFeatureName());
+        }
 
         //grab all the items specified to be used for this menu and add to inventory
         this.setMenuItems();
+
         for (Map.Entry<String, MenuAddon> menuAddonName : addonList.entrySet()) {
             MenuAddon addon = menuAddonName.getValue();
             addon.setMenuAddonItems();
