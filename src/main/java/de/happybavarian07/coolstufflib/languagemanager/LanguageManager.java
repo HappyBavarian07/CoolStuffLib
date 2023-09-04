@@ -294,7 +294,7 @@ public class LanguageManager {
     }
 
     public String getMessage(String path, Player player, boolean resetAfter) {
-        return getMessage(path, player, null, resetAfter);
+        return getMessage(path, player, getCurrentLangName(), resetAfter);
     }
 
     public String getMessage(String path, Player player, String langName, boolean resetAfter) {
@@ -320,7 +320,7 @@ public class LanguageManager {
     }
 
     public ItemStack getItem(String path, Player player, boolean resetAfter) {
-        return getItem(path, player, null, resetAfter);
+        return getItem(path, player, getCurrentLangName(), resetAfter);
     }
 
     public ItemStack getItem(String path, Player player, String langName, boolean resetAfter) {
@@ -381,7 +381,7 @@ public class LanguageManager {
     }
 
     public String getMenuTitle(String path, Player player) {
-        return getMenuTitle(path, player, null);
+        return getMenuTitle(path, player, getCurrentLangName());
     }
 
     public String getMenuTitle(String path, Player player, String langName) {

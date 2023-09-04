@@ -11,6 +11,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
@@ -33,7 +34,11 @@ public abstract class CommandManager {
 
     public abstract List<String> getCommandAliases();
 
-    public abstract String getCommandPermission();
+    public abstract Permission getCommandPermissionAsPermission();
+
+    public abstract String getCommandPermissionAsString();
+
+    public abstract boolean autoRegisterPermission();
 
     public boolean onCommand(Player player, String[] args) {
         SubCommand target = this.getSub(args[0]);

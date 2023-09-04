@@ -3,13 +3,13 @@ package de.happybavarian07.coolstufflib.commandmanagement;/*
  * @Date 09.11.2021 | 14:52
  */
 
-import de.happybavarian07.coolstufflib.CoolStuffLib;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import de.happybavarian07.coolstufflib.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.*;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -104,10 +104,22 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
             pluginCommand.setProperty("aliases", cm.getCommandAliases());
             pluginCommand.setProperty("usage", cm.getCommandUsage());
             pluginCommand.setProperty("description", cm.getCommandInfo());
-            pluginCommand.setProperty("permission", cm.getCommandPermission());
+            pluginCommand.setProperty("permission", cm.getCommandPermissionAsPermission());
             pluginCommand.setExecutor(this);
             pluginCommand.setTabCompleter(this);
             pluginCommand.register();
+        }
+        if(cm.autoRegisterPermission()) {
+            if (cm.getCommandPermissionAsString().isEmpty()) {
+                if (!Bukkit.getPluginManager().getPermissions().contains(cm.getCommandPermissionAsPermission())) {
+                    Bukkit.getPluginManager().addPermission(cm.getCommandPermissionAsPermission());
+                }
+            } else {
+                Permission tempPerm = new Permission(cm.getCommandPermissionAsString());
+                if (!Bukkit.getPluginManager().getPermissions().contains(tempPerm)) {
+                    Bukkit.getPluginManager().addPermission(tempPerm);
+                }
+            }
         }
         // Calling setup() for Adding Sub Commands
         cm.setup();
@@ -130,12 +142,25 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
             pluginCommand.setProperty("aliases", cm.getCommandAliases());
             pluginCommand.setProperty("usage", cm.getCommandUsage());
             pluginCommand.setProperty("description", cm.getCommandInfo());
-            pluginCommand.setProperty("permission", cm.getCommandPermission());
+            pluginCommand.setProperty("permission", cm.getCommandPermissionAsPermission());
             pluginCommand.setExecutor(this);
             pluginCommand.setTabCompleter(this);
             unregisterCommand(pluginCommand, javaPlugin);
         }
-        // Calling setup() for Adding Sub Commands
+        if(cm.autoRegisterPermission()) {
+            if (cm.getCommandPermissionAsString().isEmpty()) {
+                if (Bukkit.getPluginManager().getPermissions().contains(cm.getCommandPermissionAsPermission())) {
+                    Bukkit.getPluginManager().removePermission(cm.getCommandPermissionAsPermission());
+                }
+            } else {
+                Permission tempPerm = new Permission(cm.getCommandPermissionAsString());
+                if (Bukkit.getPluginManager().getPermissions().contains(tempPerm)) {
+                    Bukkit.getPluginManager().removePermission(tempPerm);
+                }
+            }
+        }
+
+        // Call SubCommands.clear to Sub Command List
         cm.getSubCommands().clear();
         commandManagers.remove(cm);
     }
