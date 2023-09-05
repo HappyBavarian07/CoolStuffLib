@@ -639,7 +639,6 @@ public class LanguageManager {
      * 
      * @param path The path of the menu title to get.
      * @param player The player to get the language name from.
-     * @param langName The language name to get the menu title in.
      * @return The menu title for the given path in the language specified by the given
      * language name.
      */
