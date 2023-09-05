@@ -11,6 +11,16 @@ public class Placeholder {
     private final Object value;
     private final PlaceholderType type;
 
+    /**
+     * The Placeholder function is used to create a placeholder object that can be
+     * used in the Language Manager. The Placeholder function takes three parameters:
+     *
+     *
+     *
+     * @param key Identify the placeholder
+     * @param value Store the value of the placeholder
+     * @param type Determine what type of placeholder is being used
+     */
     public Placeholder(String key, Object value, PlaceholderType type) {
         this.key = key;
         this.value = value;
@@ -29,6 +39,14 @@ public class Placeholder {
         return type;
     }
 
+    /**
+     * The replace function replaces the placeholder with the value.
+     *
+     *
+     * @param s Get the string that needs to be replaced
+     *
+     * @return A string
+     */
     public String replace(String s) {
         if (!stringContainsPlaceholder(s)) return s;
         if (value == null) throw new NullPointerException("The Value of Key " + key + " is null");

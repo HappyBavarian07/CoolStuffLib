@@ -3,7 +3,9 @@ package de.happybavarian07.coolstufflib.commandmanagement;/*
  * @Date 09.11.2021 | 14:52
  */
 
+import de.happybavarian07.coolstufflib.CoolStuffLib;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
+import de.happybavarian07.coolstufflib.utils.LogPrefix;
 import de.happybavarian07.coolstufflib.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.*;
@@ -15,22 +17,35 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.logging.Level;
 
+/**
+ * CommandManagerRegistry class.
+ */
 public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     private final JavaPlugin plugin;
     private LanguageManager lgm;
     private final Map<CommandManager, CommandData> commandManagers;
     private boolean commandManagerRegistryReady = false;
 
+    /**
+     * Provides a constructor for the CommandManagerRegistry class, initializing the
+     * plugin and commandManagers fields. The commandManagers field is a HashMap that
+     * stores CommandManager objects.
+     */
     public CommandManagerRegistry(JavaPlugin plugin) {
         this.plugin = plugin;
         this.commandManagers = new HashMap<>();
     }
 
+    /**
+     * Retrieves the value of a private field from an object.
+     *
+     * @param object The object from which to retrieve the field.
+     * @param field The name of the private field to retrieve.
+     * @return The value of the private field, or null if an error occurs.
+     */
     private static Object getPrivateField(Object object, String field) {
         Object result;
         try {
@@ -45,7 +60,14 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
         return result;
     }
 
-    public static void unregisterCommand(PluginCommand cmd, JavaPlugin javaPlugin) {
+    /**
+     * CommandManagerRegistry class provides a method to unregister a command from a
+     * JavaPlugin. This method takes two parameters, a Command and a JavaPlugin. It
+     * uses reflection to access the private fields of the Bukkit Server PluginManager
+     * and SimpleCommandMap. It then uses a HashMap to remove the command and its
+     * aliases from the knownCommands map.
+     */
+    public static void unregisterCommand(Command cmd, JavaPlugin javaPlugin) {
         try {
             Object result = getPrivateField(Bukkit.getServer().getPluginManager(), "commandMap");
             SimpleCommandMap commandMap = (SimpleCommandMap) result;
@@ -65,26 +87,26 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
         }
     }
 
-    public static void unregisterCommand(BukkitCommand cmd, JavaPlugin javaPlugin) {
-        try {
-            Object result = getPrivateField(Bukkit.getServer().getPluginManager(), "commandMap");
-            SimpleCommandMap commandMap = (SimpleCommandMap) result;
-            assert commandMap != null;
-            Object map = getPrivateField(commandMap, "knownCommands");
-            @SuppressWarnings("unchecked")
-            HashMap<String, Command> knownCommands = (HashMap<String, Command>) map;
-            assert knownCommands != null;
-            knownCommands.remove(cmd.getName());
-            for (String alias : cmd.getAliases()) {
-                if (knownCommands.containsKey(alias) && knownCommands.get(alias).toString().contains(javaPlugin.getName())) {
-                    knownCommands.remove(alias);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
+    /**
+     * CommandManagerRegistry class provides the register() method which allows for
+     * registering a CommandManager. This method takes a CommandManager as a parameter
+     * and returns a boolean value. It checks if the CommandManager has already been
+     * registered or if the parameter is null. If either of these conditions is true,
+     * the method returns false. It then checks if the CommandManagerRegistry is ready
+     * to use by checking if the Start Method has been called. If not, a
+     * RuntimeException is thrown.
+     * <p>
+     * The method then checks if the CommandManager has CommandData and registers the
+     * Command on the Server. If the Command already exists, the Executor and
+     * TabCompleter are set to the CommandManagerRegistry. If the Command does not
+     * exist, a new DCommand is created and registered.
+     * <p>
+     * The method then checks if the CommandManager has an autoRegisterPermission and
+     * adds the permission to the PluginManager if it does not already exist. Finally,
+     * the setup() method is called for adding Sub Commands and the CommandManager is
+     * added to the CommandManagerRegistry with the CommandData. The method then
+     * returns true.
+     */
     public boolean register(CommandManager cm) {
         if (commandManagers.containsKey(cm) || cm == null) return false;
         if(!commandManagerRegistryReady) throw new RuntimeException("CommandManagerRegistry (CMR) not ready to use yet. The Start Method has not been called yet.");
@@ -104,7 +126,7 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
             pluginCommand.setProperty("aliases", cm.getCommandAliases());
             pluginCommand.setProperty("usage", cm.getCommandUsage());
             pluginCommand.setProperty("description", cm.getCommandInfo());
-            pluginCommand.setProperty("permission", cm.getCommandPermissionAsPermission());
+            pluginCommand.setProperty("permission", cm.getCommandPermissionAsString());
             pluginCommand.setExecutor(this);
             pluginCommand.setTabCompleter(this);
             pluginCommand.register();
@@ -123,10 +145,35 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
         }
         // Calling setup() for Adding Sub Commands
         cm.setup();
+
+        for(SubCommand subCommand : cm.getSubCommands()) {
+            if(subCommand.autoRegisterPermission()) {
+                if (subCommand.permissionAsString().isEmpty()) {
+                    if (!Bukkit.getPluginManager().getPermissions().contains(subCommand.permissionAsPermission())) {
+                        Bukkit.getPluginManager().addPermission(subCommand.permissionAsPermission());
+                    }
+                } else {
+                    Permission tempPerm = new Permission(subCommand.permissionAsString());
+                    if (!Bukkit.getPluginManager().getPermissions().contains(tempPerm)) {
+                        Bukkit.getPluginManager().addPermission(tempPerm);
+                    }
+                }
+            }
+        }
+
         commandManagers.put(cm, data);
         return true;
     }
 
+    /**
+     * Registers a CommandManager to the CommandManagerRegistry. This method will
+     * register the CommandManager to the CommandManagerRegistry, register the command
+     * to the server, and register the permission to the server if the
+     * CommandManager's autoRegisterPermission is set to true. If the CommandManager
+     * is already registered, this method will do nothing.
+     * 
+     * @param cm The CommandManager to register.
+     */
     public void unregister(CommandManager cm) {
         if (!commandManagers.containsKey(cm) || cm == null) return;
         if(!commandManagerRegistryReady) throw new RuntimeException("CommandManagerRegistry (CMR) not ready to use yet. The Start Method has not been called yet.");
@@ -142,7 +189,7 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
             pluginCommand.setProperty("aliases", cm.getCommandAliases());
             pluginCommand.setProperty("usage", cm.getCommandUsage());
             pluginCommand.setProperty("description", cm.getCommandInfo());
-            pluginCommand.setProperty("permission", cm.getCommandPermissionAsPermission());
+            pluginCommand.setProperty("permission", cm.getCommandPermissionAsString());
             pluginCommand.setExecutor(this);
             pluginCommand.setTabCompleter(this);
             unregisterCommand(pluginCommand, javaPlugin);
@@ -160,11 +207,31 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
             }
         }
 
+        for(SubCommand subCommand : cm.getSubCommands()) {
+            if(subCommand.autoRegisterPermission()) {
+                if (subCommand.permissionAsString().isEmpty()) {
+                    if (Bukkit.getPluginManager().getPermissions().contains(subCommand.permissionAsPermission())) {
+                        Bukkit.getPluginManager().removePermission(subCommand.permissionAsPermission());
+                    }
+                } else {
+                    Permission tempPerm = new Permission(subCommand.permissionAsString());
+                    if (Bukkit.getPluginManager().getPermissions().contains(tempPerm)) {
+                        Bukkit.getPluginManager().removePermission(tempPerm);
+                    }
+                }
+            }
+        }
+
         // Call SubCommands.clear to Sub Command List
         cm.getSubCommands().clear();
         commandManagers.remove(cm);
     }
 
+    /**
+     * Unregisters all CommandManagers from the CommandManagerRegistry. If the
+     * CommandManagerRegistry has not been initialized, a RuntimeException will be
+     * thrown.
+     */
     public void unregisterAll() {
         if(!commandManagerRegistryReady) throw new RuntimeException("CommandManagerRegistry (CMR) not ready to use yet. The Start Method has not been called yet.");
         for (CommandManager cm : commandManagers.keySet()) {
@@ -172,11 +239,23 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
         }
     }
 
+    /**
+     * Retrieves the map of CommandManager and CommandData objects.
+     *
+     * @return A map of CommandManager and CommandData objects.
+     * @throws RuntimeException if the CommandManagerRegistry (CMR) is not ready to use yet.
+     */
     public Map<CommandManager, CommandData> getCommandManagers() {
         if(!commandManagerRegistryReady) throw new RuntimeException("CommandManagerRegistry (CMR) not ready to use yet. The Start Method has not been called yet.");
         return commandManagers;
     }
 
+    /**
+     * Retrieves the CommandManager associated with the given command name.
+     *
+     * @param commandName The name of the command to retrieve the CommandManager for.
+     * @return The CommandManager associated with the given command name, or null if none is found.
+     */
     public CommandManager getCommandManager(String commandName) {
         for (CommandManager cm : commandManagers.keySet()) {
             if (cm.getCommandName().equals(commandName)) {
@@ -188,86 +267,186 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
         return null;
     }
 
+    /**
+     * Checks if a player is required for the given CommandManager.
+     *
+     * @param commandManager The CommandManager to check.
+     * @return True if a player is required, false otherwise.
+     */
     public Boolean isPlayerRequired(CommandManager commandManager) {
         CommandData data = commandManagers.get(commandManager);
         if (data == null) return false;
         return data.playerRequired();
     }
 
+    /**
+     * Checks if a CommandManager requires an operator to execute.
+     *
+     * @param commandManager The CommandManager to check.
+     * @return True if the CommandManager requires an operator to execute, false otherwise.
+     */
     public Boolean isOpRequired(CommandManager commandManager) {
         CommandData data = commandManagers.get(commandManager);
         if (data == null) return false;
         return data.opRequired();
     }
 
+    /**
+     * Checks if the given {@link CommandManager} allows only sub-command arguments that fit to sub-arguments.
+     * 
+     * @param commandManager The {@link CommandManager} to check.
+     * @return {@code true} if the given {@link CommandManager} allows only sub-command arguments that fit to sub-arguments, {@code false} otherwise.
+     */
     public Boolean allowOnlySubCommandArgsThatFitToSubArgs(CommandManager commandManager) {
         CommandData data = commandManagers.get(commandManager);
         if (data == null) return false;
         return data.allowOnlySubCommandArgsThatFitToSubArgs();
     }
 
+    /**
+     * Retrieves a list of subcommands associated with the specified command name.
+     *
+     * @param commandName The name of the command to retrieve subcommands for.
+     * @return A list of subcommands associated with the specified command name.
+     */
     public List<SubCommand> getSubCommands(String commandName) {
         return getCommandManager(commandName).getSubCommands();
     }
 
-
+    /**
+     * Handles the execution of commands registered in the {@link CommandManagerRegistry}.
+     * Logs the command execution and result (success or failure) to the log file.
+     *
+     * @param sender The {@link CommandSender} who executed the command.
+     * @param cmd The {@link Command} that was executed.
+     * @param label The command label.
+     * @param args The command arguments.
+     * @return True if the command was successfully executed, false otherwise.
+     */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, String[] args) {
         for (CommandManager cm : commandManagers.keySet()) {
-            if (cm.getCommandName().equalsIgnoreCase(cmd.getName())) {
-                if (args.length == 0) {
-                    sender.sendMessage(lgm.getMessage("Player.Commands.TooFewArguments", (sender instanceof Player) ? (Player) sender : null, true));
-                    return true;
-                }
-                if (sender instanceof Player) {
-                    return cm.onCommand((Player) sender, args);
-                } else {
-                    if (isPlayerRequired(cm)) {
-                        sender.sendMessage(lgm.getMessage("Console.ExecutesPlayerCommand", null, true));
+            try {
+                if (cm.getCommandName().equalsIgnoreCase(cmd.getName())) {
+                    if (args.length == 0) {
+                        sender.sendMessage(lgm.getMessage("Player.Commands.TooFewArguments", (sender instanceof Player) ? (Player) sender : null, true));
                         return true;
                     }
-                    return cm.onCommand((ConsoleCommandSender) sender, args);
+                    if (!(sender instanceof Player)) {
+                        if (isPlayerRequired(cm)) {
+                            sender.sendMessage(lgm.getMessage("Console.ExecutesPlayerCommand", null, true));
+                            return true;
+                        }
+                    }
+                    boolean commandResult = cm.onCommand(sender, args);
+
+                    // Logging the command execution
+                    String logMessage = "Command execution for command: " + cmd.getName() + ", Args: " + Arrays.toString(args);
+
+                    // Log the command result (success or failure)
+                    if (commandResult) {
+                        logMessage += " - Success";
+                    } else {
+                        logMessage += " - Failure";
+                    }
+
+                    CoolStuffLib.getLib().writeToLog(Level.INFO, logMessage, LogPrefix.COOLSTUFFLIB_COMMANDS, false);
+                    return cm.onCommand(sender, args);
                 }
+            } catch (Exception e) {
+                // Error occurred during command execution, log it.
+                String logMessage = "Error during command execution for command: " + cmd.getName() + ", Args: " + Arrays.toString(args)
+                        + ", Error: " + e.getMessage() + ", Stacktrace: " + Arrays.toString(e.getStackTrace());
+                CoolStuffLib.getLib().writeToLog(Level.SEVERE, logMessage, LogPrefix.ERROR, true);
             }
         }
         return true;
     }
 
+    /**
+     * CommandManagerRegistry class provides a method to complete tab for a command.
+     * This method takes four parameters, CommandSender sender, Command cmd, String
+     * label and String[] args. It returns a list of strings. If the sender is not a
+     * player and the command requires a player, an empty list is returned. If the
+     * args length is 0, an empty list is returned. Otherwise, the onTabComplete
+     * method of the CommandManager is called and the result is returned. If an error
+     * occurs, it is logged and an empty list is returned.
+     */
     @Nullable
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, String[] args) {
-        for (CommandManager cm : commandManagers.keySet()) {
-            if (cm.getCommandName().equalsIgnoreCase(cmd.getName())) {
-                try {
-                    if (!(sender instanceof Player) && isPlayerRequired(cm)) {
-                        return Utils.emptyList();
-                    }
-                    if (args.length == 0) {
-                        return Utils.emptyList();
-                    }
-                    //System.out.println("Test 1");
-                    return cm.onTabComplete(sender, cmd, label, args);
-                } catch (NullPointerException e) {
-                    e.printStackTrace();
-                    return Utils.emptyList();
+        CommandManager cm = findCommandManager(cmd.getName());
+
+        if (cm != null) {
+            try {
+                if (!(sender instanceof Player) && isPlayerRequired(cm)) {
+                    return Collections.emptyList();
                 }
+
+                if (args.length == 0) {
+                    return Collections.emptyList();
+                }
+
+                return cm.onTabComplete(sender, cmd, label, args);
+            } catch (NullPointerException e) {
+                String logMessage = "Error during tab completion for command: " + cmd.getName() + ", Args: " + Arrays.toString(args)
+                        + ", Error: " + e.getMessage() + ", Stacktrace: " + Arrays.toString(e.getStackTrace());
+                CoolStuffLib.getLib().writeToLog(Level.SEVERE, logMessage, LogPrefix.ERROR, true);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Finds the CommandManager associated with the given command name.
+     *
+     * @param commandName The name of the command to search for.
+     * @return The CommandManager associated with the given command name, or null if none is found.
+     */
+    @Nullable
+    private CommandManager findCommandManager(String commandName) {
+        for (CommandManager cm : commandManagers.keySet()) {
+            if (cm.getCommandName().equalsIgnoreCase(commandName)) {
+                return cm;
             }
         }
         return null;
     }
 
+    /**
+     * Sets a boolean value indicating whether the CommandManagerRegistry is ready.
+     * 
+     * @param cmrReady boolean value indicating whether the CommandManagerRegistry is
+     * ready.
+     */
     public void setCommandManagerRegistryReady(boolean cmrReady) {
         this.commandManagerRegistryReady = cmrReady;
     }
 
+    /**
+     * Checks if the CommandManagerRegistry is ready.
+     *
+     * @return true if the CommandManagerRegistry is ready, false otherwise.
+     */
     public boolean isCommandManagerRegistryReady() {
         return commandManagerRegistryReady;
     }
 
+    /**
+     * Sets the LanguageManager for the CommandManagerRegistry.
+     * 
+     * @param lgm The LanguageManager to be set.
+     */
     public void setLanguageManager(LanguageManager lgm) {
         this.lgm = lgm;
     }
 
+    /**
+     * Provides access to the JavaPlugin associated with the CommandManagerRegistry.
+     * 
+     * Returns the JavaPlugin associated with the CommandManagerRegistry.
+     */
     public JavaPlugin getPlugin() {
         return plugin;
     }

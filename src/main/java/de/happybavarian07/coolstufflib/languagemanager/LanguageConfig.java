@@ -19,6 +19,22 @@ public class LanguageConfig {
     private final String resourceDirectory;
     private final File langFolder;
 
+    /**
+     * The LanguageConfig function is used to create a new LanguageConfig object.
+     * This function will also save the default language file if it does not exist,
+     * and load the configuration from that file into memory.
+
+     *
+     * @param langFile Set the file variable
+     * @param langFolder Create the folder where the language file is stored
+     * @param resourceDirectory Specify the folder in which the language file is located
+     * @param langName Set the name of the language file
+     * @param plugin Get the plugin name, which is used to save the default config
+     *
+     * @return A new languageconfig object
+     *
+     * @docauthor Trelent
+     */
     public LanguageConfig(File langFile, File langFolder, String resourceDirectory, String langName, JavaPlugin plugin) {
         this.plugin = plugin;
         this.langName = langName;
@@ -30,6 +46,10 @@ public class LanguageConfig {
         this.config = YamlConfiguration.loadConfiguration(file);
     }
 
+    /**
+     * The reloadConfig function reloads the config file from disk.
+     * It is called when the plugin is enabled, and whenever a player uses /reload.
+     */
     public void reloadConfig() {
         if (this.file == null)
             this.file = new File(langFolder, this.langName + ".yml");
@@ -45,6 +65,10 @@ public class LanguageConfig {
         }
     }
 
+    /**
+     * The getConfig function is used to get the configuration file for this plugin.
+     * If the config file does not exist, it will be created.
+     */
     public FileConfiguration getConfig() {
         if (this.config == null)
             reloadConfig();
@@ -52,6 +76,9 @@ public class LanguageConfig {
         return this.config;
     }
 
+    /**
+     * The saveConfig function saves the config file to disk.
+     */
     public void saveConfig() {
         if (this.config == null || this.file == null)
             return;
@@ -63,6 +90,10 @@ public class LanguageConfig {
         }
     }
 
+    /**
+     * The saveDefaultConfig function is used to save the default configuration file from the plugin's jar.
+     * This function will only run if there is no existing config file in the plugins data folder.
+     */
     public void saveDefaultConfig() {
         if (this.file == null)
             this.file = new File(langFolder, this.langName + ".yml");
@@ -72,10 +103,24 @@ public class LanguageConfig {
         }
     }
 
+    /**
+     * The getLangName function returns the name of the language.
+     *
+     *
+     *
+     * @return The name of the language
+     */
     public String getLangName() {
         return langName;
     }
 
+    /**
+     * The getFile function returns the file that is being read from.
+     *
+     *
+     *
+     * @return A file object
+     */
     public File getFile() {
         return file;
     }

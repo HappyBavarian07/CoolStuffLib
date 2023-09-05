@@ -7,11 +7,14 @@ import de.happybavarian07.coolstufflib.commandmanagement.CommandManagerRegistry;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import de.happybavarian07.coolstufflib.menusystem.MenuAddonManager;
 import de.happybavarian07.coolstufflib.menusystem.MenuListener;
+import de.happybavarian07.coolstufflib.utils.LogPrefix;
+import de.happybavarian07.coolstufflib.utils.PluginFileLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 public class CoolStuffLib {
     private static CoolStuffLib lib;
@@ -19,6 +22,7 @@ public class CoolStuffLib {
     private final LanguageManager languageManager;
     private final CommandManagerRegistry commandManagerRegistry;
     private final MenuAddonManager menuAddonManager;
+    private final PluginFileLogger pluginFileLogger;
     // Directory of the Plugin using this Lib
     private final File workingDirectory;
     private final boolean usePlayerLangHandler;
@@ -50,6 +54,7 @@ public class CoolStuffLib {
                            LanguageManager languageManager,
                            CommandManagerRegistry commandManagerRegistry,
                            MenuAddonManager menuAddonManager,
+                           PluginFileLogger pluginFileLogger,
                            boolean usePlayerLangHandler,
                            Consumer<Object[]> languageManagerStartingMethod,
                            Consumer<Object[]> commandManagerRegistryStartingMethod,
@@ -65,6 +70,7 @@ public class CoolStuffLib {
         this.languageManager = languageManager;
         this.commandManagerRegistry = commandManagerRegistry;
         this.menuAddonManager = menuAddonManager;
+        this.pluginFileLogger = pluginFileLogger;
         this.usePlayerLangHandler = usePlayerLangHandler;
         this.languageManagerStartingMethod = languageManagerStartingMethod;
         this.commandManagerRegistryStartingMethod = commandManagerRegistryStartingMethod;
@@ -76,6 +82,12 @@ public class CoolStuffLib {
         return lib;
     }
 
+    /**
+     * The setup function is used to initialize the various managers and addons that are being used by the plugin.
+     * It will also check if PlaceholderAPI is enabled, and if it is, it will set a boolean value to true so that
+     * other parts of the library can use this information. The setup function should be called in onEnable() or after all
+     * of your code has been executed in onEnable(). If you do not call this method, then none of your managers or addons will work!
+     */
     public void setup() {
         if (languageManager != null) {
             if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
@@ -97,6 +109,10 @@ public class CoolStuffLib {
             // Menu Addon Manager Init Code
             executeMethod(menuAddonManagerStartingMethod, menuAddonManager);
             menuAddonManagerEnabled = true;
+        }
+        if(pluginFileLogger != null) {
+            // Plugin File Logger Init Code
+            pluginFileLogger.createLogFile();
         }
         Bukkit.getPluginManager().registerEvents(new MenuListener(), javaPluginUsingLib);
     }
@@ -155,5 +171,39 @@ public class CoolStuffLib {
 
     public void executeMethod(Consumer<Object[]> method, Object... arguments) {
         method.accept(arguments);
+    }
+
+    /**
+     * The getPluginFileLogger function returns the pluginFileLogger object.
+     *
+     *
+     *
+     * @return The pluginfilelogger variable
+     *
+     * @docauthor Trelent
+     */
+    public PluginFileLogger getPluginFileLogger() {
+        return pluginFileLogger;
+    }
+
+    /**
+     * The writeToLog function is used to write a message to the log file.
+     *
+     *
+     * @param info Define the log level, which is used to filter out some messages
+     * @param logMessage Write the message to the log
+     * @param logPrefix Add a prefix to the log message
+     * @param sendToConsole Determine if the message should be sent to the console
+     *
+     * @return A boolean, which is true if the message was written to the log file
+     *
+     * @docauthor Trelent
+     */
+    public void writeToLog(Level info, String logMessage, LogPrefix logPrefix, boolean sendToConsole) {
+        if(pluginFileLogger != null) {
+            pluginFileLogger.writeToLog(info, logMessage, logPrefix, sendToConsole);
+            return;
+        }
+        System.out.println("PluginFileLogger is not enabled. Please enable it in the CoolStuffLibBuilder, if you want to see Error Messages and such Things.");
     }
 }

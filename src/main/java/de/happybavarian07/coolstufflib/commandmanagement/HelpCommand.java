@@ -34,7 +34,7 @@ public class HelpCommand extends SubCommand {
             lgm.addPlaceholder(PlaceholderType.MESSAGE, "%max_page%", messages.getMaxPage(), false);
             player.sendMessage(lgm.getMessage("Player.Commands.HelpMessages.Header", player, false));
             for (SubCommand s : messages.getPage(page)) {
-                if (player.hasPermission(s.permission())) {
+                if (player.hasPermission(s.permissionAsPermission())) {
                     player.sendMessage(format(lgm.getMessage("Player.Commands.HelpMessages.Format", player, false), s));
                 }
             }
@@ -66,7 +66,7 @@ public class HelpCommand extends SubCommand {
             lgm.addPlaceholder(PlaceholderType.MESSAGE, "%max_page%", messages.getMaxPage(), false);
             sender.sendMessage(lgm.getMessage("Player.Commands.HelpMessages.Header", null, false));
             for (SubCommand s : messages.getPage(page)) {
-                if (sender.hasPermission(s.permission()) && !isPlayerRequired()) {
+                if (sender.hasPermission(s.permissionAsPermission()) && !isPlayerRequired()) {
                     sender.sendMessage(format(lgm.getMessage("Player.Commands.HelpMessages.Format", null, false), s));
                 }
             }
@@ -107,7 +107,12 @@ public class HelpCommand extends SubCommand {
     }
 
     @Override
-    public String permission() {
+    public String permissionAsString() {
         return "";
+    }
+
+    @Override
+    public boolean autoRegisterPermission() {
+        return false;
     }
 }
