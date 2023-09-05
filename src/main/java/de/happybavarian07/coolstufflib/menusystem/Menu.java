@@ -32,6 +32,13 @@ public abstract class Menu implements InventoryHolder {
     //Constructor for Menu. Pass in a PlayerMenuUtility so that
     // we have information on who's menu this is and
     // what info is to be transfered
+    /**
+     * The Menu function is the main function of this class. It creates a menu for the player to interact with, and
+     * allows them to choose what they want to do next. The Menu function takes in no parameters.
+
+     *
+     * @param playerMenuUtility Pass the playermenuutility object to the menu class
+     */
     public Menu(PlayerMenuUtility playerMenuUtility) {
         this.playerMenuUtility = playerMenuUtility;
     }
@@ -56,14 +63,36 @@ public abstract class Menu implements InventoryHolder {
     //let each menu decide what items are to be placed in the inventory menu
     public abstract void setMenuItems();
 
+    /**
+     * The getOpeningPermission function returns the openingPermission variable.
+     *
+     *
+     *
+     * @return The openingpermission variable
+     */
     public String getOpeningPermission() {
         return openingPermission;
     }
 
+    /**
+     * The setOpeningPermission function sets the openingPermission variable to a new value.
+     *
+     *
+     * @param permission Set the openingpermission variable
+     */
     public void setOpeningPermission(String permission) {
         this.openingPermission = permission;
     }
 
+    /**
+     * The legacyServer function checks the server version and returns true if it is 1.12 or older,
+     * false otherwise. This is used to determine whether to use legacy methods for certain
+     * things like setting a player's skin (which changed in 1.13).
+
+     *
+     *
+     * @return A boolean value, true or false
+     */
     protected boolean legacyServer() {
         String serverVersion = Bukkit.getServer().getVersion();
         return serverVersion.contains("1.12") ||
@@ -75,6 +104,10 @@ public abstract class Menu implements InventoryHolder {
     }
 
     //When called, an inventory is created and opened for the player
+    /**
+     * The open function is the main function that opens a menu.
+     * It creates an inventory, sets the items in it, and then opens it for the player.
+     */
     public void open() {
         //The owner of the inventory created is the Menu itself,
         // so we are able to reverse engineer the Menu object from the
@@ -116,12 +149,23 @@ public abstract class Menu implements InventoryHolder {
     }
 
     //Overridden method from the InventoryHolder interface
+    /**
+     * The getInventory function returns the inventory of the player.
+     *
+     *
+     *
+     * @return The inventory object
+     */
     @Override
     public Inventory getInventory() {
         return inventory;
     }
 
     //Helpful utility method to fill all remaining slots with "filler glass"
+    /**
+     * The setFillerGlass function is used to fill the empty slots in a player's inventory with glass panes.
+     * This function is called when a player opens their inventory, and it ensures that all of the empty slots are filled with glass panes.
+     */
     public void setFillerGlass() {
         for (int i = 0; i < getSlots(); i++) {
             if (inventory.getItem(i) == null) {
@@ -130,6 +174,16 @@ public abstract class Menu implements InventoryHolder {
         }
     }
 
+    /**
+     * The makeItem function is a function that creates an ItemStack with the given parameters.
+     *
+     *
+     * @param material Set the material of the item
+     * @param displayName Set the name of the item
+     * @param lore Make the lore variable a string array
+     *
+     * @return An itemstack
+     */
     public ItemStack makeItem(Material material, String displayName, String... lore) {
 
         ItemStack item = new ItemStack(material);
@@ -143,6 +197,15 @@ public abstract class Menu implements InventoryHolder {
     }
 
 
+    /**
+     * The getSlot function is used to get the slot of an item.
+     *
+     *
+     * @param path Get the path of the item
+     * @param defaultInt Set a default value for the slot if it is not found in the config
+     *
+     * @return The slot of the item
+     */
     public int getSlot(String path, int defaultInt) {
         return lgm.getCustomObject("Items." + path + ".slot", null, defaultInt, false);
     }

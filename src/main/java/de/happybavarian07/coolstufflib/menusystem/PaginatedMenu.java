@@ -17,6 +17,11 @@ public abstract class PaginatedMenu extends Menu {
     }
 
     //Set the border and menu buttons for the menu
+    /**
+     * The addMenuBorder function adds the border to the menu.
+     * It does this by setting all the items in slots 0-9, 17, 18, 26-36 and 44-53 to a filler item.
+     * It also sets all the items in slots 48, 49, 50 and 51 to their respective border items (Left arrow for slot 48 etc.)
+     */
     public void addMenuBorder() {
         LanguageManager lgm = CoolStuffLib.getLib().getLanguageManager();
         inventory.setItem(getSlot("General.Left", 48), lgm.getItem("General.Left", null, false));

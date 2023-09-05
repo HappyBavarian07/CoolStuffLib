@@ -4,6 +4,7 @@ import de.happybavarian07.coolstufflib.commandmanagement.CommandManagerRegistry;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import de.happybavarian07.coolstufflib.languagemanager.PerPlayerLanguageHandler;
 import de.happybavarian07.coolstufflib.menusystem.MenuAddonManager;
+import de.happybavarian07.coolstufflib.utils.PluginFileLogger;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,6 +17,7 @@ public class CoolStuffLibBuilder {
     private LanguageManager languageManager = null;
     private CommandManagerRegistry commandManagerRegistry = null;
     private MenuAddonManager menuAddonManager = null;
+    private PluginFileLogger pluginFileLogger = null;
     private boolean usePlayerLangHandler = false;
     private Consumer<Object[]> languageManagerStartingMethod = (args) -> {
         if (args.length != 4) return;
@@ -88,6 +90,11 @@ public class CoolStuffLibBuilder {
         return this;
     }
 
+    public CoolStuffLibBuilder setPluginFileLogger(PluginFileLogger pluginFileLogger) {
+        this.pluginFileLogger = pluginFileLogger;
+        return this;
+    }
+
     public CoolStuffLibBuilder setUsePlayerLangHandler(boolean usePlayerLangHandler) {
         this.usePlayerLangHandler = usePlayerLangHandler;
         return this;
@@ -121,6 +128,7 @@ public class CoolStuffLibBuilder {
                 languageManager,
                 commandManagerRegistry,
                 menuAddonManager,
+                pluginFileLogger,
                 usePlayerLangHandler,
                 languageManagerStartingMethod,
                 commandManagerRegistryStartingMethod,
