@@ -1,14 +1,35 @@
 # CoolStuffLib
-The Library with my changed Version of the Command Manager and Menu System from Kody Simpson.
------
-Also it contains my Language Manager, which is a really powerful tool, that allows developers to manage multiple languages very easily with minimal effort.
------
-# Future Updates
-In the future there will also be a few other Systems like a MySQL client or File Manager.
-A Language Translator to translate a Default Language File like English into other Languages using either a custom api key or google translate.
 
+Welcome to CoolStuffLib, a powerful library for Java developers! This library contains enhanced versions of the Command Manager and Menu System originally developed by Kody Simpson. Additionally, it features a robust Language Manager, designed to simplify multi-language support in your projects with minimal effort.
 
-# TODO
-- MySQL Client
-- File Manager
-- Language Translator
+## Features
+
+- **Enhanced Command Manager:** Build and manage commands effortlessly.
+- **Improved Menu System:** Create intuitive menus with ease.
+- **Language Manager:** Simplify multi-language support in your applications.
+
+## Future Updates
+
+I have exciting plans for CoolStuffLib's future updates:
+
+- **MySQL Interface:** Seamlessly interact with and control MySQL databases in your projects.
+- **File Manager:** Manage files and directories efficiently within your Java applications.
+- **Language Translator:** Translate default language files into various languages, utilizing custom API keys or Google Translate.
+
+## Getting Started
+
+To start using CoolStuffLib in your projects, check out our detailed documentation and examples on how to integrate and leverage its powerful features.
+
+## Contributions
+
+I welcome contributions from the community! If you have ideas, bug reports, or would like to collaborate, feel free to open an issue or submit a pull request.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+**Have questions or need assistance?** Don't hesitate to reach out. I'm here to help you make the most of CoolStuffLib!
+
+Happy coding! 🚀
