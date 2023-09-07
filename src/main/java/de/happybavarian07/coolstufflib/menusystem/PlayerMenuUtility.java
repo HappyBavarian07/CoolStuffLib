@@ -1,9 +1,11 @@
 package de.happybavarian07.coolstufflib.menusystem;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /*
 Companion class to all menus. This is needed to pass information across the entire
@@ -14,17 +16,21 @@ Companion class to all menus. This is needed to pass information across the enti
 
 public class PlayerMenuUtility {
 
-    private final Player owner;
+    private final UUID ownerUUID;
     private Player target;
     // Stores all temporary Data for the PlayerMenuUtility
     private final Map<String, Object> data = new HashMap<>();
 
-    public PlayerMenuUtility(Player p) {
-        this.owner = p;
+    public PlayerMenuUtility(UUID ownerUUID) {
+        this.ownerUUID = ownerUUID;
+    }
+
+    public UUID getOwnerUUID() {
+        return ownerUUID;
     }
 
     public Player getOwner() {
-        return owner;
+        return Bukkit.getPlayer(getOwnerUUID());
     }
 
     public Player getTarget() {

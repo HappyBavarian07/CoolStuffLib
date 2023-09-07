@@ -31,11 +31,9 @@ public abstract class SubCommand {
     }
 
     /**
-     * The isPlayerRequired function is used to determine whether or not the command requires a player.
+     * <p>Determines whether the command requires a player.</p>
      *
-     *
-     *
-     * @return A boolean value
+     * @return True if the command requires a player, false otherwise.
      */
     public boolean isPlayerRequired() {
         if (!this.getClass().isAnnotationPresent(CommandData.class)) {
@@ -45,11 +43,9 @@ public abstract class SubCommand {
     }
 
     /**
-     * The isOpRequired function is used to determine whether or not the command requires OP status.
+     * <p>Determines whether the command requires OP status.</p>
      *
-     *
-     *
-     * @return The value of the oprequired variable in the commanddata annotation
+     * @return True if the command requires OP status, false otherwise.
      */
     public boolean isOpRequired() {
         if (!this.getClass().isAnnotationPresent(CommandData.class)) {
@@ -59,12 +55,15 @@ public abstract class SubCommand {
     }
 
     /**
-     * The allowOnlySubCommandArgsThatFitToSubArgs function is used to determine whether or not the command should only allow sub-command arguments that fit into the sub-command's argument list.
-     * For example, if a command has two sub-commands: &quot;sub&quot; and &quot;sub2&quot;, and each of those commands have their own argument lists, then this function will determine whether or not it is possible for a user to enter an invalid set of arguments.
-     * If this function returns true (which it does by default), then if a user enters &quot;/mainCommandName sub arg0 arg2&quot;, where arg0 and arg2 are valid arguments for the mainCommandName command
+     * <p>Determines whether the command should only allow sub-command arguments that fit into the sub-command's argument list.</p>
+     * <p>If set to true, entering invalid arguments for sub-commands is prevented.</p>
      *
+     * <p>For example, if a command has two sub-commands: "sub" and "sub2," and each of those commands has its own argument lists, then this function will determine whether or not it is possible for a user to enter an invalid set of arguments.</p>
      *
-     * @return The value of the allowonlysubcommandargsthatfittosubargs function in the commandregistry class
+     * <p>If this function returns true (which it does by default), then if a user enters "/mainCommandName sub arg0 arg2," where arg0 and arg2 are valid arguments for the mainCommandName command,
+     * the system will check if "sub" accepts those arguments, preventing invalid inputs.</p>
+     *
+     * @return True if only valid sub-command arguments are allowed, false otherwise.
      */
     public boolean allowOnlySubCommandArgsThatFitToSubArgs() {
         if (!this.getClass().isAnnotationPresent(CommandData.class)) {
@@ -73,16 +72,13 @@ public abstract class SubCommand {
         return this.getClass().getAnnotation(CommandData.class).allowOnlySubCommandArgsThatFitToSubArgs();
     }
 
+
     /**
-     * The onPlayerCommand function is called when a player executes a command.
+     * <p>Called when a player executes a command.</p>
      *
-     *
-     * @param player Get the player who sent the command
-     * @param args Get the arguments that are passed to the command
-     *
-     * @return A boolean value
-     *
-     * @docauthor Trelent
+     * @param player  The player who sent the command.
+     * @param args    The command arguments.
+     * @return A boolean value.
      */
     public boolean onPlayerCommand(Player player, String[] args) {
         return handleCommand(player, player, args);
@@ -96,27 +92,18 @@ public abstract class SubCommand {
      * @param args Get the arguments that were passed to the command
      *
      * @return A boolean, which is used to determine whether the command was successful
-     *
-     * @docauthor Trelent
      */
     public boolean onConsoleCommand(ConsoleCommandSender sender, String[] args) {
         return handleCommand(sender, null, args);
     }
 
     /**
-     * The handleCommand function is the main function of a CommandHandler.
-     * It takes in a CommandSender, which can be either a Player or ConsoleCommandSender,
-     * and an array of Strings containing all arguments passed to the command.
-     * The handleCommand function should return true if it handled the command successfully, false otherwise.
-
+     * <p>Called when a command is entered into the console.</p>
      *
-     * @param sender Send messages to the player who executed the command
-     * @param playerOrNull Get the player's location, inventory, and more
-     * @param args Get the arguments that were passed to the command
-     *
-     * @return A boolean, which is a true or false value
-     *
-     * @docauthor Trelent
+     * @param sender  The console command sender.
+     * @param playerOrNull The player who sent the command, or null if the command was sent from the console.
+     * @param args    The command arguments.
+     * @return True if the command was handled successfully, false otherwise.
      */
     public boolean handleCommand(CommandSender sender, Player playerOrNull, String[] args) {
         return false;
@@ -139,21 +126,20 @@ public abstract class SubCommand {
     public abstract boolean autoRegisterPermission();
 
     /**
-     * The format function is used to format the help message for a subcommand.
-     * It replaces placeholders in the string with their respective values.
-     * The following placeholders are available:
-     * &lt;ul&gt;
-     *     &lt;li&gt;%usage% - Replaced with the usage of this command&lt;/li&gt;
-     *     &lt;li&gt;%description% - Replaced with a description of this command&lt;/li&gt;
-     *     &lt;li&gt;%name% - Replaced with the name of this command&lt;/li&gt;
-
+     * <p>Formats the help message for a subcommand, replacing placeholders with their respective values.</p>
+     * <p>Available placeholders:</p>
+     * <ul>
+     *     <li>%usage% - Replaced with the usage of this command</li>
+     *     <li>%description% - Replaced with a description of this command</li>
+     *     <li>%name% - Replaced with the name of this command</li>
+     *     <li>%permission% - Replaced with the permission required for this command</li>
+     *     <li>%aliases% - Replaced with the command's aliases</li>
+     *     <li>%subArgs% - Replaced with the command's sub-arguments</li>
+     * </ul>
      *
-     * @param in Format the message
-     * @param cmd Get the information about the command
-     *
-     * @return The string with the placeholders replaced
-     *
-     * @docauthor Trelent
+     * @param in   The message to format.
+     * @param cmd  Information about the command.
+     * @return The string with the placeholders replaced.
      */
     protected String format(String in, SubCommand cmd) {
         Map<String, Placeholder> placeholders = new HashMap<>();

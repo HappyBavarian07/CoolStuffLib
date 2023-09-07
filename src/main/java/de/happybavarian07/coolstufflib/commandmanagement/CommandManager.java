@@ -17,7 +17,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.*;
 
 /**
- * CommandManager class.
+ * The base class for creating command managers with subcommands.
  */
 @CommandData
 public abstract class CommandManager {
@@ -28,63 +28,70 @@ public abstract class CommandManager {
     protected List<String> commandSubArgs = new ArrayList<>();
 
     /**
-     * Gets the name of the command.
-     * 
-     * Returns a String representing the name of the command.
+     * Gets the name of the main command.
+     *
+     * @return The name of the main command.
      */
     public abstract String getCommandName();
 
     /**
-     * Returns a String containing the usage instructions for the command. This String
-     * should provide information on how to use the command, including any parameters
-     * or flags that can be used.
+     * Gets the usage instructions for the main command.
+     *
+     * @return The usage instructions for the main command.
      */
     public abstract String getCommandUsage();
 
     /**
-     * Returns a String containing information about the command.
+     * Gets a brief description of what the main command does.
+     *
+     * @return A brief description of the main command.
      */
     public abstract String getCommandInfo();
 
     /**
-     * Provides access to the JavaPlugin associated with the CommandManager.
-     * 
-     * Returns the JavaPlugin associated with the CommandManager.
+     * Gets the JavaPlugin associated with this command manager.
+     *
+     * @return The JavaPlugin associated with this command manager.
      */
     public abstract JavaPlugin getJavaPlugin();
 
     /**
-     * Returns a list of aliases for the command. Aliases are alternate names for the
-     * command that can be used to invoke it.
+     * Gets a list of aliases for the main command.
+     *
+     * @return A list of aliases for the main command.
      */
     public abstract List<String> getCommandAliases();
 
     /**
-     * Returns the permission associated with the command as a Permission object.
+     * Gets the permission associated with the main command as a Permission object.
+     *
+     * @return The permission associated with the main command as a Permission object.
      */
     public abstract Permission getCommandPermissionAsPermission();
 
     /**
-     * Returns the command permission as a String. The command permission is used to
-     * determine if a user has permission to execute a command.
+     * Gets the permission associated with the main command as a string.
+     *
+     * @return The permission associated with the main command as a string.
      */
     public abstract String getCommandPermissionAsString();
 
     /**
-     * Provides a boolean value indicating whether permission should be automatically
-     * registered when a command is registered.
+     * Determines whether permission should be automatically registered for the main command.
+     *
+     * @return True if permission should be automatically registered, false otherwise.
      */
     public abstract boolean autoRegisterPermission();
 
     /**
-     * Executes a subcommand based on the given arguments.
+     * Executes the main command or one of its subcommands.
      *
      * @param sender The sender of the command.
-     * @param args The arguments of the command.
-     * @return Whether the command was successful.
+     * @param args   The arguments provided with the command.
+     * @return True if the command was handled successfully, false otherwise.
      */
     public boolean onCommand(CommandSender sender, String[] args) {
-        SubCommand target = this.getSub(args[0]);
+        SubCommand target = this.getSubCommand(args[0]);
 
         if (target == null) {
             sender.sendMessage(lgm.getMessage("Player.Commands.InvalidSubCommand", getPlayerForSender(sender), true));
@@ -133,9 +140,9 @@ public abstract class CommandManager {
     /**
      * Finds invalid arguments in a given array of arguments for a given subcommand.
      *
-     * @param args the array of arguments to check
-     * @param target the subcommand to check against
-     * @return a map of invalid arguments, with the key being the index of the argument and the value being the argument itself
+     * @param args   The array of arguments to check.
+     * @param target The subcommand to check against.
+     * @return A map of invalid arguments, with the key being the index of the argument and the value being the argument itself.
      */
     private Map<Integer, String> findInvalidArgs(String[] args, SubCommand target) {
         Map<Integer, String> invalidArgs = new HashMap<>();
@@ -152,8 +159,8 @@ public abstract class CommandManager {
     /**
      * Retrieves the {@link Player} object associated with the given {@link CommandSender}.
      *
-     * @param sender the {@link CommandSender} to retrieve the {@link Player} object for
-     * @return the {@link Player} object associated with the given {@link CommandSender}, or null if the sender is not a {@link Player}
+     * @param sender The {@link CommandSender} to retrieve the {@link Player} object for.
+     * @return The {@link Player} object associated with the given {@link CommandSender}, or null if the sender is not a {@link Player}.
      */
     private Player getPlayerForSender(CommandSender sender) {
         return (sender instanceof Player) ? (Player) sender : null;
@@ -162,8 +169,8 @@ public abstract class CommandManager {
     /**
      * Removes the first argument from the given array of arguments.
      *
-     * @param args the array of arguments
-     * @return a new array of arguments with the first argument removed
+     * @param args The array of arguments.
+     * @return A new array of arguments with the first argument removed.
      */
     private String[] removeFirstArgument(String[] args) {
         return Arrays.copyOfRange(args, 1, args.length);
@@ -171,7 +178,7 @@ public abstract class CommandManager {
 
     /**
      * Checks if the given {@link CommandSender} has permission to execute the given {@link SubCommand}.
-     * 
+     *
      * @param sender The {@link CommandSender} to check permission for.
      * @param target The {@link SubCommand} to check permission for.
      * @return {@code true} if the {@link CommandSender} has permission to execute the {@link SubCommand}, {@code false} otherwise.
@@ -182,10 +189,10 @@ public abstract class CommandManager {
 
     /**
      * Handles a subcommand for the given sender.
-     * 
+     *
      * @param sender The sender of the command.
      * @param target The subcommand to handle.
-     * @param args The arguments for the subcommand.
+     * @param args   The arguments for the subcommand.
      * @return Whether the command was successfully handled.
      */
     public boolean handleSubCommand(CommandSender sender, SubCommand target, String[] args) {
@@ -196,13 +203,13 @@ public abstract class CommandManager {
     }
 
     /**
-     * Provides tab completion for the command.
+     * Handles tab completion for the main command and its subcommands.
      *
-     * @param sender The sender of the command
-     * @param command The command being executed
-     * @param label The label of the command
-     * @param args The arguments of the command
-     * @return A list of possible tab completions
+     * @param sender  The {@link CommandSender} of the command.
+     * @param command The main {@link Command}.
+     * @param label   The label of the command.
+     * @param args    The arguments provided for tab completion.
+     * @return A list of possible tab completions.
      */
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         List<String> result = new ArrayList<>();
@@ -245,55 +252,49 @@ public abstract class CommandManager {
     }
 
     /**
-     * Provides a setup method for CommandManager class. This method is used to set up
-     * the CommandManager class.
+     * Sets up the main command and its subcommands. This method should be called during plugin initialization.
      */
     public abstract void setup();
 
     /**
-     * Retrieves the list of subcommands associated with this CommandManager.
-     * 
-     * @return A list of SubCommand objects associated with this CommandManager.
+     * Retrieves the list of subcommands associated with the main command.
+     *
+     * @return A list of {@link SubCommand} objects associated with the main command.
      */
     public List<SubCommand> getSubCommands() {
         return commands;
     }
 
     /**
-     * Gets a SubCommand from the list of SubCommands by its name or alias.
-     * 
-     * Parameters:
-     * name - The name or alias of the SubCommand to get
-     * 
-     * Returns:
-     * The SubCommand with the given name or alias, or null if none is found
+     * Gets a specific subcommand by its name or alias.
+     *
+     * @param name The name or alias of the subcommand to retrieve.
+     * @return The {@link SubCommand} with the given name or alias, or null if not found.
      */
-    protected SubCommand getSub(String name) {
-        for (SubCommand sub : getSubCommands()) {
-            if (sub.name().equalsIgnoreCase(name)) {
-                return sub;
-            }
-
-            String[] aliases;
-            int length = (aliases = sub.aliases()).length;
-
-            for (int i = 0; i < length; i++) {
-                String alias = aliases[i];
-                if (name.equalsIgnoreCase(alias)) {
-                    return sub;
-                }
+    protected SubCommand getSubCommand(String name) {
+        for (SubCommand subCommand : getSubCommands()) {
+            if (subCommand.name().equalsIgnoreCase(name) || Arrays.asList(subCommand.aliases()).contains(name)) {
+                return subCommand;
             }
         }
         return null;
     }
 
     /**
-     * CommandManager.format() is a method used to format a string with placeholders.
-     * It takes in a string and a SubCommand as parameters and returns a formatted
-     * string. The method creates a HashMap of Placeholders and adds the following
-     * Placeholders to it: "%usage%", "%description%", "%name%", "%permission%",
-     * "%aliases%" and "%subArgs%". The Placeholders are then replaced in the string
-     * and the formatted string is returned.
+     * <p>Formats the help message for a subcommand, replacing placeholders with their respective values.</p>
+     * <p>Available placeholders:</p>
+     * <ul>
+     *     <li>%usage% - Replaced with the usage of this command</li>
+     *     <li>%description% - Replaced with a description of this command</li>
+     *     <li>%name% - Replaced with the name of this command</li>
+     *     <li>%permission% - Replaced with the permission required for this command</li>
+     *     <li>%aliases% - Replaced with the command's aliases</li>
+     *     <li>%subArgs% - Replaced with the command's sub-arguments</li>
+     * </ul>
+     *
+     * @param in   The message to format.
+     * @param cmd  The {@link SubCommand} associated with the message.
+     * @return The string with the placeholders replaced.
      */
     private String format(String in, SubCommand cmd) {
         Map<String, Placeholder> placeholders = new HashMap<>();

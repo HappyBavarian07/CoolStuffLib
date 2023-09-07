@@ -7,12 +7,17 @@ import de.happybavarian07.coolstufflib.commandmanagement.CommandManagerRegistry;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import de.happybavarian07.coolstufflib.menusystem.MenuAddonManager;
 import de.happybavarian07.coolstufflib.menusystem.MenuListener;
+import de.happybavarian07.coolstufflib.menusystem.PlayerMenuUtility;
 import de.happybavarian07.coolstufflib.utils.LogPrefix;
 import de.happybavarian07.coolstufflib.utils.PluginFileLogger;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
@@ -34,21 +39,24 @@ public class CoolStuffLib {
     private boolean commandManagerRegistryEnabled = false;
     private boolean menuAddonManagerEnabled = false;
     private boolean placeholderAPIEnabled = false;
+    private final Map<UUID, PlayerMenuUtility> playerMenuUtilityMap = new HashMap<>();
 
 
     /**
-     * You can find a full Tutorial on this Lib under this Link: .
-     * Here is a Video from me explaining it a bit more and showing one Example.
+     * Initializes the CoolStuffLib with the provided parameters.
+     * For a full tutorial on using this library, refer to [insert link here].
+     * Additionally, a video explaining the library and demonstrating an example is available.
      *
-     * @param javaPluginUsingLib                   You have to set your Java Plugin Here to make it work.
-     * @param languageManager                      The Language Manager Class
-     * @param commandManagerRegistry               The Command Manager Registry Class
-     * @param menuAddonManager                     The Menu Addon Manager Class
-     * @param usePlayerLangHandler                 Boolean if it should use a PlayerLangHandler
-     * @param languageManagerStartingMethod        The Method that gets executed when Language Manager System is initiated
-     * @param commandManagerRegistryStartingMethod The Method that gets executed when Command Manager System is initiated
-     * @param menuAddonManagerStartingMethod       The Method that gets executed when Menu Manager System is initiated
-     * @param dataFile                             Data File for important Data
+     * @param javaPluginUsingLib                   Your Java Plugin instance for integration.
+     * @param languageManager                      The Language Manager Class.
+     * @param commandManagerRegistry               The Command Manager Registry Class.
+     * @param menuAddonManager                     The Menu Addon Manager Class.
+     * @param pluginFileLogger                    The Plugin File Logger for logging purposes.
+     * @param usePlayerLangHandler                 A boolean indicating if a PlayerLangHandler should be used.
+     * @param languageManagerStartingMethod        The method to execute when the Language Manager System is initiated.
+     * @param commandManagerRegistryStartingMethod The method to execute when the Command Manager System is initiated.
+     * @param menuAddonManagerStartingMethod       The method to execute when the Menu Manager System is initiated.
+     * @param dataFile                             The data file for storing important data.
      */
     protected CoolStuffLib(JavaPlugin javaPluginUsingLib,
                            LanguageManager languageManager,
@@ -83,10 +91,12 @@ public class CoolStuffLib {
     }
 
     /**
-     * The setup function is used to initialize the various managers and addons that are being used by the plugin.
-     * It will also check if PlaceholderAPI is enabled, and if it is, it will set a boolean value to true so that
-     * other parts of the library can use this information. The setup function should be called in onEnable() or after all
-     * of your code has been executed in onEnable(). If you do not call this method, then none of your managers or addons will work!
+     * Initializes various managers and addons used by the plugin.
+     * Checks if PlaceholderAPI is enabled and sets a boolean value accordingly.
+     * This function should be called in onEnable() or after all other initialization
+     * code in onEnable().
+     * <p>
+     * Failure to call this method will result in non-functioning managers and addons.
      */
     public void setup() {
         if (languageManager != null) {
@@ -179,8 +189,6 @@ public class CoolStuffLib {
      *
      *
      * @return The pluginfilelogger variable
-     *
-     * @docauthor Trelent
      */
     public PluginFileLogger getPluginFileLogger() {
         return pluginFileLogger;
@@ -195,9 +203,6 @@ public class CoolStuffLib {
      * @param logPrefix Add a prefix to the log message
      * @param sendToConsole Determine if the message should be sent to the console
      *
-     * @return A boolean, which is true if the message was written to the log file
-     *
-     * @docauthor Trelent
      */
     public void writeToLog(Level info, String logMessage, LogPrefix logPrefix, boolean sendToConsole) {
         if(pluginFileLogger != null) {
@@ -205,5 +210,74 @@ public class CoolStuffLib {
             return;
         }
         System.out.println("PluginFileLogger is not enabled. Please enable it in the CoolStuffLibBuilder, if you want to see Error Messages and such Things.");
+    }
+
+    /**
+     * The getPlayerMenuUtility function is used to get the PlayerMenuUtility object of a player.
+     * <p>
+     * If the player doesn't have a PlayerMenuUtility object, it will be created.
+     * <p>
+     * The Menu API uses this function.
+     * @see PlayerMenuUtility
+     * @see MenuListener
+     * @see MenuAddonManager
+     * @see de.happybavarian07.coolstufflib.menusystem.Menu
+     *
+     * @param player Get the player, whose PlayerMenuUtility object should be returned
+     * @return The PlayerMenuUtility object of the player
+     */
+    public PlayerMenuUtility getPlayerMenuUtility(UUID player) {
+        PlayerMenuUtility playerMenuUtility;
+        if (!(playerMenuUtilityMap.containsKey(player))) { //See if the player has a playermenuutility "saved" for them
+
+            //This player doesn't. Make one of them and add it to the hashmap
+            playerMenuUtility = new PlayerMenuUtility(player);
+            playerMenuUtilityMap.put(player, playerMenuUtility);
+
+            return playerMenuUtility;
+        } else {
+            return playerMenuUtilityMap.get(player); //Return the object by using the provided player
+        }
+    }
+
+    /**
+     * The createPlayerMenuUtility function is used to create a PlayerMenuUtility object for a player.
+     * <p>
+     * If the player already has a PlayerMenuUtility object, it will be overwritten.
+     * <p>
+     * The Menu API uses this function.
+     * @see PlayerMenuUtility
+     * @see MenuListener
+     * @see MenuAddonManager
+     * @see de.happybavarian07.coolstufflib.menusystem.Menu
+     *
+     * @param player Get the player, whose PlayerMenuUtility object should be created
+     * @param addToList Determine if the PlayerMenuUtility object should be added to the hashmap
+     * @return The PlayerMenuUtility object of the player
+     */
+    public PlayerMenuUtility createPlayerMenuUtility(UUID player, boolean addToList) {
+        //This player doesn't. Make one of them and add it to the hashmap
+        PlayerMenuUtility playerMenuUtility = new PlayerMenuUtility(player);
+        if (addToList)
+            playerMenuUtilityMap.put(player, playerMenuUtility);
+
+        return playerMenuUtility;
+    }
+
+    /**
+     * The removePlayerMenuUtility function is used to remove a PlayerMenuUtility object from the hashmap.
+     * <p>
+     * The Menu API uses this function.
+     * <p>
+     * @see PlayerMenuUtility
+     *
+     * @param player Get the player, whose PlayerMenuUtility object should be removed
+     */
+    public void removePlayerMenuUtility(UUID player) {
+        playerMenuUtilityMap.remove(player);
+    }
+
+    public Map<UUID, PlayerMenuUtility> getPlayerMenuUtilityMap() {
+        return playerMenuUtilityMap;
     }
 }

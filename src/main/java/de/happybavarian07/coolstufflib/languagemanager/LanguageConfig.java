@@ -30,10 +30,7 @@ public class LanguageConfig {
      * @param resourceDirectory Specify the folder in which the language file is located
      * @param langName Set the name of the language file
      * @param plugin Get the plugin name, which is used to save the default config
-     *
-     * @return A new languageconfig object
-     *
-     * @docauthor Trelent
+     * @see LanguageManager
      */
     public LanguageConfig(File langFile, File langFolder, String resourceDirectory, String langName, JavaPlugin plugin) {
         this.plugin = plugin;
@@ -68,6 +65,8 @@ public class LanguageConfig {
     /**
      * The getConfig function is used to get the configuration file for this plugin.
      * If the config file does not exist, it will be created.
+     *
+     * @return The config file
      */
     public FileConfiguration getConfig() {
         if (this.config == null)
