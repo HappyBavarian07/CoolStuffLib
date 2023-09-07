@@ -68,8 +68,10 @@ public class LanguageManager {
 
     /**
      * Gets the PerPlayerLanguageHandler associated with this LanguageManager.
-     * 
+     * <p>
      * Returns the PerPlayerLanguageHandler associated with this LanguageManager.
+     *
+     * @return The PerPlayerLanguageHandler associated with this LanguageManager.
      */
     public PerPlayerLanguageHandler getPLHandler() {
         return playerLanguageHandler;
@@ -89,6 +91,8 @@ public class LanguageManager {
      * Gets the language folder.
      * 
      * Returns the File object representing the language folder.
+     *
+     * @return The language folder.
      */
     public File getLangFolder() {
         return langFolder;
@@ -125,6 +129,8 @@ public class LanguageManager {
      * Gets the current language file.
      * 
      * Returns the LanguageFile object representing the current language.
+     *
+     * @return The current language file.
      */
     public LanguageFile getCurrentLang() {
         return currentLang;
@@ -155,7 +161,7 @@ public class LanguageManager {
     /**
      * Adds languages to the list.
      *
-     * @param log Whether to log the language registration or not
+     * @param log Whether to log the language registration or not.
      */
     public void addLanguagesToList(boolean log) {
         File[] fileArray = langFolder.listFiles();
@@ -260,9 +266,12 @@ public class LanguageManager {
     }
 
     /**
-     * Adds a placeholder to the LanguageManager. The placeholder type, key, and value
-     * must be specified. If resetBefore is true, all placeholders of the specified
-     * type will be reset before adding the new placeholder.
+     * Adds a placeholder to the LanguageManager.
+     *
+     * @param type       The type of placeholder.
+     * @param key        The key associated with the placeholder.
+     * @param value      The value to replace the placeholder with.
+     * @param resetBefore Whether to reset all placeholders of the specified type before adding the new one.
      */
     public void addPlaceholder(PlaceholderType type, String key, Object value, boolean resetBefore) {
         if (resetBefore) resetPlaceholders(type, null);
@@ -279,7 +288,6 @@ public class LanguageManager {
      * @param placeholders The placeholders to add
      * @param resetBefore Whether to reset existing placeholders before adding the new
      * ones
-     * @return void
      */
     public void addPlaceholders(Map<String, Placeholder> placeholders, boolean resetBefore) {
         if (resetBefore) resetPlaceholders(PlaceholderType.ALL, null);
@@ -321,6 +329,9 @@ public class LanguageManager {
      * Removes all placeholders of the specified type, excluding the keys specified in
      * the excludeKeys list. If the excludeKeys list is null, all placeholders of the
      * specified type will be removed.
+     *
+     * @param type        The type of placeholders to reset.
+     * @param excludeKeys A list of keys to exclude from removal, or null to remove all placeholders of the specified type.
      */
     public void resetPlaceholders(PlaceholderType type, @Nullable List<String> excludeKeys) {
         List<String> keysToRemove = new ArrayList<>();
@@ -335,11 +346,13 @@ public class LanguageManager {
     }
 
     /**
-     * This method resets specific placeholders of a given type. If includeKeys is
-     * provided, only those keys will be reset. It iterates through the placeholders
-     * and checks if the type matches the given type or is of type ALL. If it does,
-     * the key is added to the list of keys to remove. Finally, the method calls
-     * removePlaceholders to remove the placeholders.
+     * Resets specific placeholders of a given type. If includeKeys is provided, only those keys will be reset.
+     * It iterates through the placeholders and checks if the type matches the given type or is of type ALL.
+     * If it does, the key is added to the list of keys to remove. Finally, the method calls removePlaceholders
+     * to remove the placeholders.
+     *
+     * @param type        The type of placeholders to reset.
+     * @param includeKeys A list of keys to include in removal, or null to reset all placeholders of the specified type.
      */
     public void resetSpecificPlaceholders(PlaceholderType type, @Nullable List<String> includeKeys) {
         List<String> keysToRemove = new ArrayList<>();
@@ -480,6 +493,11 @@ public class LanguageManager {
      * parameter is returned. If the player parameter is not null, the language
      * associated with the player is returned. If the langName parameter is null and
      * the currentLang parameter is false, the current language is returned.
+     * @param currentLang Whether to return the current language.
+     * @param langName The name of the language to return.
+     * @param player The player to return the language for.
+     * 
+     * @return The LanguageFile object.
      */
     public LanguageFile getLangOrPlayerLang(boolean currentLang, String langName, @Nullable Player player) {
         if (player == null && currentLang) return getCurrentLang();
@@ -560,21 +578,13 @@ public class LanguageManager {
     }
 
     /**
-     * LanguageManager class provides a method to get an ItemStack from a given path.
-     * The path is specified in the language configuration file. The method takes in a
-     * path, a player, a language name and a boolean value as parameters. The language
-     * name is used to get the language configuration file. If the language
-     * configuration file is not found, an ItemStack with a barrier material is
-     * returned. If the path is not found in the language configuration file, an
-     * ItemStack with a barrier material is returned. If the path is found but the
-     * item is disabled, the general disabled item is returned. If the material
-     * specified in the language configuration file is not found, an ItemStack with a
-     * barrier material is returned. The display name and lore of the item is taken
-     * from the language configuration file. Placeholders in the display name and lore
-     * are replaced with the corresponding values. If the item is set to be enchanted,
-     * the item is enchanted with the durability enchantment and the enchantment is
-     * hidden. If the boolean value is set to true, the placeholders used in the
-     * display name and lore are reset. The method returns the ItemStack.
+     * Retrieves an ItemStack based on the provided path, player, language, and reset flag.
+     *
+     * @param path       The path to the item configuration.
+     * @param player     The player for whom the item is intended.
+     * @param langName   The name of the language.
+     * @param resetAfter A boolean flag indicating whether to reset placeholders after use.
+     * @return An ItemStack based on the specified parameters.
      */
     public ItemStack getItem(String path, Player player, String langName, boolean resetAfter) {
         LanguageFile langFile = getLangOrPlayerLang(false, langName, player);
@@ -647,10 +657,15 @@ public class LanguageManager {
     }
 
     /**
-     * Provides a method to get the menu title from the language file based on the
-     * given path. The language file is either the specified language or the player's
-     * language. The title is then formatted with the player's language and the
-     * prefix. Placeholders are also replaced in the title.
+     * Retrieves a menu title from the language file based on the provided path.
+     * The language file can be either the specified language or the player's language.
+     * The title is then formatted with the player's language and the prefix, and
+     * placeholders are replaced in the title.
+     *
+     * @param path     The path to the menu title in the language configuration.
+     * @param player   The player for whom the menu title is intended.
+     * @param langName The name of the language to use.
+     * @return The formatted menu title for the player.
      */
     public String getMenuTitle(String path, Player player, String langName) {
         LanguageFile langFile = getLangOrPlayerLang(false, langName, player);
@@ -671,9 +686,10 @@ public class LanguageManager {
      * 
      * @param path The path to the custom object.
      * @param player The player to retrieve the custom object for, or null for global.
-     * @param defaultValue The default value to return if the custom object is not
-     * found.
-     * @param resetAfter Whether or not to reset the custom object after retrieval.
+     * @param defaultValue The default value to return if the custom object is not found.
+     * @param resetAfter Whether to reset the custom object after retrieval.
+     * @param <T> The type of the custom object.
+     *
      * @return The custom object, or the default value if not found.
      */
     public <T> T getCustomObject(String path, @Nullable Player player, T defaultValue, boolean resetAfter) {
@@ -688,6 +704,8 @@ public class LanguageManager {
      * @param langName The language name to use.
      * @param defaultValue The default value to return if the object is not found.
      * @param resetAfter Whether to reset the placeholders after getting the object.
+     * @param <T> The type of the object.
+     *
      * @return The object from the language file, or the default value if not found.
      */
     public <T> T getCustomObject(String path, @Nullable Player player, String langName, T defaultValue, boolean resetAfter) {

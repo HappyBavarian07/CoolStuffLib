@@ -10,13 +10,13 @@ import java.util.*;
  */
 public class PaginatedList<T> {
     private final Map<Integer, List<T>> resultMap;
-    private int maxItemsPerPage = 1;
     private final List<T> listOfThings;
+    private int maxItemsPerPage = 1;
     private boolean sorted = false;
 
     /**
      * Constructs a new PaginatedList with the given list of things.
-     * 
+     *
      * @param listOfThings the list of things to be stored in the PaginatedList
      */
     public PaginatedList(List<T> listOfThings) {
@@ -26,7 +26,7 @@ public class PaginatedList<T> {
 
     /**
      * Constructs a new PaginatedList with the given set of elements.
-     * 
+     *
      * @param listOfThings the set of elements to be added to the PaginatedList
      */
     public PaginatedList(Set<T> listOfThings) {
@@ -42,7 +42,7 @@ public class PaginatedList<T> {
      * @throws ListNotSortedException if the List has not been sorted yet
      */
     public Map<Integer, List<T>> getResultMap() throws ListNotSortedException {
-        if(!sorted) throw new ListNotSortedException("The List isn't sorted yet! (Method: getResultMap())");
+        if (!sorted) throw new ListNotSortedException("The List isn't sorted yet! (Method: getResultMap())");
         return resultMap;
     }
 
@@ -68,7 +68,7 @@ public class PaginatedList<T> {
 
     /**
      * Retrieves the list of things stored in the PaginatedList.
-     * 
+     *
      * @return a List of type T containing the list of things stored in the PaginatedList
      */
     public List<T> getListOfThings() {
@@ -77,20 +77,20 @@ public class PaginatedList<T> {
 
     /**
      * Sorts the list of things in the PaginatedList.
-     * 
+     * <p>
      * This method clears the resultMap, creates a temporary list of things, and adds each item to the list. If the count is equal to the maxItemsPerPage or the last item in the list is reached, the list is added to the resultMap and the count and currentPage are reset. If the resultMap is not empty, the sorted boolean is set to true.
-     * 
+     *
      * @return the sorted PaginatedList
      */
     public PaginatedList<T> sort() {
-        if(sorted) return this;
+        if (sorted) return this;
         resultMap.clear();
         int count = 0;
         int currentPage = 1;
         List<T> tempObs = new ArrayList<>();
         for (T sub : listOfThings) {
             tempObs.add(sub);
-            if (count == (maxItemsPerPage-1) || listOfThings.get(listOfThings.size() - 1) == sub) {
+            if (count == (maxItemsPerPage - 1) || listOfThings.get(listOfThings.size() - 1) == sub) {
                 List<T> tempTempObs = new ArrayList<>(tempObs);
                 resultMap.put(currentPage, tempTempObs);
                 count = 0;
@@ -100,7 +100,7 @@ public class PaginatedList<T> {
                 count++;
             }
         }
-        if(!resultMap.isEmpty()) {
+        if (!resultMap.isEmpty()) {
             sorted = true;
         }
         return this;
@@ -114,7 +114,7 @@ public class PaginatedList<T> {
      * @throws ListNotSortedException if the list is not sorted
      */
     public List<T> getPage(int page) throws ListNotSortedException {
-        if(!sorted) throw new ListNotSortedException("The List isn't sorted yet! (Method: getPage())");
+        if (!sorted) throw new ListNotSortedException("The List isn't sorted yet! (Method: getPage())");
         return getResultMap().get(page);
     }
 
@@ -126,7 +126,7 @@ public class PaginatedList<T> {
      * @throws ListNotSortedException if the list is not sorted
      */
     public boolean containsPage(int page) throws ListNotSortedException {
-        if(!sorted) throw new ListNotSortedException("The List isn't sorted yet! (Method: containsPage())");
+        if (!sorted) throw new ListNotSortedException("The List isn't sorted yet! (Method: containsPage())");
         return getResultMap().containsKey(page);
     }
 
@@ -137,7 +137,7 @@ public class PaginatedList<T> {
      * @throws ListNotSortedException if the list is not sorted
      */
     public int getMaxPage() throws ListNotSortedException {
-        if(!sorted) throw new ListNotSortedException("The List isn't sorted yet! (Method: getMaxPage())");
+        if (!sorted) throw new ListNotSortedException("The List isn't sorted yet! (Method: getMaxPage())");
         return getResultMap().size();
     }
 
@@ -145,7 +145,7 @@ public class PaginatedList<T> {
      * Thrown when a list is not sorted.
      */
     public static class ListNotSortedException extends Exception {
-        
+
         /**
          * Constructs a new ListNotSortedException.
          */
@@ -153,50 +153,45 @@ public class PaginatedList<T> {
         }
 
         /**
-     * Throws an exception when a list is not sorted.
-     *
-     * @param message The message to be displayed when the exception is thrown.
-     * @throws ListNotSortedException
-     */
-    public ListNotSortedException(String message) {
+         * Throws an exception when a list is not sorted.
+         *
+         * @param message The message to be displayed when the exception is thrown.
+         */
+        public ListNotSortedException(String message) {
             super(message);
         }
 
         /**
-     * Constructs a new ListNotSortedException with the specified detail message and cause.
-     *
-     * @param message the detail message
-     * @param cause the cause
-     */
-    public ListNotSortedException(String message, Throwable cause) {
+         * Constructs a new ListNotSortedException with the specified detail message and cause.
+         *
+         * @param message the detail message
+         * @param cause   the cause
+         */
+        public ListNotSortedException(String message, Throwable cause) {
             super(message, cause);
         }
 
         /**
-     * Constructs a new ListNotSortedException with the specified cause.
-     *
-     * @param cause the cause of the exception
-     */
-    public ListNotSortedException(Throwable cause) {
+         * Constructs a new ListNotSortedException with the specified cause.
+         *
+         * @param cause the cause of the exception
+         */
+        public ListNotSortedException(Throwable cause) {
             super(cause);
         }
 
         /**
-     * PaginatedList class constructor that creates a new ListNotSortedException with
-     * the specified detail message, cause, suppression enabled or disabled, and
-     * writable stack trace enabled or disabled.
-     * 
-     * Parameters:
-     * message - the detail message.
-     * cause - the cause. (A null value is permitted, and indicates that the cause is
-     * nonexistent or unknown.)
-     * enableSuppression - whether or not suppression is enabled or disabled
-     * writableStackTrace - whether or not the stack trace should be writable
-     * 
-     * Throws:
-     * IllegalArgumentException - if message is null
-     */
-    public ListNotSortedException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+         * Constructs a new ListNotSortedException with the specified detail message, cause,
+         * suppression enabled or disabled, and writable stack trace enabled or disabled.
+         *
+         * @param message            The detail message.
+         * @param cause              The cause. (A null value is permitted, indicating that
+         *                           the cause is nonexistent or unknown.)
+         * @param enableSuppression  Whether suppression is enabled or disabled.
+         * @param writableStackTrace Whether the stack trace should be writable.
+         * @throws IllegalArgumentException if the message is null.
+         */
+        public ListNotSortedException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
             super(message, cause, enableSuppression, writableStackTrace);
         }
     }
