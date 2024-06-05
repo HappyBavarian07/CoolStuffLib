@@ -10,6 +10,7 @@ de\happybavarian07\coolstufflib\menusystem\PaginatedMenu.class
 de\happybavarian07\coolstufflib\commandmanagement\CommandManager.class
 de\happybavarian07\coolstufflib\languagemanager\OldLanguageFileUpdater.class
 de\happybavarian07\coolstufflib\utils\PluginFileLogger.class
+de\happybavarian07\coolstufflib\menusystem\misc\ConfirmationMenu.class
 de\happybavarian07\coolstufflib\menusystem\MenuListener.class
 de\happybavarian07\coolstufflib\configupdater\KeyBuilder.class
 de\happybavarian07\coolstufflib\languagemanager\LanguageFileUpdater.class
@@ -19,6 +20,8 @@ de\happybavarian07\coolstufflib\configupdater\ConfigUpdater.class
 de\happybavarian07\coolstufflib\commandmanagement\PaginatedList$ListNotSortedException.class
 de\happybavarian07\coolstufflib\languagemanager\LanguageConfig.class
 de\happybavarian07\coolstufflib\commandmanagement\CommandData.class
+de\happybavarian07\coolstufflib\commandmanagement\NaturalOrderComparator.class
+de\happybavarian07\coolstufflib\commandmanagement\PaginatedList$SubCommandComparator.class
 de\happybavarian07\coolstufflib\languagemanager\LanguageManager.class
 de\happybavarian07\coolstufflib\commandmanagement\DCommand$CommandNotPreparedException.class
 de\happybavarian07\coolstufflib\configupdater\OldConfigUpdater.class
@@ -27,5 +30,6 @@ de\happybavarian07\coolstufflib\commandmanagement\CommandManagerRegistry.class
 de\happybavarian07\coolstufflib\commandmanagement\SubCommand.class
 de\happybavarian07\coolstufflib\menusystem\Menu.class
 de\happybavarian07\coolstufflib\commandmanagement\PaginatedList.class
+de\happybavarian07\coolstufflib\utils\StartUpLogger.class
 de\happybavarian07\coolstufflib\menusystem\MenuAddonManager.class
 de\happybavarian07\coolstufflib\languagemanager\PlaceholderType.class

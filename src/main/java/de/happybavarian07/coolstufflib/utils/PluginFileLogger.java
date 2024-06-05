@@ -19,9 +19,9 @@ public class PluginFileLogger {
     private static File logFile;
     private static PluginFileLogger instance;
 
-    public PluginFileLogger() {
+    public PluginFileLogger(JavaPlugin javaPluginUsingThisLib) {
         instance = this;
-        plugin = CoolStuffLib.getLib().getJavaPluginUsingLib();
+        plugin = javaPluginUsingThisLib;
         logFile = new File(plugin.getDataFolder(), "plugin.log");
     }
 

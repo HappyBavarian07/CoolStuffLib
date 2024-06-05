@@ -63,6 +63,14 @@ public class CoolStuffLibBuilder {
     };
     private File dataFile = null;
 
+    /**
+     * The CoolStuffLibBuilder function is used to create a new CoolStuffLibBuilder object.
+     * The CoolStuffLibBuilder object can be used to build the CoolStuffLib library,
+     * which is needed for the Plugin using it.
+     *
+     *
+     * @param javaPluginUsingLib Get the plugin's datafolder
+     */
     public CoolStuffLibBuilder(JavaPlugin javaPluginUsingLib) {
         this.javaPluginUsingLib = javaPluginUsingLib;
         if (this.javaPluginUsingLib == null) {
@@ -70,6 +78,14 @@ public class CoolStuffLibBuilder {
         }
     }
 
+    /**
+     * The setJavaPluginUsingLib function sets the javaPluginUsingLib variable to the value of its parameter.
+     *
+     *
+     * @param javaPluginUsingLib Set the javapluginusinglib field
+     *
+     * @return A reference to the builder object itself
+     */
     public CoolStuffLibBuilder setJavaPluginUsingLib(JavaPlugin javaPluginUsingLib) {
         this.javaPluginUsingLib = javaPluginUsingLib;
         return this;

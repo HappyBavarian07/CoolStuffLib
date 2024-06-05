@@ -12,12 +12,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 @CommandData
-public abstract class SubCommand {
+public abstract class SubCommand implements Comparable<SubCommand> {
     protected CoolStuffLib lib = CoolStuffLib.getLib();
     protected LanguageManager lgm = lib.getLanguageManager();
     protected CommandManagerRegistry registry = lib.getCommandManagerRegistry();
@@ -151,5 +153,44 @@ public abstract class SubCommand {
         placeholders.put("%subArgs%", new Placeholder("%subArgs%", cmd.subArgs().toString(), PlaceholderType.ALL));
 
         return lgm.replacePlaceholders(in, placeholders);
+    }
+
+    /**
+     * <p>Compares this subcommand to another subcommand.</p>
+     * <p>Subcommands are compared based on their name, info, aliases, syntax, and info.</p>
+     * <p>Subcommands are sorted in ascending order based on the following criteria:</p>
+     * <ol>
+     *     <li>Name</li>
+     *     <li>Info</li>
+     *     <li>Aliases</li>
+     *     <li>Syntax</li>
+     * </ol>
+     * @param o The subcommand to compare to.
+     * @return A negative integer, zero, or a positive integer as this subcommand is less than,
+     * equal to, or greater than the specified subcommand.
+     */
+    @Override
+    public int compareTo(@NotNull SubCommand o) {
+        int nameComparison = this.name().compareTo(o.name());
+        if (nameComparison != 0) {
+            return nameComparison;
+        }
+
+        int infoComparison = this.info().compareTo(o.info());
+        if (infoComparison != 0) {
+            return infoComparison;
+        }
+
+        int aliasesComparison = Arrays.toString(this.aliases()).compareTo(Arrays.toString(o.aliases()));
+        if (aliasesComparison != 0) {
+            return aliasesComparison;
+        }
+
+        int syntaxComparison = this.syntax().compareTo(o.syntax());
+        if (syntaxComparison != 0) {
+            return syntaxComparison;
+        }
+
+        return this.info().compareTo(o.info());
     }
 }

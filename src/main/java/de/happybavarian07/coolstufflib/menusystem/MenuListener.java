@@ -63,12 +63,6 @@ public class MenuListener implements Listener {
             Menu holder = (Menu) event.getInventory().getHolder();
 
             holder.handleOpenMenu(event);
-
-            if(CoolStuffLib.getLib().getMenuAddonManager() == null) return;
-            for (String menuAddonName : CoolStuffLib.getLib().getMenuAddonManager().getMenuAddons(holder.getConfigMenuAddonFeatureName()).keySet()) {
-                MenuAddon addon = CoolStuffLib.getLib().getMenuAddonManager().getMenuAddons(holder.getConfigMenuAddonFeatureName()).get(menuAddonName);
-                addon.onCloseEvent();
-            }
         }
     }
 }
