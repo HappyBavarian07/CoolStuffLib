@@ -8,13 +8,18 @@ import de.happybavarian07.coolstufflib.languagemanager.PlaceholderType;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @CommandData
 public class HelpCommand extends SubCommand {
+    private final PaginatedList<SubCommand> messages;
     public HelpCommand(String mainCommandName) {
         super(mainCommandName);
+        messages = new PaginatedList<>(lib.getCommandManagerRegistry().getSubCommands(mainCommandName));
+        messages.maxItemsPerPage(10).sort("subcommand", false);
     }
 
     @Override
@@ -24,8 +29,6 @@ public class HelpCommand extends SubCommand {
         }
         try {
             int page = Integer.parseInt(args[0]);
-            PaginatedList<SubCommand> messages = new PaginatedList<>(lib.getCommandManagerRegistry().getSubCommands(mainCommandName));
-            messages.maxItemsPerPage(10).sort("subcommand", false);
             lgm.addPlaceholder(PlaceholderType.MESSAGE, "%page%", page, false);
             if (!messages.containsPage(page)) {
                 player.sendMessage(lgm.getMessage("Player.Commands.HelpPageDoesNotExist", player, true));
@@ -56,8 +59,6 @@ public class HelpCommand extends SubCommand {
         }
         try {
             int page = Integer.parseInt(args[0]);
-            PaginatedList<SubCommand> messages = new PaginatedList<>(lib.getCommandManagerRegistry().getSubCommands(mainCommandName));
-            messages.maxItemsPerPage(10).sort("subcommand", false);
             lgm.addPlaceholder(PlaceholderType.MESSAGE, "%page%", page, false);
             if (!messages.containsPage(page)) {
                 sender.sendMessage(lgm.getMessage("Player.Commands.HelpPageDoesNotExist", null, true));
@@ -97,8 +98,20 @@ public class HelpCommand extends SubCommand {
     }
 
     @Override
-    public Map<Integer, String[]> subArgs() {
-        return new HashMap<>();
+    public Map<Integer, String[]> subArgs(int isPlayer) {
+        Map<Integer, String[]> map = new HashMap<>();
+        // Get Max Page and add it and all the pages before it to the map as a sub argument
+        List<String> pages = new ArrayList<>();
+        try {
+            for (int i = 1; i <= messages.getMaxPage(); i++) {
+                pages.add(String.valueOf(i));
+            }
+        } catch (PaginatedList.ListNotSortedException e) {
+            e.printStackTrace();
+            return map;
+        }
+        map.put(1, pages.toArray(new String[0]));
+        return map;
     }
 
     @Override

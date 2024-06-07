@@ -316,6 +316,17 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     }
 
     /**
+     * Checks if the given {@link CommandManager} has sender type specific sub-arguments.
+     * @param commandManager The {@link CommandManager} to check.
+     * @return {@code true} if the given {@link CommandManager} has sender type-specific sub-arguments, {@code false} otherwise.
+     */
+    public boolean senderTypeSpecificSubArgs(CommandManager commandManager) {
+        CommandData data = commandManagers.get(commandManager);
+        if (data == null) return false;
+        return data.senderTypeSpecificSubArgs();
+    }
+
+    /**
      * Retrieves a list of subcommands associated with the specified command name.
      *
      * @param commandName The name of the command to retrieve subcommands for.

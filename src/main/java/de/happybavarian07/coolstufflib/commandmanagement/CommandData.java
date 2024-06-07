@@ -17,4 +17,5 @@ public @interface CommandData {
     boolean playerRequired() default false;
     boolean opRequired() default false;
     boolean allowOnlySubCommandArgsThatFitToSubArgs() default false;
+    boolean senderTypeSpecificSubArgs() default false;
 }

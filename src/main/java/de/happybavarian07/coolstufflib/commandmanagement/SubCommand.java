@@ -74,6 +74,13 @@ public abstract class SubCommand implements Comparable<SubCommand> {
         return this.getClass().getAnnotation(CommandData.class).allowOnlySubCommandArgsThatFitToSubArgs();
     }
 
+    public boolean senderTypeSpecificSubArgs() {
+        if (!this.getClass().isAnnotationPresent(CommandData.class)) {
+            return registry.senderTypeSpecificSubArgs(registry.getCommandManager(mainCommandName));
+        }
+        return this.getClass().getAnnotation(CommandData.class).senderTypeSpecificSubArgs();
+    }
+
 
     /**
      * <p>Called when a player executes a command.</p>
@@ -117,7 +124,23 @@ public abstract class SubCommand implements Comparable<SubCommand> {
 
     public abstract String[] aliases();
 
-    public abstract Map<Integer, String[]> subArgs();
+    /**
+     * <p>Gets the sub-arguments for this command.</p>
+     * <p>Sub-arguments are arguments that are specific to a sub-command.</p>
+     * <p>The Integer means the Number of the Argument, while the String[] contains the arguments</p>
+     * <p>That means that if you want a command like this: /chat friend <Friend|Player> [Message]</p>
+     * <p>Then you would return a Map with the following values:</p>
+     * <p>1, new String[]{"Friend", "Player"}</p>
+     * <p>2, new String[]{"Message"}</p>
+     * The isPlayer can be used, but it doesn't need to be used.<br>
+     * There is also a function called senderTypeSpecificSubArgs,<br>
+     * which can be used to determine whether the sub-arguments are specific to the sender type.<br>
+     * If this function returns true,<br>
+     * then you can/wanted use the isPlayer variable to determine whether the sender is a player or not.<br>
+     * @param isPlayer Whether the sender is a player or not. -1 if not determined.
+     * @return A map containing the sub-arguments for this command.
+     */
+    public abstract Map<Integer, String[]> subArgs(int isPlayer);
 
     public abstract String syntax();
 
@@ -150,7 +173,7 @@ public abstract class SubCommand implements Comparable<SubCommand> {
         placeholders.put("%name%", new Placeholder("%name%", cmd.name(), PlaceholderType.ALL));
         placeholders.put("%permission%", new Placeholder("%permission%", cmd.permissionAsPermission().getName(), PlaceholderType.ALL));
         placeholders.put("%aliases%", new Placeholder("%aliases%", cmd.aliases(), PlaceholderType.ALL));
-        placeholders.put("%subArgs%", new Placeholder("%subArgs%", cmd.subArgs().toString(), PlaceholderType.ALL));
+        placeholders.put("%subArgs%", new Placeholder("%subArgs%", cmd.subArgs(-1).toString(), PlaceholderType.ALL));
 
         return lgm.replacePlaceholders(in, placeholders);
     }
