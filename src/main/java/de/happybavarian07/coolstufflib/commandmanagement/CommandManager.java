@@ -87,7 +87,7 @@ public abstract class CommandManager {
      * Executes the main command or one of its subcommands.
      *
      * @param sender The sender of the command.
-     * @param args   The arguments provided with the command.
+     * @param args   The arguments provided the command.
      * @return True if the command was handled successfully, false otherwise.
      */
     public boolean onCommand(CommandSender sender, String[] args) {

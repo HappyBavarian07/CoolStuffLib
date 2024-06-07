@@ -68,14 +68,13 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
      * aliases from the knownCommands map.</p>
      *
      * @param cmd        The Command object to unregister.
-     * @param javaPlugin The JavaPlugin associated with the command.
      */
-    public static void unregisterCommand(Command cmd, JavaPlugin javaPlugin) {
+    public static void unregisterCommand(Command cmd) {
         try {
             Object result = getPrivateField(Bukkit.getServer().getPluginManager(), "commandMap");
             SimpleCommandMap commandMap = (SimpleCommandMap) result;
             assert commandMap != null;
-            Object map = getPrivateField(commandMap, "knownCommands");
+            /*Object map = getPrivateField(commandMap, "knownCommands");
             @SuppressWarnings("unchecked")
             HashMap<String, Command> knownCommands = (HashMap<String, Command>) map;
             assert knownCommands != null;
@@ -84,7 +83,8 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
                 if (knownCommands.containsKey(alias) && knownCommands.get(alias).toString().contains(javaPlugin.getName())) {
                     knownCommands.remove(alias);
                 }
-            }
+            }*/
+            cmd.unregister(commandMap);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -192,7 +192,7 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
 
         // Unregistering the Command on the Server
         if (javaPlugin.getCommand(cm.getCommandName()) != null) {
-            unregisterCommand(javaPlugin.getCommand(cm.getCommandName()), javaPlugin);
+            unregisterCommand(javaPlugin.getCommand(cm.getCommandName()));
         } else {
             DCommand pluginCommand = new DCommand(cm.getCommandName(), javaPlugin);
             pluginCommand.setProperty("label", javaPlugin.getName().toLowerCase());
@@ -200,9 +200,7 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
             pluginCommand.setProperty("usage", cm.getCommandUsage());
             pluginCommand.setProperty("description", cm.getCommandInfo());
             pluginCommand.setProperty("permission", cm.getCommandPermissionAsString());
-            pluginCommand.setExecutor(this);
-            pluginCommand.setTabCompleter(this);
-            unregisterCommand(pluginCommand, javaPlugin);
+            unregisterCommand(pluginCommand);
         }
         if (cm.autoRegisterPermission()) {
             if (cm.getCommandPermissionAsString().isEmpty()) {
@@ -355,7 +353,7 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
                     boolean commandResult = cm.onCommand(sender, args);
 
                     // Logging the command execution
-                    String logMessage = "Command execution for command: " + cmd.getName() + ", Args: " + Arrays.toString(args);
+                    String logMessage = "Command execution for command: " + cmd.getName() + ", Args: " + Arrays.toString(args) + ", Sender: " + sender.getName();
 
                     // Log the command result (success or failure)
                     if (commandResult) {
@@ -365,7 +363,7 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
                     }
 
                     CoolStuffLib.getLib().writeToLog(Level.INFO, logMessage, LogPrefix.COOLSTUFFLIB_COMMANDS, false);
-                    return cm.onCommand(sender, args);
+                    return commandResult;
                 }
             } catch (Exception e) {
                 // Error occurred during command execution, log it.

@@ -104,10 +104,9 @@ public class CoolStuffLib {
                 placeholderAPIEnabled = true;
             }
             // Language Manager Enable Code
-            // TODO Add more customizablity for languages folder. Make it editable and make it use the instance of the language manager or smth
-            File langDir = new File(javaPluginUsingLib.getDataFolder(), "languages");
+            File langDir = languageManager.getLangFolder();
             if (!langDir.isDirectory()) langDir.mkdirs();
-            executeMethod(languageManagerStartingMethod, languageManager, javaPluginUsingLib, usePlayerLangHandler, dataFile, langDir);
+            executeMethod(languageManagerStartingMethod, languageManager, javaPluginUsingLib, usePlayerLangHandler, dataFile);
             languageManagerEnabled = true;
         }
         if (commandManagerRegistry != null) {
