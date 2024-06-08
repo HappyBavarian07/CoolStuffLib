@@ -98,7 +98,7 @@ public class HelpCommand extends SubCommand {
     }
 
     @Override
-    public Map<Integer, String[]> subArgs(int isPlayer) {
+    public Map<Integer, String[]> subArgs(int isPlayer, String[] args) {
         Map<Integer, String[]> map = new HashMap<>();
         // Get Max Page and add it and all the pages before it to the map as a sub argument
         List<String> pages = new ArrayList<>();

@@ -145,10 +145,11 @@ public abstract class CommandManager {
      */
     private Map<Integer, String> findInvalidArgs(String[] args, SubCommand target, int isPlayer) {
         Map<Integer, String> invalidArgs = new HashMap<>();
-        if(target.subArgs(isPlayer) == null || target.subArgs(isPlayer).isEmpty()) return invalidArgs;
+        Map<Integer, String[]> subArgs = target.subArgs(isPlayer, args);
+        if(subArgs == null || subArgs.isEmpty()) return invalidArgs;
         for (int i = 1; i < args.length; i++) {
             String arg = args[i];
-            if (!Arrays.asList(target.subArgs(isPlayer).get(i)).contains(arg)) {
+            if (!Arrays.asList(subArgs.get(i)).contains(arg)) {
                 invalidArgs.put(i, arg);
             }
         }
@@ -231,7 +232,7 @@ public abstract class CommandManager {
                 }
             } else if (args.length > 1) {
                 if (sub.name().equals(args[0]) || Arrays.asList(sub.aliases()).contains(args[0])) {
-                    Map<Integer, String[]> subArgs = sub.subArgs((sender instanceof Player) ? 1 : 0);
+                    Map<Integer, String[]> subArgs = sub.subArgs((sender instanceof Player) ? 1 : 0, Arrays.copyOfRange(args, 1, args.length));
                     if (subArgs != null && subArgs.containsKey(args.length - 1)) {
                         subCommandArgOptions.addAll(Arrays.asList(subArgs.get(args.length - 1)));
                     }
@@ -302,7 +303,7 @@ public abstract class CommandManager {
         placeholders.put("%name%", new Placeholder("%name%", cmd.name(), PlaceholderType.ALL));
         placeholders.put("%permission%", new Placeholder("%permission%", cmd.permissionAsPermission().getName(), PlaceholderType.ALL));
         placeholders.put("%aliases%", new Placeholder("%aliases%", cmd.aliases(), PlaceholderType.ALL));
-        placeholders.put("%subArgs%", new Placeholder("%subArgs%", cmd.subArgs(-1).toString(), PlaceholderType.ALL));
+        placeholders.put("%subArgs%", new Placeholder("%subArgs%", cmd.subArgs(-1, new String[0]).toString(), PlaceholderType.ALL));
 
         return lgm.replacePlaceholders(in, placeholders);
     }

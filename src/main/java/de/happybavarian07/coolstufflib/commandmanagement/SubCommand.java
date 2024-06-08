@@ -128,7 +128,7 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      * <p>Gets the sub-arguments for this command.</p>
      * <p>Sub-arguments are arguments that are specific to a sub-command.</p>
      * <p>The Integer means the Number of the Argument, while the String[] contains the arguments</p>
-     * <p>That means that if you want a command like this: /chat friend <Friend|Player> [Message]</p>
+     * <p>That means that if you want a command like this: /chat friend [Friend|Player] [Message]</p>
      * <p>Then you would return a Map with the following values:</p>
      * <p>1, new String[]{"Friend", "Player"}</p>
      * <p>2, new String[]{"Message"}</p>
@@ -138,9 +138,10 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      * If this function returns true,<br>
      * then you can/wanted use the isPlayer variable to determine whether the sender is a player or not.<br>
      * @param isPlayer Whether the sender is a player or not. -1 if not determined.
+     * @param args The arguments that were passed to the command.
      * @return A map containing the sub-arguments for this command.
      */
-    public abstract Map<Integer, String[]> subArgs(int isPlayer);
+    public abstract Map<Integer, String[]> subArgs(int isPlayer, String[] args);
 
     public abstract String syntax();
 
@@ -173,7 +174,7 @@ public abstract class SubCommand implements Comparable<SubCommand> {
         placeholders.put("%name%", new Placeholder("%name%", cmd.name(), PlaceholderType.ALL));
         placeholders.put("%permission%", new Placeholder("%permission%", cmd.permissionAsPermission().getName(), PlaceholderType.ALL));
         placeholders.put("%aliases%", new Placeholder("%aliases%", cmd.aliases(), PlaceholderType.ALL));
-        placeholders.put("%subArgs%", new Placeholder("%subArgs%", cmd.subArgs(-1).toString(), PlaceholderType.ALL));
+        placeholders.put("%subArgs%", new Placeholder("%subArgs%", cmd.subArgs(-1, new String[0]).toString(), PlaceholderType.ALL));
 
         return lgm.replacePlaceholders(in, placeholders);
     }
