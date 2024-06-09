@@ -33,6 +33,19 @@ public abstract class SubCommand implements Comparable<SubCommand> {
     }
 
     /**
+     * <p>Called before the command is registered.</p>
+     */
+    public void preInit() {
+    }
+
+    /**
+     * <p>Called after the command is registered.</p>
+     * <p>Use this function to initialize Values in the SubCommand</p>
+     */
+    public void postInit() {
+    }
+
+    /**
      * <p>Determines whether the command requires a player.</p>
      *
      * @return True if the command requires a player, false otherwise.
@@ -52,7 +65,7 @@ public abstract class SubCommand implements Comparable<SubCommand> {
     public boolean isOpRequired() {
         if (!this.getClass().isAnnotationPresent(CommandData.class)) {
             return registry.isOpRequired(registry.getCommandManager(mainCommandName));
-          }
+        }
         return this.getClass().getAnnotation(CommandData.class).opRequired();
     }
 
@@ -85,8 +98,8 @@ public abstract class SubCommand implements Comparable<SubCommand> {
     /**
      * <p>Called when a player executes a command.</p>
      *
-     * @param player  The player who sent the command.
-     * @param args    The command arguments.
+     * @param player The player who sent the command.
+     * @param args   The command arguments.
      * @return A boolean value.
      */
     public boolean onPlayerCommand(Player player, String[] args) {
@@ -96,10 +109,8 @@ public abstract class SubCommand implements Comparable<SubCommand> {
     /**
      * The onConsoleCommand function is called when a command is entered into the console.
      *
-     *
      * @param sender Send messages to the console
-     * @param args Get the arguments that were passed to the command
-     *
+     * @param args   Get the arguments that were passed to the command
      * @return A boolean, which is used to determine whether the command was successful
      */
     public boolean onConsoleCommand(ConsoleCommandSender sender, String[] args) {
@@ -109,9 +120,9 @@ public abstract class SubCommand implements Comparable<SubCommand> {
     /**
      * <p>Called when a command is entered into the console.</p>
      *
-     * @param sender  The console command sender.
+     * @param sender       The console command sender.
      * @param playerOrNull The player who sent the command, or null if the command was sent from the console.
-     * @param args    The command arguments.
+     * @param args         The command arguments.
      * @return True if the command was handled successfully, false otherwise.
      */
     public boolean handleCommand(CommandSender sender, Player playerOrNull, String[] args) {
@@ -137,8 +148,9 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      * which can be used to determine whether the sub-arguments are specific to the sender type.<br>
      * If this function returns true,<br>
      * then you can/wanted use the isPlayer variable to determine whether the sender is a player or not.<br>
+     *
      * @param isPlayer Whether the sender is a player or not. -1 if not determined.
-     * @param args The arguments that were passed to the command.
+     * @param args     The arguments that were passed to the command.
      * @return A map containing the sub-arguments for this command.
      */
     public abstract Map<Integer, String[]> subArgs(int isPlayer, String[] args);
@@ -148,7 +160,9 @@ public abstract class SubCommand implements Comparable<SubCommand> {
     public Permission permissionAsPermission() {
         return new Permission(permissionAsString(), permissionAsString());
     }
+
     public abstract String permissionAsString();
+
     public abstract boolean autoRegisterPermission();
 
     /**
@@ -163,8 +177,8 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      *     <li>%subArgs% - Replaced with the command's sub-arguments</li>
      * </ul>
      *
-     * @param in   The message to format.
-     * @param cmd  Information about the command.
+     * @param in  The message to format.
+     * @param cmd Information about the command.
      * @return The string with the placeholders replaced.
      */
     protected String format(String in, SubCommand cmd) {
@@ -189,6 +203,7 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      *     <li>Aliases</li>
      *     <li>Syntax</li>
      * </ol>
+     *
      * @param o The subcommand to compare to.
      * @return A negative integer, zero, or a positive integer as this subcommand is less than,
      * equal to, or greater than the specified subcommand.

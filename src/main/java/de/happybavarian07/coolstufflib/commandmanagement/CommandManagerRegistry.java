@@ -119,6 +119,11 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
         if (!commandManagerRegistryReady)
             throw new RuntimeException("CommandManagerRegistry (CMR) not ready to use yet. The Start Method has not been called yet.");
 
+        // Pre Init SubCommands
+        for (SubCommand subCommand : cm.getSubCommands()) {
+            subCommand.preInit();
+        }
+
         // Checking if the Command Manager has CommandData
 
         CommandData data = cm.getClass().getAnnotation(CommandData.class);
@@ -170,6 +175,11 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
         }
 
         commandManagers.put(cm, data);
+
+        // Post Init SubCommands
+        for (SubCommand subCommand : cm.getSubCommands()) {
+            subCommand.postInit();
+        }
         return true;
     }
 

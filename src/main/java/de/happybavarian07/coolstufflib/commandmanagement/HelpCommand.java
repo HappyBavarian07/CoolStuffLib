@@ -15,9 +15,14 @@ import java.util.Map;
 
 @CommandData
 public class HelpCommand extends SubCommand {
-    private final PaginatedList<SubCommand> messages;
+    private PaginatedList<SubCommand> messages;
+
     public HelpCommand(String mainCommandName) {
         super(mainCommandName);
+    }
+
+    @Override
+    public void postInit() {
         messages = new PaginatedList<>(lib.getCommandManagerRegistry().getSubCommands(mainCommandName));
         messages.maxItemsPerPage(10).sort("subcommand", false);
     }
@@ -67,7 +72,7 @@ public class HelpCommand extends SubCommand {
             lgm.addPlaceholder(PlaceholderType.MESSAGE, "%max_page%", messages.getMaxPage(), false);
             sender.sendMessage(lgm.getMessage("Player.Commands.HelpMessages.Header", null, false));
             for (SubCommand s : messages.getPage(page)) {
-                if (sender.hasPermission(s.permissionAsPermission()) && !isPlayerRequired()) {
+                if (sender.hasPermission(s.permissionAsPermission()) && !s.isPlayerRequired()) {
                     sender.sendMessage(format(lgm.getMessage("Player.Commands.HelpMessages.Format", null, false), s));
                 }
             }
