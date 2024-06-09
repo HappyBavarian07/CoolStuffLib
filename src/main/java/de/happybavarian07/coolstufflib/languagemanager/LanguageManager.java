@@ -195,7 +195,7 @@ public class LanguageManager {
                     }
                 }
                 // "Test.Options", "Items.PlayerManager.TrollMenu.VillagerSounds.true.Options"
-                ConfigUpdater.update(plugin, resourceName, langFiles.getLangFile(), null);
+                ConfigUpdater.update(plugin, resourceName, langFiles.getLangFile(), new ArrayList<>());
             } catch (IOException e) {
                 e.printStackTrace();
             }

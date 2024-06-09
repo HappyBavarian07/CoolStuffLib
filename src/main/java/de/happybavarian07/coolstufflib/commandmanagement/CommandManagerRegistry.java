@@ -36,7 +36,7 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
      */
     public CommandManagerRegistry(JavaPlugin plugin) {
         this.plugin = plugin;
-        this.commandManagers = new HashMap<>();
+        this.commandManagers = new LinkedHashMap<>();
     }
 
     /**
