@@ -5,6 +5,7 @@ package de.happybavarian07.coolstufflib.commandmanagement;
  */
 
 import de.happybavarian07.coolstufflib.languagemanager.PlaceholderType;
+import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
@@ -103,7 +104,7 @@ public class HelpCommand extends SubCommand {
     }
 
     @Override
-    public Map<Integer, String[]> subArgs(int isPlayer, String[] args) {
+    public Map<Integer, String[]> subArgs(CommandSender sender, int isPlayer, String[] args) {
         Map<Integer, String[]> map = new HashMap<>();
         // Get Max Page and add it and all the pages before it to the map as a sub argument
         List<String> pages = new ArrayList<>();

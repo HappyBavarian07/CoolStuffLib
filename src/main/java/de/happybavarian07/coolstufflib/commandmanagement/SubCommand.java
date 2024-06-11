@@ -153,7 +153,7 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      * @param args     The arguments that were passed to the command.
      * @return A map containing the sub-arguments for this command.
      */
-    public abstract Map<Integer, String[]> subArgs(int isPlayer, String[] args);
+    public abstract Map<Integer, String[]> subArgs(CommandSender sender, int isPlayer, String[] args);
 
     public abstract String syntax();
 
@@ -188,7 +188,7 @@ public abstract class SubCommand implements Comparable<SubCommand> {
         placeholders.put("%name%", new Placeholder("%name%", cmd.name(), PlaceholderType.ALL));
         placeholders.put("%permission%", new Placeholder("%permission%", cmd.permissionAsPermission().getName(), PlaceholderType.ALL));
         placeholders.put("%aliases%", new Placeholder("%aliases%", cmd.aliases(), PlaceholderType.ALL));
-        placeholders.put("%subArgs%", new Placeholder("%subArgs%", cmd.subArgs(-1, new String[0]).toString(), PlaceholderType.ALL));
+        placeholders.put("%subArgs%", new Placeholder("%subArgs%", cmd.subArgs(null, -1, new String[0]).toString(), PlaceholderType.ALL));
 
         return lgm.replacePlaceholders(in, placeholders);
     }

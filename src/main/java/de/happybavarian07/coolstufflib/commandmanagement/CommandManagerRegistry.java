@@ -67,7 +67,7 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
      * and SimpleCommandMap. It then uses a HashMap to remove the command and its
      * aliases from the knownCommands map.</p>
      *
-     * @param cmd        The Command object to unregister.
+     * @param cmd The Command object to unregister.
      */
     public static void unregisterCommand(Command cmd) {
         try {
@@ -255,8 +255,9 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     public void unregisterAll() {
         if (!commandManagerRegistryReady)
             throw new RuntimeException("CommandManagerRegistry (CMR) not ready to use yet. The Start Method has not been called yet.");
-        for (CommandManager cm : commandManagers.keySet()) {
-            unregister(cm);
+        List<CommandManager> managers = new ArrayList<>(commandManagers.keySet());
+        for (CommandManager manager : managers) {
+            unregister(manager);
         }
     }
 
@@ -327,6 +328,7 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
 
     /**
      * Checks if the given {@link CommandManager} has sender type specific sub-arguments.
+     *
      * @param commandManager The {@link CommandManager} to check.
      * @return {@code true} if the given {@link CommandManager} has sender type-specific sub-arguments, {@code false} otherwise.
      */
