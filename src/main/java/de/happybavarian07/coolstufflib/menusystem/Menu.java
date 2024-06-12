@@ -148,6 +148,13 @@ public abstract class Menu implements InventoryHolder {
         }
     }
 
+    /**
+     * Opens a menu for the player. This function is thread-safe.
+     */
+    public void openThreadSafe() {
+        Bukkit.getScheduler().runTask(lib.getJavaPluginUsingLib(), this::open);
+    }
+
     //Overridden method from the InventoryHolder interface
     /**
      * The getInventory function returns the inventory of the player.
