@@ -693,7 +693,7 @@ public class LanguageManager {
      * @return The custom object, or the default value if not found.
      */
     public <T> T getCustomObject(String path, @Nullable Player player, T defaultValue, boolean resetAfter) {
-        return getCustomObject(path, player, null, defaultValue, resetAfter);
+        return getCustomObject(path, player, getCurrentLangName(), defaultValue, resetAfter);
     }
 
     /**
@@ -712,10 +712,10 @@ public class LanguageManager {
         LanguageFile langFile = getLangOrPlayerLang(false, langName, player);
         LanguageConfig langConfig = langFile.getLangConfig();
         if (langConfig == null || langConfig.getConfig() == null)
-            return null;
+            return defaultValue;
         if (langConfig.getConfig().get(path) == null || !langConfig.getConfig().contains(path))
-            return null;
-        if (langConfig.getConfig().get(path) == null) return null;
+            return defaultValue;
+        if (langConfig.getConfig().get(path) == null) return defaultValue;
 
         T obj;
         try {
