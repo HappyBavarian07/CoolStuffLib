@@ -6,7 +6,7 @@
 
     <groupId>io.github.happybavarian07</groupId>
     <artifactId>CoolStuffLib</artifactId>
-    <version>1.5.3</version>
+    <version>1.5.4</version>
 
     <name>CoolStuffLib</name>
     <description>The Library that houses my Command Manager And Menu Manager (Original Version from Kody Simpson on YouTube)</description>
@@ -105,7 +105,7 @@
     <licenses>
         <license>
             <name>MIT License</name>
-            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <url>https://www.opensource.org/licenses/mit-license.php</url>
         </license>
     </licenses>
 
@@ -144,6 +144,11 @@
             <id>placeholderapi</id>
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
+        <repository>
+            <id>maven_central</id>
+            <name>Maven Central</name>
+            <url>https://repo.maven.apache.org/maven2/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -156,7 +161,7 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>24.0.1</version>
+            <version>24.1.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

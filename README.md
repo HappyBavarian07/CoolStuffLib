@@ -19,10 +19,11 @@ I have exciting plans for CoolStuffLib's future updates:
 ## Getting Started
 
 To start using CoolStuffLib in your projects, check out our detailed documentation and examples on how to integrate and leverage its powerful features.
+Here is a Link to the Wiki: [WIKI](https://happybavarian07.gitbook.io/wiki/coolstufflib/coolstufflib)
 
 ## Contributions
 
-I welcome contributions from the community! If you have ideas, bug reports, or would like to collaborate, feel free to open an issue or submit a pull request.
+I welcome contributions from the community! If you have ideas, bug reports, or would like to collaborate, feel free to open an issue or submit a pull request or join my Discord (Link on most of my Spigot plugins and in the Admin-Panel Repo).
 
 ## License
 
