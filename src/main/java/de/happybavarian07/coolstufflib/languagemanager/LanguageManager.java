@@ -215,7 +215,7 @@ public class LanguageManager {
             getLang(langFiles, true).getLangConfig().reloadConfig();
             if (messageReceiver != null) {
                 addPlaceholder(PlaceholderType.MESSAGE, "%language%", getLang(langFiles, true).getLangFile(), true);
-                messageReceiver.sendMessage(getMessage("Player.General.ReloadedLanguageFile", null, true));
+                messageReceiver.sendMessage(getMessage("Player.General.ReloadedLanguageFile", messageReceiver instanceof Player ? (Player) messageReceiver : null, true));
             }
         }
         setCurrentLang(getLang(plugin.getConfig().getString("Plugin.language"), true), log);
@@ -504,12 +504,12 @@ public class LanguageManager {
         if (player == null) return getLang(langName, true);
         if (langName == null && currentLang) return getCurrentLang();
 
-        LanguageFile langFile = playerLanguageHandler.getPlayerLanguage(player.getUniqueId());
-        if (langFile == null) {
+        LanguageFile lang = playerLanguageHandler.getPlayerLanguage(player.getUniqueId());
+        if (lang == null) {
             if (currentLang) return getCurrentLang();
             else return getLang(langName, true);
         }
-        return langFile;
+        return lang;
     }
 
     /**
