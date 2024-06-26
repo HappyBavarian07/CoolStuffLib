@@ -7,6 +7,7 @@ import de.happybavarian07.coolstufflib.CoolStuffLib;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import de.happybavarian07.coolstufflib.languagemanager.Placeholder;
 import de.happybavarian07.coolstufflib.languagemanager.PlaceholderType;
+import de.happybavarian07.coolstufflib.utils.LogPrefix;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -15,13 +16,14 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
+import java.util.logging.Level;
 
 /**
  * The base class for creating command managers with subcommands.
  */
 @CommandData
 public abstract class CommandManager {
-    protected final ArrayList<SubCommand> commands = new ArrayList<>();
+    private final ArrayList<SubCommand> commands = new ArrayList<>();
     protected final CoolStuffLib coolStuffLib = CoolStuffLib.getLib();
     protected final LanguageManager lgm = coolStuffLib.getLanguageManager();
     protected List<String> commandArgs = new ArrayList<>();
@@ -132,6 +134,12 @@ public abstract class CommandManager {
             lgm.addPlaceholder(PlaceholderType.MESSAGE, "%error%", e + ": " + e.getMessage(), false);
             lgm.addPlaceholder(PlaceholderType.MESSAGE, "%stacktrace%", Arrays.toString(e.getStackTrace()), false);
             sender.sendMessage(format(lgm.getMessage("Player.Commands.ErrorPerformingSubCommand", getPlayerForSender(sender), true), target));
+            String stacktraceWithLineBreaks = Arrays.toString(e.getStackTrace()).replace(", ", "\n");
+            coolStuffLib.getPluginFileLogger().writeToLog(Level.SEVERE,
+                    "Error performing subcommand: " + target.name() +
+                            "(Error: " + e + ": " + e.getLocalizedMessage() + ", Stacktrace: " + stacktraceWithLineBreaks + ")",
+                    LogPrefix.COOLSTUFFLIB_COMMANDS,
+                    true);
         }
         return true;
     }
@@ -146,7 +154,7 @@ public abstract class CommandManager {
     private Map<Integer, String> findInvalidArgs(String[] args, SubCommand target, int isPlayer) {
         Map<Integer, String> invalidArgs = new HashMap<>();
         Map<Integer, String[]> subArgs = target.subArgs(null, isPlayer, args);
-        if(subArgs == null || subArgs.isEmpty()) return invalidArgs;
+        if (subArgs == null || subArgs.isEmpty()) return invalidArgs;
         for (int i = 1; i < args.length; i++) {
             String arg = args[i];
             if (!Arrays.asList(subArgs.get(i)).contains(arg)) {
@@ -252,7 +260,10 @@ public abstract class CommandManager {
     }
 
     /**
-     * Sets up the main command and its subcommands. This method should be called during plugin initialization.
+     * Sets up the main command and registers all subcommands.
+     * <p> This will be called by the CMR on registration. </p>
+     * <p> This is where you should register all subcommands using {@link #registerSubCommand(SubCommand)}. </p>
+     * <p> This method should be overridden by the implementing class. </p>
      */
     public abstract void setup();
 
@@ -281,6 +292,20 @@ public abstract class CommandManager {
     }
 
     /**
+     * Registers a subcommand with the main command.
+     * <p> This method should be called in the {@link #setup()} method to register all subcommands.</p>
+     * <p> If the subcommand is successfully registered, this method will return true.</p>
+     * <p> If the subcommand is not successfully registered, this method will return false.</p>
+     * <p> If the subcommand is already registered, this method will return false.</p>
+     *
+     * @param subCommand The subcommand to register.
+     * @return True if the subcommand was successfully registered, false otherwise.
+     */
+    protected boolean registerSubCommand(SubCommand subCommand) {
+        return commands.add(subCommand);
+    }
+
+    /**
      * <p>Formats the help message for a subcommand, replacing placeholders with their respective values.</p>
      * <p>Available placeholders:</p>
      * <ul>
@@ -292,8 +317,8 @@ public abstract class CommandManager {
      *     <li>%subArgs% - Replaced with the command's sub-arguments</li>
      * </ul>
      *
-     * @param in   The message to format.
-     * @param cmd  The {@link SubCommand} associated with the message.
+     * @param in  The message to format.
+     * @param cmd The {@link SubCommand} associated with the message.
      * @return The string with the placeholders replaced.
      */
     private String format(String in, SubCommand cmd) {

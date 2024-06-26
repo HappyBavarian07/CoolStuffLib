@@ -93,7 +93,7 @@ public class ConfirmationMenu extends Menu {
     }
 
     private void openOldMenuFromNameAndPackage(String menuToOpenAfter, String menuPackage, Player player) {
-        if (menuToOpenAfter != null) {
+        if (menuToOpenAfter != null && menuPackage != null && !menuToOpenAfter.isEmpty() && !menuPackage.isEmpty()) {
             Menu oldMenu = Utils.getMenuByClassName(menuPackage, menuToOpenAfter, player);
             if (oldMenu != null) {
                 oldMenu.open();
