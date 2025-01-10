@@ -69,7 +69,9 @@ public abstract class CommandManager {
      *
      * @return The permission associated with the main command as a Permission object.
      */
-    public abstract Permission getCommandPermissionAsPermission();
+    public Permission getCommandPermissionAsPermission() {
+        return new Permission(getCommandPermissionAsString(), getCommandInfo());
+    }
 
     /**
      * Gets the permission associated with the main command as a string.
@@ -220,7 +222,7 @@ public abstract class CommandManager {
      * @return A list of possible tab completions.
      */
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
-        List<String> result = new ArrayList<>();
+        Set<String> result = new HashSet<>();
         List<String> subCommandOptions = new ArrayList<>();
         List<String> subCommandArgOptions = new ArrayList<>();
 
@@ -251,12 +253,12 @@ public abstract class CommandManager {
                         }
                     }
 
-                    return result;
+                    return new ArrayList<>(result);
                 }
             }
         }
 
-        return result;
+        return new ArrayList<>(result);
     }
 
     /**

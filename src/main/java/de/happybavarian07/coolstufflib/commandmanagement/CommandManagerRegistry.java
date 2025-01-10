@@ -19,7 +19,32 @@ import java.util.*;
 import java.util.logging.Level;
 
 /**
- * CommandManagerRegistry class.
+ * <p>The {@code CommandManagerRegistry} class provides functionality for managing
+ * and registering command managers and commands within a JavaPlugin environment.
+ * It allows for commands to be registered, unregistered, and queried, as well
+ * as maintaining associations between commands and their respective managers.</p>
+ *
+ * <p>This class offers reflection-based utilities for interacting with the internal
+ * structures of the Bukkit PluginManager and the command system, such as
+ * accessing private fields and handling known commands.</p>
+ *
+ * <p>Key Features:</p>
+ * <ul>
+ *   <li>Registers and unregisters {@link CommandManager}s and associated commands.</li>
+ *   <li>Allows for query methods to check properties of commands and their managers,
+ *       such as permission requirements, argument constraints, and subcommands.</li>
+ *   <li>Supports auto-registration of permissions and subcommands for {@code CommandManager}s.</li>
+ *   <li>Provides methods for handling command execution and tab completion efficiently.</li>
+ *   <li>Ensures the integrity of the registry by allowing toggling and checks of the
+ *       registry's ready state.</li>
+ * </ul>
+ *
+ * <p>Usage of the {@code CommandManagerRegistry} requires initializing the class
+ * with a {@link JavaPlugin} instance. Ensure that the registry is marked as ready
+ * before performing registration or query operations to avoid runtime exceptions.</p>
+ *
+ * <p>Designed for advanced handling, this class assumes familiarity with
+ * Bukkit's Plugin and Command APIs, as well as Java's reflection mechanisms.</p>
  */
 public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     private final JavaPlugin plugin;
@@ -28,11 +53,12 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     private boolean commandManagerRegistryReady = false;
 
     /**
-     * Provides a constructor for the CommandManagerRegistry class, initializing the
-     * plugin and commandManagers fields. The commandManagers field is a HashMap that
-     * stores CommandManager objects.
+     * Constructs a new {@code CommandManagerRegistry} instance.
      *
-     * @param plugin The JavaPlugin instance to associate with this registry.
+     * <p>This constructor initializes the registry for managing command managers
+     * specific to the provided plugin instance.</p>
+     *
+     * @param plugin The instance of the {@link JavaPlugin} this registry is associated with.
      */
     public CommandManagerRegistry(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -40,11 +66,16 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Retrieves the value of a private field from an object.
+     * Retrieves the value of a private field from a given object using reflection.
+     * <p>
+     * This method allows accessing private fields by temporarily making them accessible.
+     * It handles exceptions such as {@link NoSuchFieldException} and {@link IllegalAccessException}.
+     * The field is made accessible only during the retrieval process and its original accessibility is restored afterward.
+     * </p>
      *
-     * @param object The object from which to retrieve the field.
-     * @param field  The name of the private field to retrieve.
-     * @return The value of the private field, or null if an error occurs.
+     * @param object The object from which the private field value is to be retrieved. Must not be null.
+     * @param field  The name of the private field to retrieve. Must not be null or empty.
+     * @return The value of the specified private field as an {@link Object}, or {@code null}
      */
     private static Object getPrivateField(Object object, String field) {
         Object result;
@@ -61,13 +92,20 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * <p>CommandManagerRegistry class provides a method to unregister a command from a
-     * JavaPlugin. This method takes two parameters, a Command and a JavaPlugin. It
-     * uses reflection to access the private fields of the Bukkit Server PluginManager
-     * and SimpleCommandMap. It then uses a HashMap to remove the command and its
-     * aliases from the knownCommands map.</p>
+     * Removes a registered command from the server's command map.
      *
-     * @param cmd The Command object to unregister.
+     * <p>
+     * This method unregisters a command from the Bukkit command map, effectively disabling it.
+     * The command is also removed from related aliases, if they exist and are linked to the command.
+     * This can be useful for dynamically managing commands in a plugin-enabled environment.
+     *
+     * <p>
+     * Please note that this method uses reflection to access private fields and internal structures
+     * of the Bukkit API. This approach might break with future updates or changes in the API and
+     * should be used with caution.
+     *
+     * @param cmd the command to be unregistered. This must be a valid and previously registered
+     *            command on the server's command map.
      */
     public static void unregisterCommand(Command cmd) {
         try {
@@ -91,28 +129,36 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * <p>CommandManagerRegistry class provides the register() method which allows for
-     * registering a CommandManager. This method takes a CommandManager as a parameter
-     * and returns a boolean value. It checks if the CommandManager has already been
-     * registered or if the parameter is null. If either of these conditions is true,
-     * the method returns false. It then checks if the CommandManagerRegistry is ready
-     * to use by checking if the Start Method has been called. If not, a
-     * RuntimeException is thrown.</p>
+     * Registers a {@link CommandManager} instance with the {@code CommandManagerRegistry}.
+     * <p>
+     * This method initializes the provided {@link CommandManager}, including its associated subcommands,
+     * registers the necessary permissions, and associates the command manager with the internal registry.
+     * It ensures that all required setup is complete and that the commands are available for execution.
+     * </p>
      *
-     * <p>The method then checks if the CommandManager has CommandData and registers the
-     * Command on the Server. If the Command already exists, the Executor and
-     * TabCompleter are set to the CommandManagerRegistry. If the Command does not
-     * exist, a new DCommand is created and registered.</p>
+     * <p><strong>Note:</strong> This method will throw a {@link RuntimeException} if the registry is not ready for use.
+     * Additionally, if a null {@code CommandManager} or a duplicate command manager is passed,
+     * registration will fail, and {@code false} will be returned.</p>
+     * <br>
+     * <br>
+     * <ul>
+     * <li><strong>Pre-Init:</strong> The method calls {@link SubCommand#preInit()} for each subcommand
+     * associated with the {@code CommandManager} before registration.</li>
+     * <li><strong>Post-Init:</strong> After registration, {@link SubCommand#postInit()} is called for each subcommand.
+     * This ensures that subcommands are correctly initialized and ready for use.</li>
+     * <li><strong>Command Registration:</strong> The method registers the command with the server and sets the executor and tab completer.
+     * If the command is already registered, the method will unregister it and re-register it.</li>
+     * <li><strong>Permission Registration:</strong> If the command manager has auto-register permission enabled,
+     * the method will check if the permission already exists and add it if not.</li>
+     * <li><strong>Subcommand Setup:</strong> The method calls {@link CommandManager#setup()} to add subcommands to the command manager.</li>
+     * <li><strong>Subcommand Permission Registration:</strong> If a subcommand has auto-register permission enabled,
+     * the method will check if the permission already exists and add it if not.</li>
+     * <li><strong>Subcommand List:</strong> The method clears the subcommand list after registration to ensure a clean state.</li>
+     * <li><strong>Return:</strong> The method returns {@code true} if the registration is successful, {@code false} otherwise.</li>
+     * </ul>
      *
-     * <p>The method then checks if the CommandManager has an autoRegisterPermission and
-     * adds the permission to the PluginManager if it does not already exist. Finally,
-     * the setup() method is called for adding Sub Commands and the CommandManager is
-     * added to the CommandManagerRegistry with the CommandData. The method then
-     * returns true.</p>
-     *
-     * @param cm The CommandManager to register.
-     * @return True if the CommandManager was successfully registered, false otherwise.
-     * @throws RuntimeException If the CommandManagerRegistry is not ready to use.
+     * @param cm the {@link CommandManager} instance to register. Must not be null.
+     * @return {@code true} if the registration is successful, {@code false} otherwise.
      */
     public boolean register(CommandManager cm) {
         if (commandManagers.containsKey(cm) || cm == null) return false;
@@ -145,15 +191,8 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
             pluginCommand.register();
         }
         if (cm.autoRegisterPermission()) {
-            if (cm.getCommandPermissionAsString().isEmpty()) {
-                if (!Bukkit.getPluginManager().getPermissions().contains(cm.getCommandPermissionAsPermission())) {
-                    Bukkit.getPluginManager().addPermission(cm.getCommandPermissionAsPermission());
-                }
-            } else {
-                Permission tempPerm = new Permission(cm.getCommandPermissionAsString());
-                if (!Bukkit.getPluginManager().getPermissions().contains(tempPerm)) {
-                    Bukkit.getPluginManager().addPermission(tempPerm);
-                }
+            if (!permissionExistsAlready(cm.getCommandPermissionAsPermission())) {
+                Bukkit.getPluginManager().addPermission(cm.getCommandPermissionAsPermission());
             }
         }
         // Calling setup() for Adding Sub Commands
@@ -161,15 +200,8 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
 
         for (SubCommand subCommand : cm.getSubCommands()) {
             if (subCommand.autoRegisterPermission()) {
-                if (subCommand.permissionAsString().isEmpty()) {
-                    if (!Bukkit.getPluginManager().getPermissions().contains(subCommand.permissionAsPermission())) {
-                        Bukkit.getPluginManager().addPermission(subCommand.permissionAsPermission());
-                    }
-                } else {
-                    Permission tempPerm = new Permission(subCommand.permissionAsString());
-                    if (!Bukkit.getPluginManager().getPermissions().contains(tempPerm)) {
-                        Bukkit.getPluginManager().addPermission(tempPerm);
-                    }
+                if (!permissionExistsAlready(subCommand.permissionAsPermission())) {
+                    Bukkit.getPluginManager().addPermission(subCommand.permissionAsPermission());
                 }
             }
         }
@@ -184,14 +216,41 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Unregisters a CommandManager from the CommandManagerRegistry. This method will
-     * unregister the CommandManager from the CommandManagerRegistry, unregister the
-     * command from the server, and remove the associated permission from the server if
-     * the CommandManager's autoRegisterPermission is set to true. If the CommandManager
-     * is not registered or if it's null, this method does nothing.
+     * Checks if a given permission already exists in the set of permissions managed by Bukkit.
      *
-     * @param cm The CommandManager to unregister.
-     * @throws RuntimeException If the CommandManagerRegistry (CMR) is not ready to use yet.
+     * <p>Compares the name of the given permission with the names of the permissions currently
+     * registered with Bukkit's PluginManager. The comparison is case-insensitive.</p>
+     *
+     * @param permission The {@link Permission} object to check for existence.
+     *                   Must not be null, and its name will be compared with existing permissions.
+     * @return {@code true} if a permission with the same name already exists, {@code false} otherwise.
+     */
+    public boolean permissionExistsAlready(Permission permission) {
+        // Check only after Name and not after any other value
+        Set<Permission> bukkitPermissions = Bukkit.getPluginManager().getPermissions();
+        for (Permission bukkitPermission : bukkitPermissions) {
+            if (bukkitPermission.getName().equalsIgnoreCase(permission.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Unregisters a {@code CommandManager} from the {@code CommandManagerRegistry}.
+     * This will remove the associated commands and permissions from the server,
+     * as well as clear the sub-command list and the internal registry of the given {@code CommandManager}.
+     *
+     * <p><b>Note:</b> This method should only be used after ensuring the {@code CommandManagerRegistry} is ready
+     * by calling the appropriate start method. If the registry is not ready, this method will throw a
+     * {@code RuntimeException}.</p>
+     *
+     * @param cm the {@code CommandManager} to unregister. If {@code null} or not registered,
+     *           the method will terminate without performing any action.
+     *           <ul>
+     *             <li>Commands registered by the {@code CommandManager} will be unregistered from the server.</li>
+     *             <li>Permissions associated with the commands, both for main and sub-commands
+     *           </ul>
      */
     public void unregister(CommandManager cm) {
         if (!commandManagers.containsKey(cm) || cm == null) return;
@@ -213,29 +272,15 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
             unregisterCommand(pluginCommand);
         }
         if (cm.autoRegisterPermission()) {
-            if (cm.getCommandPermissionAsString().isEmpty()) {
-                if (Bukkit.getPluginManager().getPermissions().contains(cm.getCommandPermissionAsPermission())) {
-                    Bukkit.getPluginManager().removePermission(cm.getCommandPermissionAsPermission());
-                }
-            } else {
-                Permission tempPerm = new Permission(cm.getCommandPermissionAsString());
-                if (Bukkit.getPluginManager().getPermissions().contains(tempPerm)) {
-                    Bukkit.getPluginManager().removePermission(tempPerm);
-                }
+            if (permissionExistsAlready(cm.getCommandPermissionAsPermission())) {
+                Bukkit.getPluginManager().removePermission(cm.getCommandPermissionAsPermission());
             }
         }
 
         for (SubCommand subCommand : cm.getSubCommands()) {
             if (subCommand.autoRegisterPermission()) {
-                if (subCommand.permissionAsString().isEmpty()) {
-                    if (Bukkit.getPluginManager().getPermissions().contains(subCommand.permissionAsPermission())) {
-                        Bukkit.getPluginManager().removePermission(subCommand.permissionAsPermission());
-                    }
-                } else {
-                    Permission tempPerm = new Permission(subCommand.permissionAsString());
-                    if (Bukkit.getPluginManager().getPermissions().contains(tempPerm)) {
-                        Bukkit.getPluginManager().removePermission(tempPerm);
-                    }
+                if (permissionExistsAlready(subCommand.permissionAsPermission())) {
+                    Bukkit.getPluginManager().removePermission(subCommand.permissionAsPermission());
                 }
             }
         }
@@ -246,11 +291,23 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Unregisters all CommandManagers from the CommandManagerRegistry. If the
-     * CommandManagerRegistry has not been initialized, a RuntimeException will be
-     * thrown.
+     * Unregisters all {@link CommandManager} instances currently registered in the registry.
      *
-     * @throws RuntimeException If the CommandManagerRegistry (CMR) is not ready to use yet.
+     * <p>This method iterates over all {@link CommandManager} instances maintained by the registry
+     * and calls {@link #unregister(CommandManager)} for each instance. It ensures a clean removal
+     * of all registered commands and their associated metadata.</p>
+     *
+     * <p><strong>Important:</strong> This method requires that the registry is in a ready state.
+     * If the {@link CommandManagerRegistry} has not been initialized or the start method has not
+     * been called, an exception will be thrown.</p>
+     *
+     * <p>Throws:</p>
+     * <ul>
+     *   <li>{@link RuntimeException} - if this method is invoked before the registry is ready for use.</li>
+     * </ul>
+     *
+     * <p>Usage of this method is suitable for scenarios where a complete reset of the command registry
+     * is needed, such as during plugin shutdown or reloading processes.</p>
      */
     public void unregisterAll() {
         if (!commandManagerRegistryReady)
@@ -262,10 +319,16 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Retrieves the map of CommandManager and CommandData objects.
+     * Retrieves a map of CommandManager instances paired with their associated CommandData.
+     * <p>
+     * This method provides access to the registered command managers and their corresponding data.
+     * It ensures that the CommandManagerRegistry (CMR) is ready before returning the map.
+     * If the CMR is not ready (i.e., the start method has not been called),
+     * a {@code RuntimeException} will be thrown.
      *
-     * @return A map of CommandManager and CommandData objects.
-     * @throws RuntimeException if the CommandManagerRegistry (CMR) is not ready to use yet.
+     * @return A {@code Map<CommandManager, CommandData>} containing the registered command managers
+     * and their associated command data.
+     * @throws RuntimeException if the CommandManagerRegistry is not ready.
      */
     public Map<CommandManager, CommandData> getCommandManagers() {
         if (!commandManagerRegistryReady)
@@ -274,10 +337,18 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Retrieves the CommandManager associated with the given command name.
+     * Retrieves the {@link CommandManager} associated with the given command name.
+     * <p>
+     * This method checks both the primary command name and any aliases
+     * associated with each {@code CommandManager}. If a match is found, the
+     * corresponding {@code CommandManager} is returned. If no match is found,
+     * {@code null} is returned.
+     * </p>
      *
-     * @param commandName The name of the command to retrieve the CommandManager for.
-     * @return The CommandManager associated with the given command name, or null if none is found.
+     * @param commandName the name of the command or an alias to search for.
+     *                    Must not be {@code null}.
+     * @return the {@link CommandManager} associated with the provided command
+     * name or {@code null} if no matching {@code CommandManager} is found.
      */
     public CommandManager getCommandManager(String commandName) {
         for (CommandManager cm : commandManagers.keySet()) {
@@ -291,10 +362,15 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Checks if a player is required for the given CommandManager.
+     * Checks if the player is required to execute the commands managed by a specific {@link CommandManager}.
      *
-     * @param commandManager The CommandManager to check.
-     * @return True if a player is required, false otherwise.
+     * <p>This method retrieves the {@link CommandData} associated with the provided {@link CommandManager}
+     * and determines whether the command managed by the CommandManager requires a player as the sender.</p>
+     *
+     * @param commandManager the {@link CommandManager} for which the player requirement status is being checked.
+     *                       Must not be null.
+     * @return {@code true} if a player is required to execute the commands for the specified {@link CommandManager},
+     * {@code false} otherwise.
      */
     public Boolean isPlayerRequired(CommandManager commandManager) {
         CommandData data = commandManagers.get(commandManager);
@@ -303,10 +379,15 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Checks if a CommandManager requires an operator to execute.
+     * Determines if the specified {@link CommandManager} requires operator (op) permissions.
      *
-     * @param commandManager The CommandManager to check.
-     * @return True if the CommandManager requires an operator to execute, false otherwise.
+     * <p>This method checks if the given {@code CommandManager} instance has a registered
+     * {@link CommandData} and evaluates whether it is flagged as requiring operator permissions.</p>
+     *
+     * @param commandManager the {@link CommandManager} instance to be checked.
+     *                       Must not be {@code null}.
+     * @return {@code true} if the given {@link CommandManager} requires operator (op) permissions;
+     * {@code false} otherwise.
      */
     public Boolean isOpRequired(CommandManager commandManager) {
         CommandData data = commandManagers.get(commandManager);
@@ -315,10 +396,22 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Checks if the given {@link CommandManager} allows only sub-command arguments that fit to sub-arguments.
+     * Determines whether only sub-command arguments that match the defined sub-arguments
+     * are allowed for a given {@link CommandManager}.
      *
-     * @param commandManager The {@link CommandManager} to check.
-     * @return {@code true} if the given {@link CommandManager} allows only sub-command arguments that fit to sub-arguments, {@code false} otherwise.
+     * <p>This method retrieves the {@link CommandData} associated with the specified
+     * {@code CommandManager}. If the associated {@link CommandData} is not found,
+     * this method returns {@code false}. Otherwise, it checks the setting for allowing only
+     * sub-command arguments that fit the sub-argument definitions and returns the result.
+     *
+     * @param commandManager the {@link CommandManager} whose sub-command argument allowance setting
+     *                       is to be retrieved.
+     *                       <ul>
+     *                         <li>Must be a valid and registered {@link CommandManager}.</li>
+     *                         <li>Cannot be {@code null}.</li>
+     *                       </ul>
+     * @return {@code true} if only sub-command arguments fitting the sub-argument definitions
+     * are allowed; {@code false} if otherwise or if no {@link CommandData} is associated
      */
     public Boolean allowOnlySubCommandArgsThatFitToSubArgs(CommandManager commandManager) {
         CommandData data = commandManagers.get(commandManager);
@@ -327,10 +420,14 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Checks if the given {@link CommandManager} has sender type specific sub-arguments.
+     * Determines if the specified {@link CommandManager}'s sub-arguments are specific to the sender type.
      *
-     * @param commandManager The {@link CommandManager} to check.
-     * @return {@code true} if the given {@link CommandManager} has sender type-specific sub-arguments, {@code false} otherwise.
+     * <p>This method retrieves the {@link CommandData} associated with the provided {@link CommandManager}.
+     * If no such mapping exists, it returns {@code false}. Otherwise, it delegates to the
+     * {@code senderTypeSpecificSubArgs()} method of the {@link CommandData} instance.
+     *
+     * @param commandManager the {@link CommandManager} whose sub-argument sender type specificity is being checked
+     * @return {@code true} if sub-arguments are specific to the sender type; {@code false} otherwise
      */
     public boolean senderTypeSpecificSubArgs(CommandManager commandManager) {
         CommandData data = commandManagers.get(commandManager);
@@ -339,24 +436,79 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Retrieves a list of subcommands associated with the specified command name.
+     * Retrieves the minimum number of arguments required for a specified {@link CommandManager}.
+     * <p>
+     * This method fetches the {@link CommandData} associated with the given {@link CommandManager}.
+     * If no data exists for the provided {@link CommandManager}, the method will return 0.
+     * Otherwise, it returns the minimum number of arguments needed as defined in the associated {@link CommandData}.
+     * </p>
      *
-     * @param commandName The name of the command to retrieve subcommands for.
-     * @return A list of subcommands associated with the specified command name.
+     * @param commandManager the {@link CommandManager} instance whose minimum argument requirement is to be retrieved.
+     *                       Must not be {@code null} to ensure reliable fetching.
+     * @return the minimum number of arguments required for the given {@link CommandManager},
+     * or 0 if no {@link CommandData} exists for the supplied {@link CommandManager}.
+     */
+    public int minArgs(CommandManager commandManager) {
+        CommandData data = commandManagers.get(commandManager);
+        if (data == null) return 0;
+        return data.minArgs();
+    }
+
+    /**
+     * Retrieves the maximum number of arguments that a command managed by the given {@link CommandManager} can support.
+     * <p>
+     * If the specified {@link CommandManager} is not registered or no associated data is found,
+     * this method returns {@code Integer.MAX_VALUE}.
+     *
+     * @param commandManager the {@link CommandManager} whose maximum argument count is being queried
+     * @return the maximum number of arguments the command can support, or {@code Integer.MAX_VALUE} if no data is associated with the provided {@link CommandManager}
+     */
+    public int maxArgs(CommandManager commandManager) {
+        CommandData data = commandManagers.get(commandManager);
+        if (data == null) return Integer.MAX_VALUE;
+        return data.maxArgs();
+    }
+
+    /**
+     * Retrieves the list of subcommands associated with the specified command name.
+     * <p>
+     * This method queries the relevant {@code CommandManager} for the given command name
+     * and collects its subcommands.
+     *
+     * @param commandName the name of the command for which the subcommands are to be retrieved;
+     *                    must not be {@code null}.
+     * @return a {@code List} of {@code SubCommand} objects representing the subcommands
+     * of the specified command; an empty list is returned if the command has no subcommands
+     * or if no {@code CommandManager} matches the provided command name.
      */
     public List<SubCommand> getSubCommands(String commandName) {
         return getCommandManager(commandName).getSubCommands();
     }
 
     /**
-     * Handles the execution of commands registered in the {@link CommandManagerRegistry}.
-     * Logs the command execution and result (success or failure) to the log file.
+     * Handles the execution of/**
+     * Handles the execution of a command by processing the provided {@link Command}, sender, and arguments.
+     * <p>
+     * The method verifies the validity of the command, checks the argument count, sender type, and permissions
+     * required to execute the command. It delegates the execution to the appropriate {@link CommandManager}
+     * implementation and logs the result.
+     * </p>
      *
-     * @param sender The {@link CommandSender} who executed the command.
-     * @param cmd    The {@link Command} that was executed.
-     * @param label  The command label.
-     * @param args   The command arguments.
-     * @return True if the command was successfully executed, false otherwise.
+     * <p>Key actions performed by the method:</p>
+     * <ul>
+     *     <li>Checks if the command name matches any registered {@link CommandManager} instances.</li>
+     *     <li>Validates the argument count and sender's characteristics (e.g., being a player).</li>
+     *     <li>Ensures that the sender has the required permissions to execute the command.</li>
+     *     <li>Logs the success or failure of the command execution to the system log.</li>
+     *     <li>Handles any exceptions that may occur during command execution by logging detailed error information.</li>
+     * </ul>
+     *
+     * @param sender The entity issuing the command. This could be a {@link Player} or a console (non-player entity).
+     * @param cmd    The {@link Command} being executed.
+     * @param label  The command label or alias used by the sender.
+     * @param args   An array of {@link String} representing the arguments passed along with the command.
+     * @return {@code true} if the command execution was successful, {@code false} otherwise. Returning {@code true}
+     * indicates that the command was handled and no further processing is required by the server.
      */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, String[] args) {
@@ -364,6 +516,14 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
             try {
                 if (cm.getCommandName().equalsIgnoreCase(cmd.getName())) {
                     if (args.length == 0) {
+                        if (CoolStuffLib.getLib().isSendSyntaxOnArgsZero()) {
+                            Player playerTemp = null;
+                            if (sender instanceof Player) {
+                                playerTemp = (Player) sender;
+                            }
+                            sender.sendMessage(format(lgm.getMessage("Player.Commands.UsageMessage", playerTemp, true), cm));
+                            return true;
+                        }
                         sender.sendMessage(lgm.getMessage("Player.Commands.TooFewArguments", (sender instanceof Player) ? (Player) sender : null, true));
                         return true;
                     }
@@ -373,6 +533,21 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
                             return true;
                         }
                     }
+                    if (isOpRequired(cm)) {
+                        if (!sender.isOp()) {
+                            sender.sendMessage(lgm.getMessage("Player.Commands.NoPermission", (sender instanceof Player) ? (Player) sender : null, true));
+                            return true;
+                        }
+                    }
+                    if (args.length < minArgs(cm)) {
+                        sender.sendMessage(lgm.getMessage("Player.Commands.TooFewArguments", (sender instanceof Player) ? (Player) sender : null, true));
+                        return true;
+                    }
+                    if (args.length > maxArgs(cm)) {
+                        sender.sendMessage(lgm.getMessage("Player.Commands.TooManyArguments", (sender instanceof Player) ? (Player) sender : null, true));
+                        return true;
+                    }
+
                     boolean commandResult = cm.onCommand(sender, args);
 
                     // Logging the command execution
@@ -399,19 +574,44 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * CommandManagerRegistry class provides a method to complete tab for a command.
-     * This method takes four parameters, CommandSender sender, Command cmd, String
-     * label, and String[] args. It returns a list of strings. If the sender is not a
-     * player and the command requires a player, an empty list is returned. If the
-     * args length is 0, an empty list is returned. Otherwise, the onTabComplete
-     * method of the CommandManager is called and the result is returned. If an error
-     * occurs, it is logged, and an empty list is returned.
+     * Formats a message by replacing placeholders with information from the provided {@link CommandManager}.
      *
-     * @param sender The sender of the tab completion request.
-     * @param cmd    The command that is being tab completed.
-     * @param label  The label of the command.
-     * @param args   The arguments provided for tab completion.
-     * @return A list of tab completion options, or null if an error occurs.
+     * <p>The following placeholders are replaced within the message:
+     * <ul>
+     *     <li><code>%command%</code>: Replaced with the name of the command.</li>
+     *     <li><code>%usage%</code>: Replaced with the usage information of the command.</li>
+     *     <li><code>%info%</code>: Replaced with the descriptive information of the command.</li>
+     *     <li><code>%permission%</code>: Replaced with the command's required permission as a string.</li>
+     * </ul>
+     *
+     * @param message The message string containing placeholders to be formatted.
+     * @param cm      The {@link CommandManager} instance to supply values for placeholders.
+     * @return The formatted message with all placeholders replaced by the corresponding values.
+     */
+    private String format(String message, CommandManager cm) {
+        return message.replace("%command%", cm.getCommandName())
+                .replace("%usage%", cm.getCommandUsage())
+                .replace("%info%", cm.getCommandInfo())
+                .replace("%permission%", cm.getCommandPermissionAsString());
+    }
+
+    /**
+     * Handles tab-completion for commands executed by a {@link CommandSender}.
+     * <p>
+     * This method attempts to provide a list of valid tab-completion options based on the provided arguments
+     * and the specific {@link CommandManager} registered for the command. If the sender does not meet certain
+     * requirements (e.g., the sender is not a {@link Player} and the command requires a player), an empty list
+     * will be returned.
+     * <p>
+     * In case of any internal errors during tab-completion, an appropriate message will be logged.
+     *
+     * @param sender the {@link CommandSender} who is attempting to execute the command.
+     *               This can be a {@link Player}, the console, or another entity.
+     * @param cmd    the {@link Command} object representing the executed command.
+     * @param label  the alias of the command used by the sender.
+     * @param args   an array of {@link String} representing the arguments provided by the sender.
+     *               This may be used to determine the appropriate tab-completion suggestions.
+     * @return a {@link List} of {@link String} containing possible tab-completion options based
      */
     @Nullable
     @Override
@@ -428,6 +628,10 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
                     return Collections.emptyList();
                 }
 
+                if (!sender.hasPermission(cm.getCommandPermissionAsPermission())) {
+                    return Collections.emptyList();
+                }
+
                 return cm.onTabComplete(sender, cmd, label, args);
             } catch (NullPointerException e) {
                 String logMessage = "Error during tab completion for command: " + cmd.getName() + ", Args: " + Arrays.toString(args)
@@ -440,10 +644,17 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Finds the CommandManager associated with the given command name.
+     * Searches for a {@link CommandManager} based on the provided command name.
+     * <p>
+     * This method iterates through the registered {@link CommandManager} instances,
+     * comparing their command names with the specified command name in a
+     * case-insensitive manner. If a matching {@link CommandManager} is found,
+     * it is returned; otherwise, {@code null} is returned.
+     * </p>
      *
-     * @param commandName The name of the command to search for.
-     * @return The CommandManager associated with the given command name, or null if none is found.
+     * @param commandName the name of the command to search for; should not be null or empty
+     * @return the {@link CommandManager} associated with the given command name,
+     * or {@code null} if no match is found
      */
     @Nullable
     private CommandManager findCommandManager(String commandName) {
@@ -456,36 +667,59 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Checks if the CommandManagerRegistry is ready.
+     * Checks whether the command manager registry is ready.
      *
-     * @return True if the CommandManagerRegistry is ready, false otherwise.
+     * <p>This method determines if the registry of command managers has been
+     * properly set up and is in a ready state. It is essential for ensuring
+     * that commands and their respective managers can function without issues.
+     *
+     * @return {@code true} if the command manager registry is ready;
+     * {@code false} otherwise.
      */
     public boolean isCommandManagerRegistryReady() {
         return commandManagerRegistryReady;
     }
 
     /**
-     * Sets a boolean value indicating whether the CommandManagerRegistry is ready.
+     * Sets the readiness status of the CommandManagerRegistry.
+     * <p>
+     * This method updates the {@code commandManagerRegistryReady} field to reflect whether
+     * the CommandManagerRegistry is ready for use or not.
+     * </p>
      *
-     * @param cmrReady Boolean value indicating whether the CommandManagerRegistry is ready.
+     * @param cmrReady A boolean indicating whether the CommandManagerRegistry is ready.
+     *                 <ul>
+     *                   <li>If {@code true}, the registry is marked as ready.</li>
+     *                   <li>If {@code false}, the registry is marked as not ready.</li>
+     *                 </ul>
      */
     public void setCommandManagerRegistryReady(boolean cmrReady) {
         this.commandManagerRegistryReady = cmrReady;
     }
 
     /**
-     * Sets the LanguageManager for the CommandManagerRegistry.
+     * Sets the LanguageManager instance for this CommandManagerRegistry.
      *
-     * @param lgm The LanguageManager to be set.
+     * <p>This method assigns the provided {@link LanguageManager} object to be used for handling language-related functionalities
+     * in the CommandManagerRegistry. The LanguageManager is responsible for managing translations, messages, or other
+     * localized content necessary for commands.
+     *
+     * <p>Calling this method allows customization of language management within this registry by setting the specific
+     * LanguageManager implementation as needed.
+     *
+     * @param lgm the {@link LanguageManager} instance to be set. It should not be null and must be properly configured
+     *            for managing desired language-related functionalities.
      */
     public void setLanguageManager(LanguageManager lgm) {
         this.lgm = lgm;
     }
 
     /**
-     * Provides access to the JavaPlugin associated with the CommandManagerRegistry.
+     * Retrieves the instance of the {@link JavaPlugin} associated with the {@code CommandManagerRegistry}.
      *
-     * @return The JavaPlugin associated with the CommandManagerRegistry.
+     * <p>This method is useful to obtain the plugin instance that this class operates on.
+     *
+     * @return the {@link JavaPlugin} instance associated with the {@code CommandManagerRegistry}.
      */
     public JavaPlugin getPlugin() {
         return plugin;

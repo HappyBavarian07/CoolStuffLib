@@ -1,6 +1,6 @@
 package de.happybavarian07.coolstufflib.languagemanager;
 
-import de.happybavarian07.coolstufflib.configupdater.ConfigUpdater;
+import de.happybavarian07.coolstufflib.configstuff.ConfigUpdater;
 import de.happybavarian07.coolstufflib.utils.Utils;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -26,6 +26,7 @@ public class LanguageManager {
     private final String resourceDirectory;
     private final Map<String, LanguageFile> registeredLanguages;
     private final Map<String, Placeholder> placeholders;
+    private final Map<String, LanguageCache> languageCaches; // New map for LanguageCache
     private String prefix;
     private String currentLangName;
     private LanguageFile currentLang;
@@ -34,10 +35,10 @@ public class LanguageManager {
     /**
      * Constructs a new LanguageManager object.
      *
-     * @param plugin The JavaPlugin instance
-     * @param langFolder The folder where language files are stored
+     * @param plugin            The JavaPlugin instance
+     * @param langFolder        The folder where language files are stored
      * @param resourceDirectory The resource directory of the plugin
-     * @param prefix The prefix for the language files
+     * @param prefix            The prefix for the language files
      */
     public LanguageManager(JavaPlugin plugin, File langFolder, String resourceDirectory, String prefix) {
         this.prefix = prefix;
@@ -46,6 +47,7 @@ public class LanguageManager {
         this.resourceDirectory = resourceDirectory;
         this.registeredLanguages = new LinkedHashMap<>();
         this.placeholders = new LinkedHashMap<>();
+        this.languageCaches = new HashMap<>();
     }
 
     /**
@@ -59,7 +61,7 @@ public class LanguageManager {
 
     /**
      * Provides the ability to set the prefix for the LanguageManager.
-     * 
+     *
      * @param prefix The prefix to be set for the LanguageManager.
      */
     public void setPrefix(String prefix) {
@@ -80,7 +82,7 @@ public class LanguageManager {
     /**
      * Provides the ability to set the PerPlayerLanguageHandler for the
      * LanguageManager.
-     * 
+     *
      * @param playerLanguageHandler The PerPlayerLanguageHandler to be set.
      */
     public void setPLHandler(PerPlayerLanguageHandler playerLanguageHandler) {
@@ -89,7 +91,7 @@ public class LanguageManager {
 
     /**
      * Gets the language folder.
-     * 
+     * <p>
      * Returns the File object representing the language folder.
      *
      * @return The language folder.
@@ -127,7 +129,7 @@ public class LanguageManager {
 
     /**
      * Gets the current language file.
-     * 
+     * <p>
      * Returns the LanguageFile object representing the current language.
      *
      * @return The current language file.
@@ -140,7 +142,7 @@ public class LanguageManager {
      * Sets the current language to the specified language file.
      *
      * @param currentLang The language file to set as the current language.
-     * @param log Whether or not to log the change.
+     * @param log         Whether or not to log the change.
      * @throws NullPointerException If the language file is not found.
      */
     public void setCurrentLang(LanguageFile currentLang, boolean log) throws NullPointerException {
@@ -168,10 +170,12 @@ public class LanguageManager {
         if (fileArray != null) {
             for (File file : fileArray) {
                 LanguageFile languageFile = new LanguageFile(plugin, langFolder, resourceDirectory, file.getName().replace(".yml", ""));
-                if (!registeredLanguages.containsValue(languageFile) && !languageFile.getLangName().equals("default"))
-                    this.registeredLanguages.put(languageFile.getLangName(), languageFile);
-                if (log && !languageFile.getLangName().equals("default"))
-                    plugin.getLogger().log(Level.INFO, "Language: " + languageFile.getLangFile() + " successfully registered!");
+                if (!registeredLanguages.containsValue(languageFile) && !languageFile.getLangName().equals("default")) {
+                    if (log)
+                        plugin.getLogger().log(Level.INFO, "Language: " + languageFile.getLangFile() + " successfully registered!");
+                    registeredLanguages.put(languageFile.getLangName(), languageFile);
+                    languageCaches.put(languageFile.getLangName(), new LanguageCache(languageFile.getLangName()));
+                }
             }
         }
     }
@@ -204,9 +208,9 @@ public class LanguageManager {
 
     /**
      * Reloads all languages and updates the language files.
-     * 
+     *
      * @param messageReceiver The command sender to send the message to.
-     * @param log Whether to log the action or not.
+     * @param log             Whether to log the action or not.
      */
     public void reloadLanguages(CommandSender messageReceiver, Boolean log) {
         addLanguagesToList(log);
@@ -231,19 +235,20 @@ public class LanguageManager {
         if (registeredLanguages.containsKey(langName) || langName.equals("default"))
             return;
         registeredLanguages.put(langName, langFile);
+        languageCaches.put(langName, new LanguageCache(langName));
         plugin.getLogger().log(Level.INFO, "Language: " + langFile.getLangFile() + " successfully registered!");
     }
 
     /**
      * Gets the LanguageFile object associated with the given language name.
-     * 
-     * @param langName The name of the language to get the LanguageFile object for.
+     *
+     * @param langName       The name of the language to get the LanguageFile object for.
      * @param throwException Whether or not to throw an exception if the language is
-     * not found.
+     *                       not found.
      * @return The LanguageFile object associated with the given language name, or null
      * if the language is not found and throwException is false.
      * @throws NullPointerException If the language is not found and throwException is
-     * true.
+     *                              true.
      */
     public LanguageFile getLang(String langName, boolean throwException) throws NullPointerException {
         if (!registeredLanguages.containsKey(langName))
@@ -268,9 +273,9 @@ public class LanguageManager {
     /**
      * Adds a placeholder to the LanguageManager.
      *
-     * @param type       The type of placeholder.
-     * @param key        The key associated with the placeholder.
-     * @param value      The value to replace the placeholder with.
+     * @param type        The type of placeholder.
+     * @param key         The key associated with the placeholder.
+     * @param value       The value to replace the placeholder with.
      * @param resetBefore Whether to reset all placeholders of the specified type before adding the new one.
      */
     public void addPlaceholder(PlaceholderType type, String key, Object value, boolean resetBefore) {
@@ -284,10 +289,10 @@ public class LanguageManager {
     /**
      * Adds the given placeholders to the LanguageManager. If resetBefore is true, all
      * existing placeholders will be reset before adding the new ones.
-     * 
+     *
      * @param placeholders The placeholders to add
-     * @param resetBefore Whether to reset existing placeholders before adding the new
-     * ones
+     * @param resetBefore  Whether to reset existing placeholders before adding the new
+     *                     ones
      */
     public void addPlaceholders(Map<String, Placeholder> placeholders, boolean resetBefore) {
         if (resetBefore) resetPlaceholders(PlaceholderType.ALL, null);
@@ -297,9 +302,9 @@ public class LanguageManager {
     /**
      * Removes a placeholder from the LanguageManager. The placeholder must match the
      * specified type and key in order to be removed.
-     * 
+     *
      * @param type The type of placeholder to remove.
-     * @param key The key of the placeholder to remove.
+     * @param key  The key of the placeholder to remove.
      */
     public void removePlaceholder(PlaceholderType type, String key) {
         if (!placeholders.containsKey(key)) return;
@@ -311,7 +316,7 @@ public class LanguageManager {
 
     /**
      * Removes the specified placeholders of the given type from the LanguageManager.
-     * 
+     *
      * @param type The type of placeholder to remove
      * @param keys The keys of the placeholders to remove
      */
@@ -352,7 +357,7 @@ public class LanguageManager {
      * to remove the placeholders.
      *
      * @param type        The type of placeholders to reset.
-     * @param includeKeys A list of keys to include in removal, or null to reset all placeholders of the specified type.
+     * @param includeKeys A list of keys to include in removal or null to reset all placeholders of the specified type.
      */
     public void resetSpecificPlaceholders(PlaceholderType type, @Nullable List<String> includeKeys) {
         List<String> keysToRemove = new ArrayList<>();
@@ -376,14 +381,24 @@ public class LanguageManager {
     }
 
     /**
+     * Retrieves the {@link LanguageCache} object associated with the given language name.
+     *
+     * @param langName The name of the language to get the {@link LanguageCache} object for.
+     * @return The {@link LanguageCache} object associated with the given language name.
+     */
+    public LanguageCache getLanguageCache(String langName) {
+        return languageCaches.get(langName);
+    }
+
+    /**
      * Gets a list of placeholder keys found in a given message of a specified type.
-     * 
+     * <p>
      * Checks each key in the placeholders map to see if it is present in the message
-     * and if its type matches the specified type or is of type PlaceholderType.ALL.
+     * and if its type matches the specified type or is of type {@link PlaceholderType}.ALL.
      * If both conditions are met, the key is added to the list of keys.
-     * 
+     *
      * @param message The message to search for placeholder keys
-     * @param type The type of placeholder to search for
+     * @param type    The type of placeholder to search for
      * @return A list of placeholder keys found in the message of the specified type
      */
     private List<String> getPlaceholderKeysInMessage(String message, PlaceholderType type) {
@@ -401,8 +416,8 @@ public class LanguageManager {
 
     /**
      * Replaces placeholders in the given message with their corresponding values.
-     * 
-     * @param type The type of placeholder to replace.
+     *
+     * @param type    The type of placeholder to replace.
      * @param message The message to replace placeholders in.
      * @return The message with placeholders replaced.
      */
@@ -420,7 +435,7 @@ public class LanguageManager {
      * Replaces placeholders in an {@link ItemStack} with the corresponding values.
      *
      * @param player The {@link Player} to use for placeholder replacements.
-     * @param item The {@link ItemStack} to replace placeholders in.
+     * @param item   The {@link ItemStack} to replace placeholders in.
      * @return The {@link ItemStack} with placeholders replaced.
      */
     public ItemStack replacePlaceholders(Player player, ItemStack item) {
@@ -442,8 +457,8 @@ public class LanguageManager {
     /**
      * Replaces placeholders in an ItemStack with the given Placeholders.
      *
-     * @param player The player to format the ItemStack for.
-     * @param item The ItemStack to replace the placeholders in.
+     * @param player       The player to format the ItemStack for.
+     * @param item         The ItemStack to replace the placeholders in.
      * @param placeholders The Placeholders to replace.
      * @return The ItemStack with the placeholders replaced.
      */
@@ -466,7 +481,7 @@ public class LanguageManager {
     /**
      * Replaces placeholders in the given message with their corresponding values.
      *
-     * @param message The message to replace placeholders in.
+     * @param message      The message to replace placeholders in.
      * @param placeholders A map of placeholder names to their corresponding Placeholder objects.
      * @return The message with all placeholders replaced.
      */
@@ -493,10 +508,10 @@ public class LanguageManager {
      * parameter is returned. If the player parameter is not null, the language
      * associated with the player is returned. If the langName parameter is null and
      * the currentLang parameter is false, the current language is returned.
+     *
      * @param currentLang Whether to return the current language.
-     * @param langName The name of the language to return.
-     * @param player The player to return the language for.
-     * 
+     * @param langName    The name of the language to return.
+     * @param player      The player to return the language for.
      * @return The LanguageFile object.
      */
     public LanguageFile getLangOrPlayerLang(boolean currentLang, String langName, @Nullable Player player) {
@@ -512,12 +527,45 @@ public class LanguageManager {
         return lang;
     }
 
+    public <T> T getObjectFromLanguageCacheOrConfig(String path, String langName, Class<T> clazz) {
+        LanguageCache langCache = getLanguageCache(langName);
+        if (langCache.containsKey(path)) {
+            return clazz.cast(langCache.getData(path));
+        } else {
+            LanguageFile langFile = getLang(langName, true);
+            LanguageConfig langConfig = langFile.getLangConfig();
+            if (langConfig == null || langConfig.getConfig() == null) return getDefaultInstance(clazz);
+            if (langConfig.getConfig().get(path) == null || !langConfig.getConfig().contains(path)) return getDefaultInstance(clazz);
+            T obj = clazz.cast(langConfig.getConfig().get(path));
+            langCache.addData(path, obj, false);
+            return obj;
+        }
+    }
+
+    private <T> T getDefaultInstance(Class<T> clazz) {
+        if (clazz == Boolean.class) {
+            return clazz.cast(Boolean.FALSE);
+        } else if (clazz == Integer.class) {
+            return clazz.cast(0);
+        } else if (clazz == Double.class) {
+            return clazz.cast(0.0);
+        } else if (clazz == String.class) {
+            return clazz.cast("");
+        } else if (clazz == List.class) {
+            return clazz.cast(new ArrayList<>());
+        } else if (clazz == Map.class) {
+            return clazz.cast(new HashMap<>());
+        }
+        // Add more default instances as needed
+        return null;
+    }
+
     /**
      * Gets a message from the specified path in the language file for the specified
      * player.
-     * 
-     * @param path The path of the message in the language file.
-     * @param player The player to get the message for.
+     *
+     * @param path       The path of the message in the language file.
+     * @param player     The player to get the message for.
      * @param resetAfter Whether or not to reset the message after it is retrieved.
      * @return The message from the specified path in the language file.
      */
@@ -527,12 +575,12 @@ public class LanguageManager {
 
     /**
      * Gets a message from the language file.
-     * 
-     * @param path The path of the message in the language file.
-     * @param player The player to format the message for.
-     * @param langName The name of the language file to get the message from.
+     *
+     * @param path       The path of the message in the language file.
+     * @param player     The player to format the message for.
+     * @param langName   The name of the language file to get the message from.
      * @param resetAfter Whether to reset the placeholders after the message is
-     * retrieved.
+     *                   retrieved.
      * @return The formatted message.
      */
     public String getMessage(String path, Player player, String langName, boolean resetAfter) {
@@ -540,10 +588,12 @@ public class LanguageManager {
         LanguageConfig langConfig = langFile.getLangConfig();
         if (langConfig == null || langConfig.getConfig() == null)
             return "null config";
-        if (langConfig.getConfig().getString("Messages." + path) == null || !langConfig.getConfig().contains("Messages." + path))
+        if ((langConfig.getConfig().getString("Messages." + path) == null || !langConfig.getConfig().contains("Messages." + path)) && !getLanguageCache(langName).containsKey("Messages." + path))
             return "null path: Messages." + path;
 
-        String message = Utils.format(player, langConfig.getConfig().getString("Messages." + path), prefix);
+        String rawMessage = getObjectFromLanguageCacheOrConfig("Messages." + path, langName, String.class);
+
+        String message = Utils.format(player, rawMessage, prefix);
         if (placeholders.isEmpty()) return message;
 
         List<String> includedKeys = new ArrayList<>(getPlaceholderKeysInMessage(message, PlaceholderType.MESSAGE));
@@ -555,7 +605,7 @@ public class LanguageManager {
     /**
      * Gets the permission message for a given permission.
      *
-     * @param player The player to get the message for.
+     * @param player     The player to get the message for.
      * @param permission The permission to get the message for.
      * @return The permission message.
      */
@@ -567,9 +617,9 @@ public class LanguageManager {
     /**
      * Gets an item from the specified path in the language file for the specified
      * player.
-     * 
-     * @param path The path of the item in the language file.
-     * @param player The player to get the item for.
+     *
+     * @param path       The path of the item in the language file.
+     * @param player     The player to get the item for.
      * @param resetAfter Whether or not to reset the item after it has been retrieved.
      * @return The item from the specified path in the language file.
      */
@@ -598,7 +648,7 @@ public class LanguageManager {
             error.setItemMeta(errorMeta);
             return error;
         }
-        if (langConfig.getConfig().getString("Items." + path) == null || !langConfig.getConfig().contains("Items." + path)) {
+        if ((langConfig.getConfig().getString("Items." + path) == null || !langConfig.getConfig().contains("Items." + path)) && !getLanguageCache(langName).containsKey("Items." + path)) {
             assert errorMeta != null;
             errorMeta.setDisplayName("Config Path not found!");
             errorMeta.setLore(Arrays.asList("If this happens often,", "please report to the Discord", "Path: Items." + path));
@@ -610,16 +660,16 @@ public class LanguageManager {
             return this.getItem("General.DisabledItem", player, false);
         }
         ItemStack item;
-        Material material = Material.matchMaterial(langConfig.getConfig().getString("Items." + path + ".material"));
+        Material material = Material.matchMaterial(getObjectFromLanguageCacheOrConfig("Items." + path + ".material", langName, String.class));
         if (material == null) {
             assert errorMeta != null;
-            errorMeta.setDisplayName("Material not found! (" + langConfig.getConfig().getString("Items." + path + ".material") + ")");
+            errorMeta.setDisplayName("Material not found! (" + getObjectFromLanguageCacheOrConfig("Items." + path + ".material", langName, String.class) + ")");
             errorMeta.setLore(Arrays.asList("If this happens,", "please change the Material from this Item", "to something existing", "Path: Items." + path + ".material"));
             error.setItemMeta(errorMeta);
             return error;
         }
-        String displayName = langConfig.getConfig().getString("Items." + path + ".displayName");
-        List<String> lore = langConfig.getConfig().getStringList("Items." + path + ".lore");
+        String displayName = getObjectFromLanguageCacheOrConfig("Items." + path + ".displayName", langName, String.class);
+        List<String> lore = getObjectFromLanguageCacheOrConfig("Items." + path + ".lore", langName, ArrayList.class);
         List<String> loreWithPlaceholders = new ArrayList<>();
         List<String> includedKeys = new ArrayList<>();
         item = new ItemStack(material, 1);
@@ -634,7 +684,7 @@ public class LanguageManager {
         assert displayName != null;
         includedKeys.addAll(getPlaceholderKeysInMessage(Utils.format(player, displayName, prefix), PlaceholderType.ITEM));
         meta.setDisplayName(replacePlaceholders(PlaceholderType.ITEM, Utils.format(player, displayName, prefix)));
-        if (langConfig.getConfig().getBoolean("Items." + path + ".enchanted", false)) {
+        if (getObjectFromLanguageCacheOrConfig("Items." + path + ".enchanted", langName, Boolean.class)) {
             meta.addEnchant(Enchantment.DURABILITY, 0, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
@@ -646,8 +696,8 @@ public class LanguageManager {
     /**
      * Gets the menu title for the given path in the language specified by the given
      * language name.
-     * 
-     * @param path The path of the menu title to get.
+     *
+     * @param path   The path of the menu title to get.
      * @param player The player to get the language name from.
      * @return The menu title for the given path in the language specified by the given
      * language name.
@@ -672,9 +722,9 @@ public class LanguageManager {
         LanguageConfig langConfig = langFile.getLangConfig();
         if (langConfig == null || langConfig.getConfig() == null)
             return "null config";
-        if (langConfig.getConfig().getString("MenuTitles." + path) == null || !langConfig.getConfig().contains("MenuTitles." + path))
+        if ((langConfig.getConfig().getString("MenuTitles." + path) == null || !langConfig.getConfig().contains("MenuTitles." + path)) && !getLanguageCache(langName).containsKey("MenuTitles." + path))
             return "null path: MenuTitles." + path;
-        String title = langConfig.getConfig().getString("MenuTitles." + path);
+        String title = getObjectFromLanguageCacheOrConfig("MenuTitles." + path, langName, String.class);
         List<String> includedKeys = new ArrayList<>(getPlaceholderKeysInMessage(title, PlaceholderType.MENUTITLE));
         title = replacePlaceholders(PlaceholderType.MENUTITLE, title);
         resetSpecificPlaceholders(PlaceholderType.MENUTITLE, includedKeys);
@@ -683,13 +733,12 @@ public class LanguageManager {
 
     /**
      * Retrieve a custom object from the specified path.
-     * 
-     * @param path The path to the custom object.
-     * @param player The player to retrieve the custom object for, or null for global.
-     * @param defaultValue The default value to return if the custom object is not found.
-     * @param resetAfter Whether to reset the custom object after retrieval.
-     * @param <T> The type of the custom object.
      *
+     * @param path         The path to the custom object.
+     * @param player       The player to retrieve the custom object for, or null for global.
+     * @param defaultValue The default value to return if the custom object is not found.
+     * @param resetAfter   Whether to reset the custom object after retrieval.
+     * @param <T>          The type of the custom object.
      * @return The custom object, or the default value if not found.
      */
     public <T> T getCustomObject(String path, @Nullable Player player, T defaultValue, boolean resetAfter) {
@@ -698,16 +747,16 @@ public class LanguageManager {
 
     /**
      * Gets a custom object from the language file.
-     * 
-     * @param path The path to the object in the language file.
-     * @param player The player to use for placeholders.
-     * @param langName The language name to use.
-     * @param defaultValue The default value to return if the object is not found.
-     * @param resetAfter Whether to reset the placeholders after getting the object.
-     * @param <T> The type of the object.
      *
+     * @param path         The path to the object in the language file.
+     * @param player       The player to use for placeholders.
+     * @param langName     The language name to use.
+     * @param defaultValue The default value to return if the object is not found.
+     * @param resetAfter   Whether to reset the placeholders after getting the object.
+     * @param <T>          The type of the object.
      * @return The object from the language file, or the default value if not found.
      */
+    @SuppressWarnings("unchecked")
     public <T> T getCustomObject(String path, @Nullable Player player, String langName, T defaultValue, boolean resetAfter) {
         LanguageFile langFile = getLangOrPlayerLang(false, langName, player);
         LanguageConfig langConfig = langFile.getLangConfig();
@@ -719,7 +768,8 @@ public class LanguageManager {
 
         T obj;
         try {
-            obj = (T) langConfig.getConfig().get(path);
+            // This Unchecked cast is safe, as the defaultValue is of the same type as the object.
+            obj = (T) getObjectFromLanguageCacheOrConfig(path, langName, defaultValue.getClass());
             if (obj instanceof String) {
                 obj = (T) replacePlaceholders(PlaceholderType.CUSTOM, Utils.format(player, obj.toString(), prefix));
                 if (resetAfter)

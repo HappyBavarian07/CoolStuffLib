@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
-    <file url="file://$PROJECT_DIR$/src/main/java/de/happybavarian07/coolstufflib/configupdater/ConfigUpdater.java" charset="ISO-8859-1" />
-    <file url="file://$PROJECT_DIR$/src/main/java/de/happybavarian07/coolstufflib/configupdater/KeyBuilder.java" charset="ISO-8859-1" />
-    <file url="file://$PROJECT_DIR$/src/main/java/de/happybavarian07/coolstufflib/configupdater/OldConfigUpdater.java" charset="ISO-8859-1" />
+    <file url="file://$PROJECT_DIR$/src/main/java/de/happybavarian07/coolstufflib/configstuff/ConfigUpdater.java" charset="ISO-8859-1" />
+    <file url="file://$PROJECT_DIR$/src/main/java/de/happybavarian07/coolstufflib/configstuff/KeyBuilder.java" charset="ISO-8859-1" />
+    <file url="file://$PROJECT_DIR$/src/main/java/de/happybavarian07/coolstufflib/configstuff/OldConfigUpdater.java" charset="ISO-8859-1" />
     <file url="file://$PROJECT_DIR$/src/main/java/de/happybavarian07/coolstufflib/languagemanager/LanguageConfig.java" charset="ISO-8859-1" />
     <file url="file://$PROJECT_DIR$/src/main/java/de/happybavarian07/coolstufflib/languagemanager/LanguageFile.java" charset="ISO-8859-1" />
     <file url="file://$PROJECT_DIR$/src/main/java/de/happybavarian07/coolstufflib/languagemanager/LanguageFileUpdater.java" charset="ISO-8859-1" />

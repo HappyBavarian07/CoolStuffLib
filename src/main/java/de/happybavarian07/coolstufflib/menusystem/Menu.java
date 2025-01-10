@@ -27,11 +27,11 @@ public abstract class Menu implements InventoryHolder {
     protected String openingPermission = "";
     protected PlayerMenuUtility playerMenuUtility;
     protected Inventory inventory;
-    protected List<Inventory> inventorys = new ArrayList<>();
+    protected List<Inventory> inventories = new ArrayList<>();
 
-    //Constructor for Menu. Pass in a PlayerMenuUtility so that
-    // we have information on who's menu this is and
-    // what info is to be transfered
+    //Constructor for Menu. Pass on a PlayerMenuUtility so that
+    // we have information on whose menu this is and
+    // what info is to be transfered.
     /**
      * The Menu function is the main function of this class. It creates a menu for the player to interact with, and
      * allows them to choose what they want to do next. The Menu function takes in no parameters.
@@ -120,7 +120,7 @@ public abstract class Menu implements InventoryHolder {
         }
 
         inventory = Bukkit.createInventory(this, getSlots(), getMenuName());
-        inventorys.add(inventory);
+        inventories.add(inventory);
         Map<String, MenuAddon> addonList = new HashMap<>();
         if (lib.getMenuAddonManager() != null) {
             addonList = lib.getMenuAddonManager().getMenuAddons(this.getConfigMenuAddonFeatureName());

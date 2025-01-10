@@ -3,7 +3,7 @@ package de.happybavarian07.coolstufflib.languagemanager;/*
  * @Date 15.11.2021 | 17:59
  */
 
-import de.happybavarian07.coolstufflib.configupdater.KeyBuilder;
+import de.happybavarian07.coolstufflib.configstuff.KeyBuilder;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;

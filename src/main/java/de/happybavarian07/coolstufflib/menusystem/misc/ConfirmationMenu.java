@@ -15,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ConfirmationMenu extends Menu {
@@ -55,7 +56,7 @@ public class ConfirmationMenu extends Menu {
             // Initialize the index to 0
             int i = 0;
 
-            // Loop until data with the key "ConfirmationMenu_MethodArgs_<i>" is found
+            // Loop until data with the key "ConfirmationMenu_MethodArgs_<i>" is found.
             while (playerMenuUtility.hasData("ConfirmationMenu_MethodArgs_" + i)) {
                 Object dataValue = playerMenuUtility.getData("ConfirmationMenu_MethodArgs_" + i);
                 // Add the data to the list of method arguments
@@ -63,7 +64,7 @@ public class ConfirmationMenu extends Menu {
                 i++; // Increment the index
             }
 
-            // Execute the method given in the data with methodArgs as arguments
+            // Execute the method given in the data with methodArgs as arguments.
             Method methodToExecute = (Method) playerMenuUtility.getData("ConfirmationMenu_MethodToExecuteAfter");
             Object objectToInvokeOn = playerMenuUtility.getData("ConfirmationMenu_ObjectToInvokeMethodOn");
             List<Class<? extends Exception>> exceptionsToCatch = (List<Class<? extends Exception>>) playerMenuUtility.getData("ConfirmationMenu_ExceptionsToCatch");
@@ -72,7 +73,8 @@ public class ConfirmationMenu extends Menu {
                     methodToExecute.invoke(objectToInvokeOn, methodArgs.toArray());
                 } catch (Exception ex) {
                     if(exceptionsToCatch.contains(ex.getClass())) {
-                        lgm.addPlaceholder(PlaceholderType.MESSAGE, "%error%", ex.getMessage(), true);
+                        lgm.addPlaceholder(PlaceholderType.MESSAGE, "%error%", ex + ": " + ex.getMessage(), false);
+                        lgm.addPlaceholder(PlaceholderType.MESSAGE, "%stacktrace%", Arrays.toString(ex.getStackTrace()), false);
                         player.sendMessage(lgm.getMessage("Player.General.Error", player, true));
                     }
                     ex.printStackTrace();
@@ -97,7 +99,11 @@ public class ConfirmationMenu extends Menu {
             Menu oldMenu = Utils.getMenuByClassName(menuPackage, menuToOpenAfter, player);
             if (oldMenu != null) {
                 oldMenu.open();
+            } else {
+                player.closeInventory();
             }
+        } else {
+            player.closeInventory();
         }
     }
 

@@ -31,6 +31,7 @@ public class CoolStuffLib {
     // Directory of the Plugin using this Lib
     private final File workingDirectory;
     private final boolean usePlayerLangHandler;
+    private final boolean sendSyntaxOnArgsZero;
     private final Consumer<Object[]> languageManagerStartingMethod;
     private final Consumer<Object[]> commandManagerRegistryStartingMethod;
     private final Consumer<Object[]> menuAddonManagerStartingMethod;
@@ -53,6 +54,7 @@ public class CoolStuffLib {
      * @param menuAddonManager                     The Menu Addon Manager Class.
      * @param pluginFileLogger                    The Plugin File Logger for logging purposes.
      * @param usePlayerLangHandler                 A boolean indicating if a PlayerLangHandler should be used.
+     * @param sendSyntaxOnArgsZero                 A boolean indicating if the syntax should be sent when the command is executed with no arguments.
      * @param languageManagerStartingMethod        The method to execute when the Language Manager System is initiated.
      * @param commandManagerRegistryStartingMethod The method to execute when the Command Manager System is initiated.
      * @param menuAddonManagerStartingMethod       The method to execute when the Menu Manager System is initiated.
@@ -64,6 +66,7 @@ public class CoolStuffLib {
                            MenuAddonManager menuAddonManager,
                            PluginFileLogger pluginFileLogger,
                            boolean usePlayerLangHandler,
+                           boolean sendSyntaxOnArgsZero,
                            Consumer<Object[]> languageManagerStartingMethod,
                            Consumer<Object[]> commandManagerRegistryStartingMethod,
                            Consumer<Object[]> menuAddonManagerStartingMethod,
@@ -80,6 +83,7 @@ public class CoolStuffLib {
         this.menuAddonManager = menuAddonManager;
         this.pluginFileLogger = pluginFileLogger;
         this.usePlayerLangHandler = usePlayerLangHandler;
+        this.sendSyntaxOnArgsZero = sendSyntaxOnArgsZero;
         this.languageManagerStartingMethod = languageManagerStartingMethod;
         this.commandManagerRegistryStartingMethod = commandManagerRegistryStartingMethod;
         this.menuAddonManagerStartingMethod = menuAddonManagerStartingMethod;
@@ -176,6 +180,10 @@ public class CoolStuffLib {
 
     public boolean isPlaceholderAPIEnabled() {
         return placeholderAPIEnabled;
+    }
+
+    public boolean isSendSyntaxOnArgsZero() {
+        return sendSyntaxOnArgsZero;
     }
 
     public void executeMethod(Consumer<Object[]> method, Object... arguments) {

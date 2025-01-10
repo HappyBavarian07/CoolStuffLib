@@ -94,6 +94,32 @@ public abstract class SubCommand implements Comparable<SubCommand> {
         return this.getClass().getAnnotation(CommandData.class).senderTypeSpecificSubArgs();
     }
 
+    /**
+     * <p>Gets the minimum number of arguments for this command.</p>
+     * <p>If the command does not have a minimum number of arguments, then 0 is returned.</p>
+     * @return The minimum number of arguments for this command.
+     */
+    public int minArgs() {
+        if (!this.getClass().isAnnotationPresent(CommandData.class)) {
+            return registry.minArgs(registry.getCommandManager(mainCommandName));
+        }
+        return this.getClass().getAnnotation(CommandData.class).minArgs();
+    }
+
+
+    /**
+     * <p>Gets the maximum number of arguments for this command.</p>
+     * <p>If the command does not have a maximum number of arguments, then Integer.MAX_VALUE is returned.</p>
+     *
+     * @return The maximum number of arguments for this command.
+     */
+    public int maxArgs() {
+        if (!this.getClass().isAnnotationPresent(CommandData.class)) {
+            return registry.maxArgs(registry.getCommandManager(mainCommandName));
+        }
+        return this.getClass().getAnnotation(CommandData.class).maxArgs();
+    }
+
 
     /**
      * <p>Called when a player executes a command.</p>

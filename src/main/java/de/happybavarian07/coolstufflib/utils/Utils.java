@@ -8,13 +8,22 @@ import de.happybavarian07.coolstufflib.menusystem.Menu;
 import de.happybavarian07.coolstufflib.menusystem.PlayerMenuUtility;
 import de.happybavarian07.coolstufflib.menusystem.misc.ConfirmationMenu;
 import me.clip.placeholderapi.PlaceholderAPI;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.profile.PlayerProfile;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public class Utils {
@@ -110,5 +119,73 @@ public class Utils {
         }
         playerMenuUtility.setData("ConfirmationMenu_ExceptionsToCatch", exceptionsToCatch, true);
         confirmationMenu.open();
+    }
+
+    /**
+     * Creates a skull with a head texture and a name from a String.
+     * <br>
+     * Use {@link #createSkull(Head, String)}, if there's a need to use predefined Head Values.
+     *
+     * @param headTexture The head texture as a String
+     * @param name
+     * @return
+     */
+    public static ItemStack createSkull(String headTexture, String name) {
+        ItemStack head = new ItemStack(legacyServer() ? Objects.requireNonNull(Material.matchMaterial("SKULL_ITEM")) : Material.PLAYER_HEAD, 1);
+        if (headTexture.isEmpty()) return head;
+
+        SkullMeta meta = (SkullMeta) head.getItemMeta();
+        assert meta != null;
+        meta.setDisplayName(Utils.chat(name));
+        PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID(), "CustomHead");
+
+        try {
+            profile.getTextures().setSkin(new URL("https://textures.minecraft.net/texture/" + headTexture));
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+        meta.setOwnerProfile(profile);
+
+        head.setItemMeta(meta);
+        return head;
+    }
+
+    /**
+     * Creates a skull with a head texture and a name from a Head Object.
+     * <br>
+     * This method can only handle values from {@link Head}
+     *
+     * @param headTexture Element from the Head Enum with Head String Values
+     * @param name The name of the skull
+     * @return The skull
+     */
+    public static ItemStack createSkull(Head headTexture, String name) {
+        ItemStack head = new ItemStack(legacyServer() ? Objects.requireNonNull(Material.matchMaterial("SKULL_ITEM")) : Material.PLAYER_HEAD, 1);
+        if (headTexture.getTexture().isEmpty()) return head;
+
+        SkullMeta meta = (SkullMeta) head.getItemMeta();
+        assert meta != null;
+        meta.setDisplayName(Utils.chat(name));
+        PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID(), "CustomHead");
+
+        try {
+            profile.getTextures().setSkin(new URL("https://textures.minecraft.net/texture/" + headTexture.getTexture()));
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+        meta.setOwnerProfile(profile);
+
+        head.setItemMeta(meta);
+        return head;
+    }
+
+    private static boolean legacyServer() {
+        String serverVersion = Bukkit.getServer().getVersion();
+        return serverVersion.contains("1.12") ||
+                serverVersion.contains("1.11") ||
+                serverVersion.contains("1.10") ||
+                serverVersion.contains("1.9") ||
+                serverVersion.contains("1.8") ||
+                serverVersion.contains("1.7");
     }
 }

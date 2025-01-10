@@ -19,6 +19,7 @@ public class CoolStuffLibBuilder {
     private MenuAddonManager menuAddonManager = null;
     private PluginFileLogger pluginFileLogger = null;
     private boolean usePlayerLangHandler = false;
+    private boolean sendSyntaxOnZeroArgs = false;
     private Consumer<Object[]> languageManagerStartingMethod = (args) -> {
         if (args.length != 4) return;
         LanguageManager languageManager = (LanguageManager) args[0];
@@ -116,6 +117,11 @@ public class CoolStuffLibBuilder {
         return this;
     }
 
+    public CoolStuffLibBuilder setSendSyntaxOnZeroArgs(boolean sendSyntaxOnZeroArgs) {
+        this.sendSyntaxOnZeroArgs = sendSyntaxOnZeroArgs;
+        return this;
+    }
+
     public CoolStuffLibBuilder setLanguageManagerStartingMethod(Consumer<Object[]> languageManagerStartingMethod) {
         this.languageManagerStartingMethod = languageManagerStartingMethod;
         return this;
@@ -146,6 +152,7 @@ public class CoolStuffLibBuilder {
                 menuAddonManager,
                 pluginFileLogger,
                 usePlayerLangHandler,
+                sendSyntaxOnZeroArgs,
                 languageManagerStartingMethod,
                 commandManagerRegistryStartingMethod,
                 menuAddonManagerStartingMethod,
