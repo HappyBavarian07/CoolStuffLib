@@ -1,0 +1,12 @@
+{
+  "name": "TestPlayer",
+  "position": {
+    "x": 100.5,
+    "y": 64.0,
+    "z": -30.25,
+    "world": "world"
+  },
+  "displayName": "Â§aTestPlayer",
+  "uuid": "6b7d052f-ed8b-45a3-82af-b09e4894fc87",
+  "health": 20
+}

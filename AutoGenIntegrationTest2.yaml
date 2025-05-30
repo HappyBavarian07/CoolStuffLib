@@ -1,0 +1,38 @@
+players:
+  904db2b9-6114-45a2-994c-013ef7e69362:
+    displayName: yamlDisp
+    health: 15
+    position:
+      z: 0.0
+      world: nether
+      y: 80.0
+      x: 0.0
+    uuid: 904db2b9-6114-45a2-994c-013ef7e69362
+    name: YamlPlayer
+  bd2a7e3e-93e3-4e98-98e8-2037b69f3379:
+    displayName: yamlDisp
+  60264a3b-97d9-4f70-a93e-e974bb13650c:
+    health: 15
+  0114d4b6-6b14-4551-8e1b-60afeaf30640:
+    name: YamlPlayer
+  42993d84-6fd2-482b-8242-4d2a9f294569:
+    uuid: 42993d84-6fd2-482b-8242-4d2a9f294569
+    health: 15
+  151f4f6c-7a23-4cdb-a1d5-dc8bc4ffe469:
+    displayName: yamlDisp
+  7b2dd99b-df2a-4d84-81af-f6e58a53f193:
+    displayName: yamlDisp
+  d2ab8a70-edce-4826-a98e-2b637c495536:
+    name: YamlPlayer
+    position:
+      z: 0.0
+      world: nether
+      y: 80.0
+      x: 0.0
+  176048e5-4f35-4c86-8e6a-d60d63df0a7f:
+    health: 15
+  5f39e71a-f05b-4072-9211-ce842f9dba5b:
+    health: 15
+    uuid: 5f39e71a-f05b-4072-9211-ce842f9dba5b
+  4964c109-b545-481a-86b6-124ab960b0c8:
+    displayName: yamlDisp

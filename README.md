@@ -7,6 +7,14 @@ Welcome to CoolStuffLib, a powerful library for Java developers! This library co
 - **Enhanced Command Manager:** Build and manage commands effortlessly.
 - **Improved Menu System:** Create intuitive menus with ease.
 - **Language Manager:** Simplify multi-language support in your applications.
+- **Utils Class:** A collection of utility methods.
+- **Config Manager:** Manage your configuration files efficiently.
+- **Expression Engine:** Evaluate and execute expressions dynamically (like Math).
+- **Plugin File Logger:** Integrated logging utility for plugin-specific logs.
+- **Player Menu Utility:** Player-specific context for menu operations.
+- **PlaceholderAPI Support:** Automatic detection and integration if PlaceholderAPI is present.
+- **Custom Startup Hooks:** Inject custom logic when initializing core systems.
+- **Persistent Data File Handling:** Centralized data file for storing plugin-specific data.
 
 ## Future Updates
 
@@ -15,6 +23,7 @@ I have exciting plans for CoolStuffLib's future updates:
 - **MySQL Interface:** Seamlessly interact with and control MySQL databases in your projects.
 - **File Manager:** Manage files and directories efficiently within your Java applications.
 - **Language Translator:** Translate default language files into various languages, utilizing custom API keys or Google Translate.
+- **Data Backup/Restore:** Automated backup and restore functionality for plugin data.
 
 ## Getting Started
 
@@ -33,4 +42,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Have questions or need assistance?** Don't hesitate to reach out. I'm here to help you make the most of CoolStuffLib!
 
-Happy coding! 🚀
+Happy coding! 

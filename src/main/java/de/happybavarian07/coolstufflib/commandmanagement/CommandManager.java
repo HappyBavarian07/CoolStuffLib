@@ -123,12 +123,7 @@ public abstract class CommandManager {
         }
 
         try {
-            boolean callResult;
-            if (sender instanceof Player) {
-                callResult = target.onPlayerCommand((Player) sender, updatedArgs);
-            } else {
-                callResult = target.onConsoleCommand((ConsoleCommandSender) sender, updatedArgs);
-            }
+            boolean callResult = handleSubCommand(sender, target, updatedArgs);
             if (!callResult) {
                 sender.sendMessage(format(lgm.getMessage("Player.Commands.UsageMessage", getPlayerForSender(sender), true), target));
             }

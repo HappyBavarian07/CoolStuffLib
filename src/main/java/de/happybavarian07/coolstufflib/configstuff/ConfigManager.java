@@ -1,18 +1,25 @@
 package de.happybavarian07.coolstufflib.configstuff;
 
-import org.bukkit.plugin.java.JavaPlugin;
+import de.happybavarian07.coolstufflib.utils.Utils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 public class ConfigManager {
-    private final JavaPlugin plugin;
+    private final File configFolder;
     private final Map<String, Config> configs = new HashMap<>();
 
-    public ConfigManager(JavaPlugin plugin) {
-        this.plugin = plugin;
+    public ConfigManager(File configFolder) {
+        this.configFolder = configFolder;
+        if (!configFolder.exists()) {
+            configFolder.mkdirs();
+        }
     }
 
     public Map<String, Config> getConfigs() {
@@ -30,10 +37,11 @@ public class ConfigManager {
     }
 
     public Config createConfig(String configName, String fileName) {
-        File configFile = new File(plugin.getDataFolder(), fileName + ".yml");
+        String fileNameWithoutExtension = fileName.endsWith(".yml") ? fileName : fileName + ".yml";
+        File configFile = new File(configFolder, fileNameWithoutExtension);
         if (!configFile.exists()) {
             configFile.getParentFile().mkdirs();
-            plugin.saveResource(fileName + ".yml", false);
+            Utils.saveResource(configFolder, fileNameWithoutExtension, false);
         }
         Config config = new Config(configFile);
         configs.put(configName, config);
@@ -41,13 +49,13 @@ public class ConfigManager {
     }
 
     public Config createConfig(String configName, File configFile) {
-        configFile = new File(plugin.getDataFolder(), configFile.getPath());
+        configFile = new File(configFolder, configFile.getPath());
         if (!configFile.exists()) {
             configFile.getParentFile().mkdirs();
             try {
                 configFile.createNewFile();
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException("Could not create config file: " + configFile.getPath(), e);
             }
         }
         Config config = new Config(configFile);
@@ -63,35 +71,36 @@ public class ConfigManager {
     }
 
     public void loadConfig(String configName, String fileName) {
-        File configFile = new File(plugin.getDataFolder(), fileName + ".yml");
+        File configFile = new File(configFolder, fileName.endsWith(".yml") ? fileName : fileName + ".yml");
         if (!configFile.exists()) {
             configFile.getParentFile().mkdirs();
             try {
                 configFile.createNewFile();
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException("Could not create config file: " + configFile.getPath(), e);
             }
         }
         configs.put(configName, new Config(configFile));
     }
 
     public void loadConfig(String configName, File configFile) {
-        configFile = new File(plugin.getDataFolder(), configFile.getPath());
+        configFile = new File(configFolder, configFile.getPath());
         if (!configFile.exists()) {
             configFile.getParentFile().mkdirs();
             try {
                 configFile.createNewFile();
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException("Could not create config file: " + configFile.getPath(), e);
             }
         }
         configs.put(configName, new Config(configFile));
     }
 
     public void loadConfigFromResource(String configName, String fileName) {
-        File configFile = new File(plugin.getDataFolder(), fileName + ".yml");
+        String fileNameWithoutExtension = fileName.endsWith(".yml") ? fileName : fileName + ".yml";
+        File configFile = new File(configFolder, fileNameWithoutExtension);
         if (!configFile.exists()) {
-            plugin.saveResource(fileName + ".yml", false);
+            Utils.saveResource(configFolder, fileNameWithoutExtension, false);
         }
         configs.put(configName, new Config(configFile));
     }
@@ -101,7 +110,7 @@ public class ConfigManager {
             try {
                 configs.get(configName).save();
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException("Could not save config: " + configName, e);
             }
         }
     }
@@ -130,7 +139,7 @@ public class ConfigManager {
             try {
                 config.save();
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         }
     }

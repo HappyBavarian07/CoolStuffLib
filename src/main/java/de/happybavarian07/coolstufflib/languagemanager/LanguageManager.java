@@ -1,19 +1,31 @@
 package de.happybavarian07.coolstufflib.languagemanager;
 
 import de.happybavarian07.coolstufflib.configstuff.ConfigUpdater;
+import de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngine;
+import de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEnginePool;
+import de.happybavarian07.coolstufflib.languagemanager.expressionengine.conditions.HeadMaterialCondition;
+import de.happybavarian07.coolstufflib.languagemanager.expressionengine.interfaces.FunctionCall;
+import de.happybavarian07.coolstufflib.languagemanager.expressionengine.interfaces.MaterialCondition;
+import de.happybavarian07.coolstufflib.utils.Head;
 import de.happybavarian07.coolstufflib.utils.Utils;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.profile.PlayerProfile;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -27,6 +39,7 @@ public class LanguageManager {
     private final Map<String, LanguageFile> registeredLanguages;
     private final Map<String, Placeholder> placeholders;
     private final Map<String, LanguageCache> languageCaches; // New map for LanguageCache
+    private final ExpressionEnginePool expressionEnginePool;
     private String prefix;
     private String currentLangName;
     private LanguageFile currentLang;
@@ -48,6 +61,97 @@ public class LanguageManager {
         this.registeredLanguages = new LinkedHashMap<>();
         this.placeholders = new LinkedHashMap<>();
         this.languageCaches = new HashMap<>();
+        // Initialize default engine for current language
+        ExpressionEngine defaultEngine = new ExpressionEngine();
+        registerHeadFunction(defaultEngine);
+        registerLangFunction(defaultEngine);
+        this.expressionEnginePool = new ExpressionEnginePool("default", defaultEngine);
+    }
+
+    // Adds a new engine for a language and registers HEAD instantly
+    private void addEngineForLanguage(String languageName, boolean headFunction, boolean langFunction) {
+        ExpressionEngine engine = new ExpressionEngine();
+        if (headFunction) registerHeadFunction(engine);
+        if (langFunction) registerLangFunction(engine);
+        expressionEnginePool.addEngineForLanguage(languageName, engine);
+    }
+
+    // Register the HEAD function for an engine
+    private void registerHeadFunction(ExpressionEngine engine) {
+        engine.registerFunction("HEAD", (interpreter, args, type) -> {
+            if (args.size() != 1) throw new RuntimeException("HEAD function expects exactly 1 argument (head name)");
+            String headName = args.get(0).toString();
+            return "HEAD(" + headName + ")";
+        }, "string");
+    }
+
+    private void registerLangFunction(ExpressionEngine engine) {
+        engine.registerFunction("lang", (interpreter, args, type) -> {
+            if (args == null || args.size() != 1) throw new RuntimeException("lang(key) expects 1 argument");
+            Object key = args.get(0);
+            if (key == null) return "";
+            return getCustomObject(key.toString(), null, "", false);
+        }, "string", new Class<?>[]{String.class}, String.class);
+    }
+
+    private void handleVariablesSection(Player player, boolean clearBefore) {
+        LanguageFile langFile = getLangOrPlayerLang(true, getCurrentLangName(), player);
+        handleVariablesSection(langFile, clearBefore);
+    }
+
+    private void handleVariablesSection(LanguageFile langFile, boolean clearBefore) {
+        LanguageConfig langConfig = langFile.getLangConfig();
+        if (langConfig == null || langConfig.getConfig() == null) return;
+
+        ConfigurationSection customSection = langConfig.getConfig().getConfigurationSection("CustomVariables");
+        if (customSection == null) return;
+
+        if (clearBefore) {
+            ExpressionEngine engine = expressionEnginePool.getEngineForLanguage(langFile.getLangName());
+            if (engine != null) {
+                engine.clearVariables();
+                engine.clearFunctions();
+            }
+        }
+
+        for (String key : customSection.getKeys(false)) {
+            Object value = customSection.get(key);
+
+            ExpressionEngine engine = expressionEnginePool.getEngineForLanguage(langFile.getLangName());
+            if (value instanceof String valueStr) {
+                if (valueStr.startsWith("VARIABLE")) {
+                    if (engine != null) {
+                        engine.setVariable(key, valueStr.substring("VARIABLE".length()).trim());
+                    }
+                } else if (valueStr.startsWith("EXPR") || valueStr.startsWith("EXPRESSION")) {
+                    String expr = valueStr.startsWith("EXPR") ?
+                            valueStr.substring("EXPR".length()).trim() :
+                            valueStr.substring("EXPRESSION".length()).trim();
+                    if (engine != null) {
+                        Object result = engine.parsePrimitive(expr);
+                        engine.setVariable(key, result);
+                    }
+                } else if (valueStr.startsWith("FUNCTION")) {
+                    String functionDef = valueStr.substring("FUNCTION".length()).trim();
+                    if (engine != null) {
+                        engine.getFunctionManager().registerFunction(functionDef);
+                    }
+                } else if (valueStr.contains("${") && valueStr.contains("}")) {
+                    String parsedExpression = Utils.format(null, valueStr, prefix);
+                    if (engine != null) {
+                        engine.setVariable(key, parsedExpression);
+                    }
+                } else {
+                    if (engine != null) {
+                        engine.setVariable(key, valueStr);
+                    }
+                }
+            } else {
+                if (engine != null) {
+                    engine.setVariable(key, value);
+                }
+            }
+        }
     }
 
     /**
@@ -156,6 +260,7 @@ public class LanguageManager {
             this.currentLangName = currentLang.getLangName();
             this.currentLang = currentLang;
         }
+        handleVariablesSection(currentLang, true);
         if (log)
             plugin.getLogger().log(Level.INFO, "Current Language: " + currentLangName);
     }
@@ -175,6 +280,7 @@ public class LanguageManager {
                         plugin.getLogger().log(Level.INFO, "Language: " + languageFile.getLangFile() + " successfully registered!");
                     registeredLanguages.put(languageFile.getLangName(), languageFile);
                     languageCaches.put(languageFile.getLangName(), new LanguageCache(languageFile.getLangName()));
+                    addEngineForLanguage(languageFile.getLangName(), true, true);
                 }
             }
         }
@@ -236,6 +342,7 @@ public class LanguageManager {
             return;
         registeredLanguages.put(langName, langFile);
         languageCaches.put(langName, new LanguageCache(langName));
+        addEngineForLanguage(langName, true, true);
         plugin.getLogger().log(Level.INFO, "Language: " + langFile.getLangFile() + " successfully registered!");
     }
 
@@ -413,7 +520,6 @@ public class LanguageManager {
         return keys;
     }
 
-
     /**
      * Replaces placeholders in the given message with their corresponding values.
      *
@@ -529,16 +635,22 @@ public class LanguageManager {
 
     public <T> T getObjectFromLanguageCacheOrConfig(String path, String langName, Class<T> clazz) {
         LanguageCache langCache = getLanguageCache(langName);
-        if (langCache.containsKey(path)) {
+        if (langCache.containsKey(path) && langCache.getData(path).getClass().isInstance(clazz)) {
             return clazz.cast(langCache.getData(path));
         } else {
             LanguageFile langFile = getLang(langName, true);
             LanguageConfig langConfig = langFile.getLangConfig();
             if (langConfig == null || langConfig.getConfig() == null) return getDefaultInstance(clazz);
-            if (langConfig.getConfig().get(path) == null || !langConfig.getConfig().contains(path)) return getDefaultInstance(clazz);
-            T obj = clazz.cast(langConfig.getConfig().get(path));
-            langCache.addData(path, obj, false);
-            return obj;
+            Object configObject = langConfig.getConfig().get(path);
+            if (configObject == null || !langConfig.getConfig().contains(path))
+                return getDefaultInstance(clazz);
+            if (configObject.getClass().isInstance(clazz)) {
+                T obj = clazz.cast(configObject);
+                langCache.addData(path, obj, true);
+                return obj;
+            } else {
+                return null;
+            }
         }
     }
 
@@ -546,9 +658,9 @@ public class LanguageManager {
         if (clazz == Boolean.class) {
             return clazz.cast(Boolean.FALSE);
         } else if (clazz == Integer.class) {
-            return clazz.cast(0);
+            return clazz.cast(Integer.valueOf("0")); // we have to do this to get around the cast method complaining about needing an object to cast.
         } else if (clazz == Double.class) {
-            return clazz.cast(0.0);
+            return clazz.cast(Double.valueOf("0.0")); // we have to do this to get around the cast method complaining about needing an object to cast.
         } else if (clazz == String.class) {
             return clazz.cast("");
         } else if (clazz == List.class) {
@@ -556,7 +668,6 @@ public class LanguageManager {
         } else if (clazz == Map.class) {
             return clazz.cast(new HashMap<>());
         }
-        // Add more default instances as needed
         return null;
     }
 
@@ -599,6 +710,7 @@ public class LanguageManager {
         List<String> includedKeys = new ArrayList<>(getPlaceholderKeysInMessage(message, PlaceholderType.MESSAGE));
         message = replacePlaceholders(PlaceholderType.MESSAGE, message);
         if (resetAfter) resetSpecificPlaceholders(PlaceholderType.MESSAGE, includedKeys);
+        message = parseEmbeddedExpressions(message, player, langName);
         return message;
     }
 
@@ -627,6 +739,14 @@ public class LanguageManager {
         return getItem(path, player, getCurrentLangName(), resetAfter);
     }
 
+    public ItemStack getItem(String path, Player player, boolean resetAfter, MaterialCondition condition) {
+        return getItem(path, player, getCurrentLangName(), resetAfter, condition);
+    }
+
+    public ItemStack getItem(String path, Player player, String langName, boolean resetAfter) {
+        return getItem(path, player, langName, resetAfter, null);
+    }
+
     /**
      * Retrieves an ItemStack based on the provided path, player, language, and reset flag.
      *
@@ -636,7 +756,7 @@ public class LanguageManager {
      * @param resetAfter A boolean flag indicating whether to reset placeholders after use.
      * @return An ItemStack based on the specified parameters.
      */
-    public ItemStack getItem(String path, Player player, String langName, boolean resetAfter) {
+    public ItemStack getItem(String path, Player player, String langName, boolean resetAfter, MaterialCondition condition) {
         LanguageFile langFile = getLangOrPlayerLang(false, langName, player);
         LanguageConfig langConfig = langFile.getLangConfig();
         ItemStack error = new ItemStack(Material.BARRIER);
@@ -660,19 +780,42 @@ public class LanguageManager {
             return this.getItem("General.DisabledItem", player, false);
         }
         ItemStack item;
-        Material material = Material.matchMaterial(getObjectFromLanguageCacheOrConfig("Items." + path + ".material", langName, String.class));
-        if (material == null) {
-            assert errorMeta != null;
-            errorMeta.setDisplayName("Material not found! (" + getObjectFromLanguageCacheOrConfig("Items." + path + ".material", langName, String.class) + ")");
-            errorMeta.setLore(Arrays.asList("If this happens,", "please change the Material from this Item", "to something existing", "Path: Items." + path + ".material"));
-            error.setItemMeta(errorMeta);
-            return error;
+
+
+        if (condition instanceof HeadMaterialCondition headCondition) {
+            if (headCondition.isHead()) {
+                item = headCondition.getHead().getAsItem();
+            } else {
+                item = createCustomSkull(headCondition.getHeadValue(), headCondition.isTexture());
+            }
+        } else {
+            String materialString = "";
+            if (getObjectFromLanguageCacheOrConfig("Items." + path + ".material", langFile.getLangName(), String.class) != null) {
+                materialString = getObjectFromLanguageCacheOrConfig("Items." + path + ".material", langFile.getLangName(), String.class);
+            } else if (getObjectFromLanguageCacheOrConfig("Items." + path + ".material", langFile.getLangName(), List.class) != null) {
+                List<?> materialList = getObjectFromLanguageCacheOrConfig("Items." + path + ".material", langFile.getLangName(), List.class);
+                StringBuilder materialBuilder = new StringBuilder();
+                for (Object materialObj : materialList) {
+                    if (materialObj instanceof String materialStr) {
+                        materialBuilder.append(materialStr).append("\n");
+                    }
+                }
+                materialString = materialBuilder.toString().trim();
+            }
+            Material material = getMaterial(materialString, player, langFile.getLangName());
+            if (material == null) {
+                assert errorMeta != null;
+                errorMeta.setDisplayName("Material not found! (" + langConfig.getConfig().getString("Items." + path + ".material") + ")");
+                errorMeta.setLore(Arrays.asList("If this happens,", "please change the Material from this Item", "to something existing", "Path: Items." + path + ".material"));
+                error.setItemMeta(errorMeta);
+                return error;
+            }
+            item = new ItemStack(material, 1);
         }
-        String displayName = getObjectFromLanguageCacheOrConfig("Items." + path + ".displayName", langName, String.class);
-        List<String> lore = getObjectFromLanguageCacheOrConfig("Items." + path + ".lore", langName, ArrayList.class);
+        String displayName = getObjectFromLanguageCacheOrConfig("Items." + path + ".displayName", langFile.getLangName(), String.class);
+        List<String> lore = getObjectFromLanguageCacheOrConfig("Items." + path + ".lore", langFile.getLangName(), List.class);
         List<String> loreWithPlaceholders = new ArrayList<>();
         List<String> includedKeys = new ArrayList<>();
-        item = new ItemStack(material, 1);
         ItemMeta meta = item.getItemMeta();
         for (String s : lore) {
             includedKeys.addAll(getPlaceholderKeysInMessage(s, PlaceholderType.ITEM));
@@ -684,13 +827,100 @@ public class LanguageManager {
         assert displayName != null;
         includedKeys.addAll(getPlaceholderKeysInMessage(Utils.format(player, displayName, prefix), PlaceholderType.ITEM));
         meta.setDisplayName(replacePlaceholders(PlaceholderType.ITEM, Utils.format(player, displayName, prefix)));
-        if (getObjectFromLanguageCacheOrConfig("Items." + path + ".enchanted", langName, Boolean.class)) {
+        if (getObjectFromLanguageCacheOrConfig("Items." + path + ".enchanted", langFile.getLangName(), Boolean.class)) {
             meta.addEnchant(Enchantment.DURABILITY, 0, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
         item.setItemMeta(meta);
         if (resetAfter) resetSpecificPlaceholders(PlaceholderType.ITEM, includedKeys);
         return item;
+    }
+
+    /**
+     * Creates a custom skull ItemStack with the given head value and texture flag.
+     *
+     * @param headValue The value of the head to create.
+     * @param isTexture Whether the head value is a texture value.
+     * @return The created ItemStack with the custom skull.
+     */
+    public ItemStack createCustomSkull(String headValue, boolean isTexture) {
+        ItemStack head = new ItemStack(Utils.legacyServer() ? Objects.requireNonNull(Material.matchMaterial("SKULL_ITEM")) : Material.PLAYER_HEAD, 1);
+        if (headValue.isEmpty()) return head;
+
+        SkullMeta meta = (SkullMeta) head.getItemMeta();
+        if (meta == null) return head;
+
+        try {
+            Head headEnum = Head.valueOf(headValue);
+            return headEnum.getAsItem();
+        } catch (IllegalArgumentException ignored) {
+        }
+
+        meta.setDisplayName(Utils.chat(headValue));
+        if (!isTexture) {
+            meta.setOwningPlayer(Bukkit.getOfflinePlayer(headValue));
+            head.setItemMeta(meta);
+            return head;
+        }
+
+        PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID(), "CustomHead");
+        try {
+            profile.getTextures().setSkin(new URL("https://textures.minecraft.net/texture/" + headValue));
+        } catch (MalformedURLException ex) {
+            throw new RuntimeException(ex);
+        }
+        meta.setOwnerProfile(profile);
+        head.setItemMeta(meta);
+        return head;
+    }
+
+    /**
+     * Gets a Material from the specified material string.
+     *
+     * @param materialString The material string to get the Material from.
+     * @param player         The player to use for placeholder replacements.
+     * @param langName       The language name to use for placeholder replacements.
+     * @return The Material from the specified material string, or BARRIER if the
+     * material is invalid.
+     */
+    public Material getMaterial(String materialString, Player player, String langName) {
+        if (materialString == null) {
+            return Material.BARRIER;
+        }
+
+        if (materialString.startsWith("HEAD(") && materialString.endsWith(")")) {
+            String headName = materialString.substring(5, materialString.length() - 1).trim();
+            try {
+                try {
+                    Head head = Head.valueOf(headName);
+                    return head.getAsItem().getType();
+                } catch (IllegalArgumentException e) {
+                    return Material.PLAYER_HEAD;
+                }
+            } catch (Exception e) {
+                plugin.getLogger().warning("Invalid head: " + headName);
+                return Material.BARRIER;
+            }
+        }
+
+        try {
+            MaterialCondition cond = getExpressionEngineFor(player, langName).parse(materialString, Material.BARRIER);
+            return cond.getMaterial();
+        } catch (Exception e) {
+            if (materialString.contains("if") || materialString.contains("else")) {
+                plugin.getLogger().warning("Error parsing conditional expression: " + materialString);
+                plugin.getLogger().warning(e.getMessage());
+            }
+        }
+
+        try {
+            return Material.valueOf(materialString.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            if (!materialString.equals("PLAYER_HEAD")) {
+                plugin.getLogger().warning("Invalid material name: " + materialString);
+            }
+            return Material.BARRIER;
+        }
     }
 
     /**
@@ -728,7 +958,8 @@ public class LanguageManager {
         List<String> includedKeys = new ArrayList<>(getPlaceholderKeysInMessage(title, PlaceholderType.MENUTITLE));
         title = replacePlaceholders(PlaceholderType.MENUTITLE, title);
         resetSpecificPlaceholders(PlaceholderType.MENUTITLE, includedKeys);
-        return Utils.format(player, title, prefix);
+        title = parseEmbeddedExpressions(Utils.format(player, title, prefix), player, langName);
+        return title;
     }
 
     /**
@@ -762,25 +993,112 @@ public class LanguageManager {
         LanguageConfig langConfig = langFile.getLangConfig();
         if (langConfig == null || langConfig.getConfig() == null)
             return defaultValue;
-        if (langConfig.getConfig().get(path) == null || !langConfig.getConfig().contains(path))
-            return defaultValue;
-        if (langConfig.getConfig().get(path) == null) return defaultValue;
-
         T obj;
         try {
-            // This Unchecked cast is safe, as the defaultValue is of the same type as the object.
             obj = (T) getObjectFromLanguageCacheOrConfig(path, langName, defaultValue.getClass());
-            if (obj instanceof String) {
-                obj = (T) replacePlaceholders(PlaceholderType.CUSTOM, Utils.format(player, obj.toString(), prefix));
-                if (resetAfter)
-                    resetSpecificPlaceholders(PlaceholderType.CUSTOM,
-                            getPlaceholderKeysInMessage((String) langConfig.getConfig().get(path), PlaceholderType.CUSTOM));
-            }
         } catch (ClassCastException e) {
-            e.printStackTrace();
             return defaultValue;
+        }
+        if (obj == null ||
+                (obj instanceof String && ((String) obj).isEmpty()) ||
+                (obj instanceof List && ((List<?>) obj).isEmpty()) ||
+                (obj instanceof Map && ((Map<?, ?>) obj).isEmpty()))
+            return defaultValue;
+        try {
+            int i = Integer.parseInt(obj.toString());
+            if (i == 0) return defaultValue;
+        } catch (NumberFormatException ignored) {
+        }
+
+        if (obj instanceof String) {
+            obj = (T) replacePlaceholders(PlaceholderType.CUSTOM, Utils.format(player, obj.toString(), prefix));
+            if (resetAfter)
+                resetSpecificPlaceholders(PlaceholderType.CUSTOM,
+                        getPlaceholderKeysInMessage((String) langConfig.getConfig().get(path), PlaceholderType.CUSTOM));
+            obj = (T) parseEmbeddedExpressions(obj.toString(), player, langName);
         }
         if (obj == null) obj = defaultValue;
         return obj;
+    }
+
+    public ExpressionEnginePool getExpressionEnginePool() {
+        return expressionEnginePool;
+    }
+
+    public void registerGlobalFunction(String functionName, FunctionCall function, String defaultType) {
+        if (expressionEnginePool != null) {
+            expressionEnginePool.registerGlobalFunction(functionName, function, defaultType);
+        }
+    }
+
+    public void registerFunction(String languageName, String functionName, FunctionCall function, String
+            defaultType) {
+        if (expressionEnginePool != null) {
+            expressionEnginePool.registerFunctionForLanguage(languageName, functionName, function, defaultType);
+        }
+    }
+
+    public void unregisterFunction(String languageName, String functionName) {
+        if (expressionEnginePool != null) {
+            expressionEnginePool.unregisterFunctionForLanguage(languageName, functionName);
+        }
+    }
+
+    public void unregisterGlobalFunction(String functionName) {
+        if (expressionEnginePool != null) {
+            expressionEnginePool.unregisterGlobalFunction(functionName);
+        }
+    }
+
+    /**
+     * Retrieves the ExpressionEngine for a specific player and language.
+     * If the player is null, it retrieves the engine for the specified language.
+     * If the languageName is null, it retrieves the default language engine.
+     *
+     * @param player       The player to get the ExpressionEngine for (nullable).
+     * @param languageName The name of the language to get the ExpressionEngine for (nullable).
+     * @return The ExpressionEngine for the specified player and language, or null if not available.
+     */
+    public ExpressionEngine getExpressionEngineFor(Player player, String languageName) {
+        if (expressionEnginePool == null) return null;
+        if (player != null && languageName != null) {
+            return expressionEnginePool.getEngineForPlayer(player, languageName);
+        }
+        if (languageName != null) {
+            return expressionEnginePool.getEngineForLanguage(languageName);
+        }
+        return expressionEnginePool.getDefaultLanguageEngine();
+    }
+
+    /**
+     * Parses all embedded EXPRESSION(expr) or EXPR(expr) segments in the input string,
+     * evaluates them, and replaces them with their results. If parsing fails, leaves
+     * the original text and stops further parsing.
+     *
+     * @param input        The input string possibly containing embedded expressions.
+     * @param player       The player context for per-player language (nullable).
+     * @param languageName The language context (nullable, uses default if null).
+     * @return The string with all embedded expressions evaluated and replaced.
+     */
+    public String parseEmbeddedExpressions(String input, Player player, String languageName) {
+        if (input == null) return null;
+        String regex = "(?i)(EXPRESSION|EXPR)\\(([^)]*)\\)";
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
+        java.util.regex.Matcher matcher = pattern.matcher(input);
+        StringBuilder sb = new StringBuilder();
+        ExpressionEngine engine = getExpressionEngineFor(player, languageName);
+        while (matcher.find()) {
+            String expr = matcher.group(2);
+            Object result;
+            try {
+                result = engine.parse(expr, Object.class);
+                matcher.appendReplacement(sb, result == null ? "null" : java.util.regex.Matcher.quoteReplacement(result.toString()));
+            } catch (Exception e) {
+                matcher.appendReplacement(sb, matcher.group(0));
+                break;
+            }
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
     }
 }

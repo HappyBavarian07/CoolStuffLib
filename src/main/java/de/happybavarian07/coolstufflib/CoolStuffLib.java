@@ -13,6 +13,8 @@ import de.happybavarian07.coolstufflib.utils.PluginFileLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.checkerframework.checker.units.qual.K;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.HashMap;
@@ -76,7 +78,8 @@ public class CoolStuffLib {
         if (this.javaPluginUsingLib == null) {
             throw new RuntimeException("CoolStuffLib did not find a Plugin it got called from. Returning. Report the Issue to the Plugin Dev(s), that may have programmed the Plugin.");
         }
-        // TODO Add StartUpLogger API, MySQL API (with class that can be inherited and then added into this constructor, Maybe other Things
+        // TODO Future Updates: Permission System, Task Scheduler, Data Backup System
+        // TODO Add MySQL API (with class that can be inherited and then added into this constructor, Maybe other Things
         this.workingDirectory = javaPluginUsingLib.getDataFolder();
         this.languageManager = languageManager;
         this.commandManagerRegistry = commandManagerRegistry;
@@ -90,7 +93,7 @@ public class CoolStuffLib {
         this.dataFile = dataFile;
     }
 
-    public static CoolStuffLib getLib() {
+    public static @Nullable CoolStuffLib getLib() {
         return lib;
     }
 
