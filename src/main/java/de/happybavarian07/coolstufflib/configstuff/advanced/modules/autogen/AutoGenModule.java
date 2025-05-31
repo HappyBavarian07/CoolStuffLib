@@ -66,7 +66,10 @@ public class AutoGenModule extends ConfigModule {
 
     private void setAllKeysRecursive(Group group, AdvancedConfig config) {
         for (Key key : group.getKeys()) {
-            config.setValue(group.getFullPath() + "." + key.getName(), key.getValue());
+            String fullPath = group.getFullPath() + "." + key.getName();
+            if (config.get(fullPath) == null && key.getValue() != null) {
+                config.setValue(fullPath, key.getValue());
+            }
         }
         for (Group sub : group.getSubGroups()) {
             setAllKeysRecursive(sub, config);

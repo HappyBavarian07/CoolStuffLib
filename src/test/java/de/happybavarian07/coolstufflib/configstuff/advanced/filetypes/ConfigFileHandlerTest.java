@@ -29,10 +29,10 @@ class ConfigFileHandlerTest {
         testDir.toFile().mkdirs();
         File tempFile = new File(testDir.toFile(), "test." + fileType.name().toLowerCase());
         ConfigFileHandler handler = getHandler(fileType);
-        AdvancedConfig config = configManager.createInMemoryConfig("test");
+        AdvancedConfig config = configManager.createInMemoryConfig("test", true);
         config.setValue("key", "value");
         config.setValue("num", 123);
-        handler.save(config, tempFile);
+        handler.save(tempFile, config.getValueMap());
         Map<String, Object> loaded = handler.load(tempFile);
         assertEquals("value", loaded.get("key"));
         Object num = loaded.get("num");

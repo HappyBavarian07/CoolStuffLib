@@ -2,7 +2,7 @@ package de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.handlers;
 
 import com.google.gson.GsonBuilder;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.ConfigTypeConverterRegistry;
-import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.interfaces.HierarchicalConfigFileHandler;
+import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.interfaces.AbstractConfigFileHandler;
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.AdvancedConfig;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -12,7 +12,7 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.util.*;
 
-public class JsonConfigFileHandler implements HierarchicalConfigFileHandler {
+public class JsonConfigFileHandler extends AbstractConfigFileHandler {
     private final Gson gson;
     private final ConfigTypeConverterRegistry converterRegistry;
     private static final Type MAP_TYPE = new TypeToken<Map<String, Object>>() {
@@ -32,16 +32,16 @@ public class JsonConfigFileHandler implements HierarchicalConfigFileHandler {
     }
 
     @Override
-    public void save(AdvancedConfig config, File file) throws IOException {
+    public void doSave(File file, Map<String, Object> data) throws IOException {
         try (Writer writer = new FileWriter(file)) {
-            Object nested = unflatten(config.getValueMap());
+            Object nested = unflatten(data);
             Object plain = Utils.recursiveConvertForSerialization(nested, converterRegistry);
             gson.toJson(plain, writer);
         }
     }
 
     @Override
-    public Map<String, Object> load(File file) throws IOException {
+    public Map<String, Object> doLoad(File file) throws IOException {
         if (!file.exists()) return new HashMap<>();
         try (Reader reader = new FileReader(file)) {
             StringBuilder sb = new StringBuilder();
@@ -50,16 +50,8 @@ public class JsonConfigFileHandler implements HierarchicalConfigFileHandler {
             while ((numRead = reader.read(buf)) > 0) sb.append(buf, 0, numRead);
             String json = sb.toString();
             Map<String, Object> map = gson.fromJson(json, MAP_TYPE);
-            return (Map<String, Object>) convertFromJson(map);
+            return (Map<String, Object>) Utils.recursiveConvertFromSerialization(map, converterRegistry);
         }
-    }
-
-    private Object convertForJson(Object value) {
-        return Utils.recursiveConvertForSerialization(value, converterRegistry);
-    }
-
-    private Object convertFromJson(Object value) {
-        return Utils.recursiveConvertFromSerialization(value, converterRegistry);
     }
 
     private static Map<String, Object> unflatten(Map<String, Object> flat) {
@@ -73,27 +65,5 @@ public class JsonConfigFileHandler implements HierarchicalConfigFileHandler {
             current.put(parts[parts.length - 1], entry.getValue());
         }
         return nested;
-    }
-
-    @Override
-    public void setValueByPath(Map<String, Object> root, String path, Object value) {
-        String[] parts = path.split("\\.");
-        Map<String, Object> current = root;
-        for (int i = 0; i < parts.length - 1; i++) {
-            current = (Map<String, Object>) current.computeIfAbsent(parts[i], k -> new LinkedHashMap<>());
-        }
-        current.put(parts[parts.length - 1], value);
-    }
-
-    @Override
-    public Object getValueByPath(Map<String, Object> root, String path) {
-        String[] parts = path.split("\\.");
-        Map<String, Object> current = root;
-        for (int i = 0; i < parts.length - 1; i++) {
-            Object next = current.get(parts[i]);
-            if (!(next instanceof Map)) return null;
-            current = (Map<String, Object>) next;
-        }
-        return current.get(parts[parts.length - 1]);
     }
 }

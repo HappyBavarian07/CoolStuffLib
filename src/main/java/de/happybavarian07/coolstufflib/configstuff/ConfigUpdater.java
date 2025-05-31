@@ -103,7 +103,7 @@ public class ConfigUpdater {
             }
 
             for (String ignoredSection : ignoredSections) {
-                System.out.println("Ignored Section: " + ignoredSection);
+                //System.out.println("Ignored Section: " + ignoredSection);
                 if (key.equals(ignoredSection)) {
                     continue outer;
                 }

@@ -29,7 +29,7 @@ class AdvancedInMemoryConfigTest {
         DummyModule module = new DummyModule();
         config.registerModule(module);
         assertTrue(config.getModules().containsValue(module));
-        config.unregisterModule(module);
+        config.unregisterModule(module.getName());
         assertFalse(config.getModules().containsValue(module));
     }
 

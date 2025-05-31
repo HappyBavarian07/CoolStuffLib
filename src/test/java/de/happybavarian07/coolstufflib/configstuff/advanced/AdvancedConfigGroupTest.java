@@ -22,8 +22,8 @@ class AdvancedConfigGroupTest {
 
     @Test
     void testGroupCreationAndConfigAddRemove() {
-        AdvancedConfig config1 = manager.createInMemoryConfig("c1");
-        AdvancedConfig config2 = manager.createInMemoryConfig("c2");
+        AdvancedConfig config1 = manager.createInMemoryConfig("c1", true);
+        AdvancedConfig config2 = manager.createInMemoryConfig("c2", true);
         var group = manager.createEmptyGroup("g1");
         group.addConfig(config1);
         group.addConfig(config2);
@@ -34,8 +34,8 @@ class AdvancedConfigGroupTest {
 
     @Test
     void testGetValuesFromAllAndFirstValue() {
-        AdvancedConfig config1 = manager.createInMemoryConfig("c1");
-        AdvancedConfig config2 = manager.createInMemoryConfig("c2");
+        AdvancedConfig config1 = manager.createInMemoryConfig("c1", true);
+        AdvancedConfig config2 = manager.createInMemoryConfig("c2", true);
         config1.setValue("foo", 10);
         config2.setValue("foo", 20);
         var group = manager.createGroup("g1", List.of(config1, config2));
@@ -50,8 +50,8 @@ class AdvancedConfigGroupTest {
 
     @Test
     void testContainsKeyInAnyAndGetAllKeys() {
-        AdvancedConfig config1 = manager.createInMemoryConfig("c1");
-        AdvancedConfig config2 = manager.createInMemoryConfig("c2");
+        AdvancedConfig config1 = manager.createInMemoryConfig("c1", true);
+        AdvancedConfig config2 = manager.createInMemoryConfig("c2", true);
         config1.setValue("a", 1);
         config2.setValue("b", 2);
         var group = manager.createGroup("g1", List.of(config1, config2));
@@ -66,8 +66,8 @@ class AdvancedConfigGroupTest {
 
     @Test
     void testDefaultGroupModuleRegistration() {
-        AdvancedConfig config1 = manager.createInMemoryConfig("c1");
-        AdvancedConfig config2 = manager.createInMemoryConfig("c2");
+        AdvancedConfig config1 = manager.createInMemoryConfig("c1", true);
+        AdvancedConfig config2 = manager.createInMemoryConfig("c2", true);
         DummyModule dummy = new DummyModule();
         config1.registerModule(dummy);
         var group = manager.createGroup("g1", List.of(config1, config2));

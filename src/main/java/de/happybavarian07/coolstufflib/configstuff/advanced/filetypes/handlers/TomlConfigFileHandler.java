@@ -1,7 +1,7 @@
 package de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.handlers;
 
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.ConfigTypeConverterRegistry;
-import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.interfaces.HierarchicalConfigFileHandler;
+import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.interfaces.AbstractConfigFileHandler;
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.AdvancedConfig;
 import de.happybavarian07.coolstufflib.utils.Utils;
 
@@ -12,7 +12,7 @@ import java.util.*;
  * TOML handler with hierarchical path and section support.
  * For production, use a TOML library like Toml4j.
  */
-public class TomlConfigFileHandler implements HierarchicalConfigFileHandler {
+public class TomlConfigFileHandler extends AbstractConfigFileHandler {
     private final ConfigTypeConverterRegistry converterRegistry;
 
     public TomlConfigFileHandler() {
@@ -26,10 +26,9 @@ public class TomlConfigFileHandler implements HierarchicalConfigFileHandler {
     }
 
     @Override
-    public void save(AdvancedConfig config, File file) throws IOException {
+    public void doSave(File file, Map<String, Object> data) throws IOException {
         try (Writer writer = new FileWriter(file)) {
-            Map<String, Object> valueMap = config.getValueMap();
-            Map<String, Object> flatMap = Utils.flatten(converterRegistry, "", valueMap);
+            Map<String, Object> flatMap = Utils.flatten(converterRegistry, "", data);
             writeToml(writer, flatMap, "");
         }
     }
@@ -55,7 +54,7 @@ public class TomlConfigFileHandler implements HierarchicalConfigFileHandler {
     }
 
     @Override
-    public Map<String, Object> load(File file) throws IOException {
+    public Map<String, Object> doLoad(File file) throws IOException {
         Map<String, Object> map = new LinkedHashMap<>();
         if (!file.exists()) return map;
         String currentSection = "";
@@ -78,27 +77,5 @@ public class TomlConfigFileHandler implements HierarchicalConfigFileHandler {
             }
         }
         return map;
-    }
-
-    @Override
-    public void setValueByPath(Map<String, Object> root, String path, Object value) {
-        String[] parts = path.split("\\.");
-        Map<String, Object> current = root;
-        for (int i = 0; i < parts.length - 1; i++) {
-            current = (Map<String, Object>) current.computeIfAbsent(parts[i], k -> new LinkedHashMap<>());
-        }
-        current.put(parts[parts.length - 1], value);
-    }
-
-    @Override
-    public Object getValueByPath(Map<String, Object> root, String path) {
-        String[] parts = path.split("\\.");
-        Map<String, Object> current = root;
-        for (int i = 0; i < parts.length - 1; i++) {
-            Object next = current.get(parts[i]);
-            if (!(next instanceof Map)) return null;
-            current = (Map<String, Object>) next;
-        }
-        return current.get(parts[parts.length - 1]);
     }
 }

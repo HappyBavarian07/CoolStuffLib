@@ -1,6 +1,7 @@
 package de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.handlers;
 
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.ConfigTypeConverterRegistry;
+import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.interfaces.AbstractConfigFileHandler;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.interfaces.ConfigFileHandler;
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.AdvancedConfig;
 import de.happybavarian07.coolstufflib.utils.Utils;
@@ -10,7 +11,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class IniConfigFileHandler implements ConfigFileHandler {
+public class IniConfigFileHandler extends AbstractConfigFileHandler {
     private final ConfigTypeConverterRegistry converterRegistry;
 
     public IniConfigFileHandler() {
@@ -26,10 +27,9 @@ public class IniConfigFileHandler implements ConfigFileHandler {
     }
 
     @Override
-    public void save(AdvancedConfig config, File file) throws IOException {
+    public void doSave(File file, Map<String, Object> data) throws IOException {
         try (Writer writer = new FileWriter(file)) {
-            Map<String, Object> valueMap = config.getValueMap();
-            Map<String, Object> flatMap = Utils.flatten(converterRegistry, "", valueMap);
+            Map<String, Object> flatMap = Utils.flatten(converterRegistry, "", data);
             for (Map.Entry<String, Object> entry : flatMap.entrySet()) {
                 writer.write(entry.getKey() + "=" + (entry.getValue() == null ? "" : entry.getValue().toString()) + "\n");
             }
@@ -37,7 +37,7 @@ public class IniConfigFileHandler implements ConfigFileHandler {
     }
 
     @Override
-    public Map<String, Object> load(File file) throws IOException {
+    public Map<String, Object> doLoad(File file) throws IOException {
         Map<String, Object> map = new LinkedHashMap<>();
         if (!file.exists()) return map;
         Map<String, String> stringMap = new LinkedHashMap<>();

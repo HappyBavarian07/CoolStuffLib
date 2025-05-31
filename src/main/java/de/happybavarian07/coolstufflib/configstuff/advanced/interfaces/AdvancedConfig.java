@@ -20,7 +20,7 @@ import java.util.Map;
  * including saving and reloading the config, retrieving the state of the config, and registering modules that can perform actions when the config is loaded or saved.
  * <p>
  * Example usage via the {@link de.happybavarian07.coolstufflib.configstuff.advanced.AdvancedConfigManager} class:
- * using the {@link de.happybavarian07.coolstufflib.configstuff.advanced.AdvancedConfigManager#createPersistentConfig(String, File, ConfigFileType)} method:
+ * using the {@link de.happybavarian07.coolstufflib.configstuff.advanced.AdvancedConfigManager#createPersistentConfig(String name, File file , ConfigFileType type, boolean registerGlobalModules)} method:
  * <pre>
  *     {@code
  *     AdvancedConfigManager configManager = new AdvancedConfigManager();
@@ -31,7 +31,7 @@ import java.util.Map;
  *     </pre>
  * This example creates a new config with a name of "myConfig", a file at "path/to/config.yml", and a YML file type.
  * It then sets the value of the key "key" to "value" and saves the config.
- * This is for persistent storage. There is also a {@link de.happybavarian07.coolstufflib.configstuff.advanced.AdvancedConfigManager#createInMemoryConfig(String)} interface for in-memory-only storage.
+ * This is for persistent storage. There is also a {@link de.happybavarian07.coolstufflib.configstuff.advanced.AdvancedConfigManager#createInMemoryConfig(String name, boolean registerGlobalModules)} interface for in-memory-only storage.
  * The Methods are the same because of a common interface {@link de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.AdvancedConfig}.
  * * <p>
  * </p>
@@ -47,6 +47,110 @@ public interface AdvancedConfig {
      * @return the name of the config
      */
     String getName();
+
+    /**
+     * Acquires the read lock for the modules.
+     * Must be called before performing read operations that need to be atomic.
+     */
+    void lockModuleRead();
+
+    /**
+     * Releases the read lock for the modules.
+     * Must be called in a finally block after read operations are complete.
+     */
+    void unlockModuleRead();
+
+    /**
+     * Acquires the write lock for the modules.
+     * Must be called before performing write operations.
+     */
+    void lockModuleWrite();
+
+    /**
+     * Releases the write lock for the modules.
+     * Must be called in a finally block after write operations are complete.
+     */
+    void unlockModuleWrite();
+
+    /**
+     * Acquires the read lock for values in this config.
+     * Must be called before performing read operations on values that need to be atomic.
+     */
+    void lockValuesRead();
+    /**
+     * Releases the read lock for values in this config.
+     * Must be called in a finally block after read operations on values are complete.
+     */
+    void unlockValuesRead();
+    /**
+     * Acquires the write lock for values in this config.
+     * Must be called before performing write operations on values.
+     */
+    void lockValuesWrite();
+    /**
+     * Releases the write lock for values in this config.
+     * Must be called in a finally block after write operations on values are complete.
+     */
+    void unlockValuesWrite();
+
+    /**
+     * Executes the provided operation with a read lock held.
+     *
+     * @param operation the operation to execute
+     * @param <T>       the return type
+     * @return the result of the operation
+     */
+    default <T> T withModuleReadLock(java.util.function.Supplier<T> operation) {
+        lockModuleRead();
+        try {
+            return operation.get();
+        } finally {
+            unlockModuleRead();
+        }
+    }
+
+    /**
+     * Executes the provided operation with a read lock held.
+     *
+     * @param operation the operation to execute
+     */
+    default <T> T withValuesReadLock(java.util.function.Supplier<T> operation) {
+        lockValuesRead();
+        try {
+            return operation.get();
+        } finally {
+            unlockValuesRead();
+        }
+    }
+
+    /**
+     * Executes the provided operation with a write lock held.
+     *
+     * @param operation the operation to execute
+     */
+    default <T> T withModulesWriteLock(java.util.function.Supplier<T> operation) {
+        lockModuleWrite();
+        try {
+            return operation.get();
+        } finally {
+            unlockModuleWrite();
+        }
+    }
+    /**
+     * Executes the provided operation with a write lock held.
+     *
+     * @param operation the operation to execute
+     * @param <T>       the return type
+     * @return the result of the operation
+     */
+    default <T> T withValuesWriteLock(java.util.function.Supplier<T> operation) {
+        lockValuesWrite();
+        try {
+            return operation.get();
+        } finally {
+            unlockValuesWrite();
+        }
+    }
 
     /**
      * Gets the type of the config file.
@@ -75,6 +179,96 @@ public interface AdvancedConfig {
      * @return the value associated with the key, or the default value if the key does not exist
      */
     Object get(String key, Object defaultValue);
+
+    /**
+     * Calls {@link #get(String key)} and casts the result to String.
+     */
+    String getString(String key);
+
+    /**
+     * Calls {@link #get(String key, Object defaultValue)} and returns the value as a String.
+     */
+    String getString(String key, String defaultValue);
+
+    /**
+     * Calls {@link #get(String key)} and casts the result to int.
+     */
+    int getInt(String key);
+
+    /**
+     * Calls {@link #get(String key, Object defaultValue)} and returns the value as an int.
+     */
+    int getInt(String key, int defaultValue);
+
+    /**
+     * Calls {@link #get(String key)} and casts the result to boolean.
+     */
+    boolean getBoolean(String key);
+
+    /**
+     * Calls {@link #get(String key, Object defaultValue)} and returns the value as a boolean.
+     */
+    boolean getBoolean(String key, boolean defaultValue);
+
+    /**
+     * Calls {@link #get(String key)} and casts the result to long.
+     */
+    long getLong(String key);
+
+    /**
+     * Calls {@link #get(String key, Object defaultValue)} and returns the value as a long.
+     */
+    long getLong(String key, long defaultValue);
+
+    /**
+     * Calls {@link #get(String key)} and casts the result to double.
+     */
+    double getDouble(String key);
+
+    /**
+     * Calls {@link #get(String key, Object defaultValue)} and returns the value as a double.
+     */
+    double getDouble(String key, double defaultValue);
+
+    /**
+     * Calls {@link #get(String key)} and casts the result to float.
+     */
+    float getFloat(String key);
+
+    /**
+     * Calls {@link #get(String key, Object defaultValue)} and returns the value as a float.
+     */
+    float getFloat(String key, float defaultValue);
+
+    /**
+     * Calls {@link #get(String key)} and casts the result to List.
+     */
+    List<?> getList(String key);
+
+    /**
+     * Calls {@link #get(String key, Object defaultValue)} and returns the value as a List.
+     */
+    List<?> getList(String key, List<?> defaultValue);
+
+    /**
+     * Calls {@link #get(String key)} and casts the result to List<String>.
+     */
+    List<String> getStringList(String key);
+
+    /**
+     * Calls {@link #get(String key, Object defaultValue)} and returns the value as a List<String>.
+     */
+    List<String> getStringList(String key, List<String> defaultValue);
+
+    /**
+     * Calls {@link #get(String key)} and casts the result to Map.
+     */
+    Map<?, ?> getMap(String key);
+
+    /**
+     * Calls {@link #get(String key, Object defaultValue)} and returns the value as a Map.
+     */
+    Map<?, ?> getMap(String key, Map<?, ?> defaultValue);
 
     /**
      * Gets a value from the config by its key, with a default value if the key does not exist.
@@ -136,20 +330,19 @@ public interface AdvancedConfig {
     void reload();
 
     /**
+     * Clears all key-value pairs in the config.
+     * This method removes all entries from the config, effectively resetting it to an empty state.
+     * It does not affect the file on disk; it only clears the in-memory representation.
+     */
+    void clear();
+
+    /**
      * Registers a module to this config.
      * The module will be attached to the config and can perform actions when the config is loaded or saved.
      *
      * @param module the module to register
      */
     void registerModule(BaseConfigModule module);
-
-    /**
-     * Unregisters a module from this config.
-     * The module will no longer be attached to the config and will not perform actions on config load or save.
-     *
-     * @param module the module to unregister
-     */
-    void unregisterModule(BaseConfigModule module);
 
     /**
      * Unregisters a module from this config by its name.

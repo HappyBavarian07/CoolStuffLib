@@ -60,7 +60,7 @@ class AutoGenModuleIntegrationTest {
     @Test
     void testAutoGenWithInMemoryConfig() {
         DummyPlayer player = new DummyPlayer("MemPlayer", new DummyLocation("world", 1, 2, 3), "memDisp", UUID.randomUUID(), 10);
-        AdvancedConfig config = configManager.createInMemoryConfig("mem");
+        AdvancedConfig config = configManager.createInMemoryConfig("mem", true);
         AutoGenModule module = new AutoGenModule();
         module.addTemplate(AutoGenUtils.createTemplateFromObject("players." + player.uuid, player));
         config.registerModule(module);
@@ -74,7 +74,7 @@ class AutoGenModuleIntegrationTest {
         JsonConfigFileHandler handler = new JsonConfigFileHandler();
         File file = JSON_PATH.toFile();
         System.out.println("File Path: " + file.getAbsolutePath());
-        AdvancedConfig config = configManager.createPersistentConfig("json", file, handler);
+        AdvancedConfig config = configManager.createPersistentConfig("json", file, handler, true);
         AutoGenModule module = new AutoGenModule();
         module.addTemplate(AutoGenUtils.createTemplateFromObject("players." + player.uuid, player));
         config.registerModule(module);
@@ -115,7 +115,7 @@ class AutoGenModuleIntegrationTest {
             }
         });
         System.out.println("File Path: " + file.getAbsolutePath());
-        AdvancedConfig config = configManager.createPersistentConfig("yaml", file, handler);
+        AdvancedConfig config = configManager.createPersistentConfig("yaml", file, handler, true);
         AutoGenModule module = new AutoGenModule();
         module.addTemplate(AutoGenUtils.createTemplateFromObject("players." + player.uuid, player));
         config.registerModule(module);

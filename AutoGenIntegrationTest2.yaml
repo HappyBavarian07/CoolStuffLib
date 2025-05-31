@@ -36,3 +36,92 @@ players:
     uuid: 5f39e71a-f05b-4072-9211-ce842f9dba5b
   4964c109-b545-481a-86b6-124ab960b0c8:
     displayName: yamlDisp
+  0cc46f19-8a87-475f-a462-bbfe9b0ba779:
+    health: 15
+  7f25e0c3-41f5-4eae-a378-28104136ba38:
+    uuid: 7f25e0c3-41f5-4eae-a378-28104136ba38
+    position:
+      z: 0.0
+      world: nether
+      y: 80.0
+      x: 0.0
+    health: 15
+    name: YamlPlayer
+    displayName: yamlDisp
+  724ab3b5-2d37-4e77-b99e-096426ab5a80:
+    name: YamlPlayer
+    displayName: yamlDisp
+    position:
+      x: 0.0
+      z: 0.0
+      world: nether
+      y: 80.0
+    uuid: 724ab3b5-2d37-4e77-b99e-096426ab5a80
+    health: 15
+  a4b5422e-a4ab-43cb-83e6-af83114c3da6:
+    displayName: yamlDisp
+    uuid: a4b5422e-a4ab-43cb-83e6-af83114c3da6
+    name: YamlPlayer
+    health: 15
+    position:
+      y: 80.0
+      world: nether
+      z: 0.0
+      x: 0.0
+  2f47de60-0db3-47ae-a5bc-1a83479c5378:
+    health: 15
+    uuid: 2f47de60-0db3-47ae-a5bc-1a83479c5378
+    position:
+      x: 0.0
+      z: 0.0
+      world: nether
+      y: 80.0
+    displayName: yamlDisp
+    name: YamlPlayer
+  372e1c52-2ed2-4fbd-b0c4-a2dfe1c996ee:
+    health: 15
+    uuid: 372e1c52-2ed2-4fbd-b0c4-a2dfe1c996ee
+    displayName: yamlDisp
+    name: YamlPlayer
+    position:
+      z: 0.0
+      world: nether
+      y: 80.0
+      x: 0.0
+  f857c8cf-b9a4-4a1d-8356-0084f4953af2:
+    displayName: yamlDisp
+    name: YamlPlayer
+    health: 15
+  44b1ee2e-0401-4b85-9e3a-3afd5a89c965:
+    name: YamlPlayer
+    displayName: yamlDisp
+    position:
+      z: 0.0
+      world: nether
+      y: 80.0
+      x: 0.0
+    uuid: 44b1ee2e-0401-4b85-9e3a-3afd5a89c965
+    health: 15
+  7f0d20cd-bd0f-48a0-ad26-68cdd0faaaa0:
+    name: YamlPlayer
+    position:
+      z: 0.0
+      world: nether
+      y: 80.0
+      x: 0.0
+    displayName: yamlDisp
+    uuid: 7f0d20cd-bd0f-48a0-ad26-68cdd0faaaa0
+    health: 15
+  62541699-2499-4110-94f0-7e39c9ae0479:
+    uuid: 62541699-2499-4110-94f0-7e39c9ae0479
+    name: YamlPlayer
+  70441435-2a51-4ba6-a020-201aca4ef7d7:
+    uuid: 70441435-2a51-4ba6-a020-201aca4ef7d7
+    displayName: yamlDisp
+    health: 15
+    name: YamlPlayer
+    position:
+      x: 0.0
+      y: 80.0
+      world: nether
+      z: 0.0

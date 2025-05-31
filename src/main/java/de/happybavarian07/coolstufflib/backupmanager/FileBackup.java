@@ -71,20 +71,12 @@ public class FileBackup implements Comparable<FileBackup> {
 
     private List<File> getFilesFromFolderWithRegex(File folder, List<RegexFileFilter> fileFilters, List<RegexFileFilter> excludeFilters) {
         List<File> files = new ArrayList<>();
-        System.out.println("Folder: " + folder.getName());
-        System.out.println("File Filters: " + fileFilters);
-        System.out.println("List Files: " + Arrays.toString(folder.listFiles()));
         for (File file : Objects.requireNonNull(folder.listFiles())) {
-            System.out.println(file.getName());
             if (file.isDirectory()) {
-                System.out.println("Folder: " + file.getName());
                 files.addAll(getFilesFromFolderWithRegex(file, fileFilters, excludeFilters));
             } else {
-                System.out.println("File: " + file.getName());
                 for (RegexFileFilter fileFilter : fileFilters) {
-                    System.out.println("Filter: " + fileFilter);
                     if (fileFilter.accept(file)) {
-                        System.out.println("Accepted: " + file.getName());
                         boolean exclude = false;
                         for (RegexFileFilter excludeFilter : excludeFilters) {
                             if (excludeFilter.accept(file)) {

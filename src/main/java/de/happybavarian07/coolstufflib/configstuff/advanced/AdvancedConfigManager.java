@@ -1,6 +1,5 @@
 package de.happybavarian07.coolstufflib.configstuff.advanced;
 
-import de.happybavarian07.coolstufflib.CoolStuffLib;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.handlers.*;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.interfaces.ConfigFileHandler;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.ConfigFileType;
@@ -13,39 +12,47 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class AdvancedConfigManager {
-    private final Map<UUID, AdvancedConfig> configs = new HashMap<>();
-    private final Map<String, UUID> nameToConfigIdMap = new HashMap<>();
-    private final Map<UUID, BaseConfigModule> globalModules = new HashMap<>();
-    private final Map<String, UUID> nameToModuleIdMap = new HashMap<>();
-    private final Map<String, AdvancedConfigGroup> groups = new HashMap<>();
-    private static boolean initialized = false;
+    private final ConcurrentMap<UUID, AdvancedConfig> configs = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, UUID> nameToConfigIdMap = new ConcurrentHashMap<>();
+    private final ConcurrentMap<UUID, BaseConfigModule> globalModules = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, UUID> nameToModuleIdMap = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, AdvancedConfigGroup> groups = new ConcurrentHashMap<>();
+    private static final AtomicBoolean initialized = new AtomicBoolean(false);
     private final File rootDirectory;
+    private final ReadWriteLock configMapLock = new ReentrantReadWriteLock();
+    private final ReadWriteLock globalModuleMapLock = new ReentrantReadWriteLock();
+    private final ReadWriteLock groupMapLock = new ReentrantReadWriteLock();
 
     public AdvancedConfigManager(File rootDirectory) {
         this.rootDirectory = rootDirectory;
-        if (!initialized) {
+        if (!initialized.get()) {
             ConfigLogger.initialize(rootDirectory);
-            initialized = true;
+            initialized.set(true);
             ConfigLogger.info("AdvancedConfigManager initialized", "AdvancedConfigManager", true);
         }
     }
 
     public AdvancedConfigManager(JavaPlugin plugin) {
         this.rootDirectory = plugin.getDataFolder();
-        if (!initialized) {
+        if (!initialized.get()) {
             ConfigLogger.initialize(plugin.getDataFolder());
-            initialized = true;
+            initialized.set(true);
             ConfigLogger.info("AdvancedConfigManager initialized", "AdvancedConfigManager", true);
         }
     }
 
     public AdvancedConfigManager() {
         this.rootDirectory = Path.of("").toFile();
-        if (!initialized) {
+        if (!initialized.get()) {
             ConfigLogger.initialize(rootDirectory);
-            initialized = true;
+            initialized.set(true);
             ConfigLogger.info("AdvancedConfigManager initialized", "AdvancedConfigManager", true);
         }
     }
@@ -59,15 +66,8 @@ public class AdvancedConfigManager {
      * @param type the type of the config filee
      * @return the created config
      */
-    public AdvancedConfig createPersistentConfig(String name, File file, ConfigFileType type) {
-        AdvancedConfig config = new AdvancedPersistentConfig(name, file, getHandlerForType(type));
-        for (BaseConfigModule module : globalModules.values()) {
-            config.registerModule(module);
-        }
-        UUID id = UUID.randomUUID();
-        configs.put(id, config);
-        nameToConfigIdMap.put(name, id);
-        return config;
+    public AdvancedConfig createPersistentConfig(String name, File file, ConfigFileType type, boolean registerGlobalModules) {
+        return createPersistentConfig(name, file, getHandlerForType(type), registerGlobalModules);
     }
 
     /**
@@ -78,22 +78,36 @@ public class AdvancedConfigManager {
      * @param handler the handler for the config file
      * @return the created config
      */
-    public AdvancedConfig createPersistentConfig(String name, File file, ConfigFileHandler handler) {
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+    public AdvancedConfig createPersistentConfig(String name, File file, ConfigFileHandler handler, boolean registerGlobalModules) {
+        configMapLock.writeLock().lock();
+        if (registerGlobalModules)
+            globalModuleMapLock.readLock().lock();
+        try {
+            if (nameToConfigIdMap.containsKey(name)) {
+                throw new IllegalStateException("Config with name " + name + " already exists");
             }
+            if (!file.exists()) {
+                try {
+                    file.createNewFile();
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to create config file: " + file.getAbsolutePath(), e);
+                }
+            }
+            AdvancedConfig config = new AdvancedPersistentConfig(name, file, handler);
+            UUID id = UUID.randomUUID();
+            if (registerGlobalModules) {
+                for (BaseConfigModule module : globalModules.values()) {
+                    config.registerModule(module);
+                }
+            }
+            configs.put(id, config);
+            nameToConfigIdMap.put(name, id);
+            return config;
+        } finally {
+            configMapLock.writeLock().unlock();
+            if (registerGlobalModules)
+                globalModuleMapLock.readLock().unlock();
         }
-        AdvancedConfig config = new AdvancedPersistentConfig(name, file, handler);
-        for (BaseConfigModule module : globalModules.values()) {
-            config.registerModule(module);
-        }
-        UUID id = UUID.randomUUID();
-        configs.put(id, config);
-        nameToConfigIdMap.put(name, id);
-        return config;
     }
 
     /**
@@ -102,15 +116,32 @@ public class AdvancedConfigManager {
      * @param name the name of the config
      * @return the created config
      */
-    public AdvancedConfig createInMemoryConfig(String name) {
-        AdvancedConfig config = new AdvancedInMemoryConfig(name);
-        for (BaseConfigModule module : globalModules.values()) {
-            config.registerModule(module);
+    public AdvancedConfig createInMemoryConfig(String name, boolean registerGlobalModules) {
+        configMapLock.writeLock().lock();
+        if (registerGlobalModules)
+            globalModuleMapLock.readLock().lock();
+        try {
+            if (name == null || name.isEmpty()) {
+                throw new IllegalArgumentException("Config name cannot be null or empty");
+            }
+            if (nameToConfigIdMap.containsKey(name)) {
+                throw new IllegalStateException("Config with name " + name + " already exists");
+            }
+            AdvancedConfig config = new AdvancedInMemoryConfig(name);
+            if (registerGlobalModules) {
+                for (BaseConfigModule module : globalModules.values()) {
+                    config.registerModule(module);
+                }
+            }
+            UUID id = UUID.randomUUID();
+            configs.put(id, config);
+            nameToConfigIdMap.put(name, id);
+            return config;
+        } finally {
+            configMapLock.writeLock().unlock();
+            if (registerGlobalModules)
+                globalModuleMapLock.readLock().unlock();
         }
-        UUID id = UUID.randomUUID();
-        configs.put(id, config);
-        nameToConfigIdMap.put(name, id);
-        return config;
     }
 
     /**
@@ -123,17 +154,26 @@ public class AdvancedConfigManager {
         if (config == null) {
             throw new IllegalArgumentException("Config is null");
         }
-        if (configs.containsKey(nameToConfigIdMap.get(config.getName()))) {
-            throw new IllegalArgumentException("Config already exists with the name: " + config.getName());
-        }
-        if (registerGlobalModules) {
-            for (BaseConfigModule module : globalModules.values()) {
-                config.registerModule(module);
+        configMapLock.writeLock().lock();
+        if (registerGlobalModules)
+            globalModuleMapLock.readLock().lock();
+        try {
+            if (configs.containsKey(nameToConfigIdMap.get(config.getName()))) {
+                throw new IllegalArgumentException("Config already exists with the name: " + config.getName());
             }
+            if (registerGlobalModules) {
+                for (BaseConfigModule module : globalModules.values()) {
+                    config.registerModule(module);
+                }
+            }
+            UUID id = UUID.randomUUID();
+            configs.put(id, config);
+            nameToConfigIdMap.put(config.getName(), id);
+        } finally {
+            configMapLock.writeLock().unlock();
+            if (registerGlobalModules)
+                globalModuleMapLock.readLock().unlock();
         }
-        UUID id = UUID.randomUUID();
-        configs.put(id, config);
-        nameToConfigIdMap.put(config.getName(), id);
     }
 
     /**
@@ -142,10 +182,18 @@ public class AdvancedConfigManager {
      * @param name the name of the config
      */
     public void unregisterConfig(String name) {
-        if (nameToConfigIdMap.containsKey(name)) {
-            UUID id = nameToConfigIdMap.get(name);
-            configs.remove(id);
-            nameToConfigIdMap.remove(name);
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Config name cannot be null or empty");
+        }
+        configMapLock.writeLock().lock();
+        try {
+            if (nameToConfigIdMap.containsKey(name)) {
+                UUID id = nameToConfigIdMap.get(name);
+                configs.remove(id);
+                nameToConfigIdMap.remove(name);
+            }
+        } finally {
+            configMapLock.writeLock().unlock();
         }
     }
 
@@ -180,11 +228,16 @@ public class AdvancedConfigManager {
      * @return the config, or null if not found
      */
     public AdvancedConfig getConfig(String name) {
-        if (nameToConfigIdMap.containsKey(name)) {
-            UUID id = nameToConfigIdMap.get(name);
-            return configs.get(id);
+        configMapLock.readLock().lock();
+        try {
+            if (nameToConfigIdMap.containsKey(name)) {
+                UUID id = nameToConfigIdMap.get(name);
+                return configs.get(id);
+            }
+            return null;
+        } finally {
+            configMapLock.readLock().unlock();
         }
-        return null;
     }
 
     /**
@@ -193,7 +246,12 @@ public class AdvancedConfigManager {
      * @return a list of all configs
      */
     public List<AdvancedConfig> getAllConfigs() {
-        return new ArrayList<>(configs.values());
+        configMapLock.readLock().lock();
+        try {
+            return new ArrayList<>(configs.values());
+        } finally {
+            configMapLock.readLock().unlock();
+        }
     }
 
     /**
@@ -202,47 +260,76 @@ public class AdvancedConfigManager {
      * @param module the module to register
      */
     public void registerGlobalModule(BaseConfigModule module) {
-        if (!globalModules.containsValue(module)) {
-            UUID id = UUID.randomUUID();
-            globalModules.put(id, module);
-            for (AdvancedConfig config : configs.values()) {
-                config.registerModule(module);
+        if (module == null) {
+            throw new IllegalArgumentException("Module cannot be null");
+        }
+        globalModuleMapLock.writeLock().lock();
+        configMapLock.writeLock().lock();
+        try {
+            if (!globalModules.containsValue(module)) {
+                UUID id = UUID.randomUUID();
+                globalModules.put(id, module);
+                for (AdvancedConfig config : configs.values()) {
+                    config.registerModule(module);
+                }
+                nameToModuleIdMap.put(module.getName(), id);
+                if (!module.isEnabled()) {
+                    module.enable();
+                    module.setEnabled(true);
+                }
             }
-            nameToModuleIdMap.put(module.getName(), id);
-            if (!module.isEnabled()) {
-                module.enable();
-                module.setEnabled(true);
-            }
+        } finally {
+            globalModuleMapLock.writeLock().unlock();
+            configMapLock.writeLock().unlock();
         }
     }
 
     /**
      * Unregisters a module globally (all configs, present and future).
      *
-     * @param module the module to unregister
+     * @param moduleName the module to unregister
      */
-    public void unregisterGlobalModule(BaseConfigModule module) {
-        if (globalModules.containsValue(module)) {
-            UUID id = globalModules.entrySet().stream()
-                    .filter(entry -> entry.getValue().equals(module))
-                    .map(Map.Entry::getKey)
-                    .findFirst().orElse(null);
-            if (id != null) {
-                if (module.isEnabled()) {
-                    module.disable();
-                    module.setEnabled(false);
+    public void unregisterGlobalModule(String moduleName) {
+        if (moduleName.isEmpty()) {
+            throw new IllegalArgumentException("Module cannot be null");
+        }
+        globalModuleMapLock.writeLock().lock();
+        configMapLock.writeLock().lock();
+        try {
+            if (nameToModuleIdMap.containsKey(moduleName)) {
+                UUID id = nameToModuleIdMap.entrySet().stream()
+                        .filter(entry -> entry.getKey().equals(moduleName))
+                        .map(Map.Entry::getValue)
+                        .findFirst().orElse(null);
+                if (id != null) {
+                    BaseConfigModule module = globalModules.get(id);
+                    if (module == null) {
+                        throw new IllegalStateException("Module not found for ID: " + id);
+                    }
+                    if (module.isEnabled()) {
+                        module.disable();
+                        module.setEnabled(false);
+                    }
+                    globalModules.remove(id);
+                    for (AdvancedConfig config : configs.values()) {
+                        config.unregisterModule(module.getName());
+                    }
+                    nameToModuleIdMap.remove(module.getName());
                 }
-                globalModules.remove(id);
-                for (AdvancedConfig config : configs.values()) {
-                    config.unregisterModule(module);
-                }
-                nameToModuleIdMap.remove(module.getName());
             }
+        } finally {
+            globalModuleMapLock.writeLock().unlock();
+            configMapLock.writeLock().unlock();
         }
     }
 
     public Map<UUID, BaseConfigModule> getGlobalModules() {
-        return Collections.unmodifiableMap(globalModules);
+        globalModuleMapLock.readLock().lock();
+        try {
+            return Collections.unmodifiableMap(globalModules);
+        } finally {
+            globalModuleMapLock.readLock().unlock();
+        }
     }
 
     /**
@@ -252,11 +339,19 @@ public class AdvancedConfigManager {
      * @return the module, or null if not found
      */
     public BaseConfigModule getGlobalModule(String name) {
-        UUID id = nameToModuleIdMap.get(name);
-        if (id != null) {
-            return globalModules.get(id);
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Module name cannot be null or empty");
         }
-        return null;
+        globalModuleMapLock.readLock().lock();
+        try {
+            UUID id = nameToModuleIdMap.get(name);
+            if (id != null) {
+                return globalModules.get(id);
+            }
+            return null;
+        } finally {
+            globalModuleMapLock.readLock().unlock();
+        }
     }
 
     /**
@@ -293,15 +388,25 @@ public class AdvancedConfigManager {
      * @param moduleName the name of the module to enable
      */
     public void enableGlobalModule(String moduleName) {
-        UUID moduleId = nameToModuleIdMap.get(moduleName);
-        if (moduleId != null) {
-            BaseConfigModule module = globalModules.get(moduleId);
-            if (module != null) {
-                for (AdvancedConfig config : configs.values()) {
-                    config.registerModule(module);
-                    config.enableModule(moduleName);
+        if (moduleName == null || moduleName.isEmpty()) {
+            throw new IllegalArgumentException("Module name cannot be null or empty");
+        }
+        globalModuleMapLock.readLock().lock();
+        configMapLock.readLock().lock();
+        try {
+            UUID moduleId = nameToModuleIdMap.get(moduleName);
+            if (moduleId != null) {
+                BaseConfigModule module = globalModules.get(moduleId);
+                if (module != null) {
+                    for (AdvancedConfig config : configs.values()) {
+                        config.registerModule(module);
+                        config.enableModule(moduleName);
+                    }
                 }
             }
+        } finally {
+            globalModuleMapLock.readLock().unlock();
+            configMapLock.readLock().unlock();
         }
     }
 
@@ -311,14 +416,24 @@ public class AdvancedConfigManager {
      * @param moduleName the name of the module to disable
      */
     public void disableGlobalModule(String moduleName) {
-        UUID moduleId = nameToModuleIdMap.get(moduleName);
-        if (moduleId != null) {
-            BaseConfigModule module = globalModules.get(moduleId);
-            if (module != null) {
-                for (AdvancedConfig config : configs.values()) {
-                    config.disableModule(moduleName);
+        if (moduleName == null || moduleName.isEmpty()) {
+            throw new IllegalArgumentException("Module name cannot be null or empty");
+        }
+        globalModuleMapLock.readLock().lock();
+        configMapLock.readLock().lock();
+        try {
+            UUID moduleId = nameToModuleIdMap.get(moduleName);
+            if (moduleId != null) {
+                BaseConfigModule module = globalModules.get(moduleId);
+                if (module != null) {
+                    for (AdvancedConfig config : configs.values()) {
+                        config.disableModule(moduleName);
+                    }
                 }
             }
+        } finally {
+            globalModuleMapLock.readLock().unlock();
+            configMapLock.readLock().unlock();
         }
     }
 
@@ -326,14 +441,28 @@ public class AdvancedConfigManager {
      * Saves all configs.
      */
     public void saveAll() {
-        for (AdvancedConfig config : configs.values()) config.save();
+        configMapLock.readLock().lock();
+        try {
+            for (AdvancedConfig config : configs.values()) {
+                config.save();
+            }
+        } finally {
+            configMapLock.readLock().unlock();
+        }
     }
 
     /**
      * Reloads all configs.
      */
     public void reloadAll() {
-        for (AdvancedConfig config : configs.values()) config.reload();
+        configMapLock.readLock().lock();
+        try {
+            for (AdvancedConfig config : configs.values()) {
+                config.reload();
+            }
+        } finally {
+            configMapLock.readLock().unlock();
+        }
     }
 
     /**
@@ -342,12 +471,17 @@ public class AdvancedConfigManager {
      * @return a map of config names to module states
      */
     public Map<String, Map<String, Object>> getAllConfigStates() {
-        Map<String, Map<String, Object>> states = new HashMap<>();
-        for (AdvancedConfig config : configs.values()) {
-            Map<String, Object> moduleStates = new HashMap<>(config.getModules());
-            states.put(config.getName(), moduleStates);
+        configMapLock.readLock().lock();
+        try {
+            Map<String, Map<String, Object>> states = new HashMap<>();
+            for (AdvancedConfig config : configs.values()) {
+                Map<String, Object> moduleStates = new HashMap<>(config.getModules());
+                states.put(config.getName(), moduleStates);
+            }
+            return states;
+        } finally {
+            configMapLock.readLock().unlock();
         }
-        return states;
     }
 
     /**
@@ -356,7 +490,17 @@ public class AdvancedConfigManager {
      * @param group the group to register
      */
     public void registerGroup(AdvancedConfigGroup group) {
-        groups.put(group.getName(), group);
+        if (group == null || group.getName() == null || group.getName().isEmpty()) {
+            throw new IllegalArgumentException("Group cannot be null and must have a valid name");
+        }
+        groupMapLock.writeLock().lock();
+        try {
+            if (!groups.containsKey(group.getName())) {
+                groups.put(group.getName(), group);
+            }
+        } finally {
+            groupMapLock.writeLock().unlock();
+        }
     }
 
     /**
@@ -365,7 +509,15 @@ public class AdvancedConfigManager {
      * @param name the name of the group
      */
     public void unregisterGroup(String name) {
-        groups.remove(name);
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Group name cannot be null or empty");
+        }
+        groupMapLock.writeLock().lock();
+        try {
+            groups.remove(name);
+        } finally {
+            groupMapLock.writeLock().unlock();
+        }
     }
 
     /**
@@ -375,7 +527,15 @@ public class AdvancedConfigManager {
      * @return the group, or null if not found
      */
     public AdvancedConfigGroup getGroup(String name) {
-        return groups.get(name);
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Group name cannot be null or empty");
+        }
+        groupMapLock.readLock().lock();
+        try {
+            return groups.get(name);
+        } finally {
+            groupMapLock.readLock().unlock();
+        }
     }
 
     /**
@@ -384,7 +544,12 @@ public class AdvancedConfigManager {
      * @return a collection of all groups
      */
     public Collection<AdvancedConfigGroup> getGroups() {
-        return groups.values();
+        groupMapLock.readLock().lock();
+        try {
+            return Collections.unmodifiableCollection(groups.values());
+        } finally {
+            groupMapLock.readLock().unlock();
+        }
     }
 
     /**
@@ -394,12 +559,20 @@ public class AdvancedConfigManager {
      * @return the created group
      */
     public AdvancedConfigGroup createEmptyGroup(String name) {
-        if (groups.containsKey(name)) {
-            return groups.get(name);
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Group name cannot be null or empty");
         }
-        AdvancedConfigGroup group = new DefaultAdvancedConfigGroup(name);
-        registerGroup(group);
-        return group;
+        groupMapLock.writeLock().lock();
+        try {
+            if (groups.containsKey(name)) {
+                return groups.get(name);
+            }
+            AdvancedConfigGroup group = new DefaultAdvancedConfigGroup(name);
+            registerGroup(group);
+            return group;
+        } finally {
+            groupMapLock.writeLock().unlock();
+        }
     }
 
     /**
@@ -410,15 +583,7 @@ public class AdvancedConfigManager {
      * @return the created group
      */
     public AdvancedConfigGroup createGroup(String name, Collection<AdvancedConfig> configs) {
-        if (groups.containsKey(name)) {
-            return groups.get(name);
-        }
-        DefaultAdvancedConfigGroup group = new DefaultAdvancedConfigGroup(name);
-        for (AdvancedConfig config : configs) {
-            group.addConfig(config);
-        }
-        registerGroup(group);
-        return group;
+        return createGroup(name, configs, new BaseConfigModule[0]);
     }
 
     /**
@@ -429,29 +594,53 @@ public class AdvancedConfigManager {
      * @return the created group
      */
     public AdvancedConfigGroup createGroup(String name, Collection<AdvancedConfig> configs, BaseConfigModule... defaultConfigModules) {
-        if (groups.containsKey(name)) {
-            return groups.get(name);
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Group name cannot be null or empty");
         }
-        DefaultAdvancedConfigGroup group = new DefaultAdvancedConfigGroup(name);
-        for (AdvancedConfig config : configs) {
-            group.addConfig(config);
-        }
-        for (BaseConfigModule module : defaultConfigModules) {
-            if (module != null) {
-                group.registerGroupModule(new DefaultGroupConfigModule(module));
+        groupMapLock.writeLock().lock();
+        try {
+            if (groups.containsKey(name)) {
+                return groups.get(name);
             }
-        }
+            DefaultAdvancedConfigGroup group = new DefaultAdvancedConfigGroup(name);
+            for (AdvancedConfig config : configs) {
+                group.addConfig(config);
+            }
+            for (BaseConfigModule module : defaultConfigModules) {
+                if (module != null) {
+                    group.registerGroupModule(new DefaultGroupConfigModule(module));
+                }
+            }
 
-        registerGroup(group);
-        return group;
+            registerGroup(group);
+            return group;
+        } finally {
+            groupMapLock.writeLock().unlock();
+        }
     }
 
     public AdvancedConfigGroup getGroupByName(String groupName) {
-        return groups.get(groupName);
+        if (groupName == null || groupName.isEmpty()) {
+            throw new IllegalArgumentException("Group name cannot be null or empty");
+        }
+        groupMapLock.readLock().lock();
+        try {
+            return groups.get(groupName);
+        } finally {
+            groupMapLock.readLock().unlock();
+        }
     }
 
     public boolean hasGroup(String groupName) {
-        return groups.containsKey(groupName);
+        if (groupName == null || groupName.isEmpty()) {
+            throw new IllegalArgumentException("Group name cannot be null or empty");
+        }
+        groupMapLock.readLock().lock();
+        try {
+            return groups.containsKey(groupName);
+        } finally {
+            groupMapLock.readLock().unlock();
+        }
     }
 
     /**
@@ -461,9 +650,22 @@ public class AdvancedConfigManager {
      * @param module    the group config module to register
      */
     public void registerGroupModule(String groupName, GroupConfigModule module) {
-        AdvancedConfigGroup group = groups.get(groupName);
-        if (group != null) {
-            group.registerGroupModule(module);
+        if (groupName == null || groupName.isEmpty()) {
+            throw new IllegalArgumentException("Group name cannot be null or empty");
+        }
+        if (module == null) {
+            throw new IllegalArgumentException("Module cannot be null");
+        }
+        groupMapLock.readLock().lock();
+        try {
+            AdvancedConfigGroup group = groups.get(groupName);
+            if (group != null) {
+                group.registerGroupModule(module);
+            } else {
+                throw new IllegalStateException("Group not found: " + groupName);
+            }
+        } finally {
+            groupMapLock.readLock().unlock();
         }
     }
 
@@ -474,9 +676,22 @@ public class AdvancedConfigManager {
      * @param moduleName the name of the module to unregister
      */
     public void unregisterGroupModule(String groupName, String moduleName) {
-        AdvancedConfigGroup group = groups.get(groupName);
-        if (group != null) {
-            group.unregisterGroupModule(moduleName);
+        if (groupName == null || groupName.isEmpty()) {
+            throw new IllegalArgumentException("Group name cannot be null or empty");
+        }
+        if (moduleName == null || moduleName.isEmpty()) {
+            throw new IllegalArgumentException("Module name cannot be null or empty");
+        }
+        groupMapLock.readLock().lock();
+        try {
+            AdvancedConfigGroup group = groups.get(groupName);
+            if (group != null) {
+                group.unregisterGroupModule(moduleName);
+            } else {
+                throw new IllegalStateException("Group not found: " + groupName);
+            }
+        } finally {
+            groupMapLock.readLock().unlock();
         }
     }
 
@@ -487,11 +702,20 @@ public class AdvancedConfigManager {
      * @return map of module names to group config modules, or empty if not found
      */
     public Map<String, GroupConfigModule> getGroupModules(String groupName) {
-        AdvancedConfigGroup group = groups.get(groupName);
-        if (group != null) {
-            return group.getGroupModules();
+        if (groupName == null || groupName.isEmpty()) {
+            throw new IllegalArgumentException("Group name cannot be null or empty");
         }
-        return Map.of();
+        groupMapLock.readLock().lock();
+        try {
+            AdvancedConfigGroup group = groups.get(groupName);
+            if (group != null) {
+                return group.getGroupModules();
+            } else {
+                return Collections.emptyMap();
+            }
+        } finally {
+            groupMapLock.readLock().unlock();
+        }
     }
 
     /**
@@ -502,9 +726,22 @@ public class AdvancedConfigManager {
      * @param module    the config module to register
      */
     public void registerConfigModuleAsGroupModule(String groupName, BaseConfigModule module) {
-        AdvancedConfigGroup group = groups.get(groupName);
-        if (group != null) {
-            group.registerGroupModule(new DefaultGroupConfigModule(module));
+        if (groupName == null || groupName.isEmpty()) {
+            throw new IllegalArgumentException("Group name cannot be null or empty");
+        }
+        if (module == null) {
+            throw new IllegalArgumentException("Module cannot be null");
+        }
+        groupMapLock.readLock().lock();
+        try {
+            AdvancedConfigGroup group = groups.get(groupName);
+            if (group != null) {
+                group.registerGroupModule(new DefaultGroupConfigModule(module));
+            } else {
+                throw new IllegalStateException("Group not found: " + groupName);
+            }
+        } finally {
+            groupMapLock.readLock().unlock();
         }
     }
 }

@@ -6,6 +6,6 @@ import java.io.IOException;
 import java.util.Map;
 
 public interface ConfigFileHandler {
-    void save(AdvancedConfig config, File file) throws IOException;
+    void save(File file, Map<String, Object> data) throws IOException;
     Map<String, Object> load(File file) throws IOException;
 }

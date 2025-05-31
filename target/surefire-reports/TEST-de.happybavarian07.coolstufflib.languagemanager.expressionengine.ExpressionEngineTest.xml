@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.286" tests="6" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="java.specification.version" value="17"/>
+    <property name="sun.cpu.isalist" value="amd64"/>
+    <property name="sun.jnu.encoding" value="Cp1252"/>
+    <property name="java.class.path" value="E:\InteliJ Programs\CoolStuffLib\target\test-classes;E:\InteliJ Programs\CoolStuffLib\target\classes;C:\Users\quiri\.m2\repository\org\spigotmc\spigot-api\1.20-R0.1-SNAPSHOT\spigot-api-1.20-R0.1-SNAPSHOT.jar;C:\Users\quiri\.m2\repository\com\google\guava\guava\31.1-jre\guava-31.1-jre.jar;C:\Users\quiri\.m2\repository\com\google\guava\failureaccess\1.0.1\failureaccess-1.0.1.jar;C:\Users\quiri\.m2\repository\com\google\guava\listenablefuture\9999.0-empty-to-avoid-conflict-with-guava\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar;C:\Users\quiri\.m2\repository\com\google\code\findbugs\jsr305\3.0.2\jsr305-3.0.2.jar;C:\Users\quiri\.m2\repository\org\checkerframework\checker-qual\3.12.0\checker-qual-3.12.0.jar;C:\Users\quiri\.m2\repository\com\google\errorprone\error_prone_annotations\2.11.0\error_prone_annotations-2.11.0.jar;C:\Users\quiri\.m2\repository\com\google\j2objc\j2objc-annotations\1.3\j2objc-annotations-1.3.jar;C:\Users\quiri\.m2\repository\com\google\code\gson\gson\2.10\gson-2.10.jar;C:\Users\quiri\.m2\repository\org\joml\joml\1.10.5\joml-1.10.5.jar;C:\Users\quiri\.m2\repository\net\md-5\bungeecord-chat\1.16-R0.4\bungeecord-chat-1.16-R0.4.jar;C:\Users\quiri\.m2\repository\org\yaml\snakeyaml\2.0\snakeyaml-2.0.jar;C:\Users\quiri\.m2\repository\org\jetbrains\annotations\24.1.0\annotations-24.1.0.jar;C:\Users\quiri\.m2\repository\me\clip\placeholderapi\2.10.9\placeholderapi-2.10.9.jar;C:\Users\quiri\.m2\repository\junit\junit\4.13.1\junit-4.13.1.jar;C:\Users\quiri\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;C:\Users\quiri\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.9.3\junit-jupiter-api-5.9.3.jar;C:\Users\quiri\.m2\repository\org\opentest4j\opentest4j\1.2.0\opentest4j-1.2.0.jar;C:\Users\quiri\.m2\repository\org\junit\platform\junit-platform-commons\1.9.3\junit-platform-commons-1.9.3.jar;C:\Users\quiri\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\quiri\.m2\repository\org\junit\jupiter\junit-jupiter-params\5.10.2\junit-jupiter-params-5.10.2.jar;C:\Users\quiri\.m2\repository\org\mockito\mockito-core\5.3.1\mockito-core-5.3.1.jar;C:\Users\quiri\.m2\repository\net\bytebuddy\byte-buddy\1.14.4\byte-buddy-1.14.4.jar;C:\Users\quiri\.m2\repository\net\bytebuddy\byte-buddy-agent\1.14.4\byte-buddy-agent-1.14.4.jar;C:\Users\quiri\.m2\repository\org\objenesis\objenesis\3.3\objenesis-3.3.jar;"/>
+    <property name="java.vm.vendor" value="Amazon.com Inc."/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="user.variant" value=""/>
+    <property name="java.vendor.url" value="https://aws.amazon.com/corretto/"/>
+    <property name="user.timezone" value="Europe/Berlin"/>
+    <property name="os.name" value="Windows 10"/>
+    <property name="java.vm.specification.version" value="17"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="DE"/>
+    <property name="sun.boot.library.path" value="C:\Users\quiri\.jdks\corretto-17.0.15\bin"/>
+    <property name="sun.java.command" value="C:\Users\quiri\AppData\Local\Temp\surefire3822206522616139631\surefirebooter-20250531224831155_3.jar C:\Users\quiri\AppData\Local\Temp\surefire3822206522616139631 2025-05-31T22-48-31_033-jvmRun1 surefire-20250531224831155_1tmp surefire_0-20250531224831155_2tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="E:\InteliJ Programs\CoolStuffLib\target\test-classes;E:\InteliJ Programs\CoolStuffLib\target\classes;C:\Users\quiri\.m2\repository\org\spigotmc\spigot-api\1.20-R0.1-SNAPSHOT\spigot-api-1.20-R0.1-SNAPSHOT.jar;C:\Users\quiri\.m2\repository\com\google\guava\guava\31.1-jre\guava-31.1-jre.jar;C:\Users\quiri\.m2\repository\com\google\guava\failureaccess\1.0.1\failureaccess-1.0.1.jar;C:\Users\quiri\.m2\repository\com\google\guava\listenablefuture\9999.0-empty-to-avoid-conflict-with-guava\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar;C:\Users\quiri\.m2\repository\com\google\code\findbugs\jsr305\3.0.2\jsr305-3.0.2.jar;C:\Users\quiri\.m2\repository\org\checkerframework\checker-qual\3.12.0\checker-qual-3.12.0.jar;C:\Users\quiri\.m2\repository\com\google\errorprone\error_prone_annotations\2.11.0\error_prone_annotations-2.11.0.jar;C:\Users\quiri\.m2\repository\com\google\j2objc\j2objc-annotations\1.3\j2objc-annotations-1.3.jar;C:\Users\quiri\.m2\repository\com\google\code\gson\gson\2.10\gson-2.10.jar;C:\Users\quiri\.m2\repository\org\joml\joml\1.10.5\joml-1.10.5.jar;C:\Users\quiri\.m2\repository\net\md-5\bungeecord-chat\1.16-R0.4\bungeecord-chat-1.16-R0.4.jar;C:\Users\quiri\.m2\repository\org\yaml\snakeyaml\2.0\snakeyaml-2.0.jar;C:\Users\quiri\.m2\repository\org\jetbrains\annotations\24.1.0\annotations-24.1.0.jar;C:\Users\quiri\.m2\repository\me\clip\placeholderapi\2.10.9\placeholderapi-2.10.9.jar;C:\Users\quiri\.m2\repository\junit\junit\4.13.1\junit-4.13.1.jar;C:\Users\quiri\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;C:\Users\quiri\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.9.3\junit-jupiter-api-5.9.3.jar;C:\Users\quiri\.m2\repository\org\opentest4j\opentest4j\1.2.0\opentest4j-1.2.0.jar;C:\Users\quiri\.m2\repository\org\junit\platform\junit-platform-commons\1.9.3\junit-platform-commons-1.9.3.jar;C:\Users\quiri\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\quiri\.m2\repository\org\junit\jupiter\junit-jupiter-params\5.10.2\junit-jupiter-params-5.10.2.jar;C:\Users\quiri\.m2\repository\org\mockito\mockito-core\5.3.1\mockito-core-5.3.1.jar;C:\Users\quiri\.m2\repository\net\bytebuddy\byte-buddy\1.14.4\byte-buddy-1.14.4.jar;C:\Users\quiri\.m2\repository\net\bytebuddy\byte-buddy-agent\1.14.4\byte-buddy-agent-1.14.4.jar;C:\Users\quiri\.m2\repository\org\objenesis\objenesis\3.3\objenesis-3.3.jar;"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="C:\Users\quiri"/>
+    <property name="user.language" value="de"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2025-04-15"/>
+    <property name="java.home" value="C:\Users\quiri\.jdks\corretto-17.0.15"/>
+    <property name="file.separator" value="\"/>
+    <property name="basedir" value="E:\InteliJ Programs\CoolStuffLib"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="surefire.real.class.path" value="C:\Users\quiri\AppData\Local\Temp\surefire3822206522616139631\surefirebooter-20250531224831155_3.jar"/>
+    <property name="user.script" value=""/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="17.0.15+6-LTS"/>
+    <property name="user.name" value="quiri"/>
+    <property name="path.separator" value=";"/>
+    <property name="os.version" value="10.0"/>
+    <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+    <property name="file.encoding" value="Cp1252"/>
+    <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+    <property name="java.vendor.version" value="Corretto-17.0.15.6.1"/>
+    <property name="localRepository" value="C:\Users\quiri\.m2\repository"/>
+    <property name="java.vendor.url.bug" value="https://github.com/corretto/corretto-17/issues/"/>
+    <property name="java.io.tmpdir" value="C:\Users\quiri\AppData\Local\Temp\"/>
+    <property name="idea.version" value="2025.1.1.1"/>
+    <property name="java.version" value="17.0.15"/>
+    <property name="user.dir" value="E:\InteliJ Programs\CoolStuffLib"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="sun.os.patch.level" value=""/>
+    <property name="native.encoding" value="Cp1252"/>
+    <property name="java.library.path" value="C:\Users\quiri\.jdks\corretto-17.0.15\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;E:\anaconda3\condabin;D:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\bin;D:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\libnvvp;C:\Program Files\Eclipse Foundation\jdk-8.0.302.8-hotspot\bin;C:\Program Files\Common Files\Oracle\Java\javapath;C:\Program Files\Python\Python310\Scripts\;C:\Program Files\Python\Python310\;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files (x86)\IVI Foundation\VISA\WinNT\Bin;C:\Program Files\dotnet\;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\dotnet\;C:\OpenJDK\openjdk-13\bin\;C:\Program Files\nodejs\;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files\playit_gg\bin\;C:\Program Files\NVIDIA Corporation\Nsight Compute 2022.3.0\;C:\Program Files\Docker\Docker\resources\bin;C:\Users\quiri\AppData\Local\Programs\Python\Python313\Scripts\;C:\Users\quiri\AppData\Local\Programs\Python\Python313\;C:\Users\quiri\.cargo\bin;C:\OpenJDK\openjdk-13\bin\;C:\Users\quiri\Documents\apache-maven-3.8.1\bin;C:\Test\ffmpeg-4.4-essentials_build\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\IVI Foundation\VISA\WinNT\Bin;C:\Program Files\dotnet\;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\dotnet\;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Users\quiri\AppData\Local\JetBrains\Toolbox\scripts;C:\Users\quiri\AppData\Local\JetBrains\IntelliJ IDEA 2023.1.4\bin;C:\Users\quiri\AppData\Local\Programs\Microsoft VS Code\bin;E:\VSCodeThings\.venv\Lib\site-packages\pywin32_system32\pywintypes38.dll;C:\Users\quiri\AppData\Local\GnuPG\bin\;C:\Users\quiri\AppData\Local\Programs\Git\cmd;C:\Users\quiri\Downloads\php-8.3.9-Win32-vs16-x64\php.exe;C:\Users\quiri\AppData\Local\Android\sdk\platform-tools;E:\go1.24.0\go\bin;E:\modder\bin;E:\medit_linux_arm64\apktool;E:\platform-tools\build-tools\31.0.0;C:\Users\quiri\.lmstudio\bin;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64;C:\Users\quiri\PycharmProjects\RocketLeagueMLBot\execution\RLBotServer;C:\Users\quiri\AppData\Local\Programs\Python\Python313\Lib\site-packages;;."/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="java.vendor" value="Amazon.com Inc."/>
+    <property name="java.vm.version" value="17.0.15+6-LTS"/>
+    <property name="java.specification.maintenance.version" value="1"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="61.0"/>
+  </properties>
+  <testcase name="testMaterialParsing" classname="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.253"/>
+  <testcase name="testConditionalChain" classname="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.018">
+    <system-out><![CDATA[[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@2de366bb
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@3f093abe
+[ExpressionEngine DEBUG] Result: 9
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@61a002b1
+[ExpressionEngine DEBUG] Result: 10.0
+[ExpressionEngine DEBUG] Result: false
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@16fb356
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@6bc248ed
+[ExpressionEngine DEBUG] Result: 9
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@23a9ba52
+[ExpressionEngine DEBUG] Result: 5.0
+[ExpressionEngine DEBUG] Result: true
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@ca27722
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@70ab80e3
+[ExpressionEngine DEBUG] Result: medium
+[ExpressionEngine DEBUG] Result: medium
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@9573b3b
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@67427b69
+[ExpressionEngine DEBUG] Result: 4
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@78461bc4
+[ExpressionEngine DEBUG] Result: 10.0
+[ExpressionEngine DEBUG] Result: false
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@544630b7
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@64f857e7
+[ExpressionEngine DEBUG] Result: 4
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@1095f122
+[ExpressionEngine DEBUG] Result: 5.0
+[ExpressionEngine DEBUG] Result: false
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@58c540cf
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@3d6300e8
+[ExpressionEngine DEBUG] Result: small
+[ExpressionEngine DEBUG] Result: small
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@1b822fcc
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@24a1c17f
+[ExpressionEngine DEBUG] Result: 11
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@56102e1c
+[ExpressionEngine DEBUG] Result: 10.0
+[ExpressionEngine DEBUG] Result: true
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@73511076
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@7927bd9f
+[ExpressionEngine DEBUG] Result: big
+[ExpressionEngine DEBUG] Result: big
+]]></system-out>
+  </testcase>
+  <testcase name="testBasicMath" classname="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.001">
+    <system-out><![CDATA[[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@532721fd
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@410954b
+[ExpressionEngine DEBUG] Result: 1.0
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@7fb9f71f
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@3b366632
+[ExpressionEngine DEBUG] Result: 2.0
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@51f49060
+[ExpressionEngine DEBUG] Result: 3.0
+[ExpressionEngine DEBUG] Result: 6.0
+[ExpressionEngine DEBUG] Result: 7.0
+]]></system-out>
+  </testcase>
+  <testcase name="testVariables" classname="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.001">
+    <system-out><![CDATA[[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@514eedd8
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@617fe9e1
+[ExpressionEngine DEBUG] Result: 4
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@6970140a
+[ExpressionEngine DEBUG] Result: 4
+[ExpressionEngine DEBUG] Result: 16.0
+]]></system-out>
+  </testcase>
+  <testcase name="testTypeInference" classname="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.01">
+    <system-out><![CDATA[[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@3af4e0bf
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@245a26e1
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@4d63b624
+[ExpressionEngine DEBUG] Result: true
+[ExpressionEngine DEBUG] Result: true
+[ExpressionEngine DEBUG] Result: true
+]]></system-out>
+  </testcase>
+  <testcase name="testFunction" classname="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.002">
+    <system-out><![CDATA[[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@7e1a1da6
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@5f7f2382
+[ExpressionEngine DEBUG] Result: 2.0
+[ExpressionEngine DEBUG] Result: 4.0
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@407cf41
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@6815c5f2
+[ExpressionEngine DEBUG] Result: 4.0
+[ExpressionEngine DEBUG] Result: 8.0
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@46cc127b
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@60094a13
+[ExpressionEngine DEBUG] Result: 8.0
+[ExpressionEngine DEBUG] Result: 16.0
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@5aceec94
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@1c32886a
+[ExpressionEngine DEBUG] Result: 16.0
+[ExpressionEngine DEBUG] Result: 32.0
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@3a4b0e5d
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@10b892d5
+[ExpressionEngine DEBUG] Result: 32.0
+[ExpressionEngine DEBUG] Result: 64.0
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@3d3f761a
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@3546d80f
+[ExpressionEngine DEBUG] Result: 64.0
+[ExpressionEngine DEBUG] Result: 128.0
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@579d011c
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@3670f00
+[ExpressionEngine DEBUG] Result: 128.0
+[ExpressionEngine DEBUG] Result: 256.0
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@452e26d0
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@46ab18da
+[ExpressionEngine DEBUG] Result: 256.0
+[ExpressionEngine DEBUG] Result: 512.0
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@790174f2
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@42257bdd
+[ExpressionEngine DEBUG] Result: 512.0
+[ExpressionEngine DEBUG] Result: 1024.0
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@7689ddef
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@687a762c
+[ExpressionEngine DEBUG] Result: 1024.0
+[ExpressionEngine DEBUG] Result: 2048.0
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@1a2e2935
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@733c423e
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@4b629f13
+[ExpressionEngine DEBUG] Result: 2.0
+[ExpressionEngine DEBUG] Result: 4.0
+[ExpressionEngine DEBUG] Result: 8.0
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@70925b45
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@1b9ea3e3
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@aa22f1c
+[ExpressionEngine DEBUG] Result: 8.0
+[ExpressionEngine DEBUG] Result: 64.0
+[ExpressionEngine DEBUG] Result: 128.0
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@55e7a35c
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@37cd92d6
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@5922ae77
+[ExpressionEngine DEBUG] Result: 128.0
+[ExpressionEngine DEBUG] Result: 16384.0
+[ExpressionEngine DEBUG] Result: 32768.0
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@4263b080
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@2af616d3
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@71f67a79
+[ExpressionEngine DEBUG] Result: 32768.0
+[ExpressionEngine DEBUG] Result: 1.073741824E9
+[ExpressionEngine DEBUG] Result: 2.147483648E9
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@3deb2326
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@62d363ab
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@7889a1ac
+[ExpressionEngine DEBUG] Result: 2.147483648E9
+[ExpressionEngine DEBUG] Result: 4.6116860184273879E18
+[ExpressionEngine DEBUG] Result: 9.223372036854776E18
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@3aee3976
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@5ef8df1e
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@27cf3151
+[ExpressionEngine DEBUG] Result: 9.223372036854776E18
+[ExpressionEngine DEBUG] Result: 8.507059173023462E37
+[ExpressionEngine DEBUG] Result: 1.7014118346046923E38
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@127e70c5
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@5910de75
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@4108fa66
+[ExpressionEngine DEBUG] Result: 1.7014118346046923E38
+[ExpressionEngine DEBUG] Result: 2.894802230932905E76
+[ExpressionEngine DEBUG] Result: 5.78960446186581E76
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@1f130eaf
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@7e0aadd0
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@21362712
+[ExpressionEngine DEBUG] Result: 5.78960446186581E76
+[ExpressionEngine DEBUG] Result: 3.3519519824856493E153
+[ExpressionEngine DEBUG] Result: 6.7039039649712985E153
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@27eb3298
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@200a26bc
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@bc57b40
+[ExpressionEngine DEBUG] Result: 6.7039039649712985E153
+[ExpressionEngine DEBUG] Result: 4.49423283715579E307
+[ExpressionEngine DEBUG] Result: 8.98846567431158E307
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@1b5bc39d
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@655a5d9c
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@1494b84d
+[ExpressionEngine DEBUG] Result: 8.98846567431158E307
+[ExpressionEngine DEBUG] Result: Infinity
+[ExpressionEngine DEBUG] Result: Infinity
+]]></system-out>
+  </testcase>
+</testsuite>

@@ -29,7 +29,7 @@ class PersistentBackupModuleTest {
         try (FileWriter writer = new FileWriter(configFile)) { writer.write("k: v"); } catch (IOException e) { fail(); }
         File backupDir = new File(testDir.toFile(), "backups_testBackupCreation");
         backupDir.mkdir();
-        AdvancedConfig config = configManager.createPersistentConfig("test", configFile, new JsonConfigFileHandler());
+        AdvancedConfig config = configManager.createPersistentConfig("test", configFile, new JsonConfigFileHandler(), true);
         PersistentBackupModule module = new PersistentBackupModule(5);
         config.registerModule(module);
         module.enable();
@@ -45,7 +45,7 @@ class PersistentBackupModuleTest {
         try (FileWriter writer = new FileWriter(configFile)) { writer.write("k: v"); } catch (IOException e) { fail(); }
         File backupDir = new File(testDir.toFile(), "backups_testRestore");
         backupDir.mkdir();
-        AdvancedConfig config = configManager.createPersistentConfig("test", configFile, new JsonConfigFileHandler());
+        AdvancedConfig config = configManager.createPersistentConfig("test", configFile, new JsonConfigFileHandler(), true);
         PersistentBackupModule module = new PersistentBackupModule(5);
         module.enable();
         module.setEnabled(true);
@@ -64,7 +64,7 @@ class PersistentBackupModuleTest {
         try (FileWriter writer = new FileWriter(configFile)) { writer.write("k: v"); } catch (IOException e) { fail(); }
         File backupDir = new File(testDir.toFile(), "backups_testDelete");
         backupDir.mkdir();
-        AdvancedConfig config = configManager.createPersistentConfig("test", configFile, new JsonConfigFileHandler());
+        AdvancedConfig config = configManager.createPersistentConfig("test", configFile, new JsonConfigFileHandler(), true);
         PersistentBackupModule module = new PersistentBackupModule(5);
         module.enable();
         module.setEnabled(true);
@@ -84,7 +84,7 @@ class PersistentBackupModuleTest {
         backupDir.mkdir();
         File unzipDir = new File(testDir.toFile(), "unzip");
         unzipDir.mkdir();
-        AdvancedConfig config = configManager.createPersistentConfig("test", configFile, new JsonConfigFileHandler());
+        AdvancedConfig config = configManager.createPersistentConfig("test", configFile, new JsonConfigFileHandler(), true);
         PersistentBackupModule module = new PersistentBackupModule(5);
         module.enable();
         module.setEnabled(true);
@@ -104,7 +104,7 @@ class PersistentBackupModuleTest {
         try (FileWriter writer = new FileWriter(configFile)) { writer.write("k: v"); } catch (IOException e) { fail(); }
         File backupDir = new File(testDir.toFile(), "backups_testIntegrationWithBackupManager");
         backupDir.mkdir();
-        AdvancedConfig config = configManager.createPersistentConfig("test", configFile, new JsonConfigFileHandler());
+        AdvancedConfig config = configManager.createPersistentConfig("test", configFile, new JsonConfigFileHandler(), true);
         PersistentBackupModule module = new PersistentBackupModule(5);
         module.enable();
         module.setEnabled(true);
