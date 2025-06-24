@@ -125,3 +125,12 @@ players:
       y: 80.0
       world: nether
       z: 0.0
+  e8d56ada-0948-4fd1-80f6-26d907f71c34:
+    health: 15
+    displayName: yamlDisp
+    position:
+      y: 80.0
+      world: nether
+      z: 0.0
+      x: 0.0
+    uuid: e8d56ada-0948-4fd1-80f6-26d907f71c34

@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: de.happybavarian07.coolstufflib.ConfigIntegrationTest
 -------------------------------------------------------------------------------
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.114 s -- in de.happybavarian07.coolstufflib.ConfigIntegrationTest
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.181 s -- in de.happybavarian07.coolstufflib.ConfigIntegrationTest

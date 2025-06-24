@@ -1,4 +1,4 @@
-# Created at 2025-05-31T22:48:31.183
+# Created at 2025-06-05T20:03:25.696
 Boot Manifest-JAR contains absolute paths in classpath 'E:\InteliJ Programs\CoolStuffLib\target\test-classes'
 Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
 'other' has different root
