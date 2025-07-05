@@ -4,11 +4,16 @@ import com.google.gson.GsonBuilder;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.ConfigTypeConverterRegistry;
 import com.google.gson.Gson;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.interfaces.AbstractConfigFileHandler;
+import de.happybavarian07.coolstufflib.logging.ConfigLogger;
 import de.happybavarian07.coolstufflib.utils.Utils;
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.MapSection;
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.ListSection;
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.SetSection;
 
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Minimal JSON5 handler. For production, use a JSON5 parser (e.g. json5-java).
@@ -25,6 +30,7 @@ public class Json5ConfigFileHandler extends AbstractConfigFileHandler {
     }
 
     public Json5ConfigFileHandler(ConfigTypeConverterRegistry registry) {
+        super(Pattern.compile(".*\\.json5$", Pattern.CASE_INSENSITIVE));
         this.gson = new GsonBuilder().setPrettyPrinting().create();
         this.converterRegistry = registry;
     }
@@ -36,23 +42,151 @@ public class Json5ConfigFileHandler extends AbstractConfigFileHandler {
     @Override
     public void doSave(File file, Map<String, Object> data) throws IOException {
         try (Writer writer = new FileWriter(file)) {
-            Object nested = unflatten(data);
-            Object plain = Utils.recursiveConvertForSerialization(nested, converterRegistry);
+            Map<String, Object> nested = Utils.unflattenObjectMap(converterRegistry, data);
+            Object plain = addSectionTypeFields(nested);
             gson.toJson(plain, writer);
         }
     }
 
-    private static Map<String, Object> unflatten(Map<String, Object> flat) {
-        Map<String, Object> nested = new LinkedHashMap<>();
-        for (Map.Entry<String, Object> entry : flat.entrySet()) {
-            String[] parts = entry.getKey().split("\\.");
-            Map<String, Object> current = nested;
-            for (int i = 0; i < parts.length - 1; i++) {
-                current = (Map<String, Object>) current.computeIfAbsent(parts[i], k -> new LinkedHashMap<>());
-            }
-            current.put(parts[parts.length - 1], entry.getValue());
+    private Object addSectionTypeFields(Object obj) {
+        if (obj instanceof MapSection) {
+            Map<String, Object> map = new LinkedHashMap<>(((MapSection) obj).toSerializableMap());
+            map.put("__type__", "MapSection");
+            return map;
         }
-        return nested;
+        if (obj instanceof ListSection) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("__type__", "ListSection");
+            map.put("values", new ArrayList<>(((ListSection) obj).toList()));
+            return map;
+        }
+        if (obj instanceof SetSection) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("__type__", "SetSection");
+            map.put("values", new ArrayList<>(((SetSection) obj).toSet()));
+            return map;
+        }
+        if (obj instanceof Map<?, ?> m) {
+            Map<String, Object> result = new LinkedHashMap<>();
+            for (Map.Entry<?, ?> entry : m.entrySet()) {
+                result.put(String.valueOf(entry.getKey()), addSectionTypeFields(entry.getValue()));
+            }
+            return result;
+        }
+        if (obj instanceof List<?> l) {
+            List<Object> result = new ArrayList<>();
+            for (Object o : l) result.add(addSectionTypeFields(o));
+            return result;
+        }
+        return obj;
+    }
+
+    private Map<String, Object> convertSectionTypes(Object obj) {
+        if (!(obj instanceof Map)) return new HashMap<>();
+        Map<String, Object> map = (Map<String, Object>) obj;
+        if (map.containsKey("__type__")) {
+            String type = String.valueOf(map.get("__type__"));
+            if ("MapSection".equals(type)) {
+                MapSection section = new MapSection("");
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    if (!"__type__".equals(entry.getKey())) {
+                        section.put(entry.getKey(), entry.getValue());
+                    }
+                }
+                Map<String, Object> result = new LinkedHashMap<>();
+                result.put("", section);
+                return result;
+            }
+            if ("ListSection".equals(type)) {
+                ListSection section = new ListSection("");
+                Object values = map.get("values");
+                if (values instanceof List<?>) {
+                    for (Object v : (List<?>) values) section.add(v);
+                }
+                Map<String, Object> result = new LinkedHashMap<>();
+                result.put("", section);
+                return result;
+            }
+            if ("SetSection".equals(type)) {
+                SetSection section = new SetSection("");
+                Object values = map.get("values");
+                if (values instanceof List<?>) for (Object v : (List<?>) values) section.add(v);
+                Map<String, Object> result = new LinkedHashMap<>();
+                result.put("", section);
+                return result;
+            }
+        }
+        Map<String, Object> result = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            Object value = entry.getValue();
+            if (value instanceof Map) {
+                Map<String, Object> sub = convertSectionTypes(value);
+                if (sub.size() == 1 && sub.containsKey("")) {
+                    result.put(entry.getKey(), sub.get(""));
+                } else {
+                    result.put(entry.getKey(), sub);
+                }
+            } else if (value instanceof List<?> l) {
+                List<Object> newList = new ArrayList<>();
+                for (Object o : l) {
+                    if (o instanceof Map) {
+                        Map<String, Object> sub = convertSectionTypes(o);
+                        if (sub.size() == 1 && sub.containsKey("")) newList.add(sub.get(""));
+                        else newList.add(sub);
+                    } else {
+                        newList.add(o);
+                    }
+                }
+                result.put(entry.getKey(), newList);
+            } else {
+                result.put(entry.getKey(), value);
+            }
+        }
+        return result;
+    }
+
+    private Object ensureSectionType(Object obj) {
+        if (obj instanceof Map<?, ?> map) {
+            if (map.containsKey("__type__")) {
+                String type = String.valueOf(map.get("__type__"));
+                if ("MapSection".equals(type)) {
+                    MapSection section = new MapSection("");
+                    for (Map.Entry<?, ?> entry : map.entrySet()) {
+                        if (!"__type__".equals(entry.getKey())) {
+                            section.put(String.valueOf(entry.getKey()), ensureSectionType(entry.getValue()));
+                        }
+                    }
+                    return section;
+                }
+                if ("ListSection".equals(type)) {
+                    ListSection section = new ListSection("");
+                    Object values = map.get("values");
+                    if (values instanceof List<?>) {
+                        for (Object v : (List<?>) values) section.add(ensureSectionType(v));
+                    }
+                    return section;
+                }
+                if ("SetSection".equals(type)) {
+                    SetSection section = new SetSection("");
+                    Object values = map.get("values");
+                    if (values instanceof List<?>) {
+                        for (Object v : (List<?>) values) section.add(ensureSectionType(v));
+                    }
+                    return section;
+                }
+            }
+            Map<String, Object> result = new LinkedHashMap<>();
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                result.put(String.valueOf(entry.getKey()), ensureSectionType(entry.getValue()));
+            }
+            return result;
+        }
+        if (obj instanceof List<?>) {
+            List<Object> result = new ArrayList<>();
+            for (Object o : (List<?>) obj) result.add(ensureSectionType(o));
+            return result;
+        }
+        return obj;
     }
 
     @Override
@@ -69,10 +203,17 @@ public class Json5ConfigFileHandler extends AbstractConfigFileHandler {
         }
         String json = sb.toString();
         try {
-            Map<String, Object> map = gson.fromJson(json, MAP_TYPE);
-            return (Map<String, Object>) Utils.recursiveConvertFromSerialization(map, converterRegistry);
+            Object loaded = gson.fromJson(json, Object.class);
+            Object withTypes = ensureSectionType(loaded);
+            return withTypes instanceof Map ? (Map<String, Object>) withTypes : new HashMap<>();
         } catch (Exception e) {
+            ConfigLogger.error("Failed to parse JSON5 file: " + file.getPath(), e, "Json5ConfigFileHandler", true);
             return new HashMap<>();
         }
+    }
+
+    @Override
+    public boolean supportsComments() {
+        return false;
     }
 }

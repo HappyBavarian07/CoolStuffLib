@@ -97,7 +97,7 @@ public class ConfigTypeConverterRegistry {
         return value;
     }
 
-    // Factory for default registry with common types
+
     public static ConfigTypeConverterRegistry defaultRegistry() {
         ConfigTypeConverterRegistry registry = new ConfigTypeConverterRegistry();
         registry.register(UUID.class, new StringConfigTypeConverter<>(UUID.class) {

@@ -1,60 +1,143 @@
 package de.happybavarian07.coolstufflib.configstuff.advanced.modules;
 
-import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.AdvancedConfig;
-import de.happybavarian07.coolstufflib.configstuff.advanced.modules.ConfigModule;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ArrayList;
+import de.happybavarian07.coolstufflib.configstuff.advanced.event.ConfigEvent;
+import de.happybavarian07.coolstufflib.configstuff.advanced.event.ConfigValueEvent;
 
-public class HistoryModule extends ConfigModule {
+import java.util.*;
+
+public class HistoryModule extends AbstractBaseConfigModule {
     private final Map<String, Deque<Object>> history = new HashMap<>();
+    private int maxHistorySize = 10;
+
+    public HistoryModule() {
+        super("HistoryModule",
+                "Tracks changes to configuration values with undo capability",
+                "1.0.0");
+    }
+
+    public HistoryModule(int maxHistorySize) {
+        this();
+        this.maxHistorySize = Math.max(1, maxHistorySize);
+    }
 
     @Override
-    public String getName() { return "HistoryModule"; }
+    protected void onInitialize() {
+        // Nothing to initialize
+    }
+
     @Override
-    public void enable() { /* Do nothing */ }
+    protected void onEnable() {
+        // Register for value change events
+        registerEventListener(
+                config.getEventBus(),
+                ConfigValueEvent.class,
+                this::onValueChangeEvent
+        );
+    }
+
     @Override
-    public void disable() { /* Do nothing */ }
+    protected void onDisable() {
+        // Unregister from value change events
+        unregisterEventListener(
+                config.getEventBus(),
+                ConfigValueEvent.class,
+                this::onValueChangeEvent
+        );
+    }
+
     @Override
-    public void reload() {}
-    @Override
-    public void save() {}
-    @Override
-    public void onConfigChange(String key, Object oldValue, Object newValue) {
-        if (oldValue != null) {
-            history.computeIfAbsent(key, k -> new ArrayDeque<>()).push(oldValue);
+    protected void onCleanup() {
+        history.clear();
+    }
+
+    private void onValueChangeEvent(ConfigValueEvent event) {
+        if (event.getType() == ConfigValueEvent.Type.SET) {
+            String key = event.getFullPath();
+            Object oldValue = event.getOldValue();
+
+            if (oldValue != null) {
+                Deque<Object> keyHistory = history.computeIfAbsent(key, k -> new ArrayDeque<>());
+                keyHistory.push(oldValue);
+
+                // Limit history size
+                while (keyHistory.size() > maxHistorySize) {
+                    keyHistory.removeLast();
+                }
+            }
         }
     }
-    @Override
-    public boolean supportsConfig(AdvancedConfig config) { return true; }
-    @Override
-    public Map<String, Object> getModuleState() {
-        Map<String, Object> state = new HashMap<>();
-        for (var entry : history.entrySet()) {
-            state.put(entry.getKey(), new ArrayList<>(entry.getValue()));
-        }
-        return state;
-    }
-    @Override
-    public Object onGetValue(String key, Object value) {
-        return value;
-    }
+
     public boolean canRollback(String key) {
         Deque<Object> stack = history.get(key);
         return stack != null && !stack.isEmpty();
     }
+
     public Object rollback(String key) {
+        if (config == null) {
+            return null;
+        }
+
         Deque<Object> stack = history.get(key);
-        if(getConfig() == null || stack == null || stack.isEmpty()) {
+        if (stack == null || stack.isEmpty()) {
             return null;
         }
-        if(!isEnabled()) {
-            return null;
+
+        Object previousValue = stack.pop();
+        config.set(key, previousValue);
+        return previousValue;
+    }
+
+    public void clearHistory() {
+        history.clear();
+    }
+
+    public void clearHistory(String key) {
+        history.remove(key);
+    }
+
+    public int getHistorySize(String key) {
+        Deque<Object> stack = history.get(key);
+        return stack != null ? stack.size() : 0;
+    }
+
+    public Object peekHistory(String key) {
+        Deque<Object> stack = history.get(key);
+        return stack != null && !stack.isEmpty() ? stack.peek() : null;
+    }
+
+    public List<Object> getHistoryValues(String key) {
+        Deque<Object> stack = history.get(key);
+        if (stack == null || stack.isEmpty()) {
+            return Collections.emptyList();
         }
-        Object oldValue = stack.pop();
-        getConfig().setValue(key, oldValue);
-        return oldValue;
+        return new ArrayList<>(stack);
+    }
+
+    public Set<String> getTrackedKeys() {
+        return new HashSet<>(history.keySet());
+    }
+
+    public int getMaxHistorySize() {
+        return maxHistorySize;
+    }
+
+    public void setMaxHistorySize(int maxHistorySize) {
+        this.maxHistorySize = Math.max(1, maxHistorySize);
+
+        // Trim any histories that are now too large
+        for (Deque<Object> stack : history.values()) {
+            while (stack.size() > maxHistorySize) {
+                stack.removeLast();
+            }
+        }
+    }
+
+    public Map<String, Object> getAdditionalModuleState() {
+        Map<String, Object> state = new HashMap<>();
+        for (Map.Entry<String, Deque<Object>> entry : history.entrySet()) {
+            state.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+        }
+        state.put("maxHistorySize", maxHistorySize);
+        return state;
     }
 }

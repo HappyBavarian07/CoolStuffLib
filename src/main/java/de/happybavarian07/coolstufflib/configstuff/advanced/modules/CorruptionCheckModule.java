@@ -1,7 +1,7 @@
 package de.happybavarian07.coolstufflib.configstuff.advanced.modules;
 
-import de.happybavarian07.coolstufflib.configstuff.advanced.ConfigLogger;
-import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.AdvancedConfig;
+import de.happybavarian07.coolstufflib.logging.ConfigLogger;
+import de.happybavarian07.coolstufflib.configstuff.advanced.event.ConfigLifecycleEvent;
 import de.happybavarian07.coolstufflib.configstuff.advanced.modules.autogen.AutoGenModule;
 import de.happybavarian07.coolstufflib.configstuff.advanced.modules.autogen.templates.AutoGenTemplate;
 
@@ -9,193 +9,160 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-public class CorruptionCheckModule extends ConfigModule {
+public class CorruptionCheckModule extends AbstractBaseConfigModule {
     private AutoGenModule autoGenModule;
+    private boolean autoRepair = true;
+    private int backupCount = 0;
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 
-    @Override
-    public String getName() {
-        return "CorruptionCheckModule";
+    public CorruptionCheckModule() {
+        super("CorruptionCheckModule",
+              "Detects and repairs corrupted configuration files",
+              "1.0.0");
     }
 
     @Override
-    public void enable() {
-    }
-
-    @Override
-    public void disable() {
-    }
-
-    @Override
-    public void reload() {}
-
-    @Override
-    public void save() {}
-    
-    @Override
-    public void onConfigChange(String key, Object oldValue, Object newValue) {}
-
-    @Override
-    public Object onGetValue(String key, Object value) {
-        return value;
-    }
-
-    @Override
-    public Map<String, Object> getModuleState() {
-        return Map.of("enabled", isEnabled());
-    }
-
-    @Override
-    public void onAttach(AdvancedConfig config) {
-        super.onAttach(config);
-        if (config.hasModule("AutoGenModule")) {
+    protected void onInitialize() {
+        // Look for autogen module to use for repairs
+        if (config != null) {
             autoGenModule = (AutoGenModule) config.getModuleByName("AutoGenModule");
-            if (autoGenModule == null) {
-                throw new IllegalStateException("AutoGenModule is not properly initialized");
-            }
-        } else {
-            throw new IllegalStateException(getName() + " requires AutoGenModule to be enabled");
         }
     }
 
     @Override
-    public boolean supportsConfig(AdvancedConfig config) {
-        return config.hasModule("AutoGenModule");
+    protected void onEnable() {
+        // Register for config reload events to check for corruption
+        registerEventListener(
+            config.getEventBus(),
+            ConfigLifecycleEvent.class,
+            this::onConfigLifecycleEvent
+        );
+    }
+
+    @Override
+    protected void onDisable() {
+        // Unregister from config reload events
+        unregisterEventListener(
+            config.getEventBus(),
+            ConfigLifecycleEvent.class,
+            this::onConfigLifecycleEvent
+        );
+    }
+
+    @Override
+    protected void onCleanup() {
+        autoGenModule = null;
+    }
+
+    private void onConfigLifecycleEvent(ConfigLifecycleEvent event) {
+        if (event.getType() == ConfigLifecycleEvent.Type.RELOAD) {
+            checkCorruption();
+        }
     }
 
     public boolean checkCorruption() {
-        if (getConfig() == null || autoGenModule == null || !isEnabled()) {
-            ConfigLogger.warning("Cannot check corruption: " + 
-                (getConfig() == null ? "Config is null" : 
-                autoGenModule == null ? "AutoGenModule is null" : "Module is disabled"), getName(), true);
+        if (config == null || config.getFile() == null) {
             return false;
         }
+
+        File configFile = config.getFile();
 
         try {
-            Map<String, Object> currentConfig = getConfig().getValueMap();
-            Map<String, Object> templateMap = autoGenModule.getMergedTemplateMap();
-            return !hasMissingOrNullValues(templateMap, currentConfig);
-        } catch (Exception e) {
-            ConfigLogger.severe("Error checking config corruption: " + e.getMessage(), getName(), true);
-            return false;
-        }
-    }
-
-    public boolean checkCorruptionAndRepair(File configFile) {
-        if (getConfig() == null || autoGenModule == null || !isEnabled()) {
-            ConfigLogger.warning("Cannot repair corruption: " + 
-                (getConfig() == null ? "Config is null" : 
-                autoGenModule == null ? "AutoGenModule is null" : "Module is disabled"), getName(), true);
-            return false;
-        }
-
-        try {
-            Map<String, Object> currentConfig = getConfig().getValueMap();
-            Map<String, Object> templateMap = autoGenModule.getMergedTemplateMap();
-            
-            if (hasMissingOrNullValues(templateMap, currentConfig)) {
-                backupConfigFile(configFile);
-                repairConfig(templateMap, currentConfig);
-                getConfig().save();
-                return false;
-            }
-            return true;
-        } catch (Exception e) {
-            ConfigLogger.severe("Error during config repair: " + e.getMessage(), getName(), true);
-            try {
-                restoreFromTemplates(configFile);
-            } catch (Exception ex) {
-                ConfigLogger.severe("Failed to restore from templates: " + ex.getMessage(), getName(), true);
-            }
-            return false;
-        }
-    }
-
-    private boolean hasMissingOrNullValues(Map<String, Object> template, Map<String, Object> actual) {
-        for (Map.Entry<String, Object> entry : template.entrySet()) {
-            String key = entry.getKey();
-            Object templateValue = entry.getValue();
-            Object actualValue = actual.get(key);
-
-            if (!actual.containsKey(key) || actualValue == null) {
+            // Check if file exists and is readable
+            if (!configFile.exists() || !configFile.canRead()) {
+                repairCorruption("File does not exist or cannot be read");
                 return true;
             }
 
-            if (templateValue instanceof Map) {
-                if (!(actualValue instanceof Map) || 
-                    hasMissingOrNullValues((Map<String, Object>) templateValue, (Map<String, Object>) actualValue)) {
+            // Check if file size is 0
+            if (configFile.length() == 0) {
+                repairCorruption("File is empty");
+                return true;
+            }
+
+            // Attempt to validate structure
+            try {
+                Map<String, Object> configData = config.getRootSection().toSerializableMap();
+                if (configData == null || configData.isEmpty()) {
+                    repairCorruption("Configuration appears to be empty");
                     return true;
                 }
-            }
-        }
-        return false;
-    }
-
-    private void repairConfig(Map<String, Object> template, Map<String, Object> actual) {
-        checkAgainstTemplateAndRepair(actual, template);
-    }
-
-    private void backupConfigFile(File configFile) throws IOException {
-        if (configFile.exists()) {
-            File backupFile = new File(
-                configFile.getParentFile(), 
-                configFile.getName().replaceFirst("(\\.[^.]*)$", "_backup_" + System.currentTimeMillis() + "$1")
-            );
-            Files.copy(configFile.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            ConfigLogger.info("Created backup at: " + backupFile.getAbsolutePath(), getName(), false);
-        }
-    }
-
-    private void restoreFromTemplates(File configFile) throws IOException {
-        if (configFile.exists()) {
-            backupConfigFile(configFile);
-        }
-
-        Map<String, Object> configMap = new LinkedHashMap<>(getConfig().getValueMap());
-        for (AutoGenTemplate template : autoGenModule.getTemplates()) {
-            Map<String, Object> templateMap = template.toMap();
-            checkAgainstTemplateAndRepair(configMap, templateMap);
-        }
-
-        getConfig().setValueBulk(configMap);
-        getConfig().save();
-        ConfigLogger.info("Config restored from templates", getName(), false);
-    }
-
-    private void checkAgainstTemplateAndRepair(Map<String, Object> configMap, Map<String, Object> templateMap) {
-        for (Map.Entry<String, Object> entry : templateMap.entrySet()) {
-            String key = entry.getKey();
-            Object templateValue = entry.getValue();
-            Object actualValue = configMap.get(key);
-
-            if (!configMap.containsKey(key) || actualValue == null) {
-                configMap.put(key, deepCopy(templateValue));
-                ConfigLogger.info("Repaired missing/null value for key: " + key, getName(), false);
-                continue;
+            } catch (Exception e) {
+                repairCorruption("Exception while reading configuration: " + e.getMessage());
+                return true;
             }
 
-            if (templateValue instanceof Map && actualValue instanceof Map) {
-                repairConfig((Map<String, Object>) templateValue, (Map<String, Object>) actualValue);
-            }
+            return false;
+
+        } catch (Exception e) {
+            ConfigLogger.error("Error during corruption check: " + e.getMessage(), getName(), true);
+            return false;
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> T deepCopy(T object) {
-        if (object instanceof Map) {
-            Map<Object, Object> map = new LinkedHashMap<>();
-            ((Map<?, ?>) object).forEach((k, v) -> map.put(k, deepCopy(v)));
-            return (T) map;
-        } else if (object instanceof List) {
-            List<Object> list = new ArrayList<>();
-            ((List<?>) object).forEach(item -> list.add(deepCopy(item)));
-            return (T) list;
-        } else if (object instanceof Set) {
-            Set<Object> set = new LinkedHashSet<>();
-            ((Set<?>) object).forEach(item -> set.add(deepCopy(item)));
-            return (T) set;
+    private void repairCorruption(String reason) {
+        if (!autoRepair) {
+            ConfigLogger.warn("Corruption detected but auto-repair is disabled: " + reason, getName(), true);
+            return;
         }
-        return object;
+
+        try {
+            File configFile = config.getFile();
+
+            File backupDir = new File(configFile.getParentFile(), "corrupted_backups");
+            if (!backupDir.exists()) {
+                backupDir.mkdirs();
+            }
+
+            String timestamp = LocalDateTime.now().format(DATE_FORMATTER);
+            File backupFile = new File(backupDir, configFile.getName() + "." + timestamp + ".corrupted");
+
+            if (configFile.exists() && configFile.length() > 0) {
+                Files.copy(configFile.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                backupCount++;
+            }
+
+            if (autoGenModule != null && autoGenModule.getState() == ModuleState.ENABLED) {
+                AutoGenTemplate template = autoGenModule.getTemplateForFile(configFile.getName());
+                if (template != null) {
+                    template.writeToFile(configFile);
+                    ConfigLogger.info("Repaired corrupted config using template", getName(), true);
+                    config.reload();
+                    return;
+                }
+            }
+
+            // Create empty file as fallback
+            Files.writeString(configFile.toPath(), "# Auto-generated after corruption was detected\n");
+            ConfigLogger.info("Created new empty config file after corruption: " + reason, getName(), true);
+            config.reload();
+
+        } catch (IOException e) {
+            ConfigLogger.error("Failed to repair corruption: " + e.getMessage(), getName(), true);
+        }
+    }
+
+    public void setAutoRepair(boolean autoRepair) {
+        this.autoRepair = autoRepair;
+    }
+
+    public boolean isAutoRepair() {
+        return autoRepair;
+    }
+
+    public int getBackupCount() {
+        return backupCount;
+    }
+
+    public Map<String, Object> getAdditionalModuleState() {
+        Map<String, Object> state = new HashMap<>();
+        state.put("autoRepair", autoRepair);
+        state.put("backupCount", backupCount);
+        state.put("autoGenModuleAvailable", autoGenModule != null && autoGenModule.getState() == ModuleState.ENABLED);
+        return state;
     }
 }

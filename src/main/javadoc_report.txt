@@ -1,0 +1,745 @@
+STATS:
+Total missing Javadoc entries: 638
+Classes affected: 100
+Class breakdown:
+BaseAdvancedConfig.java: 66
+ValueAccessor.java: 27
+DefaultAdvancedConfigGroup.java: 25
+AdvancedConfigGroupImpl.java: 23
+SubCommand.java: 21
+StartUpLogger.java: 19
+ValidationModule.java: 18
+CommandManagerRegistry.java: 16
+ConditionBuilder.java: 16
+ConfigEventBus.java: 16
+AbstractBaseConfigModule.java: 15
+Parser.java: 15
+Config.java: 14
+ConfigManager.java: 14
+ConfigLockManager.java: 12
+FileBackup.java: 12
+CoolStuffLib.java: 11
+KeyBuilder.java: 11
+ExpressionEnginePool.java: 10
+Menu.java: 10
+AbstractGroupConfigModule.java: 9
+AutoGenModule.java: 9
+PlayerMenuUtility.java: 9
+PluginUtils.java: 9
+BackupManager.java: 8
+CommandManager.java: 8
+ConfigLogger.java: 8
+DefaultGroup.java: 8
+ConfigLifecycleEvent.java: 7
+HistoryModule.java: 7
+ModuleManager.java: 7
+SectionCommentManager.java: 7
+SectionMetadataManager.java: 7
+AutoGenUtils.java: 6
+ConfigChangeTrackerModule.java: 6
+LanguageCache.java: 6
+SectionManager.java: 6
+DefaultsModule.java: 5
+InMemoryBackupModule.java: 5
+MenuAddonManager.java: 5
+PaginatedList.java: 5
+PerPlayerLanguageHandler.java: 5
+ConfigCommentManager.java: 4
+ConfigMetadataManager.java: 4
+ConfigModuleEvent.java: 4
+DCommand.java: 4
+MenuAddon.java: 4
+SectionSerializationHelper.java: 4
+AutoGenTemplates.java: 3
+ConfigMigrationUtility.java: 3
+ConfigValueEvent.java: 3
+CustomPlayerSelector.java: 3
+DefaultGroupConfigModule.java: 3
+HeadMaterialCondition.java: 3
+LanguageConfig.java: 3
+MathOperations.java: 3
+MenuListener.java: 3
+MigrationContext.java: 3
+NotificationModule.java: 3
+PluginFileLogger.java: 3
+SimpleMapTemplate.java: 3
+SimpleObjectTemplate.java: 3
+SimpleValueTemplate.java: 3
+ConfigEvent.java: 2
+ConfigSectionEvent.java: 2
+CorruptionCheckModule.java: 2
+MigrationModule.java: 2
+OldLanguageFileUpdater.java: 2
+PersistentHistoryModule.java: 2
+Placeholder.java: 2
+RegexFileFilter.java: 2
+VersioningModule.java: 2
+AdditionOperation.java: 1
+AndCondition.java: 1
+BackupExecuteRunnable.java: 1
+ConfigMetadataEvent.java: 1
+ConfigUpdater.java: 1
+CoolStuffLibBuilder.java: 1
+DivisionOperation.java: 1
+EqualCondition.java: 1
+FunctionExample.java: 1
+GreaterThanCondition.java: 1
+GreaterThanOrEqualCondition.java: 1
+LanguageFileUpdater.java: 1
+LessThanCondition.java: 1
+LessThanOrEqualCondition.java: 1
+MathCondition.java: 1
+ModuloOperation.java: 1
+MultiplicationOperation.java: 1
+NaturalOrderComparator.java: 1
+NotCondition.java: 1
+NotEqualCondition.java: 1
+OldConfigUpdater.java: 1
+OrCondition.java: 1
+PaginatedMenu.java: 1
+PowerOperation.java: 1
+SectionFactory.java: 1
+SubtractionOperation.java: 1
+TernaryCondition.java: 1
+TypeUtil.java: 1
+
+---
+
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\CoolStuffLib.java:108 setup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\CoolStuffLib.java:172 isLanguageManagerEnabled
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\CoolStuffLib.java:176 isCommandManagerRegistryEnabled
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\CoolStuffLib.java:180 isMenuAddonManagerEnabled
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\CoolStuffLib.java:184 isPlaceholderAPIEnabled
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\CoolStuffLib.java:188 isSendSyntaxOnArgsZero
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\CoolStuffLib.java:192 executeMethod
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\CoolStuffLib.java:217 writeToLog
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\CoolStuffLib.java:239 getPlayerMenuUtility
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\CoolStuffLib.java:268 createPlayerMenuUtility
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\CoolStuffLib.java:286 removePlayerMenuUtility
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\CoolStuffLibBuilder.java:145 createCoolStuffLib
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\BackupExecuteRunnable.java:19 run
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\BackupManager.java:50 stopBackupScheduler
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\BackupManager.java:57 addFileBackup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\BackupManager.java:69 removeFileBackup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\BackupManager.java:79 startBackup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\BackupManager.java:94 loadBackup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\BackupManager.java:100 getFileBackup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\BackupManager.java:104 backupAllFileBackups
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\BackupManager.java:131 deleteBackupFile
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\FileBackup.java:95 fillBackupsDoneIfEmpty
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\FileBackup.java:117 backup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\FileBackup.java:147 removeLastBackup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\FileBackup.java:152 removeOldestBackup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\FileBackup.java:186 loadBackup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\FileBackup.java:216 loadSpecificFilesFromBackup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\FileBackup.java:248 deleteZipBackup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\FileBackup.java:268 deleteZipBackup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\FileBackup.java:276 getBackupFileFromNumber
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\FileBackup.java:286 getBackupFromFileName
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\FileBackup.java:336 addBackupDone
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\FileBackup.java:347 compareTo
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\RegexFileFilter.java:15 accept
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\RegexFileFilter.java:20 toString
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManager.java:88 autoRegisterPermission
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManager.java:97 onCommand
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManager.java:191 hasPermission
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManager.java:203 handleSubCommand
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManager.java:219 onTabComplete
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManager.java:265 setup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManager.java:282 getSubCommand
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManager.java:301 registerSubCommand
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManagerRegistry.java:110 unregisterCommand
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManagerRegistry.java:163 register
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManagerRegistry.java:228 permissionExistsAlready
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManagerRegistry.java:255 unregister
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManagerRegistry.java:312 unregisterAll
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManagerRegistry.java:353 getCommandManager
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManagerRegistry.java:375 isPlayerRequired
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManagerRegistry.java:392 isOpRequired
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManagerRegistry.java:416 allowOnlySubCommandArgsThatFitToSubArgs
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManagerRegistry.java:432 senderTypeSpecificSubArgs
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManagerRegistry.java:451 minArgs
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManagerRegistry.java:466 maxArgs
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManagerRegistry.java:484 getSubCommands
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManagerRegistry.java:514 onCommand
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManagerRegistry.java:618 onTabComplete
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\CommandManagerRegistry.java:679 isCommandManagerRegistryReady
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\DCommand.java:45 tabComplete
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\DCommand.java:50 execute
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\DCommand.java:60 setProperty
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\DCommand.java:81 register
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\NaturalOrderComparator.java:41 compare
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\PaginatedList.java:33 maxItemsPerPage
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\PaginatedList.java:49 sort
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\PaginatedList.java:483 getPage
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\PaginatedList.java:488 containsPage
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\PaginatedList.java:500 compare
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:38 preInit
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:45 postInit
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:53 isPlayerRequired
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:65 isOpRequired
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:83 allowOnlySubCommandArgsThatFitToSubArgs
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:90 senderTypeSpecificSubArgs
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:102 minArgs
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:116 maxArgs
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:131 onPlayerCommand
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:142 onConsoleCommand
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:154 handleCommand
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:158 name
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:160 info
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:162 aliases
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:182 subArgs
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:184 syntax
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:186 permissionAsPermission
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:190 permissionAsString
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:192 autoRegisterPermission
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:210 format
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:238 compareTo
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\Config.java:36 reload
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\Config.java:47 save
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\Config.java:58 set
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\Config.java:62 contains
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\Config.java:66 getString
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\Config.java:70 getInt
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\Config.java:74 getBoolean
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\Config.java:78 getDouble
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\Config.java:82 getLong
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\Config.java:86 getStringList
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\Config.java:94 getIntList
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\Config.java:103 get
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\Config.java:114 delete
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\Config.java:119 compareTo
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\ConfigManager.java:29 getConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\ConfigManager.java:33 reloadConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\ConfigManager.java:39 createConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\ConfigManager.java:51 createConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\ConfigManager.java:66 deleteConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\ConfigManager.java:73 loadConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\ConfigManager.java:86 loadConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\ConfigManager.java:99 loadConfigFromResource
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\ConfigManager.java:108 saveConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\ConfigManager.java:118 setConfigValue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\ConfigManager.java:124 getConfigValue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\ConfigManager.java:131 reloadAllConfigs
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\ConfigManager.java:137 saveAllConfigs
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\ConfigManager.java:147 deleteAllConfigs
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\ConfigUpdater.java:41 update
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\KeyBuilder.java:26 parseLine
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\KeyBuilder.java:53 isEmpty
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\KeyBuilder.java:58 isSubKeyOf
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\KeyBuilder.java:63 isSubKey
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\KeyBuilder.java:67 isSubKeyOf
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\KeyBuilder.java:75 getIndents
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\KeyBuilder.java:86 isConfigSection
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\KeyBuilder.java:91 isConfigSectionWithKeys
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\KeyBuilder.java:97 removeLastKey
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\KeyBuilder.java:110 toString
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\KeyBuilder.java:115 clone
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\OldConfigUpdater.java:34 update
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:37 addConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:45 removeConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:52 removeConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:60 getConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:65 containsConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:70 containsConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:75 getConfigValue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:81 getConfigValue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:87 getValuesFromAll
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:99 getValuesFromAll
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:111 getFirstValue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:122 getFirstValue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:128 containsKeyInAny
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:147 setValueInAll
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:159 registerGroupModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:167 unregisterGroupModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:175 getGroupModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:180 hasGroupModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:185 enableGroupModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:193 disableGroupModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:217 equals
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:225 hashCode
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupImpl.java:230 toString
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:90 lockModuleRead
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:95 unlockModuleRead
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:100 lockModuleWrite
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:105 unlockModuleWrite
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:110 lockValuesRead
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:115 unlockValuesRead
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:120 lockValuesWrite
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:125 unlockValuesWrite
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:130 withModuleReadLock
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:135 withValuesReadLock
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:140 withModulesWriteLock
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:145 withValuesWriteLock
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:155 getSection
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:160 createSection
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:165 hasSection
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:170 removeSection
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:175 get
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:180 get
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:185 getString
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:190 getString
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:195 getBoolean
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:200 getBoolean
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:205 getInt
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:210 getInt
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:215 getLong
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:220 getLong
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:225 getDouble
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:230 getDouble
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:235 getFloat
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:240 getFloat
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:245 getList
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:250 getList
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:255 getStringList
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:260 getStringList
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:265 get
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:270 getValue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:275 getOptionalValue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:280 set
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:290 remove
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:295 containsKey
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:300 clear
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:305 registerModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:310 unregisterModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:315 hasModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:320 hasModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:325 getModuleByName
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:330 enableModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:335 disableModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:345 getKeys
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:350 createCustomSection
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:355 copyFrom
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:360 hasMetadata
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:365 removeMetadata
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:375 getMetadata
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:380 addMetadata
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:385 setComment
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:402 getComment
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:407 removeComment
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:417 hasComment
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:448 detectAndConvertCollectionsRecursive
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:495 detectAndConvertCollections
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:500 save
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:503 reload
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:506 isLoaded
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:522 migrate
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\BaseAdvancedConfig.java:533 migrate
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:41 addConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:60 removeConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:65 removeConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:73 getConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:78 containsConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:83 containsConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:88 getConfigValue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:100 getConfigValue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:106 getValuesFromAll
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:118 getValuesFromAll
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:130 getFirstValue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:141 getFirstValue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:147 containsKeyInAny
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:164 setValueInAll
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:176 registerGroupModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:184 unregisterGroupModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:192 getGroupModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:197 hasGroupModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:202 enableGroupModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:210 disableGroupModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:217 registerDefaultModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:233 unregisterDefaultModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:237 getDefaultModuleByName
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:245 hasDefaultModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultAdvancedConfigGroup.java:250 toString
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultGroupConfigModule.java:59 onConfigAdded
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultGroupConfigModule.java:83 onConfigRemoved
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\DefaultGroupConfigModule.java:95 appliesTo
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigCommentManager.java:10 setComment
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigCommentManager.java:15 getComment
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigCommentManager.java:20 removeComment
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigCommentManager.java:30 hasComment
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigLockManager.java:10 lockModuleRead
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigLockManager.java:11 unlockModuleRead
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigLockManager.java:12 lockModuleWrite
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigLockManager.java:13 unlockModuleWrite
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigLockManager.java:14 lockValuesRead
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigLockManager.java:15 unlockValuesRead
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigLockManager.java:16 lockValuesWrite
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigLockManager.java:17 unlockValuesWrite
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigLockManager.java:18 withModuleReadLock
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigLockManager.java:19 withValuesReadLock
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigLockManager.java:20 withModulesWriteLock
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigLockManager.java:21 withValuesWriteLock
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigMetadataManager.java:19 hasMetadata
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigMetadataManager.java:24 removeMetadata
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigMetadataManager.java:34 getMetadata
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigMetadataManager.java:39 addMetadata
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\SectionManager.java:25 getSection
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\SectionManager.java:29 createSection
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\SectionManager.java:34 hasSection
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\SectionManager.java:38 removeSection
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\SectionManager.java:48 getKeys
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\SectionManager.java:52 createCustomSection
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:23 get
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:27 get
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:31 getString
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:35 getString
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:39 getBoolean
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:43 getBoolean
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:47 getInt
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:51 getInt
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:55 getLong
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:59 getLong
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:63 getDouble
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:67 getDouble
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:71 getFloat
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:75 getFloat
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:79 getList
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:83 getList
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:87 getStringList
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:91 getStringList
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:95 get
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:99 getValue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:103 getOptionalValue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:107 set
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:116 setBulk
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:121 remove
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:130 containsKey
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:134 clear
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java:139 copyFrom
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEvent.java:66 isCancellable
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEvent.java:75 isCancelled
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus.java:20 subscribe
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus.java:24 subscribe
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus.java:28 subscribe
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus.java:34 unsubscribe
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus.java:41 unsubscribeAll
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus.java:45 unsubscribeAll
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus.java:50 publish
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus.java:98 publishAsync
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus.java:117 isAsyncEnabled
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus.java:121 shutdown
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus.java:184 filter
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus.java:201 isAsync
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus.java:219 withPriority
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus.java:224 withAsync
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus.java:229 withCondition
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus.java:234 subscribe
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigLifecycleEvent.java:13 configCopied
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigLifecycleEvent.java:18 configLoad
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigLifecycleEvent.java:22 configSave
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigLifecycleEvent.java:26 configReload
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigLifecycleEvent.java:30 configCreate
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigLifecycleEvent.java:34 configDelete
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigLifecycleEvent.java:38 configClear
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigMetadataEvent.java:32 metadataAdded
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigModuleEvent.java:10 moduleRegistered
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigModuleEvent.java:14 moduleUnregistered
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigModuleEvent.java:18 moduleEnabled
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigModuleEvent.java:22 moduleDisabled
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigSectionEvent.java:12 sectionCreated
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigSectionEvent.java:16 sectionRemoved
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigValueEvent.java:13 valueSet
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigValueEvent.java:17 valueGet
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigValueEvent.java:21 valueRemove
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\migration\ConfigMigrationUtility.java:11 migrateFromLegacy
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\migration\ConfigMigrationUtility.java:25 migrateFromLegacyAdvanced
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\migration\ConfigMigrationUtility.java:48 detectAndConvertCollections
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\migration\MigrationContext.java:10 isLegacyCompatibilityEnabled
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\migration\MigrationContext.java:18 setMetadata
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\migration\MigrationContext.java:22 getMetadata
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractBaseConfigModule.java:53 initialize
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractBaseConfigModule.java:68 onInitialize
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractBaseConfigModule.java:71 enable
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractBaseConfigModule.java:93 onEnable
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractBaseConfigModule.java:96 disable
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractBaseConfigModule.java:115 onDisable
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractBaseConfigModule.java:118 cleanup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractBaseConfigModule.java:148 onCleanup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractBaseConfigModule.java:155 addDependency
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractBaseConfigModule.java:159 removeDependency
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractBaseConfigModule.java:164 isConfigured
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractBaseConfigModule.java:169 configure
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractBaseConfigModule.java:174 registerEventListener
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractBaseConfigModule.java:187 copyFrom
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractBaseConfigModule.java:214 unregisterEventListener
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractGroupConfigModule.java:42 initialize
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractGroupConfigModule.java:51 enable
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractGroupConfigModule.java:60 disable
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractGroupConfigModule.java:69 cleanup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractGroupConfigModule.java:77 isEnabled
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractGroupConfigModule.java:81 onInitialize
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractGroupConfigModule.java:83 onEnable
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractGroupConfigModule.java:85 onDisable
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractGroupConfigModule.java:87 onCleanup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ConfigChangeTrackerModule.java:190 getFilteredChanges
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ConfigChangeTrackerModule.java:200 clearChanges
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ConfigChangeTrackerModule.java:217 isTrackValueChanges
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ConfigChangeTrackerModule.java:233 isTrackSectionChanges
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ConfigChangeTrackerModule.java:254 exportToMap
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ConfigChangeTrackerModule.java:263 saveToFile
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\CorruptionCheckModule.java:67 checkCorruption
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\CorruptionCheckModule.java:153 isAutoRepair
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\DefaultsModule.java:72 setDefault
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\DefaultsModule.java:94 getDefault
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\DefaultsModule.java:98 hasDefault
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\DefaultsModule.java:102 removeDefault
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\DefaultsModule.java:106 clearDefaults
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\HistoryModule.java:70 canRollback
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\HistoryModule.java:75 rollback
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\HistoryModule.java:90 clearHistory
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\HistoryModule.java:94 clearHistory
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\HistoryModule.java:98 getHistorySize
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\HistoryModule.java:103 peekHistory
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\HistoryModule.java:108 getHistoryValues
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\InMemoryBackupModule.java:68 createBackup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\InMemoryBackupModule.java:85 restoreBackup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\InMemoryBackupModule.java:105 deleteBackup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\InMemoryBackupModule.java:109 clearBackups
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\InMemoryBackupModule.java:117 getBackup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\MigrationModule.java:72 addMigration
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\MigrationModule.java:76 migrateTo
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ModuleManager.java:21 registerModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ModuleManager.java:34 unregisterModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ModuleManager.java:46 hasModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ModuleManager.java:49 hasModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ModuleManager.java:55 getModuleByName
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ModuleManager.java:61 enableModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ModuleManager.java:68 disableModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\NotificationModule.java:65 addListener
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\NotificationModule.java:71 removeListener
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\NotificationModule.java:75 hasListener
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\PersistentHistoryModule.java:71 addHistoryEntry
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\PersistentHistoryModule.java:91 getHistoryForKey
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.java:57 validateValue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.java:73 addRule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.java:80 removeRule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.java:85 hasRule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.java:94 hasErrors
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.java:99 getRules
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.java:107 hasError
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.java:111 getError
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.java:115 addStringValidator
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.java:127 addValidator
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.java:131 addPatternValidator
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.java:135 addPatternValidator
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.java:144 validateAllValues
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.java:166 validate
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.java:185 validate
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.java:212 validate
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.java:234 validate
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.java:261 validate
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\VersioningModule.java:44 saveVersion
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\VersioningModule.java:93 getVersion
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenModule.java:23 registerTemplate
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenModule.java:31 mapTemplateToFile
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenModule.java:39 mapTemplateToFile
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenModule.java:48 getTemplateById
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenModule.java:52 getTemplateByName
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenModule.java:57 getTemplateForFile
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenModule.java:78 getKeyByPath
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenModule.java:89 getGroupByPath
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenModule.java:157 applyTemplateToConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenUtils.java:11 createDefaultAutoGenModule
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenUtils.java:15 createGroup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenUtils.java:18 createKey
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenUtils.java:22 getOrCreateGroupByPath
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenUtils.java:36 createTemplateFromObject
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenUtils.java:40 createTemplateFromMap
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\misc\DefaultGroup.java:57 getGroup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\misc\DefaultGroup.java:62 getKey
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\misc\DefaultGroup.java:67 findGroups
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\misc\DefaultGroup.java:78 findKeys
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\misc\DefaultGroup.java:90 findKeys
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\misc\DefaultGroup.java:102 findGroups
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\misc\DefaultGroup.java:112 addGroup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\misc\DefaultGroup.java:117 addKey
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\templates\AutoGenTemplates.java:8 fromMap
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\templates\AutoGenTemplates.java:12 fromObject
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\templates\AutoGenTemplates.java:16 fromValue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\templates\SimpleMapTemplate.java:31 toMap
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\templates\SimpleMapTemplate.java:36 applyTo
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\templates\SimpleMapTemplate.java:41 writeToFile
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\templates\SimpleObjectTemplate.java:29 toMap
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\templates\SimpleObjectTemplate.java:37 applyTo
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\templates\SimpleObjectTemplate.java:46 writeToFile
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\templates\SimpleValueTemplate.java:30 toMap
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\templates\SimpleValueTemplate.java:53 applyTo
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\templates\SimpleValueTemplate.java:62 writeToFile
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\internal\SectionFactory.java:10 createCustomSection
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\internal\SectionSerializationHelper.java:11 toMap
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\internal\SectionSerializationHelper.java:18 toList
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\internal\SectionSerializationHelper.java:25 toSet
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\internal\SectionSerializationHelper.java:32 toSerializableMap
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\meta\SectionCommentManager.java:13 setComment
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\meta\SectionCommentManager.java:20 getComment
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\meta\SectionCommentManager.java:23 hasComment
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\meta\SectionCommentManager.java:26 removeComment
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\meta\SectionCommentManager.java:32 clearComments
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\meta\SectionCommentManager.java:35 copyFrom
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\meta\SectionCommentManager.java:40 deepClone
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\meta\SectionMetadataManager.java:12 addMetadata
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\meta\SectionMetadataManager.java:16 getMetadata
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\meta\SectionMetadataManager.java:24 hasMetadata
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\meta\SectionMetadataManager.java:27 removeMetadata
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\meta\SectionMetadataManager.java:30 clearMetadata
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\meta\SectionMetadataManager.java:33 copyFrom
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\meta\SectionMetadataManager.java:38 deepClone
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\LanguageCache.java:23 setup
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\LanguageCache.java:31 addData
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\LanguageCache.java:40 getData
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\LanguageCache.java:45 containsKey
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\LanguageCache.java:49 removeData
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\LanguageCache.java:53 clearCache
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\LanguageConfig.java:50 reloadConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\LanguageConfig.java:81 saveConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\LanguageConfig.java:96 saveDefaultConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\LanguageFileUpdater.java:25 update
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\OldLanguageFileUpdater.java:15 checkForUpdates
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\OldLanguageFileUpdater.java:69 updateFile
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\PerPlayerLanguageHandler.java:25 getPlayerLanguageName
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\PerPlayerLanguageHandler.java:29 getPlayerLanguage
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\PerPlayerLanguageHandler.java:43 setPlayerLanguage
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\PerPlayerLanguageHandler.java:50 removePlayerLanguage
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\PerPlayerLanguageHandler.java:56 saveConfig
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\Placeholder.java:50 replace
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\Placeholder.java:59 stringContainsPlaceholder
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ConditionBuilder.java:39 equal
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ConditionBuilder.java:51 notEqual
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ConditionBuilder.java:63 greaterThan
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ConditionBuilder.java:75 lessThan
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ConditionBuilder.java:87 greaterThanOrEqual
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ConditionBuilder.java:99 lessThanOrEqual
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ConditionBuilder.java:114 math
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ConditionBuilder.java:129 and
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ConditionBuilder.java:140 or
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ConditionBuilder.java:151 not
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ConditionBuilder.java:164 ternary
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ConditionBuilder.java:177 ternary
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ConditionBuilder.java:188 trueMaterial
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ConditionBuilder.java:201 falseMaterial
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ConditionBuilder.java:214 defaultMaterial
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ConditionBuilder.java:226 build
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ExpressionEnginePool.java:71 getEngineForLanguage
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ExpressionEnginePool.java:85 getEngineForPlayer
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ExpressionEnginePool.java:109 addEngineForLanguage
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ExpressionEnginePool.java:123 updatePlayerEngine
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ExpressionEnginePool.java:134 clearPlayerEngine
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ExpressionEnginePool.java:143 clearLanguageEngine
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ExpressionEnginePool.java:150 registerGlobalFunction
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ExpressionEnginePool.java:159 registerFunctionForLanguage
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ExpressionEnginePool.java:166 unregisterGlobalFunction
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ExpressionEnginePool.java:175 unregisterFunctionForLanguage
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\FunctionExample.java:8 main
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser.java:58 parse
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser.java:97 parseConditionalChain
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser.java:403 accept
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser.java:443 accept
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser.java:460 accept
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser.java:475 accept
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser.java:488 accept
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser.java:501 accept
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser.java:514 accept
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser.java:529 accept
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser.java:546 accept
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser.java:561 accept
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser.java:576 accept
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser.java:593 accept
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser.java:606 accept
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\TypeUtil.java:4 convert
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\AndCondition.java:41 isTrue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\EqualCondition.java:42 isTrue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\GreaterThanCondition.java:44 isTrue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\GreaterThanOrEqualCondition.java:42 isTrue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\HeadMaterialCondition.java:46 isTrue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\HeadMaterialCondition.java:85 isTexture
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\HeadMaterialCondition.java:89 isHead
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\LessThanCondition.java:42 isTrue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\LessThanOrEqualCondition.java:42 isTrue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\MathCondition.java:59 isTrue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\NotCondition.java:38 isTrue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\NotEqualCondition.java:42 isTrue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\OrCondition.java:41 isTrue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\TernaryCondition.java:59 isTrue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\operations\AdditionOperation.java:9 perform
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\operations\DivisionOperation.java:9 perform
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\operations\MathOperations.java:27 registerOperation
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\operations\MathOperations.java:37 getOperation
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\operations\MathOperations.java:59 performOperation
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\operations\ModuloOperation.java:9 perform
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\operations\MultiplicationOperation.java:9 perform
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\operations\PowerOperation.java:9 perform
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\operations\SubtractionOperation.java:9 perform
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\logging\ConfigLogger.java:19 initialize
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\logging\ConfigLogger.java:33 info
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\logging\ConfigLogger.java:38 warning
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\logging\ConfigLogger.java:43 error
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\logging\ConfigLogger.java:48 error
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\logging\ConfigLogger.java:62 debug
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\logging\ConfigLogger.java:71 isDebugEnabled
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\logging\ConfigLogger.java:89 warn
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\Menu.java:55 handleMenu
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\Menu.java:58 handleOpenMenu
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\Menu.java:61 handleCloseMenu
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\Menu.java:64 setMenuItems
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\Menu.java:96 legacyServer
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\Menu.java:111 open
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\Menu.java:154 openThreadSafe
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\Menu.java:176 setFillerGlass
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\Menu.java:194 makeItem
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\Menu.java:216 getSlot
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\MenuAddon.java:18 setMenuAddonItems
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\MenuAddon.java:20 handleMenu
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\MenuAddon.java:22 onOpenEvent
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\MenuAddon.java:24 onCloseEvent
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\MenuAddonManager.java:18 addMenuAddon
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\MenuAddonManager.java:25 removeMenuAddon
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\MenuAddonManager.java:34 getMenuAddons
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\MenuAddonManager.java:41 hasMenuAddon
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\MenuAddonManager.java:52 isMenuAddonManagerReady
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\MenuListener.java:17 onMenuClick
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\MenuListener.java:43 onInvClose
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\MenuListener.java:60 onInvOpen
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\PaginatedMenu.java:25 addMenuBorder
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\PlayerMenuUtility.java:191 getData
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\PlayerMenuUtility.java:205 getData
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\PlayerMenuUtility.java:225 getData
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\PlayerMenuUtility.java:239 getData
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\PlayerMenuUtility.java:259 setData
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\PlayerMenuUtility.java:276 addData
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\PlayerMenuUtility.java:288 removeData
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\PlayerMenuUtility.java:300 replaceData
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\PlayerMenuUtility.java:314 hasData
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\misc\CustomPlayerSelector.java:100 handleMenu
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\misc\CustomPlayerSelector.java:196 handleOpenMenu
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\misc\CustomPlayerSelector.java:201 handleCloseMenu
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\PluginFileLogger.java:49 writeToLog
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\PluginFileLogger.java:70 writeToLog
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\PluginFileLogger.java:95 createLogFile
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\PluginUtils.java:27 copyURLToFile
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\PluginUtils.java:78 load
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\PluginUtils.java:82 load
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\PluginUtils.java:119 load
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\PluginUtils.java:133 getPluginByName
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\PluginUtils.java:144 getPluginNames
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\PluginUtils.java:152 unload
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\PluginUtils.java:253 reload
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\PluginUtils.java:264 downloadPluginFromSpiget
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\StartUpLogger.java:44 create
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\StartUpLogger.java:48 spacer
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\StartUpLogger.java:58 coloredSpacer
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\StartUpLogger.java:64 getColoredSpacer
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\StartUpLogger.java:68 emptySpacer
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\StartUpLogger.java:78 message
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\StartUpLogger.java:92 getMessage
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\StartUpLogger.java:97 coloredMessage
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\StartUpLogger.java:103 getColoredMessage
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\StartUpLogger.java:107 dataClientMessage
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\StartUpLogger.java:126 dataClientMessage
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\StartUpLogger.java:149 rawMessage
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\StartUpLogger.java:155 messages
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\StartUpLogger.java:165 rawMessages
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\StartUpLogger.java:188 addMessageToQueue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\StartUpLogger.java:197 addMessageToQueue
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\StartUpLogger.java:204 enableMessageSystem
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\StartUpLogger.java:210 isMessageSystemEnabled
+Missing Javadoc: E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\StartUpLogger.java:214 disableMessageSystem

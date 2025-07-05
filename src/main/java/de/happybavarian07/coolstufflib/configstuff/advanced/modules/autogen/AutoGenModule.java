@@ -1,7 +1,7 @@
 package de.happybavarian07.coolstufflib.configstuff.advanced.modules.autogen;
 
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.AdvancedConfig;
-import de.happybavarian07.coolstufflib.configstuff.advanced.modules.ConfigModule;
+import de.happybavarian07.coolstufflib.configstuff.advanced.modules.AbstractBaseConfigModule;
 import de.happybavarian07.coolstufflib.configstuff.advanced.modules.autogen.misc.DefaultGroup;
 import de.happybavarian07.coolstufflib.configstuff.advanced.modules.autogen.misc.Group;
 import de.happybavarian07.coolstufflib.configstuff.advanced.modules.autogen.misc.Key;
@@ -9,14 +9,66 @@ import de.happybavarian07.coolstufflib.configstuff.advanced.modules.autogen.temp
 
 import java.util.*;
 
-public class AutoGenModule extends ConfigModule {
-    private final List<AutoGenTemplate> templates = new ArrayList<>();
+public class AutoGenModule extends AbstractBaseConfigModule {
     private final Group rootGroup = new DefaultGroup("", null);
-    private AdvancedConfig config;
 
-    public void addTemplate(AutoGenTemplate template) {
-        templates.add(template);
+    private final Map<UUID, AutoGenTemplate> templateRegistry = new HashMap<>();
+    private final Map<String, UUID> nameToTemplateIdMap = new HashMap<>();
+    private final Map<String, UUID> fileToTemplateIdMap = new HashMap<>();
+
+    public AutoGenModule() {
+        super("AutoGenModule", "Automatically generates config structure from templates", "1.0.0");
+    }
+
+    public UUID registerTemplate(AutoGenTemplate template, String templateName) {
+        UUID templateId = UUID.randomUUID();
+        templateRegistry.put(templateId, template);
+        nameToTemplateIdMap.put(templateName, templateId);
         template.applyTo(rootGroup);
+        return templateId;
+    }
+
+    public void mapTemplateToFile(UUID templateId, String fileName) {
+        if (templateRegistry.containsKey(templateId)) {
+            fileToTemplateIdMap.put(fileName, templateId);
+        } else {
+            throw new IllegalArgumentException("Template with ID " + templateId + " is not registered");
+        }
+    }
+
+    public void mapTemplateToFile(String templateName, String fileName) {
+        UUID templateId = nameToTemplateIdMap.get(templateName);
+        if (templateId != null) {
+            fileToTemplateIdMap.put(fileName, templateId);
+        } else {
+            throw new IllegalArgumentException("Template with name " + templateName + " is not registered");
+        }
+    }
+
+    public AutoGenTemplate getTemplateById(UUID templateId) {
+        return templateRegistry.get(templateId);
+    }
+
+    public AutoGenTemplate getTemplateByName(String templateName) {
+        UUID templateId = nameToTemplateIdMap.get(templateName);
+        return templateId != null ? templateRegistry.get(templateId) : null;
+    }
+
+    public AutoGenTemplate getTemplateForFile(String fileName) {
+        UUID templateId = fileToTemplateIdMap.get(fileName);
+        return templateId != null ? templateRegistry.get(templateId) : null;
+    }
+
+    public Collection<AutoGenTemplate> getAllTemplates() {
+        return templateRegistry.values();
+    }
+
+    public Set<UUID> getAllTemplateIds() {
+        return templateRegistry.keySet();
+    }
+
+    public Map<String, UUID> getTemplateNameToIdMap() {
+        return new HashMap<>(nameToTemplateIdMap);
     }
 
     public Group getRootGroup() {
@@ -46,113 +98,66 @@ public class AutoGenModule extends ConfigModule {
     }
 
     @Override
-    public String getName() {
-        return "AutoGenModule";
+    protected void onInitialize() {
+        // Initialization logic
     }
 
     @Override
-    public void enable() { /* No-op */ }
-
-    @Override
-    public void disable() { /* No-op */ }
-
-    @Override
-    public void reload() {
+    protected void onEnable() {
+        // Enable logic
     }
 
     @Override
-    public void save() {
+    protected void onDisable() {
+        // Disable logic
+    }
+
+    @Override
+    protected void onCleanup() {
+        templateRegistry.clear();
+        nameToTemplateIdMap.clear();
+        fileToTemplateIdMap.clear();
+    }
+
+    @Override
+    public Set<String> getDependencies() {
+        return dependencies;
+    }
+
+    @Override
+    public boolean isConfigured() {
+        return moduleConfiguration != null;
+    }
+
+    @Override
+    public void configure(Map<String, Object> configuration) {
+        this.moduleConfiguration = configuration;
+        // Apply configuration
     }
 
     private void setAllKeysRecursive(Group group, AdvancedConfig config) {
         for (Key key : group.getKeys()) {
             String fullPath = group.getFullPath() + "." + key.getName();
-            if (config.get(fullPath) == null && key.getValue() != null) {
-                config.setValue(fullPath, key.getValue());
+            if (fullPath.startsWith(".")) {
+                fullPath = fullPath.substring(1);
             }
+            config.set(fullPath, key.getValue());
         }
-        for (Group sub : group.getSubGroups()) {
-            setAllKeysRecursive(sub, config);
+
+        for (Group subGroup : group.getSubGroups()) {
+            setAllKeysRecursive(subGroup, config);
         }
     }
 
     @Override
-    public void onAttach(AdvancedConfig config) {
-        this.config = config;
-        // Generate config from templates
-        for (AutoGenTemplate template : templates) {
-            template.applyTo(rootGroup);
+    protected Map<String, Object> getAdditionalModuleState() {
+        return Map.of();
+    }
+
+    public void applyTemplateToConfig(String templateName) {
+        Group group = getGroupByPath(getTemplateByName(templateName).getBasePath());
+        if (group != null) {
+            setAllKeysRecursive(group, config);
         }
-
-        setAllKeysRecursive(rootGroup, config);
-        config.save();
-    }
-
-    @Override
-    public void onDetach() {
-        this.config = null;
-    }
-
-    @Override
-    public void onConfigChange(String key, Object oldValue, Object newValue) {
-    }
-
-    @Override
-    public boolean supportsConfig(AdvancedConfig config) {
-        return true;
-    }
-
-    @Override
-    public Map<String, Object> getModuleState() {
-        return Map.of("templateCount", templates.size());
-    }
-
-    @Override
-    public Object onGetValue(String key, Object value) {
-        return value;
-    }
-
-    public List<AutoGenTemplate> getTemplates() {
-        return java.util.Collections.unmodifiableList(templates);
-    }
-
-    /**
-     * Returns a merged map of all templates, with each template's map inserted at its base path.
-     */
-    public Map<String, Object> getMergedTemplateMap() {
-        Map<String, Object> merged = new java.util.LinkedHashMap<>();
-        for (AutoGenTemplate template : templates) {
-            String base = template.getBasePath();
-            Map<String, Object> map = template.toMap();
-            if (base == null || base.isEmpty()) {
-                mergeInto(merged, map);
-            } else {
-                setValueByPath(merged, base, map);
-            }
-        }
-        return merged;
-    }
-
-    private void mergeInto(Map<String, Object> target, Map<String, Object> source) {
-        for (Map.Entry<String, Object> entry : source.entrySet()) {
-            if (entry.getValue() instanceof Map && target.get(entry.getKey()) instanceof Map) {
-                mergeInto((Map<String, Object>) target.get(entry.getKey()), (Map<String, Object>) entry.getValue());
-            } else {
-                target.put(entry.getKey(), entry.getValue());
-            }
-        }
-    }
-
-    private void setValueByPath(Map<String, Object> map, String path, Object value) {
-        String[] parts = path.split("\\.");
-        Map<String, Object> current = map;
-        for (int i = 0; i < parts.length - 1; i++) {
-            current = (Map<String, Object>) current.computeIfAbsent(parts[i], k -> new java.util.LinkedHashMap<>());
-        }
-        current.put(parts[parts.length - 1], value);
-    }
-
-    public void clearTemplates() {
-        templates.clear();
     }
 }

@@ -1,424 +1,1020 @@
 package de.happybavarian07.coolstufflib.configstuff.advanced.interfaces;
 
-import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.ConfigFileType;
+import de.happybavarian07.coolstufflib.configstuff.advanced.event.ConfigEventBus;
+import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.interfaces.ConfigFileHandler;
+import de.happybavarian07.coolstufflib.configstuff.advanced.migration.MigrationContext;
 
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
- * An advanced config interface that provides more features than the standard {@link de.happybavarian07.coolstufflib.configstuff.Config} interface.
- * This interface is designed to be used for more complex configuration scenarios.
- * It provides methods for registering modules, saving and reloading the config, and retrieving the state of the config.
+ * <p>Core interface for advanced configuration management with hierarchical sections,
+ * module system, thread safety, and event handling capabilities.</p>
  *
- * <p>
- * This interface allows for more flexibility and extensibility in managing configurations.
- * It is recommended to use this interface instead of the standard {@link de.happybavarian07.coolstufflib.configstuff.Config} interface for more complex configuration scenarios.
- * It supports various file types and allows for the registration of modules that can perform actions when the config is loaded or saved.
- * <p>
- * The methods provided in this interface allow for easy manipulation of configuration data,
- * including saving and reloading the config, retrieving the state of the config, and registering modules that can perform actions when the config is loaded or saved.
- * <p>
- * Example usage via the {@link de.happybavarian07.coolstufflib.configstuff.advanced.AdvancedConfigManager} class:
- * using the {@link de.happybavarian07.coolstufflib.configstuff.advanced.AdvancedConfigManager#createPersistentConfig(String name, File file , ConfigFileType type, boolean registerGlobalModules)} method:
- * <pre>
- *     {@code
- *     AdvancedConfigManager configManager = new AdvancedConfigManager();
- *     AdvancedConfig config = configManager.createPersistentConfig("myConfig", new File("path/to/config.yml"), ConfigFileType.YML);
- *     config.setValue("key", "value");
- *     config.save();
- *     }
- *     </pre>
- * This example creates a new config with a name of "myConfig", a file at "path/to/config.yml", and a YML file type.
- * It then sets the value of the key "key" to "value" and saves the config.
- * This is for persistent storage. There is also a {@link de.happybavarian07.coolstufflib.configstuff.advanced.AdvancedConfigManager#createInMemoryConfig(String name, boolean registerGlobalModules)} interface for in-memory-only storage.
- * The Methods are the same because of a common interface {@link de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.AdvancedConfig}.
- * * <p>
- * </p>
+ * <p>This interface provides comprehensive configuration management including:</p>
+ * <ul>
+ *   <li>Hierarchical section-based organization</li>
+ *   <li>Type-safe value access with defaults</li>
+ *   <li>Module system for extensibility</li>
+ *   <li>Thread-safe operations with explicit locking</li>
+ *   <li>Event-driven architecture for change notifications</li>
+ *   <li>File-based persistence with multiple format support</li>
+ * </ul>
  *
- * @author HappyBavarian07
- * @since 1.0
+ * <pre><code>
+ * AdvancedConfig config = new AdvancedPersistentConfig("myConfig",
+ *     new File("config.yml"), ConfigFileType.YAML);
+ *
+ * config.set("database.host", "localhost");
+ * config.set("database.port", 5432);
+ * String host = config.getString("database.host", "127.0.0.1");
+ *
+ * config.save();
+ * </code></pre>
  */
 public interface AdvancedConfig {
 
     /**
-     * Gets the name of the config.
+     * <p>Gets the unique name identifier for this configuration instance.</p>
      *
-     * @return the name of the config
+     * <pre><code>
+     * String configName = config.getName();
+     * </code></pre>
+     *
+     * @return the configuration name, never null
      */
     String getName();
 
     /**
-     * Acquires the read lock for the modules.
-     * Must be called before performing read operations that need to be atomic.
-     */
-    void lockModuleRead();
-
-    /**
-     * Releases the read lock for the modules.
-     * Must be called in a finally block after read operations are complete.
-     */
-    void unlockModuleRead();
-
-    /**
-     * Acquires the write lock for the modules.
-     * Must be called before performing write operations.
-     */
-    void lockModuleWrite();
-
-    /**
-     * Releases the write lock for the modules.
-     * Must be called in a finally block after write operations are complete.
-     */
-    void unlockModuleWrite();
-
-    /**
-     * Acquires the read lock for values in this config.
-     * Must be called before performing read operations on values that need to be atomic.
-     */
-    void lockValuesRead();
-    /**
-     * Releases the read lock for values in this config.
-     * Must be called in a finally block after read operations on values are complete.
-     */
-    void unlockValuesRead();
-    /**
-     * Acquires the write lock for values in this config.
-     * Must be called before performing write operations on values.
-     */
-    void lockValuesWrite();
-    /**
-     * Releases the write lock for values in this config.
-     * Must be called in a finally block after write operations on values are complete.
-     */
-    void unlockValuesWrite();
-
-    /**
-     * Executes the provided operation with a read lock held.
+     * <p>Gets the file associated with this configuration for persistence operations.</p>
      *
-     * @param operation the operation to execute
-     * @param <T>       the return type
-     * @return the result of the operation
-     */
-    default <T> T withModuleReadLock(java.util.function.Supplier<T> operation) {
-        lockModuleRead();
-        try {
-            return operation.get();
-        } finally {
-            unlockModuleRead();
-        }
-    }
-
-    /**
-     * Executes the provided operation with a read lock held.
+     * <pre><code>
+     * File configFile = config.getFile();
+     * if (configFile != null && configFile.exists()) {
+     *     // File-based configuration
+     * }
+     * </code></pre>
      *
-     * @param operation the operation to execute
-     */
-    default <T> T withValuesReadLock(java.util.function.Supplier<T> operation) {
-        lockValuesRead();
-        try {
-            return operation.get();
-        } finally {
-            unlockValuesRead();
-        }
-    }
-
-    /**
-     * Executes the provided operation with a write lock held.
-     *
-     * @param operation the operation to execute
-     */
-    default <T> T withModulesWriteLock(java.util.function.Supplier<T> operation) {
-        lockModuleWrite();
-        try {
-            return operation.get();
-        } finally {
-            unlockModuleWrite();
-        }
-    }
-    /**
-     * Executes the provided operation with a write lock held.
-     *
-     * @param operation the operation to execute
-     * @param <T>       the return type
-     * @return the result of the operation
-     */
-    default <T> T withValuesWriteLock(java.util.function.Supplier<T> operation) {
-        lockValuesWrite();
-        try {
-            return operation.get();
-        } finally {
-            unlockValuesWrite();
-        }
-    }
-
-    /**
-     * Gets the type of the config file.
-     *
-     * @return the type of the config file
+     * @return the configuration file, or null for in-memory configurations
      */
     File getFile();
 
     /**
-     * Gets a value from the config by its key.
-     * Example: If the config contains a key "database.url", you can retrieve it with get("database.url").
-     * This method returns the value associated with the specified key.
-     * If the key does not exist, it may return null or throw an exception depending on the implementation.
+     * <p>Gets the file handler responsible for serialization and deserialization operations.</p>
      *
-     * @param key the key to look up in the config
-     * @return the value associated with the key, or null if the key does not exist
-     */
-    Object get(String key);
-
-    /**
-     * Gets a value from the config by its key, with a default value if the key does not exist.
-     * This method is useful for providing a fallback value when the key is not found in the config.
+     * <pre><code>
+     * ConfigFileHandler handler = config.getConfigFileHandler();
+     * boolean supportsComments = handler.supportsComments();
+     * </code></pre>
      *
-     * @param key          the key to look up in the config
-     * @param defaultValue the default value to return if the key does not exist
-     * @return the value associated with the key, or the default value if the key does not exist
+     * @return the file handler instance, never null
      */
-    Object get(String key, Object defaultValue);
+    ConfigFileHandler getConfigFileHandler();
 
     /**
-     * Calls {@link #get(String key)} and casts the result to String.
-     */
-    String getString(String key);
-
-    /**
-     * Calls {@link #get(String key, Object defaultValue)} and returns the value as a String.
-     */
-    String getString(String key, String defaultValue);
-
-    /**
-     * Calls {@link #get(String key)} and casts the result to int.
-     */
-    int getInt(String key);
-
-    /**
-     * Calls {@link #get(String key, Object defaultValue)} and returns the value as an int.
-     */
-    int getInt(String key, int defaultValue);
-
-    /**
-     * Calls {@link #get(String key)} and casts the result to boolean.
-     */
-    boolean getBoolean(String key);
-
-    /**
-     * Calls {@link #get(String key, Object defaultValue)} and returns the value as a boolean.
-     */
-    boolean getBoolean(String key, boolean defaultValue);
-
-    /**
-     * Calls {@link #get(String key)} and casts the result to long.
-     */
-    long getLong(String key);
-
-    /**
-     * Calls {@link #get(String key, Object defaultValue)} and returns the value as a long.
-     */
-    long getLong(String key, long defaultValue);
-
-    /**
-     * Calls {@link #get(String key)} and casts the result to double.
-     */
-    double getDouble(String key);
-
-    /**
-     * Calls {@link #get(String key, Object defaultValue)} and returns the value as a double.
-     */
-    double getDouble(String key, double defaultValue);
-
-    /**
-     * Calls {@link #get(String key)} and casts the result to float.
-     */
-    float getFloat(String key);
-
-    /**
-     * Calls {@link #get(String key, Object defaultValue)} and returns the value as a float.
-     */
-    float getFloat(String key, float defaultValue);
-
-    /**
-     * Calls {@link #get(String key)} and casts the result to List.
-     */
-    List<?> getList(String key);
-
-    /**
-     * Calls {@link #get(String key, Object defaultValue)} and returns the value as a List.
-     */
-    List<?> getList(String key, List<?> defaultValue);
-
-    /**
-     * Calls {@link #get(String key)} and casts the result to List<String>.
-     */
-    List<String> getStringList(String key);
-
-    /**
-     * Calls {@link #get(String key, Object defaultValue)} and returns the value as a List<String>.
-     */
-    List<String> getStringList(String key, List<String> defaultValue);
-
-    /**
-     * Calls {@link #get(String key)} and casts the result to Map.
-     */
-    Map<?, ?> getMap(String key);
-
-    /**
-     * Calls {@link #get(String key, Object defaultValue)} and returns the value as a Map.
-     */
-    Map<?, ?> getMap(String key, Map<?, ?> defaultValue);
-
-    /**
-     * Gets a value from the config by its key, with a default value if the key does not exist.
-     * This method is useful for providing a fallback value when the key is not found in the config.
-     * It also allows specifying the expected type of the value.
+     * <p>Gets the event bus for configuration change notifications and module communication.</p>
      *
-     * @param key          the key to look up in the config
-     * @param defaultValue the default value to return if the key does not exist
-     * @param type         the expected type of the value
-     * @return the value associated with the key, or the default value if the key does not exist
+     * <pre><code>
+     * ConfigEventBus eventBus = config.getEventBus();
+     * eventBus.subscribe(ConfigValueEvent.class, this::onValueChange);
+     * </code></pre>
+     *
+     * @return the event bus instance, never null
      */
-    <T> T get(String key, T defaultValue, Class<T> type);
+    ConfigEventBus getEventBus();
 
     /**
-     * Sets a value in the config for the specified key.
-     * If the key already exists, it updates the value; otherwise, it adds a new key-value pair.
+     * <p>Acquires a read lock for module operations to ensure thread-safe access.</p>
      *
-     * @param key   the key to set in the config
-     * @param value the value to associate with the key
+     * <pre><code>
+     * config.lockModuleRead();
+     * try {
+     *     BaseConfigModule module = config.getModuleByName("ValidationModule");
+     * } finally {
+     *     config.unlockModuleRead();
+     * }
+     * </code></pre>
      */
-    void setValue(String key, Object value);
+    void lockModuleRead();
 
     /**
-     * Sets multiple key-value pairs in the config.
-     * This method allows you to set multiple values at once, which can be more efficient than setting them one by one.
+     * <p>Releases a read lock for module operations.</p>
      *
-     * @param values a map of key-value pairs to set in the config
+     * <pre><code>
+     * config.lockModuleRead();
+     * try {
+     *     // Module operations
+     * } finally {
+     *     config.unlockModuleRead();
+     * }
+     * </code></pre>
      */
-    void setValueBulk(Map<String, Object> values);
+    void unlockModuleRead();
 
     /**
-     * Removes a key and its associated value from the config.
-     * If the key does not exist, this method may do nothing or throw an exception depending on the implementation.
+     * <p>Acquires a write lock for module operations to ensure thread-safe modifications.</p>
      *
-     * @param key the key to remove from the config
+     * <pre><code>
+     * config.lockModuleWrite();
+     * try {
+     *     config.registerModule(new ValidationModule());
+     * } finally {
+     *     config.unlockModuleWrite();
+     * }
+     * </code></pre>
      */
-    void remove(String key);
+    void lockModuleWrite();
 
     /**
-     * Checks if the config contains a specific key.
-     * This method returns true if the key exists in the config, false otherwise.
+     * <p>Releases a write lock for module operations.</p>
      *
-     * @param key the key to check for existence in the config
+     * <pre><code>
+     * config.lockModuleWrite();
+     * try {
+     *     // Module modifications
+     * } finally {
+     *     config.unlockModuleWrite();
+     * }
+     * </code></pre>
+     */
+    void unlockModuleWrite();
+
+    /**
+     * <p>Acquires a read lock for value operations to ensure thread-safe access.</p>
+     *
+     * <pre><code>
+     * config.lockValuesRead();
+     * try {
+     *     String value = config.getString("key");
+     * } finally {
+     *     config.unlockValuesRead();
+     * }
+     * </code></pre>
+     */
+    void lockValuesRead();
+
+    /**
+     * <p>Releases a read lock for value operations.</p>
+     *
+     * <pre><code>
+     * config.lockValuesRead();
+     * try {
+     *     // Value reading operations
+     * } finally {
+     *     config.unlockValuesRead();
+     * }
+     * </code></pre>
+     */
+    void unlockValuesRead();
+
+    /**
+     * <p>Acquires a write lock for value operations to ensure thread-safe modifications.</p>
+     *
+     * <pre><code>
+     * config.lockValuesWrite();
+     * try {
+     *     config.set("key", "value");
+     * } finally {
+     *     config.unlockValuesWrite();
+     * }
+     * </code></pre>
+     */
+    void lockValuesWrite();
+
+    /**
+     * <p>Releases a write lock for value operations.</p>
+     *
+     * <pre><code>
+     * config.lockValuesWrite();
+     * try {
+     *     // Value modification operations
+     * } finally {
+     *     config.unlockValuesWrite();
+     * }
+     * </code></pre>
+     */
+    void unlockValuesWrite();
+
+    /**
+     * <p>Executes an operation with a module read lock, automatically handling lock acquisition and release.</p>
+     *
+     * <pre><code>
+     * BaseConfigModule module = config.withModuleReadLock(() ->
+     *     config.getModuleByName("ValidationModule"));
+     * </code></pre>
+     *
+     * @param operation the operation to execute under lock
+     * @param <T>       the return type of the operation
+     * @return the result of the operation
+     */
+    <T> T withModuleReadLock(Supplier<T> operation);
+
+    /**
+     * <p>Executes an operation with a values read lock, automatically handling lock acquisition and release.</p>
+     *
+     * <pre><code>
+     * String value = config.withValuesReadLock(() ->
+     *     config.getString("database.host"));
+     * </code></pre>
+     *
+     * @param operation the operation to execute under lock
+     * @param <T>       the return type of the operation
+     * @return the result of the operation
+     */
+    <T> T withValuesReadLock(Supplier<T> operation);
+
+    /**
+     * <p>Executes an operation with a modules write lock, automatically handling lock acquisition and release.</p>
+     *
+     * <pre><code>
+     * config.withModulesWriteLock(() -> {
+     *     config.registerModule(new ValidationModule());
+     *     return null;
+     * });
+     * </code></pre>
+     *
+     * @param operation the operation to execute under lock
+     * @param <T>       the return type of the operation
+     * @return the result of the operation
+     */
+    <T> T withModulesWriteLock(Supplier<T> operation);
+
+    /**
+     * <p>Executes an operation with a values write lock, automatically handling lock acquisition and release.</p>
+     *
+     * <pre><code>
+     * config.withValuesWriteLock(() -> {
+     *     config.set("database.host", "localhost");
+     *     config.set("database.port", 5432);
+     *     return null;
+     * });
+     * </code></pre>
+     *
+     * @param operation the operation to execute under lock
+     * @param <T>       the return type of the operation
+     * @return the result of the operation
+     */
+    <T> T withValuesWriteLock(Supplier<T> operation);
+
+    /**
+     * <p>Gets the root configuration section that contains all configuration data.</p>
+     *
+     * <pre><code>
+     * ConfigSection root = config.getRootSection();
+     * Map<String, Object> allData = root.toMap();
+     * </code></pre>
+     *
+     * @return the root section, never null
+     */
+    ConfigSection getRootSection();
+
+    /**
+     * <p>Gets an existing configuration section by its hierarchical path.</p>
+     *
+     * <pre><code>
+     * ConfigSection dbSection = config.getSection("database");
+     * if (dbSection != null) {
+     *     String host = dbSection.getString("host");
+     * }
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the section
+     * @return the section if it exists, null otherwise
+     */
+    ConfigSection getSection(String path);
+
+    /**
+     * <p>Creates a new configuration section at the specified path, including any missing parent sections.</p>
+     *
+     * <pre><code>
+     * ConfigSection dbSection = config.createSection("database.credentials");
+     * dbSection.set("username", "admin");
+     * </code></pre>
+     *
+     * @param path the dot-separated path for the new section
+     * @return the created section, never null
+     */
+    ConfigSection createSection(String path);
+
+    /**
+     * <p>Checks if a configuration section exists at the specified path.</p>
+     *
+     * <pre><code>
+     * if (config.hasSection("database")) {
+     *     ConfigSection dbSection = config.getSection("database");
+     * }
+     * </code></pre>
+     *
+     * @param path the dot-separated path to check
+     * @return true if the section exists, false otherwise
+     */
+    boolean hasSection(String path);
+
+    /**
+     * <p>Removes a configuration section and all its contents at the specified path.</p>
+     *
+     * <pre><code>
+     * config.removeSection("database.credentials");
+     * </code></pre>
+     *
+     * @param path the dot-separated path of the section to remove
+     */
+    void removeSection(String path);
+
+    /**
+     * <p>Gets a configuration value by its hierarchical path.</p>
+     *
+     * <pre><code>
+     * Object value = config.get("database.host");
+     * if (value instanceof String host) {
+     *     // Use the host value
+     * }
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the value
+     * @return the value if present, null otherwise
+     */
+    Object get(String path);
+
+    /**
+     * <p>Gets a configuration value with a fallback default if the value is not present.</p>
+     *
+     * <pre><code>
+     * String host = (String) config.get("database.host", "localhost");
+     * </code></pre>
+     *
+     * @param path         the dot-separated path to the value
+     * @param defaultValue the fallback value if path is not found
+     * @return the configuration value or the default value
+     */
+    Object get(String path, Object defaultValue);
+
+    /**
+     * <p>Gets a string value with type safety and null protection.</p>
+     *
+     * <pre><code>
+     * String username = config.getString("database.username");
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the value
+     * @return the string value, or null if not found or not a string
+     */
+    String getString(String path);
+
+    /**
+     * <p>Gets a string value with a fallback default if the value is not present or not a string.</p>
+     *
+     * <pre><code>
+     * String host = config.getString("database.host", "localhost");
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the value
+     * @param defaultValue the fallback value if not found or not a string
+     * @return the string value or the default value
+     */
+    String getString(String path, String defaultValue);
+
+    /**
+     * <p>Gets a boolean value from the configuration.</p>
+     *
+     * <pre><code>
+     * boolean enabled = config.getBoolean("features.authentication");
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the value
+     * @return the boolean value, or false if not found or not a boolean
+     */
+    boolean getBoolean(String path);
+
+    /**
+     * <p>Gets a boolean value with a fallback default if the value is not present or not a boolean.</p>
+     *
+     * <pre><code>
+     * boolean enabled = config.getBoolean("features.authentication", true);
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the value
+     * @param defaultValue the fallback value if not found or not a boolean
+     * @return the boolean value or the default value
+     */
+    boolean getBoolean(String path, boolean defaultValue);
+
+    /**
+     * <p>Gets an integer value from the configuration.</p>
+     *
+     * <pre><code>
+     * int port = config.getInt("database.port");
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the value
+     * @return the integer value, or 0 if not found or not an integer
+     */
+    int getInt(String path);
+
+    /**
+     * <p>Gets an integer value with a fallback default if the value is not present or not an integer.</p>
+     *
+     * <pre><code>
+     * int port = config.getInt("database.port", 3306);
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the value
+     * @param defaultValue the fallback value if not found or not an integer
+     * @return the integer value or the default value
+     */
+    int getInt(String path, int defaultValue);
+
+    /**
+     * <p>Gets a long value from the configuration.</p>
+     *
+     * <pre><code>
+     * long timestamp = config.getLong("lastModified");
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the value
+     * @return the long value, or 0 if not found or not a long
+     */
+    long getLong(String path);
+
+    /**
+     * <p>Gets a long value with a fallback default if the value is not present or not a long.</p>
+     *
+     * <pre><code>
+     * long timestamp = config.getLong("lastModified", System.currentTimeMillis());
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the value
+     * @param defaultValue the fallback value if not found or not a long
+     * @return the long value or the default value
+     */
+    long getLong(String path, long defaultValue);
+
+    /**
+     * <p>Gets a double value from the configuration.</p>
+     *
+     * <pre><code>
+     * double ratio = config.getDouble("settings.ratio");
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the value
+     * @return the double value, or 0.0 if not found or not a double
+     */
+    double getDouble(String path);
+
+    /**
+     * <p>Gets a double value with a fallback default if the value is not present or not a double.</p>
+     *
+     * <pre><code>
+     * double ratio = config.getDouble("settings.ratio", 1.0);
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the value
+     * @param defaultValue the fallback value if not found or not a double
+     * @return the double value or the default value
+     */
+    double getDouble(String path, double defaultValue);
+
+    /**
+     * <p>Gets a float value from the configuration.</p>
+     *
+     * <pre><code>
+     * float multiplier = config.getFloat("settings.multiplier");
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the value
+     * @return the float value, or 0.0f if not found or not a float
+     */
+    float getFloat(String path);
+
+    /**
+     * <p>Gets a float value with a fallback default if the value is not present or not a float.</p>
+     *
+     * <pre><code>
+     * float multiplier = config.getFloat("settings.multiplier", 1.0f);
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the value
+     * @param defaultValue the fallback value if not found or not a float
+     * @return the float value or the default value
+     */
+    float getFloat(String path, float defaultValue);
+
+    /**
+     * <p>Gets a list value from the configuration.</p>
+     *
+     * <pre><code>
+     * List<?> items = config.getList("inventory.items");
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the value
+     * @return the list value, or null if not found or not a list
+     */
+    List<?> getList(String path);
+
+    /**
+     * <p>Gets a list value with a fallback default if the value is not present or not a list.</p>
+     *
+     * <pre><code>
+     * List<?> items = config.getList("inventory.items", new ArrayList<>());
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the value
+     * @param defaultValue the fallback value if not found or not a list
+     * @return the list value or the default value
+     */
+    List<?> getList(String path, List<?> defaultValue);
+
+    /**
+     * <p>Gets a string list value from the configuration.</p>
+     *
+     * <pre><code>
+     * List<String> names = config.getStringList("players.names");
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the value
+     * @return the string list value, or null if not found or not a string list
+     */
+    List<String> getStringList(String path);
+
+    /**
+     * <p>Gets a string list value with a fallback default if the value is not present or not a string list.</p>
+     *
+     * <pre><code>
+     * List<String> names = config.getStringList("players.names", new ArrayList<>());
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the value
+     * @param defaultValue the fallback value if not found or not a string list
+     * @return the string list value or the default value
+     */
+    List<String> getStringList(String path, List<String> defaultValue);
+
+    <T> T get(String path, T defaultValue, Class<T> type);
+
+    /**
+     * <p>Gets a strongly-typed value with automatic type conversion.</p>
+     *
+     * <pre><code>
+     * Integer port = config.getValue("database.port", Integer.class);
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the value
+     * @param type the expected type class
+     * @param <T>  the value type
+     * @return the typed value, or null if not found or conversion fails
+     */
+    <T> T getValue(String path, Class<T> type);
+
+    /**
+     * <p>Gets a strongly-typed value wrapped in an Optional for null safety.</p>
+     *
+     * <pre><code>
+     * Optional<Integer> port = config.getOptionalValue("database.port", Integer.class);
+     * if (port.isPresent()) {
+     *     // Use the port value
+     * }
+     * </code></pre>
+     *
+     * @param path the dot-separated path to the value
+     * @param type the expected type class
+     * @param <T>  the value type
+     * @return an Optional containing the typed value, or empty if not found
+     */
+    <T> Optional<T> getOptionalValue(String path, Class<T> type);
+
+    /**
+     * <p>Sets a configuration value at the specified path, creating parent sections as needed.</p>
+     *
+     * <pre><code>
+     * config.set("database.host", "localhost");
+     * config.set("database.port", 5432);
+     * </code></pre>
+     *
+     * @param path  the dot-separated path for the value
+     * @param value the value to set
+     */
+    void set(String path, Object value);
+
+    /**
+     * <p>Sets multiple configuration values in a single operation for better performance.</p>
+     *
+     * <pre><code>
+     * Map<String, Object> dbConfig = Map.of(
+     *     "database.host", "localhost",
+     *     "database.port", 5432
+     * );
+     * config.setBulk(dbConfig);
+     * </code></pre>
+     *
+     * @param values map of paths to values to set
+     */
+    void setBulk(Map<String, Object> values);
+
+    /**
+     * <p>Removes a configuration value at the specified path.</p>
+     *
+     * <pre><code>
+     * config.remove("database.password");
+     * </code></pre>
+     *
+     * @param path the dot-separated path of the value to remove
+     */
+    void remove(String path);
+
+    /**
+     * <p>Checks if a configuration key exists at the specified path.</p>
+     *
+     * <pre><code>
+     * if (config.containsKey("database.host")) {
+     *     String host = config.getString("database.host");
+     * }
+     * </code></pre>
+     *
+     * @param path the dot-separated path to check
      * @return true if the key exists, false otherwise
      */
-    boolean containsKey(String key);
+    boolean containsKey(String path);
 
     /**
-     * Saves the current state of the config to the file.
-     * This method should be called after making changes to ensure they are persisted.
+     * <p>Persists the current configuration state to the associated file.</p>
+     *
+     * <pre><code>
+     * config.set("lastModified", System.currentTimeMillis());
+     * config.save();
+     * </code></pre>
+     *
+     * @throws RuntimeException if save operation fails
      */
     void save();
 
     /**
-     * Reloads the config from the file.
-     * This method discards any unsaved changes and reloads the config data from the file.
-     * But only for the persistent configs, not for in-memory configs.
+     * <p>Reloads configuration data from the associated file, discarding unsaved changes.</p>
+     *
+     * <pre><code>
+     * config.reload();
+     * </code></pre>
+     *
+     * @throws RuntimeException if reload operation fails
      */
     void reload();
 
     /**
-     * Clears all key-value pairs in the config.
-     * This method removes all entries from the config, effectively resetting it to an empty state.
-     * It does not affect the file on disk; it only clears the in-memory representation.
+     * <p>Clears all configuration data, removing all sections and values.</p>
+     *
+     * <pre><code>
+     * config.clear();
+     * </code></pre>
      */
     void clear();
 
     /**
-     * Registers a module to this config.
-     * The module will be attached to the config and can perform actions when the config is loaded or saved.
+     * <p>Registers a module to extend configuration functionality.</p>
+     *
+     * <pre><code>
+     * ValidationModule validator = new ValidationModule();
+     * config.registerModule(validator);
+     * </code></pre>
      *
      * @param module the module to register
+     * @throws IllegalArgumentException if module is already registered
      */
     void registerModule(BaseConfigModule module);
 
     /**
-     * Unregisters a module from this config by its name.
-     * The module will no longer be attached to the config and will not perform actions on config load or save.
+     * <p>Unregisters a module by name, removing its functionality from the configuration.</p>
+     *
+     * <pre><code>
+     * config.unregisterModule("ValidationModule");
+     * </code></pre>
      *
      * @param name the name of the module to unregister
      */
     void unregisterModule(String name);
 
     /**
-     * Checks if a module is registered with this config.
-     * This method returns true if the module is registered, false otherwise.
-     * This can be useful for checking if a specific module is active before performing operations that depend on it.
+     * <p>Checks if a specific module instance is registered with this configuration.</p>
      *
-     * @param module the module to check for registration
+     * <pre><code>
+     * ValidationModule validator = new ValidationModule();
+     * if (config.hasModule(validator)) {
+     *     // Module is registered
+     * }
+     * </code></pre>
+     *
+     * @param module the module instance to check
      * @return true if the module is registered, false otherwise
      */
     boolean hasModule(BaseConfigModule module);
 
     /**
-     * Checks if a module is registered with this config by its name.
-     * This method returns true if a module with the specified name is registered, false otherwise.
-     * This can be useful for checking if a specific module is active before performing operations that depend on it.
+     * <p>Checks if a module with the specified name is registered with this configuration.</p>
      *
-     * @param moduleName the name of the module to check for registration
-     * @return true if the module is registered, false otherwise
+     * <pre><code>
+     * if (config.hasModule("ValidationModule")) {
+     *     config.enableModule("ValidationModule");
+     * }
+     * </code></pre>
+     *
+     * @param moduleName the name of the module to check
+     * @return true if a module with this name is registered, false otherwise
      */
     boolean hasModule(String moduleName);
 
     /**
-     * Gets the module registered with the given name.
+     * <p>Gets a registered module by its name.</p>
      *
-     * @param name the module name
-     * @return the module, or null if not registered
+     * <pre><code>
+     * BaseConfigModule validator = config.getModuleByName("ValidationModule");
+     * if (validator != null) {
+     *     // Use the module
+     * }
+     * </code></pre>
+     *
+     * @param name the name of the module to retrieve
+     * @return the module instance, or null if not found
      */
     BaseConfigModule getModuleByName(String name);
 
     /**
-     * Enables a module by its name.
-     * This method will call the enable method of the module if it is registered.
-     * If the module is not registered, it will do nothing.
+     * <p>Enables a module by name, allowing it to process configuration events.</p>
+     *
+     * <pre><code>
+     * config.enableModule("ValidationModule");
+     * </code></pre>
      *
      * @param moduleName the name of the module to enable
      */
     void enableModule(String moduleName);
 
     /**
-     * Disables a module by its name.
-     * This method will call the disable method of the module if it is registered.
-     * If the module is not registered, it will do nothing.
+     * <p>Disables a module by name, preventing it from processing configuration events.</p>
+     *
+     * <pre><code>
+     * config.disableModule("ValidationModule");
+     * </code></pre>
      *
      * @param moduleName the name of the module to disable
      */
     void disableModule(String moduleName);
 
     /**
-     * Gets a list of all registered modules for this config.
-     * This method returns a list of ConfigModule objects that are currently registered with the config.
+     * <p>Gets all registered modules as a map of name to module instance.</p>
      *
-     * @return a map of registered modules
+     * <pre><code>
+     * Map<String, BaseConfigModule> modules = config.getModules();
+     * for (Map.Entry<String, BaseConfigModule> entry : modules.entrySet()) {
+     *     String name = entry.getKey();
+     *     BaseConfigModule module = entry.getValue();
+     * }
+     * </code></pre>
+     *
+     * @return a map of module names to module instances, never null
      */
     Map<String, BaseConfigModule> getModules();
 
     /**
-     * Gets a list of all keys present in the config.
+     * <p>Gets all configuration keys, optionally including nested keys from subsections.</p>
      *
-     * @return a list of all keys in the config
+     * <pre><code>
+     * List<String> allKeys = config.getKeys(true);
+     * List<String> topLevelKeys = config.getKeys(false);
+     * </code></pre>
+     *
+     * @param deep if true, includes keys from nested sections; if false, only top-level keys
+     * @return a list of configuration keys, never null
      */
-    List<String> getKeys();
+    List<String> getKeys(boolean deep);
 
     /**
-     * Gets a map of all key-value pairs in the config.
-     * This method returns a map containing all keys and their associated values in the config.
-     * It can be useful for iterating over all configuration entries or exporting the config data.
+     * <p>Creates a specialized configuration section with custom behavior.</p>
      *
-     * @return a map of all key-value pairs in the config
+     * <pre><code>
+     * ListSection items = config.createCustomSection("inventory.items", ListSection.class);
+     * items.add("sword");
+     * items.add("shield");
+     * </code></pre>
+     *
+     * @param path        the path for the new section
+     * @param sectionType the specialized section type
+     * @param <T>         the section type
+     * @return the created specialized section
      */
-    Map<String, Object> getValueMap();
+    <T extends ConfigSection> T createCustomSection(String path, Class<T> sectionType);
+
+    /**
+     * <p>Copies all configuration data from another configuration instance.</p>
+     *
+     * <pre><code>
+     * AdvancedConfig source = loadConfigFromFile("template.yml");
+     * config.copyFrom(source);
+     * </code></pre>
+     *
+     * @param config2 the source configuration to copy from
+     */
+    void copyFrom(AdvancedConfig config2);
+
+    /**
+     * <p>Checks if the configuration has metadata associated with it, such as version or additional information.</p>
+     *
+     * <pre><code>
+     * if (config.hasMetadata("version")) {
+     *     String version = config.getMetadata("version");
+     * }
+     * </code></pre>
+     *
+     * @param version the metadata key to check
+     * @return true if metadata exists for the given key, false otherwise
+     */
+    boolean hasMetadata(String version);
+
+    /**
+     * <p>Removes metadata associated with the configuration, such as version or additional information.</p>
+     *
+     * <pre><code>
+     * config.removeMetadata("version");
+     * </code></pre>
+     *
+     * @param version the metadata key to remove
+     */
+    void removeMetadata(String version);
+
+    /**
+     * <p>Gets all metadata associated with the configuration.</p>
+     *
+     * <pre><code>
+     * Map<String, Object> metadata = config.getMetadata();
+     * </code></pre>
+     *
+     * @return a map of metadata key-value pairs, never null
+     */
+    Map<String, Object> getMetadata();
+
+    /**
+     * <p>Gets metadata associated with the configuration, such as version or additional information.</p>
+     *
+     * <pre><code>
+     * String version = config.getMetadata("version");
+     * </code></pre>
+     *
+     * @param name the metadata key
+     * @param <T>  the type of the value
+     * @return the metadata value, or null if not found
+     */
+    <T> T getMetadata(String name);
+
+    /**
+     * <p>Adds metadata to the configuration, which can be used for versioning or additional information.</p>
+     *
+     * <pre><code>
+     * config.addMetadata("version", "1.0.0");
+     * </code></pre>
+     *
+     * @param name  the metadata key
+     * @param value the metadata value
+     * @param <T>   the type of the value
+     */
+    <T> void addMetadata(String name, T value);
+
+    /**
+     * <p>Gets a comment associated with the specified configuration key.</p>
+     *
+     * <pre><code>
+     * String comment = config.getComment("database.host");
+     * </code></pre>
+     *
+     * @param path the configuration path
+     * @return the comment text if exists, null otherwise
+     */
+    Object getComment(String path);
+
+    /**
+     * <p>Sets a comment for the specified configuration path.</p>
+     *
+     * <pre><code>
+     * config.setComment("database", "Database connection settings");
+     * config.setComment("database.credentials", "Secure credential information");
+     * </code></pre>
+     *
+     * @param path    the configuration path to associate the comment with
+     * @param comment the comment text to set
+     */
+    void setComment(String path, String comment);
+
+    /**
+     * <p>Removes the comment associated with the specified configuration path.</p>
+     *
+     * <pre><code>
+     * config.removeComment("database.host");
+     * </code></pre>
+     *
+     * @param path the configuration path to remove comment from
+     */
+    void removeComment(String path);
+
+    /**
+     * <p>Returns all comments defined in the configuration.</p>
+     *
+     * <pre><code>
+     * Map<String, String> comments = config.getAllComments();
+     * for (Map.Entry<String, String> entry : comments.entrySet()) {
+     *     String path = entry.getKey();
+     *     String comment = entry.getValue();
+     * }
+     * </code></pre>
+     *
+     * @return a map of path-to-comment associations
+     */
+    Map<String, String> getAllComments();
+
+    /**
+     * <p>Checks if the specified configuration path has an associated comment.</p>
+     *
+     * <pre><code>
+     * if (config.hasComment("database")) {
+     *     String comment = config.getComment("database");
+     * }
+     * </code></pre>
+     *
+     * @param path the configuration path to check
+     * @return true if a comment exists for the path, false otherwise
+     */
+    boolean hasComment(String path);
+
+    /**
+     * <p>Gets the migration context associated with this configuration, which can be used for version migrations.</p>
+     *
+     * <pre><code>
+     * MigrationContext migrationContext = config.getMigrationContext();
+     * if (migrationContext != null) {
+     *     // Perform migration operations
+     * }
+     * </code></pre>
+     *
+     * @return the migration context, or null if not set
+     */
+    MigrationContext getMigrationContext();
+
+    /**
+     * <p>Sets the migration context for this configuration, which can be used for version migrations.</p>
+     *
+     * <pre><code>
+     * MigrationContext migrationContext = new MigrationContext("1.0.0", "2.0.0");
+     * config.setMigrationContext(migrationContext);
+     * </code></pre>
+     *
+     * @param migrationContext the migration context to set
+     */
+    void setMigrationContext(MigrationContext migrationContext);
+
+    /**
+     * <p>Checks if the configuration is currently loaded and ready for use.</p>
+     *
+     * <pre><code>
+     * if (config.isLoaded()) {
+     *     // Configuration is ready to use
+     * }
+     * </code></pre>
+     *
+     * @return true if the configuration is loaded, false otherwise
+     */
+    boolean isLoaded();
+
+    /**
+     * <p>Detects and converts collection data structures to their appropriate section types.</p>
+     *
+     * <pre><code>
+     * config.detectAndConvertCollections();
+     * </code></pre>
+     */
+    void detectAndConvertCollections();
+
+    /**
+     * <p>Migrates configuration data from the given root section into this config.</p>
+     *
+     * <pre><code>
+     * config.migrate(context, oldConfig.getRootSection(), true);
+     * </code></pre>
+     *
+     * @param context the migration context
+     * @param rootSection the root section of the old config
+     * @param replace if true, replaces existing values; if false, merges
+     */
+    void migrate(MigrationContext context, ConfigSection rootSection, boolean replace);
+
+    /**
+     * <p>Migrates configuration data from the given map into this config.</p>
+     *
+     * <pre><code>
+     * Map<String, Object> oldData = loadOldData();
+     * config.migrate(context, oldData, false);
+     * </code></pre>
+     *
+     * @param context the migration context
+     * @param values the map of values to migrate
+     * @param replace if true, replaces existing values; if false, merges
+     */
+    void migrate(MigrationContext context, Map<String, Object> values, boolean replace);
 }

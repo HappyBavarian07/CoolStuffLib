@@ -9,7 +9,7 @@ import de.happybavarian07.coolstufflib.configstuff.advanced.modules.autogen.temp
 
 public class AutoGenUtils {
     public static AutoGenModule createDefaultAutoGenModule() {
-        // Add default template(s) if needed
+
         return new AutoGenModule();
     }
     public static Group createGroup(String name, Group parent) {

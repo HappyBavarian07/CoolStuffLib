@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.393" tests="6" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.22" tests="6" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="17"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -15,7 +15,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="DE"/>
     <property name="sun.boot.library.path" value="C:\Users\quiri\.jdks\corretto-17.0.15\bin"/>
-    <property name="sun.java.command" value="C:\Users\quiri\AppData\Local\Temp\surefire5733817888484209734\surefirebooter-20250605200325666_3.jar C:\Users\quiri\AppData\Local\Temp\surefire5733817888484209734 2025-06-05T20-03-25_397-jvmRun1 surefire-20250605200325666_1tmp surefire_0-20250605200325666_2tmp"/>
+    <property name="sun.java.command" value="C:\Users\quiri\AppData\Local\Temp\surefire4590060393846963857\surefirebooter-20250624201534135_3.jar C:\Users\quiri\AppData\Local\Temp\surefire4590060393846963857 2025-06-24T20-15-33_987-jvmRun1 surefire-20250624201534135_1tmp surefire_0-20250624201534135_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="E:\InteliJ Programs\CoolStuffLib\target\test-classes;E:\InteliJ Programs\CoolStuffLib\target\classes;C:\Users\quiri\.m2\repository\org\spigotmc\spigot-api\1.20-R0.1-SNAPSHOT\spigot-api-1.20-R0.1-SNAPSHOT.jar;C:\Users\quiri\.m2\repository\com\google\guava\guava\31.1-jre\guava-31.1-jre.jar;C:\Users\quiri\.m2\repository\com\google\guava\failureaccess\1.0.1\failureaccess-1.0.1.jar;C:\Users\quiri\.m2\repository\com\google\guava\listenablefuture\9999.0-empty-to-avoid-conflict-with-guava\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar;C:\Users\quiri\.m2\repository\com\google\code\findbugs\jsr305\3.0.2\jsr305-3.0.2.jar;C:\Users\quiri\.m2\repository\org\checkerframework\checker-qual\3.12.0\checker-qual-3.12.0.jar;C:\Users\quiri\.m2\repository\com\google\errorprone\error_prone_annotations\2.11.0\error_prone_annotations-2.11.0.jar;C:\Users\quiri\.m2\repository\com\google\j2objc\j2objc-annotations\1.3\j2objc-annotations-1.3.jar;C:\Users\quiri\.m2\repository\com\google\code\gson\gson\2.10\gson-2.10.jar;C:\Users\quiri\.m2\repository\org\joml\joml\1.10.5\joml-1.10.5.jar;C:\Users\quiri\.m2\repository\net\md-5\bungeecord-chat\1.16-R0.4\bungeecord-chat-1.16-R0.4.jar;C:\Users\quiri\.m2\repository\org\yaml\snakeyaml\2.0\snakeyaml-2.0.jar;C:\Users\quiri\.m2\repository\org\jetbrains\annotations\24.1.0\annotations-24.1.0.jar;C:\Users\quiri\.m2\repository\me\clip\placeholderapi\2.10.9\placeholderapi-2.10.9.jar;C:\Users\quiri\.m2\repository\junit\junit\4.13.1\junit-4.13.1.jar;C:\Users\quiri\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;C:\Users\quiri\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.9.3\junit-jupiter-api-5.9.3.jar;C:\Users\quiri\.m2\repository\org\opentest4j\opentest4j\1.2.0\opentest4j-1.2.0.jar;C:\Users\quiri\.m2\repository\org\junit\platform\junit-platform-commons\1.9.3\junit-platform-commons-1.9.3.jar;C:\Users\quiri\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\quiri\.m2\repository\org\junit\jupiter\junit-jupiter-params\5.10.2\junit-jupiter-params-5.10.2.jar;C:\Users\quiri\.m2\repository\org\mockito\mockito-core\5.3.1\mockito-core-5.3.1.jar;C:\Users\quiri\.m2\repository\net\bytebuddy\byte-buddy\1.14.4\byte-buddy-1.14.4.jar;C:\Users\quiri\.m2\repository\net\bytebuddy\byte-buddy-agent\1.14.4\byte-buddy-agent-1.14.4.jar;C:\Users\quiri\.m2\repository\org\objenesis\objenesis\3.3\objenesis-3.3.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -30,7 +30,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\Users\quiri\AppData\Local\Temp\surefire5733817888484209734\surefirebooter-20250605200325666_3.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\quiri\AppData\Local\Temp\surefire4590060393846963857\surefirebooter-20250624201534135_3.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="17.0.15+6-LTS"/>
@@ -51,7 +51,7 @@
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
     <property name="sun.os.patch.level" value=""/>
     <property name="native.encoding" value="Cp1252"/>
-    <property name="java.library.path" value="C:\Users\quiri\.jdks\corretto-17.0.15\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;E:\anaconda3\condabin;D:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\bin;D:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\libnvvp;C:\Program Files\Java\jdk-21\bin;C:\Program Files\Python\Python310\Scripts\;C:\Program Files\Python\Python310\;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files (x86)\IVI Foundation\VISA\WinNT\Bin;C:\Program Files\dotnet\;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\dotnet\;C:\Program Files\Java\jdk-21\bin;C:\Program Files\nodejs\;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files\NVIDIA Corporation\Nsight Compute 2022.3.0\;C:\Program Files\Docker\Docker\resources\bin;C:\Users\quiri\AppData\Local\Programs\Python\Python313\Scripts\;C:\Users\quiri\AppData\Local\Programs\Python\Python313\;C:\Users\quiri\.cargo\bin;C:\Users\quiri\Documents\apache-maven-3.8.1\bin;C:\Test\ffmpeg-4.4-essentials_build\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\IVI Foundation\VISA\WinNT\Bin;C:\Program Files\dotnet\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\dotnet\;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Users\quiri\AppData\Local\JetBrains\Toolbox\scripts;C:\Users\quiri\AppData\Local\Programs\Microsoft VS Code\bin;E:\VSCodeThings\.venv\Lib\site-packages\pywin32_system32\pywintypes38.dll;C:\Users\quiri\AppData\Local\GnuPG\bin\;C:\Users\quiri\AppData\Local\Programs\Git\cmd;C:\Users\quiri\AppData\Local\Android\sdk\platform-tools;E:\go1.24.0\go\bin;E:\platform-tools\build-tools\31.0.0;C:\Users\quiri\.lmstudio\bin;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64;C:\Users\quiri\PycharmProjects\RocketLeagueMLBot\execution\RLBotServer;C:\Users\quiri\AppData\Local\Programs\Python\Python313\Lib\site-packages;C:\Users\quiri\.dotnet\tools;."/>
+    <property name="java.library.path" value="C:\Users\quiri\.jdks\corretto-17.0.15\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;E:\anaconda3\condabin;D:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.6\bin;D:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.6\libnvvp;;D:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\bin;D:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\libnvvp;C:\Program Files\Java\jdk-21\bin;C:\Program Files\Python\Python310\Scripts\;C:\Program Files\Python\Python310\;C:\Program Files\Python\Python310\Lib;C:\Program Files\Python\Python310\DLLs;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files (x86)\IVI Foundation\VISA\WinNT\Bin;C:\Program Files\dotnet\;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\dotnet\;C:\Program Files\nodejs\;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files\NVIDIA Corporation\Nsight Compute 2022.3.0\;C:\Program Files\Docker\Docker\resources\bin;C:\Users\quiri\.cargo\bin;C:\Users\quiri\Documents\apache-maven-3.8.1\bin;C:\Test\ffmpeg-4.4-essentials_build\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\IVI Foundation\VISA\WinNT\Bin;C:\Program Files\dotnet\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\dotnet\;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Users\quiri\AppData\Local\JetBrains\Toolbox\scripts;C:\Users\quiri\AppData\Local\Programs\Microsoft VS Code\bin;E:\VSCodeThings\.venv\Lib\site-packages\pywin32_system32\pywintypes38.dll;C:\Users\quiri\AppData\Local\GnuPG\bin\;C:\Users\quiri\AppData\Local\Programs\Git\cmd;C:\Users\quiri\AppData\Local\Android\sdk\platform-tools;E:\go1.24.0\go\bin;E:\platform-tools\build-tools\31.0.0;C:\Users\quiri\.lmstudio\bin;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64;C:\Users\quiri\PycharmProjects\RocketLeagueMLBot\execution\RLBotServer;C:\Users\quiri\.dotnet\tools;C:\Users\quiri\AppData\Local\Programs\cursor\resources\app\bin;."/>
     <property name="java.vm.info" value="mixed mode, sharing"/>
     <property name="java.vendor" value="Amazon.com Inc."/>
     <property name="java.vm.version" value="17.0.15+6-LTS"/>
@@ -59,181 +59,323 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="61.0"/>
   </properties>
-  <testcase name="testMaterialParsing" classname="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.334"/>
-  <testcase name="testConditionalChain" classname="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.041">
-    <system-out><![CDATA[[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@1b58ff9e
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@2f66e802
+  <testcase name="testMaterialParsing" classname="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.192"/>
+  <testcase name="testConditionalChain" classname="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.017">
+    <system-out><![CDATA[Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$ConditionalChain@251f7d26
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@2575f671
+[ExpressionEngine DEBUG] Evaluating binary expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@2575f671
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@329a1243
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 9 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 9
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 9
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@56b78e55
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@ecf9fb3
 [ExpressionEngine DEBUG] Result: 10.0
 [ExpressionEngine DEBUG] Result: false
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@7fe083b1
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@23c388c2
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@27f9e982
+[ExpressionEngine DEBUG] Evaluating binary expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@27f9e982
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@4593ff34
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 9 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 9
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 9
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@486be205
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@37d3d232
 [ExpressionEngine DEBUG] Result: 5.0
 [ExpressionEngine DEBUG] Result: true
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@f713686
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@74f7d1d2
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@30c0ccff
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@581d969c
 [ExpressionEngine DEBUG] Result: medium
 [ExpressionEngine DEBUG] Result: medium
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@4b4dd216
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@5ca17ab0
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$ConditionalChain@22db8f4
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@2b46a8c1
+[ExpressionEngine DEBUG] Evaluating binary expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@2b46a8c1
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@1d572e62
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 4 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 4
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 4
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@5a62b2a4
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@29caf222
 [ExpressionEngine DEBUG] Result: 10.0
 [ExpressionEngine DEBUG] Result: false
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@1051817b
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@35293c05
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@46cf05f7
+[ExpressionEngine DEBUG] Evaluating binary expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@46cf05f7
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@5851bd4f
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 4 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 4
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 4
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@620aa4ea
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@7cd1ac19
 [ExpressionEngine DEBUG] Result: 5.0
 [ExpressionEngine DEBUG] Result: false
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@2db2dd9d
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@3174cb09
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@2f40a43
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@3caa4757
 [ExpressionEngine DEBUG] Result: small
 [ExpressionEngine DEBUG] Result: small
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@4d411036
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@7adbd080
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$ConditionalChain@69c43e48
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@1804f60d
+[ExpressionEngine DEBUG] Evaluating binary expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@1804f60d
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@3a80515c
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 11 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 11
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 11
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@41beb473
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@547e29a4
 [ExpressionEngine DEBUG] Result: 10.0
 [ExpressionEngine DEBUG] Result: true
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@560513ce
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@13006998
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@1c807b1d
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@238b521e
 [ExpressionEngine DEBUG] Result: big
 [ExpressionEngine DEBUG] Result: big
 ]]></system-out>
   </testcase>
   <testcase name="testBasicMath" classname="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.001">
-    <system-out><![CDATA[[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@37fbe4a8
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@352c308
+    <system-out><![CDATA[Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@1b39fd82
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@1b39fd82
+[ExpressionEngine DEBUG] Evaluating binary expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@1b39fd82
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@3e2fc448
 [ExpressionEngine DEBUG] Result: 1.0
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@7d373bcf
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@6d6bc158
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@21680803
+[ExpressionEngine DEBUG] Evaluating binary expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@21680803
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@588ab592
 [ExpressionEngine DEBUG] Result: 2.0
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@5dda6f9
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@c8b96ec
 [ExpressionEngine DEBUG] Result: 3.0
 [ExpressionEngine DEBUG] Result: 6.0
 [ExpressionEngine DEBUG] Result: 7.0
 ]]></system-out>
   </testcase>
-  <testcase name="testVariables" classname="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.0">
-    <system-out><![CDATA[[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@10027fc9
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@54afd745
+  <testcase name="testVariables" classname="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.002">
+    <system-out><![CDATA[Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@4cc61eb1
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@4cc61eb1
+[ExpressionEngine DEBUG] Evaluating binary expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Binary@4cc61eb1
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@2d8f2f3a
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 4 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 4
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 4
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@677dbd89
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@2024293c
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 4 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 4
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 4
 [ExpressionEngine DEBUG] Result: 16.0
 ]]></system-out>
   </testcase>
-  <testcase name="testTypeInference" classname="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.011">
-    <system-out><![CDATA[[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@c00fff0
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@263f04ca
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@2ca47471
+  <testcase name="testTypeInference" classname="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.001">
+    <system-out><![CDATA[Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@c074c0c
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@c074c0c
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@58a55449
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Literal@5949eba8
 [ExpressionEngine DEBUG] Result: true
 [ExpressionEngine DEBUG] Result: true
 [ExpressionEngine DEBUG] Result: true
 ]]></system-out>
   </testcase>
-  <testcase name="testFunction" classname="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.003">
-    <system-out><![CDATA[[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@b93aad
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@4a9419d7
+  <testcase name="testFunction" classname="de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngineTest" time="0.004">
+    <system-out><![CDATA[Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@3c291aad
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@3c291aad
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@2d0566ba
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 2.0 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 2.0
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 2.0
 [ExpressionEngine DEBUG] Result: 4.0
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@2f3c6ac4
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@2e8ab815
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@733037
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@733037
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@7728643a
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 4.0 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 4.0
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 4.0
 [ExpressionEngine DEBUG] Result: 8.0
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@67af833b
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@d1f74b8
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@320e400
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@320e400
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@5167268
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 8.0 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 8.0
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 8.0
 [ExpressionEngine DEBUG] Result: 16.0
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@41394595
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@3a0807b7
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@1cfd1875
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@1cfd1875
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@28c0b664
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 16.0 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 16.0
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 16.0
 [ExpressionEngine DEBUG] Result: 32.0
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@21a5fd96
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@5769e7ae
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@2c444798
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@2c444798
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@1af7f54a
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 32.0 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 32.0
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 32.0
 [ExpressionEngine DEBUG] Result: 64.0
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@5c77053b
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@26b894bd
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@6ebd78d1
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@6ebd78d1
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@436390f4
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 64.0 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 64.0
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 64.0
 [ExpressionEngine DEBUG] Result: 128.0
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@287f94b1
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@30b34287
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@4d157787
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@4d157787
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@68ed96ca
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 128.0 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 128.0
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 128.0
 [ExpressionEngine DEBUG] Result: 256.0
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@5489c777
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@3676ac27
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@6d1310f6
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@6d1310f6
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@3228d990
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 256.0 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 256.0
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 256.0
 [ExpressionEngine DEBUG] Result: 512.0
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@62f87c44
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@48f5bde6
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@54e7391d
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@54e7391d
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@50b8ae8d
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 512.0 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 512.0
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 512.0
 [ExpressionEngine DEBUG] Result: 1024.0
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@525d79f0
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@5149f008
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@255990cc
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@255990cc
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@51c929ae
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 1024.0 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 1024.0
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 1024.0
 [ExpressionEngine DEBUG] Result: 2048.0
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@7072bc39
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@158d255c
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@2ca65ce4
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@3c8bdd5b
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@3c8bdd5b
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@29d2d081
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@40e4ea87
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 2.0 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 2.0
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 2.0
 [ExpressionEngine DEBUG] Result: 4.0
 [ExpressionEngine DEBUG] Result: 8.0
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@327120c8
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@5707c1cb
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@2b5cb9b2
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@58783f6c
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@58783f6c
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@3a7b503d
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@512d92b
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 8.0 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 8.0
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 8.0
 [ExpressionEngine DEBUG] Result: 64.0
 [ExpressionEngine DEBUG] Result: 128.0
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@35038141
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@ecf9049
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@672f11c2
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@62c5bbdc
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@62c5bbdc
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@7bdf6bb7
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@1bc53649
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 128.0 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 128.0
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 128.0
 [ExpressionEngine DEBUG] Result: 16384.0
 [ExpressionEngine DEBUG] Result: 32768.0
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@2970a5bc
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@50305a
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@72efb5c1
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@88d6f9b
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@88d6f9b
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@47d93e0d
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@475b7792
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 32768.0 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 32768.0
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 32768.0
 [ExpressionEngine DEBUG] Result: 1.073741824E9
 [ExpressionEngine DEBUG] Result: 2.147483648E9
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@6d511b5f
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@41200e0c
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@40f33492
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@751e664e
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@751e664e
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@160c3ec1
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@182b435b
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 2.147483648E9 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 2.147483648E9
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 2.147483648E9
 [ExpressionEngine DEBUG] Result: 4.6116860184273879E18
 [ExpressionEngine DEBUG] Result: 9.223372036854776E18
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@4fbdc0f0
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@2ad3a1bb
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@6bc28a83
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@4d0402b
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@4d0402b
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@2fa7ae9
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@7577b641
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 9.223372036854776E18 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 9.223372036854776E18
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 9.223372036854776E18
 [ExpressionEngine DEBUG] Result: 8.507059173023462E37
 [ExpressionEngine DEBUG] Result: 1.7014118346046923E38
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@324c64cd
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@13579834
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@24be2d9c
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@3704122f
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@3704122f
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@3153ddfc
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@60afd40d
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 1.7014118346046923E38 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 1.7014118346046923E38
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 1.7014118346046923E38
 [ExpressionEngine DEBUG] Result: 2.894802230932905E76
 [ExpressionEngine DEBUG] Result: 5.78960446186581E76
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@5bd73d1a
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@aec50a1
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@2555fff0
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@28a2a3e7
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@28a2a3e7
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@3f2049b6
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@10b3df93
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 5.78960446186581E76 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 5.78960446186581E76
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 5.78960446186581E76
 [ExpressionEngine DEBUG] Result: 3.3519519824856493E153
 [ExpressionEngine DEBUG] Result: 6.7039039649712985E153
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@70d2e40b
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@120f38e6
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@7a0e1b5e
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@ea27e34
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@ea27e34
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@33a2499c
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@e72dba7
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 6.7039039649712985E153 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 6.7039039649712985E153
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 6.7039039649712985E153
 [ExpressionEngine DEBUG] Result: 4.49423283715579E307
 [ExpressionEngine DEBUG] Result: 8.98846567431158E307
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@702ed190
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@173b9122
-[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@7c18432b
+Parsed expression: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@33c2bd
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@33c2bd
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Call@1dfd5f51
+[ExpressionEngine DEBUG] Evaluating: de.happybavarian07.coolstufflib.languagemanager.expressionengine.Parser$Expression$Variable@3c321bdb
+[Variable tracking] Accessing variable x (remaining uses: -1)
+[ExpressionEngine DEBUG] Getting value of variable: 8.98846567431158E307 (remaining uses: -1)
+[ExpressionEngine DEBUG] Using variable with unlimited uses: 8.98846567431158E307
+[Variable tracking] After access variable x (remaining uses: -1)
 [ExpressionEngine DEBUG] Result: 8.98846567431158E307
 [ExpressionEngine DEBUG] Result: Infinity
 [ExpressionEngine DEBUG] Result: Infinity

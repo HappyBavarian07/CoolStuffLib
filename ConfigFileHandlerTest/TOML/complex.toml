@@ -1,0 +1,10 @@
+[simple]
+boolean = true
+string = "test_value"
+double = 3.14
+integer = 42
+[list]
+items = "{__type__=ListSection, __items=[item1, item2, item3]}"
+[nested.section]
+number = 999
+key = "nested_value"

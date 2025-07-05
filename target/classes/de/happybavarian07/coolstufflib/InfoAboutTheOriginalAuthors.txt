@@ -1,0 +1,5 @@
+Config Updater is from https://github.com/tchristofferson/Config-Updater and I slighty changed it.
+The Language Manager is from me. I programmed the whole thing from the ground up. The Main Version is in my Admin-Panel.
+The Menu System is from Kody Simpson on Youtube (https://www.youtube.com/watch?v=xebH6M_7k18). I just changed it and added a few things.
+The Command Manager System is from this Video from Kody Simpson (https://www.youtube.com/watch?v=WyFN_jTS4nU). I just again changed it and this time added a lot of things.
+The Rest (utils Package) is just basic Things like Color Formatter or other Stuff that might be useful.

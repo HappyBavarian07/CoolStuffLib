@@ -1,12 +1,12 @@
 {
   "name": "TestPlayer",
+  "displayName": "§aTestPlayer",
+  "uuid": "e79962de-ba2c-40e2-ab3c-6001bd49f322",
+  "health": 20,
   "position": {
     "x": 100.5,
     "y": 64.0,
     "z": -30.25,
     "world": "world"
-  },
-  "displayName": "§aTestPlayer",
-  "uuid": "feadd5bd-c2de-40ca-b83f-7ac390daaed4",
-  "health": 20
+  }
 }

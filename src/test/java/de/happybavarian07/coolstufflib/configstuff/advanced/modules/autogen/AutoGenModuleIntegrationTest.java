@@ -53,7 +53,7 @@ class AutoGenModuleIntegrationTest {
 
     @BeforeEach
     void setup() throws IOException {
-        configManager = new AdvancedConfigManager(JSON_PATH.toFile().getParentFile());
+        configManager = new AdvancedConfigManager();
         Files.deleteIfExists(JSON_PATH);
     }
 
@@ -62,9 +62,8 @@ class AutoGenModuleIntegrationTest {
         DummyPlayer player = new DummyPlayer("MemPlayer", new DummyLocation("world", 1, 2, 3), "memDisp", UUID.randomUUID(), 10);
         AdvancedConfig config = configManager.createInMemoryConfig("mem", true);
         AutoGenModule module = new AutoGenModule();
-        module.addTemplate(AutoGenUtils.createTemplateFromObject("players." + player.uuid, player));
+        module.registerTemplate(AutoGenUtils.createTemplateFromObject("players." + player.uuid, player), "playerTemplate");
         config.registerModule(module);
-        module.onAttach(config);
         Assertions.assertNotNull(module.getGroupByPath("players." + player.uuid));
     }
 
@@ -76,11 +75,10 @@ class AutoGenModuleIntegrationTest {
         System.out.println("File Path: " + file.getAbsolutePath());
         AdvancedConfig config = configManager.createPersistentConfig("json", file, handler, true);
         AutoGenModule module = new AutoGenModule();
-        module.addTemplate(AutoGenUtils.createTemplateFromObject("players." + player.uuid, player));
+        module.registerTemplate(AutoGenUtils.createTemplateFromObject("players." + player.uuid, player), "playerTemplate");
         config.registerModule(module);
-        module.onAttach(config);
+        module.applyTemplateToConfig("playerTemplate");
         config.save();
-        // Reload and verify
         Assertions.assertTrue(file.exists());
         Map<String, Object> map = handler.load(file);
         Assertions.assertNotNull(map);
@@ -117,9 +115,8 @@ class AutoGenModuleIntegrationTest {
         System.out.println("File Path: " + file.getAbsolutePath());
         AdvancedConfig config = configManager.createPersistentConfig("yaml", file, handler, true);
         AutoGenModule module = new AutoGenModule();
-        module.addTemplate(AutoGenUtils.createTemplateFromObject("players." + player.uuid, player));
+        module.registerTemplate(AutoGenUtils.createTemplateFromObject("players." + player.uuid, player), "playerTemplate");
         config.registerModule(module);
-        module.onAttach(config);
         config.save();
         // Reload and verify
         Assertions.assertTrue(file.exists());

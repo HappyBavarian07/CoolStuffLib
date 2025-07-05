@@ -1,149 +1,166 @@
 package de.happybavarian07.coolstufflib.configstuff.advanced;
 
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.AdvancedConfig;
-import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.AdvancedConfigGroup;
-import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.GroupConfigModule;
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.BaseConfigModule;
+import de.happybavarian07.coolstufflib.configstuff.advanced.modules.AbstractGroupConfigModule;
 
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.Set;
 
-class DefaultGroupConfigModule implements GroupConfigModule {
+/**
+ * <p>Default implementation of GroupConfigModule that manages individual BaseConfigModule
+ * instances across all configurations in a group. Automatically handles module lifecycle
+ * events when configurations are added or removed from the group.</p>
+ *
+ * <p>This module provides:</p>
+ * <ul>
+ * <li>Automatic module registration for new configurations</li>
+ * <li>Module cloning to prevent shared state issues</li>
+ * <li>Lifecycle synchronization between group and individual modules</li>
+ * <li>Clean removal when configurations leave the group</li>
+ * </ul>
+ *
+ * <pre><code>
+ * BaseConfigModule validationModule = new ValidationModule();
+ * DefaultGroupConfigModule groupModule = new DefaultGroupConfigModule(validationModule);
+ * group.registerGroupModule(groupModule);
+ * </code></pre>
+ */
+class DefaultGroupConfigModule extends AbstractGroupConfigModule {
     private final BaseConfigModule module;
-    private AdvancedConfigGroup group;
 
     public DefaultGroupConfigModule(BaseConfigModule module) {
+        super(module.getName(), module.getDescription(), module.getVersion());
         this.module = module;
     }
 
     @Override
-    public String getName() {
-        return module.getName();
+    protected void onInitialize() {
+        for (AdvancedConfig config : getGroup().getConfigs().values()) {
+            onConfigAdded(config);
+        }
     }
 
     @Override
-    public void onGroupAttach(AdvancedConfigGroup group) {
-        this.group = group;
-        for (AdvancedConfig config : group.getConfigs()) {
-            if (!config.hasModule(module.getName())) {
-                config.registerModule(module);
-                config.getModuleByName(module.getName()).enable();
-            } else {
-                BaseConfigModule existingModule = config.getModuleByName(module.getName());
-                if (existingModule != null && !existingModule.isEnabled()) {
-                    existingModule.enable();
+    protected void onEnable() {
+        for (AdvancedConfig config : getGroup().getConfigs().values()) {
+            if (config.hasModule(module.getName())) {
+                BaseConfigModule configModule = config.getModuleByName(module.getName());
+                if (configModule != null && configModule.getState() == BaseConfigModule.ModuleState.INITIALIZED) {
+                    configModule.enable();
                 }
             }
         }
     }
 
     @Override
-    public void onGroupDetach() {
-        this.group = null;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return module.isEnabled();
-    }
-
-    @Override
-    public void enable() {
-        module.enable();
-    }
-
-    @Override
-    public void disable() {
-        module.disable();
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-        module.setEnabled(enabled);
-    }
-
-    @Override
-    public AdvancedConfigGroup getGroup() {
-        return group;
-    }
-
-    @Override
-    public void reload() {
-        if (group == null) return;
-        for (AdvancedConfig config : group.getConfigs()) {
+    protected void onDisable() {
+        for (AdvancedConfig config : getGroup().getConfigs().values()) {
             if (config.hasModule(module.getName())) {
-                config.getModuleByName(module.getName()).reload();
+                BaseConfigModule configModule = config.getModuleByName(module.getName());
+                if (configModule != null && configModule.getState() == BaseConfigModule.ModuleState.ENABLED) {
+                    configModule.disable();
+                }
             }
         }
     }
 
     @Override
-    public void save() {
-        if (group == null) return;
-        for (AdvancedConfig config : group.getConfigs()) {
+    protected void onCleanup() {
+        for (AdvancedConfig config : getGroup().getConfigs().values()) {
             if (config.hasModule(module.getName())) {
-                config.getModuleByName(module.getName()).save();
+                config.getModuleByName(module.getName()).cleanup();
             }
         }
     }
 
-    @Override
-    public boolean supportsConfig(AdvancedConfig config) {
-        return config != null && config.hasModule(module.getName()) &&
-                module.supportsConfig(config);
-    }
-
-    @Override
-    public void onGetValuesFromAll(String key, Map<String, Object> values) {
-        if (group == null) return;
-        for (AdvancedConfig config : group.getConfigs()) {
-            if (config.hasModule(module.getName())) {
-                config.getModuleByName(module.getName()).onGetValue(key, values);
-            }
-        }
-    }
-
-    @Override
-    public <T> T onGetFirstValue(String key, Class<T> type, T defaultValue) {
-        if (group == null) return defaultValue;
-        for (AdvancedConfig config : group.getConfigs()) {
-            Object value = config.get(key);
-            if (type.isInstance(value)) {
-                return type.cast(value);
-            }
-        }
-        return defaultValue;
-    }
-
-    @Override
+    /**
+     * <p>Handles the addition of a new configuration to the group by registering and
+     * initializing the associated module. Attempts to clone the module to prevent
+     * shared state issues between configurations.</p>
+     *
+     * <pre><code>
+     * groupModule.onConfigAdded(newConfig);
+     * // newConfig now has the module registered and initialized
+     * </code></pre>
+     *
+     * @param config the configuration that was added to the group
+     */
     public void onConfigAdded(AdvancedConfig config) {
         if (!config.hasModule(module.getName())) {
-            config.registerModule(module);
-            if (!config.getModuleByName(module.getName()).isEnabled()) {
-                config.getModuleByName(module.getName()).enable();
+            try {
+                // Clone the module for the config
+                Class<? extends BaseConfigModule> moduleClass = module.getClass();
+                BaseConfigModule clonedModule = moduleClass.getDeclaredConstructor().newInstance();
+                config.registerModule(clonedModule);
+                clonedModule.initialize(config);
+                if (isEnabled()) {
+                    clonedModule.enable();
+                }
+            } catch (Exception e) {
+                // Fallback to using the original module if cloning fails
+                if (!config.hasModule(module)) {
+                    config.registerModule(module);
+                    if (isEnabled()) {
+                        module.enable();
+                    }
+                }
             }
         }
     }
 
+    /**
+     * <p>Handles the removal of a configuration from the group by properly disabling,
+     * cleaning up, and unregistering the associated module to prevent resource leaks.</p>
+     *
+     * <pre><code>
+     * groupModule.onConfigRemoved(oldConfig);
+     * // oldConfig no longer has the module and resources are cleaned up
+     * </code></pre>
+     *
+     * @param config the configuration that was removed from the group
+     */
     @Override
     public void onConfigRemoved(AdvancedConfig config) {
         if (config.hasModule(module.getName())) {
-            if (config.getModuleByName(module.getName()).isEnabled()) {
-                config.getModuleByName(module.getName()).disable();
+            BaseConfigModule configModule = config.getModuleByName(module.getName());
+            if (configModule != null) {
+                configModule.disable();
+                configModule.cleanup();
             }
             config.unregisterModule(module.getName());
         }
     }
 
+    /**
+     * <p>Determines whether this group module applies to a specific configuration
+     * by checking if the configuration already has the associated module registered.</p>
+     *
+     * <pre><code>
+     * if (groupModule.appliesTo(config)) {
+     *     // Module is relevant to this configuration
+     * }
+     * </code></pre>
+     *
+     * @param config the configuration to check
+     * @return true if the configuration has the associated module, false otherwise
+     */
     @Override
-    public void onGroupApply(Consumer<AdvancedConfig> action) {
-        if (group == null) return;
-        for (AdvancedConfig config : group.getConfigs()) {
-            action.accept(config);
-        }
+    public boolean appliesTo(AdvancedConfig config) {
+        return config.hasModule(module.getName());
     }
 
-    public BaseConfigModule getModule() {
-        return module;
+    @Override
+    public Set<String> getRequiredModules() {
+        return module.getDependencies();
+    }
+
+    @Override
+    protected Map<String, Object> getAdditionalModuleState() {
+        return Map.of(
+                "moduleName", module.getName(),
+                "moduleDescription", module.getDescription(),
+                "moduleVersion", module.getVersion()
+        );
     }
 }

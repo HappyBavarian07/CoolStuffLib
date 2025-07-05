@@ -30,13 +30,30 @@ import java.util.stream.Collectors;
 public class ConfigUpdater {
 
     /**
-     * Update a yaml file from a resource inside your plugin jar
+     * <p>Updates a YAML configuration file by merging new structure from a plugin resource
+     * while preserving existing values and comments. This method intelligently combines
+     * the latest configuration template with user customizations.</p>
      *
-     * @param plugin          You plugin
-     * @param resourceName    The yaml file name to update from, typically config.yml
-     * @param toUpdate        The yaml file to update
-     * @param ignoredSections List of sections to ignore and copy from the current config
-     * @throws IOException If an IOException occurs
+     * <p>The update process:</p>
+     * <ul>
+     * <li>Loads the new configuration template from plugin resources</li>
+     * <li>Preserves all existing user values from the current file</li>
+     * <li>Maintains comments and formatting where possible</li>
+     * <li>Ignores specified sections to prevent overwriting sensitive data</li>
+     * <li>Handles special version keys for language files</li>
+     * </ul>
+     *
+     * <pre><code>
+     * List&lt;String&gt; ignoredSections = Arrays.asList("database", "custom-settings");
+     * ConfigUpdater.update(plugin, "config.yml", configFile, ignoredSections);
+     * // Config file now has latest structure with preserved user values
+     * </code></pre>
+     *
+     * @param plugin the plugin instance providing access to bundled resources
+     * @param resourceName the name of the YAML resource file to use as template
+     * @param toUpdate the target configuration file to update
+     * @param ignoredSections list of configuration section paths to preserve unchanged
+     * @throws IOException if file reading, writing, or resource access fails
      */
     public static void update(Plugin plugin, String resourceName, File toUpdate, List<String> ignoredSections) throws IOException {
         DumperOptions dumperOptions = new DumperOptions();
@@ -67,26 +84,30 @@ public class ConfigUpdater {
         write(newConfig, oldConfig, comments, ignoredSectionsArrayList, writer, yaml);
     }
 
-    //Write method doing the work.
-    //It checks if key has a comment associated with it and writes comment then the key and value
     private static void write(FileConfiguration newConfig, FileConfiguration oldConfig, Map<String, String> comments, List<String> ignoredSections, BufferedWriter writer, Yaml yaml) throws IOException {
-        //System.out.println("Ignored Sections 2: " + ignoredSections);
-        for (String key : oldConfig.getKeys(true)) {
-            if (newConfig.contains(key) || oldConfig.get(key) == null || oldConfig.isConfigurationSection(key)) {
+        for (String key : newConfig.getKeys(true)) {
+            if (newConfig.isConfigurationSection(key)) {
                 continue;
             }
-            if (key.equals("LanguageFullName")) {
-                newConfig.set(key, newConfig.get(key));
-            } else if (key.equals("LanguageVersion")) {
-                newConfig.set(key, CoolStuffLib.getLib().getJavaPluginUsingLib().getDescription().getVersion());
-            } else {
-                newConfig.set(key, oldConfig.get(key));
+
+            Object oldValue = oldConfig.get(key);
+            if (oldValue != null) {
+                if (key.equals("LanguageFullName")) {
+
+                } else if (key.equals("LanguageVersion")) {
+                    newConfig.set(key, CoolStuffLib.getLib().getJavaPluginUsingLib().getDescription().getVersion());
+                } else {
+                    newConfig.set(key, oldValue);
+                }
             }
         }
+
         outer:
-        for (String key : oldConfig.getKeys(true)) {
-            //System.out.println();
-            //System.out.println("Key: " + key);
+        for (String key : newConfig.getKeys(true)) {
+            if (newConfig.isConfigurationSection(key)) {
+                continue;
+            }
+
             String[] keys = key.split("\\.");
             String actualKey = keys[keys.length - 1];
             String comment = comments.remove(key);
@@ -96,35 +117,18 @@ public class ConfigUpdater {
             appendPrefixSpaces(prefixBuilder, indents);
             String prefixSpaces = prefixBuilder.toString();
 
-            //System.out.println("Prefix Builder + Prefix Spaces: " + prefixBuilder.length() + " | " + prefixSpaces.length());
-
             if (comment != null) {
-                writer.write(comment);//No \n character necessary, new line is automatically at end of comment
+                writer.write(comment);
             }
 
             for (String ignoredSection : ignoredSections) {
-                //System.out.println("Ignored Section: " + ignoredSection);
-                if (key.equals(ignoredSection)) {
+                if (key.equals(ignoredSection) || key.startsWith(ignoredSection + ".")) {
                     continue outer;
                 }
             }
 
-            Object newObj = newConfig.get(key);
-            Object oldObj = oldConfig.get(key);
-
-            if (newObj instanceof ConfigurationSection && oldObj instanceof ConfigurationSection) {
-                //write the old section
-                writeSection(writer, actualKey, prefixSpaces, (ConfigurationSection) oldObj);
-            } else if (newObj instanceof ConfigurationSection) {
-                //write the new section, old value is no more
-                writeSection(writer, actualKey, prefixSpaces, (ConfigurationSection) newObj);
-            } else if (oldObj != null) {
-                //write the old object
-                write(oldObj, actualKey, prefixSpaces, yaml, writer);
-            } else {
-                //write new object
-                write(newObj, actualKey, prefixSpaces, yaml, writer);
-            }
+            Object configValue = newConfig.get(key);
+            write(configValue, actualKey, prefixSpaces, yaml, writer);
         }
 
         String danglingComments = comments.get(null);

@@ -1,16 +1,17 @@
 // File: `src/main/java/de/happybavarian07/coolstufflib/languagemanager/LanguageCache.java`
 package de.happybavarian07.coolstufflib.languagemanager;
 
-import de.happybavarian07.coolstufflib.CoolStuffLib;
-import org.bukkit.Bukkit;
-
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class LanguageCache {
     private final String languageName;
     private final Map<String, Object> languageCache;
     private long lastAccess;
+    private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     public LanguageCache(String languageName) {
         this.languageName = languageName;
@@ -20,11 +21,11 @@ public class LanguageCache {
     }
 
     public void setup() {
-        Bukkit.getScheduler().runTaskTimerAsynchronously(CoolStuffLib.getLib().getJavaPluginUsingLib(), () -> {
+        executor.scheduleAtFixedRate(() -> {
             if (languageCache.size() > 600 || System.currentTimeMillis() - lastAccess > 600000) {
                 clearCache();
             }
-        }, 6000, 6000);
+        }, 6000, 6000, TimeUnit.MILLISECONDS);
     }
 
     public void addData(String key, Object value, boolean replace) {

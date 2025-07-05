@@ -1,0 +1,33 @@
+{
+  "app": {
+    "features": {
+      "enabled": {
+        "__type__": "ListSection",
+        "values": [
+          "search",
+          "notifications",
+          "sharing"
+        ]
+      }
+    },
+    "database": {
+      "port": 3306,
+      "credentials": {
+        "password": "secret",
+        "__type__": "MapSection",
+        "user": "admin"
+      },
+      "host": "localhost"
+    },
+    "name": "TestApp",
+    "version": "1.0.0"
+  },
+  "app.features.enabled": {
+    "__type__": "ListSection",
+    "values": [
+      "search",
+      "notifications",
+      "sharing"
+    ]
+  }
+}

@@ -8,12 +8,11 @@ import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import de.happybavarian07.coolstufflib.menusystem.MenuAddonManager;
 import de.happybavarian07.coolstufflib.menusystem.MenuListener;
 import de.happybavarian07.coolstufflib.menusystem.PlayerMenuUtility;
+import de.happybavarian07.coolstufflib.testing.LibraryTestInitializer;
 import de.happybavarian07.coolstufflib.utils.LogPrefix;
 import de.happybavarian07.coolstufflib.utils.PluginFileLogger;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.checkerframework.checker.units.qual.K;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -38,11 +37,12 @@ public class CoolStuffLib {
     private final Consumer<Object[]> commandManagerRegistryStartingMethod;
     private final Consumer<Object[]> menuAddonManagerStartingMethod;
     private final File dataFile;
+    private final Map<UUID, PlayerMenuUtility> playerMenuUtilityMap = new HashMap<>();
     private boolean languageManagerEnabled = false;
     private boolean commandManagerRegistryEnabled = false;
     private boolean menuAddonManagerEnabled = false;
     private boolean placeholderAPIEnabled = false;
-    private final Map<UUID, PlayerMenuUtility> playerMenuUtilityMap = new HashMap<>();
+    private LibraryTestInitializer testInitializer;
 
 
     /**
@@ -54,7 +54,7 @@ public class CoolStuffLib {
      * @param languageManager                      The Language Manager Class.
      * @param commandManagerRegistry               The Command Manager Registry Class.
      * @param menuAddonManager                     The Menu Addon Manager Class.
-     * @param pluginFileLogger                    The Plugin File Logger for logging purposes.
+     * @param pluginFileLogger                     The Plugin File Logger for logging purposes.
      * @param usePlayerLangHandler                 A boolean indicating if a PlayerLangHandler should be used.
      * @param sendSyntaxOnArgsZero                 A boolean indicating if the syntax should be sent when the command is executed with no arguments.
      * @param languageManagerStartingMethod        The method to execute when the Language Manager System is initiated.
@@ -98,12 +98,15 @@ public class CoolStuffLib {
     }
 
     /**
-     * Initializes various managers and addons used by the plugin.
-     * Checks if PlaceholderAPI is enabled and sets a boolean value accordingly.
-     * This function should be called in onEnable() or after all other initialization
-     * code in onEnable().
-     * <p>
-     * Failure to call this method will result in non-functioning managers and addons.
+     * <p>Initializes all core managers and addons for the plugin.</p>
+     * <ul>
+     *   <li>Enables LanguageManager, CommandManagerRegistry, and MenuAddonManager if present</li>
+     *   <li>Checks for PlaceholderAPI and sets internal state</li>
+     *   <li>Registers MenuListener events</li>
+     * </ul>
+     * <pre><code>
+     * coolStuffLib.setup();
+     * </code></pre>
      */
     public void setup() {
         if (languageManager != null) {
@@ -126,7 +129,7 @@ public class CoolStuffLib {
             executeMethod(menuAddonManagerStartingMethod, menuAddonManager);
             menuAddonManagerEnabled = true;
         }
-        if(pluginFileLogger != null) {
+        if (pluginFileLogger != null) {
             // Plugin File Logger Init Code
             pluginFileLogger.createLogFile();
         }
@@ -196,8 +199,6 @@ public class CoolStuffLib {
     /**
      * The getPluginFileLogger function returns the pluginFileLogger object.
      *
-     *
-     *
      * @return The pluginfilelogger variable
      */
     public PluginFileLogger getPluginFileLogger() {
@@ -207,15 +208,13 @@ public class CoolStuffLib {
     /**
      * The writeToLog function is used to write a message to the log file.
      *
-     *
-     * @param info Define the log level, which is used to filter out some messages
-     * @param logMessage Write the message to the log
-     * @param logPrefix Add a prefix to the log message
+     * @param info          Define the log level, which is used to filter out some messages
+     * @param logMessage    Write the message to the log
+     * @param logPrefix     Add a prefix to the log message
      * @param sendToConsole Determine if the message should be sent to the console
-     *
      */
     public void writeToLog(Level info, String logMessage, LogPrefix logPrefix, boolean sendToConsole) {
-        if(pluginFileLogger != null) {
+        if (pluginFileLogger != null) {
             pluginFileLogger.writeToLog(info, logMessage, logPrefix, sendToConsole);
             return;
         }
@@ -228,13 +227,13 @@ public class CoolStuffLib {
      * If the player doesn't have a PlayerMenuUtility object, it will be created.
      * <p>
      * The Menu API uses this function.
+     *
+     * @param player Get the player, whose PlayerMenuUtility object should be returned
+     * @return The PlayerMenuUtility object of the player
      * @see PlayerMenuUtility
      * @see MenuListener
      * @see MenuAddonManager
      * @see de.happybavarian07.coolstufflib.menusystem.Menu
-     *
-     * @param player Get the player, whose PlayerMenuUtility object should be returned
-     * @return The PlayerMenuUtility object of the player
      */
     public PlayerMenuUtility getPlayerMenuUtility(UUID player) {
         PlayerMenuUtility playerMenuUtility;
@@ -256,14 +255,14 @@ public class CoolStuffLib {
      * If the player already has a PlayerMenuUtility object, it will be overwritten.
      * <p>
      * The Menu API uses this function.
+     *
+     * @param player    Get the player, whose PlayerMenuUtility object should be created
+     * @param addToList Determine if the PlayerMenuUtility object should be added to the hashmap
+     * @return The PlayerMenuUtility object of the player
      * @see PlayerMenuUtility
      * @see MenuListener
      * @see MenuAddonManager
      * @see de.happybavarian07.coolstufflib.menusystem.Menu
-     *
-     * @param player Get the player, whose PlayerMenuUtility object should be created
-     * @param addToList Determine if the PlayerMenuUtility object should be added to the hashmap
-     * @return The PlayerMenuUtility object of the player
      */
     public PlayerMenuUtility createPlayerMenuUtility(UUID player, boolean addToList) {
         //This player doesn't. Make one of them and add it to the hashmap
@@ -279,9 +278,9 @@ public class CoolStuffLib {
      * <p>
      * The Menu API uses this function.
      * <p>
-     * @see PlayerMenuUtility
      *
      * @param player Get the player, whose PlayerMenuUtility object should be removed
+     * @see PlayerMenuUtility
      */
     public void removePlayerMenuUtility(UUID player) {
         playerMenuUtilityMap.remove(player);
@@ -289,5 +288,16 @@ public class CoolStuffLib {
 
     public Map<UUID, PlayerMenuUtility> getPlayerMenuUtilityMap() {
         return playerMenuUtilityMap;
+    }
+
+    public void initializeTests() {
+        if (javaPluginUsingLib != null) {
+            testInitializer = new LibraryTestInitializer(javaPluginUsingLib);
+            testInitializer.executeTests();
+        }
+    }
+
+    public LibraryTestInitializer getTestInitializer() {
+        return testInitializer;
     }
 }

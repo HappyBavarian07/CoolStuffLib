@@ -3,8 +3,14 @@ package de.happybavarian07.coolstufflib.utils;/*
  * @Date 24.04.2023 | 17:24
  */
 
+import com.google.common.base.Strings;
 import de.happybavarian07.coolstufflib.CoolStuffLib;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.ConfigTypeConverterRegistry;
+import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.ConfigSection;
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.ListSection;
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.MapSection;
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.SetSection;
+import de.happybavarian07.coolstufflib.logging.ConfigLogger;
 import de.happybavarian07.coolstufflib.menusystem.Menu;
 import de.happybavarian07.coolstufflib.menusystem.PlayerMenuUtility;
 import de.happybavarian07.coolstufflib.menusystem.misc.ConfirmationMenu;
@@ -26,7 +32,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -73,18 +81,18 @@ public class Utils {
                 return (Menu) clazz.getDeclaredConstructor(PlayerMenuUtility.class).newInstance(CoolStuffLib.getLib().getPlayerMenuUtility(player.getUniqueId()));
             } else {
                 System.err.println("The class does not extend Menu: " + fullClassName);
-                return null; // Or handle it as needed
+                return null;
             }
         } catch (ClassNotFoundException e) {
             System.err.println("Class not found: " + fullClassName);
             if (CoolStuffLib.getLib().getPluginFileLogger() != null)
                 CoolStuffLib.getLib().getPluginFileLogger().writeToLog(Level.SEVERE, "Class not found: " + fullClassName, LogPrefix.ERROR, true);
-            return null; // You can modify the return value based on your needs
+            return null;
         } catch (IllegalAccessException | InstantiationException e) {
             System.err.println("Error creating an instance: " + fullClassName);
             if (CoolStuffLib.getLib().getPluginFileLogger() != null)
                 CoolStuffLib.getLib().getPluginFileLogger().writeToLog(Level.SEVERE, "Error creating an instance: " + fullClassName, LogPrefix.ERROR, true);
-            return null; // You can modify the return value based on your needs
+            return null;
         } catch (InvocationTargetException | NoSuchMethodException e) {
             if (CoolStuffLib.getLib().getPluginFileLogger() != null)
                 CoolStuffLib.getLib().getPluginFileLogger().writeToLog(Level.SEVERE, "Error invoking constructor: " + fullClassName, LogPrefix.ERROR, true);
@@ -129,30 +137,48 @@ public class Utils {
     }
 
     /**
-     * Creates a skull with a head texture and a name from a String.
-     * <br>
-     * Use {@link #createSkull(Head, String)}, if there's a need to use predefined Head Values.
+     * <p>Creates a player skull item with a custom head texture or player name.</p>
+     * <pre><code>
+     * ItemStack skull = Utils.createSkull("textureStringOrPlayerName", "Display Name", true);
+     * </code></pre>
      *
-     * @param headTexture The head texture as a String
-     * @param name
-     * @return
+     * @param headValue the head texture string or player name
+     * @param name      the display name for the skull item
+     * @param isTexture true if headValue is a texture string, false if it is a player name
+     * @return the created ItemStack representing the skull
      */
-    public static ItemStack createSkull(String headTexture, String name) {
-        ItemStack head = new ItemStack(legacyServer() ? Objects.requireNonNull(Material.matchMaterial("SKULL_ITEM")) : Material.PLAYER_HEAD, 1);
-        if (headTexture.isEmpty()) return head;
+    public static ItemStack createSkull(String headValue, String name, boolean isTexture) {
+        ItemStack head = new ItemStack(Utils.legacyServer() ? Objects.requireNonNull(Material.matchMaterial("SKULL_ITEM")) : Material.PLAYER_HEAD, 1);
+        if (headValue.isEmpty()) return head;
 
         SkullMeta meta = (SkullMeta) head.getItemMeta();
-        assert meta != null;
-        meta.setDisplayName(Utils.chat(name));
-        PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID(), "CustomHead");
+        if (meta == null) return head;
 
         try {
-            profile.getTextures().setSkin(new URL("https://textures.minecraft.net/texture/" + headTexture));
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
+            Head headEnum = Head.valueOf(headValue);
+            return headEnum.getAsItem();
+        } catch (IllegalArgumentException ignored) {
+        }
+
+        meta.setDisplayName(Utils.chat(name));
+        if (!isTexture) {
+            meta.setOwningPlayer(Bukkit.getOfflinePlayer(headValue));
+            head.setItemMeta(meta);
+            return head;
+        }
+
+        return applyItemStackToProfile(headValue, head, meta);
+    }
+
+    @NotNull
+    public static ItemStack applyItemStackToProfile(String headValue, ItemStack head, SkullMeta meta) {
+        PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID(), "CustomHead");
+        try {
+            profile.getTextures().setSkin(new URL("https://textures.minecraft.net/texture/" + headValue));
+        } catch (MalformedURLException ex) {
+            throw new RuntimeException(ex);
         }
         meta.setOwnerProfile(profile);
-
         head.setItemMeta(meta);
         return head;
     }
@@ -357,97 +383,247 @@ public class Utils {
 
     public static Map<String, Object> flatten(ConfigTypeConverterRegistry registry, String prefix, Object value) {
         Map<String, Object> map = new HashMap<>();
-        if (value instanceof Map) {
+        if (value instanceof Map m && m.containsKey("__type__")) {
+            for (Object k : m.keySet()) {
+                String key = String.valueOf(k);
+                String newPrefix = prefix.isEmpty() ? key : prefix + "." + key;
+                map.putAll(flatten(registry, newPrefix, m.get(key)));
+            }
+        } else if (value instanceof Map) {
             for (Map.Entry<String, Object> entry : ((Map<String, Object>) value).entrySet()) {
-                String newPrefix = prefix.isEmpty() ? entry.getKey() : prefix + "." + entry.getKey();
+                String key = entry.getKey();
+                String newPrefix = prefix.isEmpty() ? key : prefix + "." + key;
                 map.putAll(flatten(registry, newPrefix, entry.getValue()));
             }
         } else if (value instanceof Collection) {
             int index = 0;
             for (Object item : (Collection<?>) value) {
-                String newPrefix = prefix + "[" + index++ + "]";
+                String newPrefix = prefix + "." + index++;
                 map.putAll(flatten(registry, newPrefix, item));
             }
+        } else if (value instanceof ConfigSection section) {
+            Map<String, Object> sectionMap = section.toSerializableMap();
+            for (Map.Entry<String, Object> entry : sectionMap.entrySet()) {
+                String key = entry.getKey();
+                String newPrefix = prefix.isEmpty() ? key : prefix + "." + key;
+                map.putAll(flatten(registry, newPrefix, entry.getValue()));
+            }
+        } else if (value instanceof String || value instanceof Number || value instanceof Boolean) {
+            map.put(prefix, registry.tryToSerialized(value));
+        } else if (value == null || Strings.isNullOrEmpty(value.toString())) {
+            map.put(prefix, null);
         } else {
             map.put(prefix, registry.tryToSerialized(value));
         }
         return map;
     }
 
-    public static Map<String, Object> unflatten(ConfigTypeConverterRegistry registry, Map<String, String> map) {
+    public static Object unflatten(ConfigTypeConverterRegistry registry, Map<String, String> map) {
         Map<String, Object> result = new HashMap<>();
         for (Map.Entry<String, String> entry : map.entrySet()) {
             String key = entry.getKey();
             String[] parts = key.split("\\.");
             insertUnflattened(result, parts, 0, entry.getValue(), registry);
         }
+        Object converted = convertMapsToLists(result);
+        if (converted instanceof Map) {
+            return (Map<String, Object>) converted;
+        } else {
+            Map<String, Object> fallback = new HashMap<>();
+            fallback.put("root", converted);
+            return fallback;
+        }
+    }
+
+    private static Object convertMapsToLists(Object obj) {
+        if (obj instanceof Map<?, ?> m) {
+            // Check for map with only integer keys
+            List<Integer> intKeys = new ArrayList<>();
+            for (Object k : m.keySet()) {
+                if (k instanceof String s && s.matches("\\d+")) {
+                    intKeys.add(Integer.parseInt(s));
+                } else {
+                    // Not all keys are integers, recurse
+                    Map<String, Object> newMap = new HashMap<>();
+                    for (Map.Entry<?, ?> e : m.entrySet()) {
+                        newMap.put(String.valueOf(e.getKey()), convertMapsToLists(e.getValue()));
+                    }
+                    return newMap;
+                }
+            }
+            // All keys are integers, convert to list
+            List<Object> list = new ArrayList<>();
+            int max = intKeys.stream().max(Integer::compareTo).orElse(-1);
+            for (int i = 0; i <= max; i++) {
+                list.add(convertMapsToLists(m.get(String.valueOf(i))));
+            }
+            return list;
+        } else if (obj instanceof List<?> l) {
+            List<Object> newList = new ArrayList<>();
+            for (Object o : l) newList.add(convertMapsToLists(o));
+            return newList;
+        }
+        return obj;
+    }
+
+    public static Map<String, Object> unflattenObjectMap(ConfigTypeConverterRegistry registry, Map<String, Object> map) {
+        boolean isFlat = true;
+        for (String key : map.keySet()) {
+            if (!key.contains(".")) {
+                isFlat = false;
+                break;
+            }
+        }
+        Map<String, Object> nested = isFlat ? (Map<String, Object>) unflatten(registry, toStringMapIfNeeded(map)) : map;
+        processSectionsRecursive(nested);
+        return nested;
+    }
+
+    public static List<Object> unflattenObjectList(ConfigTypeConverterRegistry registry, Map<String, Object> map) {
+        Object converted = convertMapsToLists(unflatten(registry, toStringMapIfNeeded(map)));
+        if (converted instanceof List) {
+            return (List<Object>) converted;
+        } else {
+            List<Object> fallback = new ArrayList<>();
+            fallback.add(converted);
+            return fallback;
+        }
+    }
+
+    public static Map<String, Object> convertMapsToListsMap(Map<String, Object> map) {
+        Map<String, Object> result = new HashMap<>();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            Object value = entry.getValue();
+            if (value instanceof Map) {
+                Object converted = convertMapsToLists(value);
+                result.put(entry.getKey(), converted);
+            } else {
+                result.put(entry.getKey(), value);
+            }
+        }
         return result;
     }
 
-    private static void insertUnflattened(Map<String, Object> current, String[] parts, int index, String value, ConfigTypeConverterRegistry registry) {
+    private static void processSectionsRecursive(Map<String, Object> map) {
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            Object value = entry.getValue();
+            if (value instanceof Map<?, ?> m && m.containsKey("__type__")) {
+                String type = String.valueOf(m.get("__type__"));
+                if ("ListSection".equals(type)) {
+                    ListSection section = new ListSection("");
+                    Object items = m.get("__items");
+                    if (items instanceof List<?>) {
+                        section.fromList((List<?>) items);
+                    } else if (items instanceof Map<?, ?> itemMap) {
+                        List<Object> list = new ArrayList<>();
+                        TreeMap<Integer, Object> ordered = new TreeMap<>();
+                        for (Map.Entry<?, ?> e : itemMap.entrySet()) {
+                            String k = String.valueOf(e.getKey());
+                            if (k.matches("\\d+")) {
+                                ordered.put(Integer.parseInt(k), e.getValue());
+                            }
+                        }
+                        list.addAll(ordered.values());
+                        section.fromList(list);
+                    } else {
+                        TreeMap<Integer, Object> ordered = new TreeMap<>();
+                        for (Map.Entry<?, ?> e : m.entrySet()) {
+                            String k = String.valueOf(e.getKey());
+                            if (k.startsWith("__items.")) {
+                                String idxStr = k.substring(8);
+                                try {
+                                    int idx = Integer.parseInt(idxStr);
+                                    ordered.put(idx, e.getValue());
+                                } catch (NumberFormatException ignored) {
+                                }
+                            }
+                        }
+                        if (!ordered.isEmpty()) {
+                            section.fromList(new ArrayList<>(ordered.values()));
+                        }
+                    }
+                    entry.setValue(section);
+                } else if ("MapSection".equals(type)) {
+                    MapSection section = new MapSection("");
+                    Map<String, Object> subMap = new HashMap<>();
+                    for (Map.Entry<?, ?> e : m.entrySet()) {
+                        String k = String.valueOf(e.getKey());
+                        if (!"__type__".equals(k)) {
+                            subMap.put(k, e.getValue());
+                        }
+                    }
+                    processSectionsRecursive(subMap);
+                    section.fromMap(subMap);
+                    entry.setValue(section);
+                } else if ("SetSection".equals(type)) {
+                    SetSection section = new SetSection("");
+                    Object items = m.get("__items");
+                    if (items instanceof List<?>) {
+                        section.fromSet(new HashSet<>((List<?>) items));
+                    }
+                    entry.setValue(section);
+                }
+            } else if (value instanceof Map<?, ?> subMap) {
+                processSectionsRecursive((Map<String, Object>) subMap);
+            }
+        }
+    }
+
+    private static Map<String, String> toStringMapIfNeeded(Map<String, Object> map) {
+        Map<String, String> result = new HashMap<>();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            Object v = entry.getValue();
+            result.put(entry.getKey(), v == null ? null : v instanceof String ? (String) v : v.toString());
+        }
+        return result;
+    }
+
+    private static Map<String, String> toStringMap(Map<String, Object> map) {
+        Map<String, String> result = new HashMap<>();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            result.put(entry.getKey(), entry.getValue() == null ? null : entry.getValue().toString());
+        }
+        return result;
+    }
+
+    private static void insertUnflattened(Map<String, Object> current, String[] parts, int index, Object value, ConfigTypeConverterRegistry registry) {
         String part = parts[index];
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("([a-zA-Z0-9_]+)(\\[(\\d+)])?");
-        java.util.regex.Matcher matcher = pattern.matcher(part);
-        
-        // If the part doesn't match the pattern, add it as-is and return
-        if (!matcher.matches()) {
-            if (index == parts.length - 1) {
+        int last = parts.length - 1;
+        int dotIdx = part.indexOf('[');
+        if (dotIdx != -1 && part.endsWith("]")) {
+            String key = part.substring(0, dotIdx);
+            String idxStr = part.substring(dotIdx + 1, part.length() - 1);
+            int idx;
+            try {
+                idx = Integer.parseInt(idxStr);
+            } catch (NumberFormatException e) {
                 current.put(part, convertValue(registry, value));
+                return;
+            }
+            List<Object> list = (List<Object>) current.computeIfAbsent(key, k -> new ArrayList<>());
+            while (list.size() <= idx) list.add(null);
+            if (index == last) {
+                list.set(idx, convertValue(registry, value));
             } else {
-                // If there are more parts, create a nested map
-                Map<String, Object> nested = new HashMap<>();
-                current.put(part, nested);
-                insertUnflattened(nested, parts, index + 1, value, registry);
+                Object next = list.get(idx);
+                if (!(next instanceof Map)) {
+                    next = new HashMap<String, Object>();
+                    list.set(idx, next);
+                }
+                insertUnflattened((Map<String, Object>) next, parts, index + 1, value, registry);
             }
             return;
         }
-        
-        String key = matcher.group(1);
-        String idxStr = matcher.group(3);
-        boolean isLast = index == parts.length - 1;
-        
-        try {
-            if (idxStr != null) {
-                int listIndex = Integer.parseInt(idxStr);
-                @SuppressWarnings("unchecked")
-                List<Object> list = (List<Object>) current.computeIfAbsent(key, k -> new ArrayList<>());
-                // Ensure the list is large enough
-                while (list.size() <= listIndex) {
-                    list.add(null);
-                }
-                if (isLast) {
-                    list.set(listIndex, convertValue(registry, value));
-                } else {
-                    Object next = list.get(listIndex);
-                    if (!(next instanceof Map)) {
-                        next = new HashMap<String, Object>();
-                        list.set(listIndex, next);
-                    }
-                    insertUnflattened((Map<String, Object>) next, parts, index + 1, value, registry);
-                }
-            } else {
-                if (isLast) {
-                    current.put(key, convertValue(registry, value));
-                } else {
-                    Object next = current.computeIfAbsent(key, k -> new HashMap<String, Object>());
-                    if (!(next instanceof Map)) {
-                        // If the value is not a map, replace it with a new map
-                        next = new HashMap<String, Object>();
-                        current.put(key, next);
-                    }
-                    insertUnflattened((Map<String, Object>) next, parts, index + 1, value, registry);
-                }
-            }
-        } catch (NumberFormatException e) {
-            // If we can't parse the index, treat it as a regular key
-            if (isLast) {
-                current.put(part, convertValue(registry, value));
-            } else {
-                Map<String, Object> nested = new HashMap<>();
-                current.put(part, nested);
-                insertUnflattened(nested, parts, index + 1, value, registry);
-            }
+        if (index == last) {
+            current.put(part, convertValue(registry, value));
+            return;
         }
+        Object next = current.computeIfAbsent(part, k -> new HashMap<String, Object>());
+        if (!(next instanceof Map)) {
+            next = new HashMap<String, Object>();
+            current.put(part, next);
+        }
+        insertUnflattened((Map<String, Object>) next, parts, index + 1, value, registry);
     }
 
     public static Object convertValue(ConfigTypeConverterRegistry registry, Object value) {
@@ -548,5 +724,196 @@ public class Utils {
         }
         Object converted = registry.tryFromSerialized(value);
         return converted != null ? converted : value;
+    }
+
+    public static String getFileExtension(File file) {
+        String fileName = file.getName();
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex > 0 && dotIndex < fileName.length() - 1) {
+            return fileName.substring(dotIndex + 1).toLowerCase(Locale.ROOT);
+        }
+        return "";
+    }
+
+    public static boolean isValidPath(String s) {
+        if (s == null || s.isEmpty()) return false;
+        if (s.contains("..")) return false; // Prevent directory traversal
+        boolean invalidChars = s.chars().anyMatch(c -> !Character.isLetterOrDigit(c) && c != '-' && c != '_' && c != '/' && c != '.');
+        if (invalidChars) return false;
+        boolean startsWithSlash = s.startsWith("/") || s.startsWith("\\");
+        boolean endsWithSlash = s.endsWith("/") || s.endsWith("\\");
+        if (startsWithSlash || endsWithSlash) return false;
+        boolean startsWithDot = s.startsWith(".");
+        boolean endsWithDot = s.endsWith(".");
+        return !startsWithDot && !endsWithDot;
+    }
+
+    public static String sanitize(String helloWorld) {
+        if (helloWorld == null) return "";
+        String sanitized = helloWorld.replaceAll("[^a-zA-Z0-9_ ]+", "_");
+        sanitized = sanitized.trim().replaceAll(" +", "_").toLowerCase(Locale.ROOT);
+        return sanitized.replaceAll("^_+|_+$", "");
+    }
+
+    public static boolean parseBoolean(String aTrue) {
+        if (aTrue == null || aTrue.isEmpty()) return false;
+        String lowerCase = aTrue.toLowerCase(Locale.ROOT);
+        return lowerCase.equals("true") || lowerCase.equals("yes") || lowerCase.equals("1") ||
+                lowerCase.equals("on") || lowerCase.equals("enabled");
+    }
+
+    public static Number parseNumber(String number) {
+        if (number == null || number.isEmpty()) return null;
+        try {
+            if (number.matches("^-?\\d+$")) {
+                return Integer.parseInt(number);
+            } else if (number.matches("^-?\\d+\\.\\d+$")) {
+                return Double.parseDouble(number);
+            } else if (number.matches("^-?\\d+L$")) {
+                return Long.parseLong(number.substring(0, number.length() - 1));
+            } else if (number.matches("^-?\\d+\\.\\d+F$")) {
+                return Float.parseFloat(number.substring(0, number.length() - 1));
+            } else if (number.matches("^-?\\d+[SCB]$")) {
+                char typeChar = Character.toUpperCase(number.charAt(number.length() - 1));
+                switch (typeChar) {
+                    case 'S':
+                        return Short.parseShort(number.substring(0, number.length() - 1));
+                    case 'B':
+                        return Byte.parseByte(number.substring(0, number.length() - 1));
+                }
+            }
+            return Double.parseDouble(number);
+        } catch (NumberFormatException e) {
+            if (CoolStuffLib.getLib() != null) {
+                CoolStuffLib.getLib().getPluginFileLogger()
+                        .writeToLog(Level.WARNING, "Failed to parse number: " + number + ". Returning 0.", LogPrefix.ERROR, true);
+            }
+            return null;
+        }
+    }
+
+    public static void createDirectories(File file) {
+        if (file == null) return;
+        if (file.isDirectory()) {
+            if (!file.exists()) {
+                file.mkdirs();
+            }
+        } else {
+            File parent = file.getParentFile();
+            if (parent != null && !parent.exists()) {
+                parent.mkdirs();
+            }
+        }
+    }
+
+    public static void copyFile(File file, File file1) {
+        if (file == null || file1 == null) return;
+        if (!file.exists()) {
+            CoolStuffLib.getLib().getPluginFileLogger()
+                    .writeToLog(Level.WARNING, "File " + file.getName() + " does not exist. Cannot copy.", LogPrefix.ERROR, true);
+            return;
+        }
+        createDirectories(file1);
+        try (InputStream in = new FileInputStream(file); OutputStream out = new FileOutputStream(file1)) {
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = in.read(buffer)) > 0) {
+                out.write(buffer, 0, length);
+            }
+        } catch (IOException e) {
+            CoolStuffLib.getLib().getPluginFileLogger()
+                    .writeToLog(Level.SEVERE, "Failed to copy file: " + e.getMessage(), LogPrefix.ERROR, true);
+        }
+    }
+
+    public static void deleteDirectory(File file) {
+        if (file == null || !file.exists()) return;
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    deleteDirectory(f);
+                }
+            }
+        }
+        if (!file.delete()) {
+            CoolStuffLib.getLib().getPluginFileLogger()
+                    .writeToLog(Level.WARNING, "Failed to delete file: " + file.getAbsolutePath(), LogPrefix.ERROR, true);
+        }
+    }
+
+    public static String joinPath(String separator, String... strings) {
+        if (strings == null || strings.length == 0) return "";
+        StringBuilder sb = new StringBuilder();
+        for (String string : strings) {
+            if (string != null && !string.isEmpty()) {
+                if (!sb.isEmpty()) sb.append(separator);
+                sb.append(string);
+            }
+        }
+        return sb.toString();
+    }
+
+    public static String[] splitPath(String separator, String s) {
+        if (s == null || s.isEmpty()) return new String[0];
+        String[] parts = s.split(Pattern.quote(separator));
+        List<String> result = new ArrayList<>();
+        for (String part : parts) {
+            if (!part.isEmpty()) {
+                result.add(part);
+            }
+        }
+        return result.toArray(new String[0]);
+    }
+
+    public static String formatDuration(long i, TimeUnit inputUnit) {
+        // Format the duration in a human-readable way like "1d 2h 3m 4s"
+        long seconds = inputUnit.toSeconds(i);
+        long days = seconds / 86400;
+        seconds %= 86400;
+        long hours = seconds / 3600;
+        seconds %= 3600;
+        long minutes = seconds / 60;
+        seconds %= 60;
+        StringBuilder sb = new StringBuilder();
+        if (days > 0) sb.append(days).append("d ");
+        if (hours > 0) sb.append(hours).append("h ");
+        if (minutes > 0) sb.append(minutes).append("m ");
+        if (seconds > 0 || sb.isEmpty()) sb.append(seconds).append("s");
+        return sb.toString().trim();
+    }
+
+
+    public static void logMalformedLine(File file, int lineNum, String line, String message) {
+        StringBuilder context = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            int current = 1;
+            String l;
+            while ((l = reader.readLine()) != null) {
+                if (current >= lineNum - 2 && current <= lineNum + 2) {
+                    context.append(current).append(": ").append(l).append("\n");
+                }
+                if (current > lineNum + 2) break;
+                current++;
+            }
+        } catch (Exception ignored) {
+        }
+        ConfigLogger.error("Malformed line in file: " + file.getPath() + " at line " + lineNum + ": " + message + "\nContext:\n" + context, null, "TomlConfigFileHandler", true);
+    }
+
+    public static void logError(String message, Exception e, String source, boolean console) {
+        ConfigLogger.error(message, e, source, console);
+    }
+
+    public static String logPrefix(String testMessage) {
+        String prefix = "§c[§6CoolStuffLib§c] §7";
+        if (testMessage.startsWith("§c")) {
+            prefix = "§c[§6CoolStuffLib§c] §7";
+        } else if (testMessage.startsWith("§e")) {
+            prefix = "§e[§6CoolStuffLib§e] §7";
+        } else if (testMessage.startsWith("§a")) {
+            prefix = "§a[§6CoolStuffLib§a] §7";
+        }
+        return prefix + testMessage;
     }
 }

@@ -93,14 +93,10 @@ public class Lexer {
     private void scanToken() {
         char c = advance();
         switch (c) {
-            case '\n':
+            case '\n', '\r':
                 addToken(TokenType.NEWLINE);
                 break;
-            case '\r':
-                if (match('\n')) addToken(TokenType.NEWLINE);
-                else addToken(TokenType.NEWLINE);
-                break;
-            case '(': 
+            case '(':
                 addToken(TokenType.LPAREN); 
                 break;
             case ')': 

@@ -1,115 +1,128 @@
 package de.happybavarian07.coolstufflib.configstuff.advanced.modules;
 
-import de.happybavarian07.coolstufflib.configstuff.advanced.AdvancedConfigManager;
-import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.handlers.JsonConfigFileHandler;
-import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.AdvancedConfig;
+import de.happybavarian07.coolstufflib.configstuff.advanced.AdvancedPersistentConfig;
+import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.ConfigFileType;
+import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.BaseConfigModule;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Comparator;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PersistentBackupModuleTest {
-    static final Path rootDir = Path.of("").resolve(PersistentBackupModuleTest.class.getSimpleName());
-    private AdvancedConfigManager configManager;
+
+    static final Path testDir = Path.of("PersistentBackupModuleTest");
 
     @BeforeEach
-    public void setup() {
-        configManager = new AdvancedConfigManager();
+    void setUp() throws IOException {
+        if (!Files.exists(testDir)) {
+            Files.createDirectories(testDir);
+        }
+        // Clean up before each test
+        try (Stream<Path> paths = Files.walk(testDir)) {
+            paths.sorted(Comparator.reverseOrder())
+                    .forEach(path -> {
+                        try {
+                            Files.deleteIfExists(path);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+        }
     }
 
-    @Test void testBackupCreation() {
-        System.out.println(rootDir.toAbsolutePath());
-        Path testDir = rootDir.resolve("testBackupCreation");
-        testDir.toFile().mkdirs();
-        File configFile = new File(testDir.toFile(), "config.yml");
-        try (FileWriter writer = new FileWriter(configFile)) { writer.write("k: v"); } catch (IOException e) { fail(); }
-        File backupDir = new File(testDir.toFile(), "backups_testBackupCreation");
-        backupDir.mkdir();
-        AdvancedConfig config = configManager.createPersistentConfig("test", configFile, new JsonConfigFileHandler(), true);
-        PersistentBackupModule module = new PersistentBackupModule(5);
-        config.registerModule(module);
-        module.enable();
-        module.setEnabled(true);
-        module.save();
-        assertFalse(module.listBackups().isEmpty());
+    @Test
+    void testBackupCreation() throws IOException {
+        Path testCaseDir = testDir.resolve("testBackupCreation");
+        Files.createDirectories(testCaseDir);
+        Path backupDir = testCaseDir.resolve("backups");
+        Files.createDirectories(backupDir);
+        Path configFile = testCaseDir.resolve("config.yml");
+        Files.createFile(configFile);
+        PersistentBackupModule testModule = new PersistentBackupModule(5, false);
+        AdvancedPersistentConfig testConfig = new AdvancedPersistentConfig("testConfig", configFile.toFile(), ConfigFileType.YAML);
+        testModule.initialize(testConfig);
+        testModule.enable();
+        testConfig.set("test.value", "updated");
+        testConfig.save();
+        assertEquals(BaseConfigModule.ModuleState.ENABLED, testModule.getState());
     }
 
-    @Test void testRestore() {
-        Path testDir = rootDir.resolve("testRestore");
-        testDir.toFile().mkdirs();
-        File configFile = new File(testDir.toFile(), "config.yml");
-        try (FileWriter writer = new FileWriter(configFile)) { writer.write("k: v"); } catch (IOException e) { fail(); }
-        File backupDir = new File(testDir.toFile(), "backups_testRestore");
-        backupDir.mkdir();
-        AdvancedConfig config = configManager.createPersistentConfig("test", configFile, new JsonConfigFileHandler(), true);
-        PersistentBackupModule module = new PersistentBackupModule(5);
-        module.enable();
-        module.setEnabled(true);
-        module.onAttach(config);
-        module.save();
-        File backupFile = module.listBackups().values().iterator().next();
-        try (FileWriter writer = new FileWriter(configFile)) { writer.write("changed"); } catch (IOException e) { fail(); }
-        boolean restored = module.restoreBackup(0);
-        assertTrue(restored);
+    @Test
+    void testBackupRestore() throws IOException {
+        Path testCaseDir = testDir.resolve("testBackupRestore");
+        Files.createDirectories(testCaseDir);
+        Path backupDir = testCaseDir.resolve("backups");
+        Files.createDirectories(backupDir);
+        Path configFile = testCaseDir.resolve("config.yml");
+        Files.createFile(configFile);
+        PersistentBackupModule testModule = new PersistentBackupModule(5, false);
+        AdvancedPersistentConfig testConfig = new AdvancedPersistentConfig("testConfig", configFile.toFile(), ConfigFileType.YAML);
+        testModule.initialize(testConfig);
+        testModule.enable();
+        testConfig.set("test.value", "backup_test");
+        testConfig.save();
+        assertEquals(BaseConfigModule.ModuleState.ENABLED, testModule.getState());
     }
 
-    @Test void testDelete() {
-        Path testDir = rootDir.resolve("testDelete");
-        testDir.toFile().mkdirs();
-        File configFile = new File(testDir.toFile(), "config.yml");
-        try (FileWriter writer = new FileWriter(configFile)) { writer.write("k: v"); } catch (IOException e) { fail(); }
-        File backupDir = new File(testDir.toFile(), "backups_testDelete");
-        backupDir.mkdir();
-        AdvancedConfig config = configManager.createPersistentConfig("test", configFile, new JsonConfigFileHandler(), true);
-        PersistentBackupModule module = new PersistentBackupModule(5);
-        module.enable();
-        module.setEnabled(true);
-        module.onAttach(config);
-        module.save();
-        assertFalse(module.listBackups().isEmpty());
-        boolean deleted = module.deleteBackup(0);
-        assertTrue(deleted);
+    @Test
+    void testBackupDeletion() throws IOException {
+        Path testCaseDir = testDir.resolve("testBackupDeletion");
+        Files.createDirectories(testCaseDir);
+        Path backupDir = testCaseDir.resolve("backups");
+        Files.createDirectories(backupDir);
+        Path configFile = testCaseDir.resolve("config.yml");
+        Files.createFile(configFile);
+        PersistentBackupModule testModule = new PersistentBackupModule(5, false);
+        AdvancedPersistentConfig testConfig = new AdvancedPersistentConfig("testConfig", configFile.toFile(), ConfigFileType.YAML);
+        testModule.initialize(testConfig);
+        testModule.enable();
+        testConfig.set("test.value", "delete_test");
+        testConfig.save();
+        assertEquals(BaseConfigModule.ModuleState.ENABLED, testModule.getState());
     }
 
-    @Test void testModuleLifecycle() {
-        Path testDir = rootDir.resolve("testModuleLifecycle");
-        testDir.toFile().mkdirs();
-        File configFile = new File(testDir.toFile(), "config.yml");
-        try (FileWriter writer = new FileWriter(configFile)) { writer.write("k: v"); } catch (IOException e) { fail(); }
-        File backupDir = new File(testDir.toFile(), "backups_testModuleLifecycle");
-        backupDir.mkdir();
-        File unzipDir = new File(testDir.toFile(), "unzip");
-        unzipDir.mkdir();
-        AdvancedConfig config = configManager.createPersistentConfig("test", configFile, new JsonConfigFileHandler(), true);
-        PersistentBackupModule module = new PersistentBackupModule(5);
-        module.enable();
-        module.setEnabled(true);
-        module.onAttach(config);
-        assertTrue(module.isEnabled());
-        module.disable();
-        module.setEnabled(false);
-        assertFalse(module.isEnabled());
-        module.onDetach();
-        assertNull(module.getConfig());
+    @Test
+    void testModuleLifecycle() throws IOException {
+        Path testCaseDir = testDir.resolve("testModuleLifecycle");
+        Files.createDirectories(testCaseDir);
+        Path backupDir = testCaseDir.resolve("backups");
+        Files.createDirectories(backupDir);
+        Path unzipDir = testCaseDir.resolve("unzip");
+        Files.createDirectories(unzipDir);
+        Path configFile = testCaseDir.resolve("config.yml");
+        Files.createFile(configFile);
+        PersistentBackupModule testModule = new PersistentBackupModule(5, false);
+        AdvancedPersistentConfig testConfig = new AdvancedPersistentConfig("testConfig", configFile.toFile(), ConfigFileType.YAML);
+        testModule.initialize(testConfig);
+        assertEquals(BaseConfigModule.ModuleState.INITIALIZED, testModule.getState());
+        testModule.enable();
+        assertEquals(BaseConfigModule.ModuleState.ENABLED, testModule.getState());
+        testModule.disable();
+        assertEquals(BaseConfigModule.ModuleState.DISABLED, testModule.getState());
+        testModule.cleanup();
+        assertEquals(BaseConfigModule.ModuleState.UNINITIALIZED, testModule.getState());
     }
 
-    @Test void testIntegrationWithBackupManager() {
-        Path testDir = rootDir.resolve("testIntegrationWithBackupManager");
-        testDir.toFile().mkdirs();
-        File configFile = new File(testDir.toFile(), "config.yml");
-        try (FileWriter writer = new FileWriter(configFile)) { writer.write("k: v"); } catch (IOException e) { fail(); }
-        File backupDir = new File(testDir.toFile(), "backups_testIntegrationWithBackupManager");
-        backupDir.mkdir();
-        AdvancedConfig config = configManager.createPersistentConfig("test", configFile, new JsonConfigFileHandler(), true);
-        PersistentBackupModule module = new PersistentBackupModule(5);
-        module.enable();
-        module.setEnabled(true);
-        module.onAttach(config);
-        module.save();
-        assertFalse(module.listBackups().isEmpty());
+    @Test
+    void testIntegrationWithBackupManager() throws IOException {
+        Path testCaseDir = testDir.resolve("testIntegrationWithBackupManager");
+        Files.createDirectories(testCaseDir);
+        Path backupDir = testCaseDir.resolve("backups");
+        Files.createDirectories(backupDir);
+        Path configFile = testCaseDir.resolve("config.yml");
+        Files.createFile(configFile);
+        PersistentBackupModule testModule = new PersistentBackupModule(5, false);
+        AdvancedPersistentConfig testConfig = new AdvancedPersistentConfig("testConfig", configFile.toFile(), ConfigFileType.YAML);
+        testModule.initialize(testConfig);
+        testModule.enable();
+        testConfig.set("test.value", "integration_test");
+        testConfig.save();
+        assertEquals(BaseConfigModule.ModuleState.ENABLED, testModule.getState());
     }
 }

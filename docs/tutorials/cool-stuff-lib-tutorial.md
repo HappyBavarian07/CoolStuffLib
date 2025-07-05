@@ -383,7 +383,6 @@ public boolean onPlayerCommand(Player player, String[] args) {
 With `setUsePlayerLangHandler(true)`, players can have individual language preferences:
 
 ```java
-// Set player's language
 LanguageManager langManager = CoolStuffLib.getLib().getLanguageManager();
 langManager.getPLHandler().setPlayerLanguage(player.getUniqueId(), "de");
 

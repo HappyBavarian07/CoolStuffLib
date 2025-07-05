@@ -293,18 +293,23 @@ public class ExpressionEngine {
         }
 
         try {
-            // First check if it's a direct material name
             if (isMaterialName(expression)) {
                 Material material = Material.valueOf(expression.toUpperCase().replace("\"", "").replace("'", ""));
                 return type.cast(material);
             }
 
             Parser.Expression expr = tokenizeAndParseExpression(expression);
+            System.out.println("Parsed expression: " + expr);
             if (expr == null) {
                 return null;
-            }
-
-            if (expr instanceof Parser.Expression.ConditionalChain chain) {
+            } else if (expr instanceof Parser.Expression.Sequence seq) {
+                Object result = null;
+                System.out.println("Parsing sequence: " + seq);
+                for (int i = 0; i < seq.exprs.size(); i++) {
+                    result = interpreter.interpret(seq.exprs.get(i));
+                }
+                return type.cast(result);
+            } else if (expr instanceof Parser.Expression.ConditionalChain chain) {
                 for (int i = 0; i < chain.branches.size(); i++) {
                     Parser.Expression.ConditionalBranch branch = chain.branches.get(i);
                     Object condResult = interpreter.interpret(branch.condition);
@@ -319,14 +324,28 @@ public class ExpressionEngine {
                     return type.cast(output);
                 }
                 return null;
+            } else if (expr instanceof Parser.Expression.Literal lit) {
+                if (lit.value == null) {
+                    return null;
+                }
+                if (type.isPrimitive() && lit.value instanceof Number) {
+                    return type.cast(((Number) lit.value).doubleValue());
+                }
+                return type.cast(lit.value);
+            } else if (expr instanceof Parser.Expression.Variable var) {
+                Object value = interpreter.getVariable(var.name.lexeme());
+                if (value == null) {
+                    return null;
+                }
+                if (type.isPrimitive() && value instanceof Number) {
+                    return type.cast(((Number) value).doubleValue());
+                }
+                return type.cast(value);
             }
 
-            // Handle other types
             if (type.isInstance(expr) && !(expr instanceof Parser.Expression.Call)) {
                 return type.cast(expr);
             }
-
-            // if expr is a function call, we need to evaluate it
 
             Object result = interpreter.interpret(expr);
 
@@ -401,12 +420,15 @@ public class ExpressionEngine {
     }
 
     private boolean isTruthy(Object value) {
-        return switch (value) {
-            case null -> false;
-            case Boolean b -> b;
-            case Number number -> number.doubleValue() != 0;
-            default -> true;
-        };
+        if (value == null) {
+            return false;
+        } else if (value instanceof Boolean b) {
+            return b;
+        } else if (value instanceof Number number) {
+            return number.doubleValue() != 0;
+        } else {
+            return true;
+        }
     }
 
     private boolean isMaterialName(String str) {

@@ -61,7 +61,7 @@ class AutoGenModuleTest {
 
         AutoGenModule module = new AutoGenModule();
         AutoGenTemplate template = AutoGenUtils.createTemplateFromObject("players." + player.uuid, player);
-        module.addTemplate(template);
+        module.registerTemplate(template, "players." + player.uuid);
 
         // Serialize config to disk (simple JSON-like, not production)
         Map<String, Object> configMap = extractGroup(module.getGroupByPath("players." + player.uuid));

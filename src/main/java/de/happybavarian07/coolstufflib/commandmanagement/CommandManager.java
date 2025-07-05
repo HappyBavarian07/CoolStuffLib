@@ -279,7 +279,7 @@ public abstract class CommandManager {
      * @param name The name or alias of the subcommand to retrieve.
      * @return The {@link SubCommand} with the given name or alias, or null if not found.
      */
-    protected SubCommand getSubCommand(String name) {
+    public SubCommand getSubCommand(String name) {
         for (SubCommand subCommand : getSubCommands()) {
             if (subCommand.name().equalsIgnoreCase(name) || Arrays.asList(subCommand.aliases()).contains(name)) {
                 return subCommand;

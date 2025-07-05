@@ -10,6 +10,26 @@ import java.io.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * <p>Represents a configuration file wrapper that provides convenient access to YAML configuration
+ * data with automatic default value handling and type-safe value retrieval methods.</p>
+ *
+ * <p>This class wraps Bukkit's FileConfiguration system and provides:</p>
+ * <ul>
+ * <li>Unique identification via UUID for each configuration instance</li>
+ * <li>Automatic loading of default values from resources</li>
+ * <li>Type-safe getter methods with default value support</li>
+ * <li>Comparable implementation for ordering configurations</li>
+ * </ul>
+ *
+ * <pre><code>
+ * Config config = new Config(new File("config.yml"));
+ * String serverName = config.getString("server.name", "Default Server");
+ * int maxPlayers = config.getInt("server.max-players", 20);
+ * config.set("server.motd", "Welcome to our server!");
+ * config.save();
+ * </code></pre>
+ */
 public class Config implements Serializable, Comparable<Config> {
     private final UUID configUUID;
     private final File configFile;
@@ -115,6 +135,31 @@ public class Config implements Serializable, Comparable<Config> {
         configFile.delete();
     }
 
+    /**
+     * <p>Compares this configuration with another configuration for ordering purposes.
+     * The comparison is based on UUID first, then file name, and finally file path
+     * to ensure consistent and deterministic ordering.</p>
+     *
+     * <p>The comparison hierarchy is:</p>
+     * <ul>
+     * <li>Primary: Configuration UUID comparison</li>
+     * <li>Secondary: Configuration file name comparison</li>
+     * <li>Tertiary: Configuration file path comparison</li>
+     * </ul>
+     *
+     * <pre><code>
+     * Config config1 = new Config(new File("config1.yml"));
+     * Config config2 = new Config(new File("config2.yml"));
+     * int comparison = config1.compareTo(config2);
+     * if (comparison < 0) {
+     *     // config1 comes before config2
+     * }
+     * </code></pre>
+     *
+     * @param o the configuration to compare with this configuration
+     * @return negative integer if this config comes before the other,
+     *         zero if they are equal, positive integer if this config comes after
+     */
     @Override
     public int compareTo(@NotNull Config o) {
         int result = this.configUUID.compareTo(o.configUUID);

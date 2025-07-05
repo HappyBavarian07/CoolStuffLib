@@ -1,5 +1,7 @@
 package de.happybavarian07.coolstufflib.languagemanager;
 
+import de.happybavarian07.coolstufflib.CoolStuffLib;
+import de.happybavarian07.coolstufflib.utils.Utils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -11,8 +13,6 @@ import java.io.InputStreamReader;
 import java.util.logging.Level;
 
 public class LanguageConfig {
-
-    private final JavaPlugin plugin;
     private final String langName;
     private File file;
     private FileConfiguration config;
@@ -29,11 +29,9 @@ public class LanguageConfig {
      * @param langFolder Create the folder where the language file is stored
      * @param resourceDirectory Specify the folder in which the language file is located
      * @param langName Set the name of the language file
-     * @param plugin Get the plugin name, which is used to save the default config
      * @see LanguageManager
      */
-    public LanguageConfig(File langFile, File langFolder, String resourceDirectory, String langName, JavaPlugin plugin) {
-        this.plugin = plugin;
+    public LanguageConfig(File langFile, File langFolder, String resourceDirectory, String langName) {
         this.langName = langName;
         this.file = langFile;
         this.resourceDirectory = resourceDirectory;
@@ -53,8 +51,8 @@ public class LanguageConfig {
 
         this.config = YamlConfiguration.loadConfiguration(this.file);
 
-        if (this.plugin.getResource(resourceDirectory + "/" + this.langName + ".yml") != null) {
-            InputStream defaultStream = this.plugin.getResource(resourceDirectory + "/" + this.langName + ".yml");
+        if (Utils.getResource(resourceDirectory + "/" + this.langName + ".yml") != null) {
+            InputStream defaultStream = Utils.getResource(resourceDirectory + "/" + this.langName + ".yml");
             if (defaultStream != null) {
                 YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defaultStream));
                 this.config.setDefaults(defaultConfig);
@@ -85,7 +83,7 @@ public class LanguageConfig {
         try {
             this.getConfig().save(this.file);
         } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE, "Could not save Config to " + this.file, e);
+            LanguageManager.getLogger().log(Level.SEVERE, "Could not save Config to " + this.file, e);
         }
     }
 
@@ -98,7 +96,8 @@ public class LanguageConfig {
             this.file = new File(langFolder, this.langName + ".yml");
 
         if (!this.file.exists()) {
-            this.plugin.saveResource(resourceDirectory + "/" + this.langName + ".yml", false);
+            File configDir = CoolStuffLib.getLib() == null ? new File("") : CoolStuffLib.getLib().getWorkingDirectory();
+            Utils.saveResource(configDir, resourceDirectory + "/" + this.langName + ".yml", false);
         }
     }
 

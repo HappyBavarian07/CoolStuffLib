@@ -1,101 +1,192 @@
 package de.happybavarian07.coolstufflib.configstuff.advanced.interfaces;
 
+import de.happybavarian07.coolstufflib.configstuff.advanced.event.ConfigEvent;
+import de.happybavarian07.coolstufflib.configstuff.advanced.event.ConfigEventBus;
+import de.happybavarian07.coolstufflib.configstuff.advanced.event.ConfigEventListener;
+
+import java.util.Map;
+import java.util.Set;
+
 /**
- * This interface defines a module for an AdvancedConfig.
- * Modules can be used to extend the functionality of an AdvancedConfig.
- * They can be enabled or disabled, and they can react to changes in the config.
- * <p>
- * Modules can be used for various purposes, such as adding custom validation,
- * handling specific data types, or providing additional features.
- * </p>
- * By implementing this interface, developers can create custom modules that integrate seamlessly with the AdvancedConfig system.
- * * <p>
+ * <p>Base interface for configuration modules that extend configuration functionality
+ * through a managed lifecycle, event handling, and dependency management.</p>
  *
- * @author HappyBavarian07
- * @since 1.0
+ * <p>Modules provide extensible functionality such as:</p>
+ * <ul>
+ *   <li>Value validation and transformation</li>
+ *   <li>Backup and history management</li>
+ *   <li>Encryption and security</li>
+ *   <li>Change tracking and auditing</li>
+ *   <li>Integration with external systems</li>
+ * </ul>
+ *
+ * <pre><code>
+ * public class ValidationModule extends AbstractBaseConfigModule {
+ *     public ValidationModule() {
+ *         super("ValidationModule", "Validates configuration values", "1.0.0");
+ *     }
+ *
+ *     protected void onEnable() {
+ *         registerEventListener(config.getEventBus(),
+ *             ConfigValueEvent.class, this::validateValue);
+ *     }
+ * }
+ * </code></pre>
  */
 public interface BaseConfigModule {
+
     /**
-     * Get the name of the module.
-     * @return The name of the module.
+     * <p>Gets the unique identifier name for this module.</p>
+     *
+     * <pre><code>
+     * String moduleName = module.getName();
+     * </code></pre>
+     *
+     * @return the module name, never null
      */
     String getName();
 
     /**
-     * Check if the module is enabled.
-     * @return true if the module is enabled, false if not.
+     * <p>Gets a human-readable description of the module's functionality.</p>
+     *
+     * <pre><code>
+     * String description = module.getDescription();
+     * </code></pre>
+     *
+     * @return the module description, never null
      */
-    boolean isEnabled();
+    String getDescription();
 
     /**
-     * Set the enabled state of the module.
-     * @param enabled true to enable the module, false to disable it.
+     * <p>Gets the version string for this module implementation.</p>
+     *
+     * <pre><code>
+     * String version = module.getVersion();
+     * </code></pre>
+     *
+     * @return the module version, never null
      */
-    void setEnabled(boolean enabled);
+    String getVersion();
 
     /**
-     * During Enabling of the module.
+     * <p>Gets the current lifecycle state of this module.</p>
+     *
+     * <pre><code>
+     * if (module.getState() == ModuleState.ENABLED) {
+     *     // Module is active
+     * }
+     * </code></pre>
+     *
+     * @return the current module state, never null
+     */
+    ModuleState getState();
+
+    /**
+     * <p>Initializes the module with a configuration instance, preparing it for operation.</p>
+     *
+     * <pre><code>
+     * ValidationModule module = new ValidationModule();
+     * module.initialize(config);
+     * </code></pre>
+     *
+     * @param config the configuration instance to attach to
+     * @throws IllegalStateException if module is already initialized
+     */
+    void initialize(AdvancedConfig config);
+
+    /**
+     * <p>Enables the module, activating its functionality and event listeners.</p>
+     *
+     * <pre><code>
+     * module.enable();
+     * assert module.getState() == ModuleState.ENABLED;
+     * </code></pre>
+     *
+     * @throws IllegalStateException if module is not initialized
      */
     void enable();
 
     /**
-     * During Disabling of the module.
+     * <p>Disables the module while preserving its configuration and state.</p>
+     *
+     * <pre><code>
+     * module.disable();
+     * assert module.getState() == ModuleState.DISABLED;
+     * </code></pre>
+     *
+     * @throws IllegalStateException if module is not enabled
      */
     void disable();
 
     /**
-     * Called when the module is attached to an AdvancedConfig.
-     * @param config The AdvancedConfig that the module is attached to.
+     * <p>Performs complete cleanup, resetting the module to uninitialized state.</p>
+     *
+     * <pre><code>
+     * module.cleanup();
+     * assert module.getState() == ModuleState.UNINITIALIZED;
+     * </code></pre>
      */
-    void onAttach(AdvancedConfig config);
+    void cleanup();
+
+    boolean isEnabled();
+
+    boolean isInitialized();
+
+    Set<String> getDependencies();
 
     /**
-     * Called when the module is detached from an AdvancedConfig.
+     * <p>Gets comprehensive state information about the module including configuration and metrics.</p>
+     *
+     * <pre><code>
+     * Map<String, Object> state = module.getModuleState();
+     * String status = (String) state.get("status");
+     * </code></pre>
+     *
+     * @return map containing module state details
      */
-    void onDetach();
+    Map<String, Object> getModuleState();
+
+    boolean isConfigured();
+
+    void configure(Map<String, Object> configuration);
 
     /**
-     * Reload the module.
+     * <p>Registers an event listener for specific configuration events.</p>
+     *
+     * <pre><code>
+     * module.registerEventListener(config.getEventBus(),
+     *     ConfigValueEvent.class, this::onValueChange);
+     * </code></pre>
+     *
+     * @param eventBus  the event bus to register with
+     * @param eventType the type of events to listen for
+     * @param listener  the listener callback
+     * @param <T>       the event type
      */
-    void reload();
+    <T extends ConfigEvent> void registerEventListener(ConfigEventBus eventBus, Class<T> eventType, ConfigEventListener<T> listener);
 
-    /**
-     * Save the module.
-     */
-    void save();
+    void copyFrom(BaseConfigModule module);
 
-    /**
-     * Called when a value is retrieved from the config.
-     * @param key The key of the value.
-     * @param value The value.
-     * @return The value or a modified version of the value.
-     */
-    Object onGetValue(String key, Object value);
+    <T extends ConfigEvent> void unregisterEventListener(ConfigEventBus eventBus, Class<T> eventType, ConfigEventListener<T> listener);
 
-    /**
-     * Called when the config is changed.
-     * @param key The key of the changed value.
-     * @param oldValue The old value.
-     * @param newValue The new value.
-     */
-    void onConfigChange(String key, Object oldValue, Object newValue);
+    void addDependency(BaseConfigModule dependency);
 
-    /**
-     * Check if the module supports the given config.
-     * @param config The config to check.
-     * @return true if the module supports the config, false if not.
-     */
-    boolean supportsConfig(AdvancedConfig config);
+    void removeDependency(BaseConfigModule dependency);
 
-    /**
-     * Get the state of the module.
-     * @return The state of the module as a map.
-     */
-    java.util.Map<String, Object> getModuleState();
+    Map<? extends ConfigEventBus, ? extends Map<Class<? extends ConfigEvent>, Set<ConfigEventListener<?>>>> getRegisteredListeners();
 
-    /**
-     * Get the AdvancedConfig that the module is attached to.
-     * @return The AdvancedConfig that the module is attached to.
-     */
     AdvancedConfig getConfig();
+
+    Map<String, Object> getModuleConfiguration();
+
+    /**
+     * <p>Enumeration of possible module lifecycle states.</p>
+     */
+    enum ModuleState {
+        UNINITIALIZED,
+        INITIALIZED,
+        ERROR,
+        ENABLED,
+        DISABLED
+    }
 }

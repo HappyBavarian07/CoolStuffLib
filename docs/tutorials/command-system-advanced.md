@@ -646,7 +646,6 @@ public String syntax() {
 Be mindful of performance, especially in tab completion:
 
 ```java
-// Cache expensive operations
 private List<String> cachedUsernames = new ArrayList<>();
 private long lastCacheUpdate = 0;
 

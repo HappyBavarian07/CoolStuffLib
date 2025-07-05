@@ -1,36 +1,88 @@
 package de.happybavarian07.coolstufflib.configstuff.advanced.modules;
 
+import de.happybavarian07.coolstufflib.configstuff.advanced.event.ConfigEvent;
+import de.happybavarian07.coolstufflib.configstuff.advanced.event.ConfigValueEvent;
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.AdvancedConfig;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-public class NotificationModule extends ConfigModule {
+public class NotificationModule extends AbstractBaseConfigModule {
     private final List<BiConsumer<String, Object>> listeners = new ArrayList<>();
 
-    @Override public String getName() { return "NotificationModule"; }
-    @Override public void enable() { /* Do nothing */ }
-    @Override public void disable() { /* Do nothing */ }
-    @Override public void reload() {}
-    @Override public void save() {}
+    public NotificationModule() {
+        super("NotificationModule",
+              "Notifies listeners of configuration changes",
+              "1.0.0");
+    }
+
     @Override
-    public Object onGetValue(String key, Object value) {
-        return value;
+    protected void onInitialize() {
+        // Nothing to initialize
     }
+
+    @Override
+    protected void onEnable() {
+        registerEventListener(
+            config.getEventBus(),
+            ConfigValueEvent.class,
+            this::onValueChangeEvent
+        );
+    }
+
+    @Override
+    protected void onDisable() {
+        unregisterEventListener(
+            config.getEventBus(),
+            ConfigValueEvent.class,
+            this::onValueChangeEvent
+        );
+    }
+
+    @Override
+    protected void onCleanup() {
+        listeners.clear();
+    }
+
+    private void onValueChangeEvent(ConfigValueEvent event) {
+        if (event.getType() == ConfigValueEvent.Type.SET) {
+            String key = event.getFullPath();
+            Object newValue = event.getNewValue();
+
+            for (BiConsumer<String, Object> listener : new ArrayList<>(listeners)) {
+                try {
+                    listener.accept(key, newValue);
+                } catch (Exception e) {
+                    // Prevent errors in listeners from affecting other listeners
+                }
+            }
+        }
+    }
+
     public void addListener(BiConsumer<String, Object> listener) {
-        listeners.add(listener);
+        if (listener != null) {
+            listeners.add(listener);
+        }
     }
+
     public void removeListener(BiConsumer<String, Object> listener) {
         listeners.remove(listener);
     }
-    @Override public void onConfigChange(String key, Object oldValue, Object newValue) {
-        for (BiConsumer<String, Object> listener : listeners) {
-            listener.accept(key, newValue);
-        }
+
+    public boolean hasListener(BiConsumer<String, Object> listener) {
+        return listeners.contains(listener);
     }
-    @Override public Map<String, Object> getModuleState() {
-        return Map.of("listenerCount", listeners.size());
+
+    public int getListenerCount() {
+        return listeners.size();
     }
-    @Override public boolean supportsConfig(AdvancedConfig config) { return true; }
+
+    public Map<String, Object> getAdditionalModuleState() {
+        Map<String, Object> state = new HashMap<>();
+        state.put("listenerCount", listeners.size());
+        return state;
+    }
 }

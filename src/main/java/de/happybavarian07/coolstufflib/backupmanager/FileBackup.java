@@ -154,10 +154,11 @@ public class FileBackup implements Comparable<FileBackup> {
         for (File backupFile : backupsDone) {
             backupFileDates.put(backupFile.lastModified(), backupFile);
         }
+        if (backupFileDates.isEmpty()) return;
         long minBackupFileDate = Collections.min(backupFileDates.keySet());
-        if (minBackupFileDate == 0) return;
-        if (backupFileDates.get(minBackupFileDate).delete())
-            backupsDone.remove(backupFileDates.get(minBackupFileDate));
+        File oldest = backupFileDates.get(minBackupFileDate);
+        if (minBackupFileDate == 0 || oldest == null) return;
+        backupsDone.remove(oldest);
     }
 
     public File getNewestBackupFile() {

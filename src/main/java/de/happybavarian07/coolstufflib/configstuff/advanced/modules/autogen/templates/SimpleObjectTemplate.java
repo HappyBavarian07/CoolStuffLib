@@ -1,8 +1,13 @@
 package de.happybavarian07.coolstufflib.configstuff.advanced.modules.autogen.templates;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import de.happybavarian07.coolstufflib.configstuff.advanced.modules.autogen.AutoGenUtils;
 import de.happybavarian07.coolstufflib.configstuff.advanced.modules.autogen.misc.Group;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -37,6 +42,25 @@ public class SimpleObjectTemplate implements AutoGenTemplate {
         }
     }
 
+    @Override
+    public void writeToFile(File file) throws IOException {
+        if (file == null) {
+            throw new IllegalArgumentException("File cannot be null");
+        }
+        if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
+            throw new IOException("Failed to create directories for file: " + file.getAbsolutePath());
+        }
+
+        try (FileWriter writer = new FileWriter(file)) {
+            Gson gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .disableHtmlEscaping()
+                .create();
+
+            writer.write(gson.toJson(toMap()));
+        }
+    }
+
     private Map<String, Object> convertMapToSimpleMap(Map<?, ?> map) {
         Map<String, Object> result = new LinkedHashMap<>();
         for (Map.Entry<?, ?> entry : map.entrySet()) {
@@ -52,50 +76,93 @@ public class SimpleObjectTemplate implements AutoGenTemplate {
     }
 
     private Map<String, Object> convertObjectToMap(Object obj) {
+        if (obj == null) return Collections.emptyMap();
+
         Map<String, Object> result = new LinkedHashMap<>();
-        if (obj == null) return result;
-        for (Field field : obj.getClass().getDeclaredFields()) {
-            field.setAccessible(true);
+        Class<?> clazz = obj.getClass();
+
+        for (Field field : clazz.getDeclaredFields()) {
             try {
+                field.setAccessible(true);
                 Object value = field.get(obj);
                 if (value != null) {
-                    if (value instanceof Map) {
+                    if (isComplexObject(value)) {
+                        result.put(field.getName(), convertObjectToMap(value));
+                    } else if (value instanceof Map) {
                         result.put(field.getName(), convertMapToSimpleMap((Map<?, ?>) value));
                     } else {
                         result.put(field.getName(), value);
                     }
                 }
-            } catch (IllegalAccessException ignored) {
+            } catch (IllegalAccessException e) {
+                // Skip fields that can't be accessed
             }
         }
+
         return result;
     }
 
+    private boolean isComplexObject(Object obj) {
+        if (obj == null) return false;
+
+        Class<?> clazz = obj.getClass();
+        String packageName = clazz.getPackage() != null ? clazz.getPackage().getName() : "";
+
+        return !clazz.isPrimitive()
+                && !packageName.startsWith("java.lang")
+                && !packageName.startsWith("java.util")
+                && !(obj instanceof Map)
+                && !(obj instanceof Collection);
+    }
+
     private void applyMap(Group root, String path, Map<?, ?> map) {
-        Group group = AutoGenUtils.getOrCreateGroupByPath(root, path);
+        Group group = path.isEmpty() ? root : AutoGenUtils.getOrCreateGroupByPath(root, path);
+
         for (Map.Entry<?, ?> entry : map.entrySet()) {
             String key = entry.getKey().toString();
             Object value = entry.getValue();
+
+            String fullPath = path.isEmpty() ? key : path + "." + key;
+
             if (value instanceof Map) {
-                applyMap(group, key, (Map<?, ?>) value);
+                applyMap(root, fullPath, (Map<?, ?>) value);
             } else {
-                group.addKey(AutoGenUtils.createKey(key, value != null ? value.getClass() : Object.class, value));
+                group.addKey(AutoGenUtils.createKey(
+                    key,
+                    value != null ? value.getClass() : Object.class,
+                    value
+                ));
             }
         }
     }
 
     private void applyObject(Group root, String path, Object obj) {
-        Group group = AutoGenUtils.getOrCreateGroupByPath(root, path);
-        for (Field field : obj.getClass().getDeclaredFields()) {
-            field.setAccessible(true);
+        if (obj == null) return;
+
+        Group group = path.isEmpty() ? root : AutoGenUtils.getOrCreateGroupByPath(root, path);
+        Class<?> clazz = obj.getClass();
+
+        for (Field field : clazz.getDeclaredFields()) {
             try {
+                field.setAccessible(true);
                 Object value = field.get(obj);
+
+                String key = field.getName();
+                String fullPath = path.isEmpty() ? key : path + "." + key;
+
                 if (value instanceof Map) {
-                    applyMap(group, field.getName(), (Map<?, ?>) value);
+                    applyMap(root, fullPath, (Map<?, ?>) value);
+                } else if (isComplexObject(value)) {
+                    applyObject(root, fullPath, value);
                 } else {
-                    group.addKey(AutoGenUtils.createKey(field.getName(), value != null ? value.getClass() : Object.class, value));
+                    group.addKey(AutoGenUtils.createKey(
+                        key,
+                        field.getType(),
+                        value
+                    ));
                 }
-            } catch (IllegalAccessException ignored) {
+            } catch (IllegalAccessException e) {
+                // Skip fields that can't be accessed
             }
         }
     }

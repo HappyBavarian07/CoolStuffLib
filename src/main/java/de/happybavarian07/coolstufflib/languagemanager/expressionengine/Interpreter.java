@@ -25,12 +25,12 @@ import java.util.Map;
 public class Interpreter implements Parser.Expression.Visitor<Object> {
     private final Map<String, VariableWithUses> variables = new HashMap<>();
     private final Map<String, RegisteredFunction> functions = new HashMap<>();
-    private boolean debug = false;
     private final Map<String, Object> context = new HashMap<>();
     private final List<String> functionWhitelist = new ArrayList<>();
     private final List<String> functionBlacklist = new ArrayList<>();
     private final List<String> variableWhitelist = new ArrayList<>();
     private final List<String> variableBlacklist = new ArrayList<>();
+    private boolean debug = false;
 
     /**
      * Evaluates the given expression and returns its result.
@@ -53,6 +53,15 @@ public class Interpreter implements Parser.Expression.Visitor<Object> {
 
     @Override
     public Object visitBinaryExpr(Parser.Expression.Binary expr) {
+        if (expr.left == null || expr.right == null) {
+            throw new ExpressionEngineException("Binary expression must have both left and right operands.");
+        }
+        if (expr.operator == null) {
+            throw new ExpressionEngineException("Binary expression must have an operator.");
+        }
+        if (debug) {
+            System.out.println("[ExpressionEngine DEBUG] Evaluating binary expression: " + expr);
+        }
         Object left = evaluate(expr.left);
         Object right = evaluate(expr.right);
 
@@ -128,13 +137,8 @@ public class Interpreter implements Parser.Expression.Visitor<Object> {
     @Override
     public Object visitLiteralExpr(Parser.Expression.Literal expr) {
         if (expr.value instanceof String str) {
-            // Only treat as variable/context/material if not a quoted string literal
             if ((str.startsWith("\"") && str.endsWith("\"")) || (str.startsWith("'") && str.endsWith("'"))) {
-                // Remove surrounding quotes if present
                 return str.substring(1, str.length() - 1);
-            }
-            if (variables.containsKey(str)) {
-                return variables.get(str).value;
             }
             if (context.containsKey(str)) {
                 return context.get(str);
@@ -160,14 +164,21 @@ public class Interpreter implements Parser.Expression.Visitor<Object> {
     @Override
     public Object visitVariableExpr(Parser.Expression.Variable expr) {
         String name = expr.name.lexeme();
-        if (!isVariableAllowed(name)) throw new ExpressionVariableException("Access to variable '" + name + "' is not allowed");
+        if (!isVariableAllowed(name))
+            throw new ExpressionVariableException("Access to variable '" + name + "' is not allowed");
+
         if (variables.containsKey(name)) {
             VariableWithUses v = variables.get(name);
-            return v.getValue();
+            System.out.println("[Variable tracking] Accessing variable " + name + " (remaining uses: " + v.remainingUses + ")");
+            Object value = v.getValue();
+            System.out.println("[Variable tracking] After access variable " + name + " (remaining uses: " + v.remainingUses + ")");
+            return value;
         }
+
         if (context.containsKey(name)) {
             return context.get(name);
         }
+
         try {
             return Material.valueOf(name.toUpperCase());
         } catch (IllegalArgumentException e) {
@@ -256,7 +267,8 @@ public class Interpreter implements Parser.Expression.Visitor<Object> {
             functionName = fullFunctionName.substring(0, lt);
             callType = fullFunctionName.substring(lt + 1, gt);
         }
-        if (!isFunctionAllowed(functionName)) throw new ExpressionEngineException("Access to function '" + functionName + "' is not allowed");
+        if (!isFunctionAllowed(functionName))
+            throw new ExpressionEngineException("Access to function '" + functionName + "' is not allowed");
         RegisteredFunction reg = functions.get(functionName);
         if (reg == null) {
             throw new ExpressionEngineException("Undefined function: " + fullFunctionName);
@@ -361,8 +373,7 @@ public class Interpreter implements Parser.Expression.Visitor<Object> {
         VariableWithUses var = variables.get(name);
         if (var == null) return null;
 
-        Object value = var.getValue();
-        return value;
+        return var.getValue();
     }
 
     /**
@@ -375,7 +386,7 @@ public class Interpreter implements Parser.Expression.Visitor<Object> {
     public Object peekVariable(String name) {
         VariableWithUses var = variables.get(name);
         if (var == null) return null;
-        return var.value;
+        return var.peekValue();
     }
 
     public void clearVariables() {
@@ -408,12 +419,12 @@ public class Interpreter implements Parser.Expression.Visitor<Object> {
         functions.clear();
     }
 
-    public void setDebug(boolean enabled) {
-        this.debug = enabled;
-    }
-
     public boolean isDebug() {
         return debug;
+    }
+
+    public void setDebug(boolean enabled) {
+        this.debug = enabled;
     }
 
     public void putContext(String key, Object value) {
@@ -461,9 +472,9 @@ public class Interpreter implements Parser.Expression.Visitor<Object> {
     }
 
     private static class VariableWithUses {
-        final Object value;
-        int remainingUses;
-        int maxUses;
+        private final Object value;
+        private final int maxUses;
+        private int remainingUses;
 
         VariableWithUses(Object value, int uses) {
             this.value = value;
@@ -471,18 +482,34 @@ public class Interpreter implements Parser.Expression.Visitor<Object> {
             this.maxUses = uses;
         }
 
+        /**
+         * Retrieves the value of the variable, decrementing its remaining uses.
+         * If the variable has unlimited uses (uses < 0), it returns the value without decrementing.
+         *
+         * @return The value of the variable.
+         * @throws ExpressionVariableException if the variable has no remaining uses.
+         */
         Object getValue() {
+            System.out.println("[ExpressionEngine DEBUG] Getting value of variable: " + value + " (remaining uses: " + remainingUses + ")");
             if (remainingUses < 0) {
-                return value; // Unlimited uses
-            }
-            if (remainingUses > 0) {
-                remainingUses--;
+                System.out.println("[ExpressionEngine DEBUG] Using variable with unlimited uses: " + value);
                 return value;
             }
-            throw new ExpressionVariableException("Variable exceeded its allowed uses (" + remainingUses + "/" + maxUses + ")");
+            if (remainingUses == 0) {
+                throw new ExpressionVariableException("Variable exceeded its allowed uses (0/" + maxUses + ")");
+            }
+            System.out.println("[ExpressionEngine DEBUG] Using variable: " + value + " (remaining uses: " + remainingUses + ")");
+            remainingUses--;
+            System.out.println("[ExpressionEngine DEBUG] Using variable: " + value + " (remaining uses: " + remainingUses + ")");
+            return value;
+        }
+
+        Object peekValue() {
+            return value;
         }
     }
 
-    private record RegisteredFunction(FunctionCall function, String defaultType, Class<?>[] argTypes, Class<?> returnType) {
+    private record RegisteredFunction(FunctionCall function, String defaultType, Class<?>[] argTypes,
+                                      Class<?> returnType) {
     }
 }

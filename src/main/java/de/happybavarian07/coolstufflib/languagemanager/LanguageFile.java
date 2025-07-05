@@ -5,8 +5,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 
 public class LanguageFile {
-
-    private final JavaPlugin plugin;
     private final File langFile;
     private final String langName;
     private final LanguageConfig langConfig;
@@ -15,16 +13,14 @@ public class LanguageFile {
      * The LanguageFile function is used to create a new LanguageFile object.
      *
      *
-     * @param plugin Get the plugin's name and version
      * @param langFolder Get the path to the language folder
      * @param resourceDirectory Specify the directory in which the language file is located
      * @param langName Set the name of the language file
      */
-    public LanguageFile(JavaPlugin plugin, File langFolder, String resourceDirectory, String langName) {
-        this.plugin = plugin;
+    public LanguageFile(File langFolder, String resourceDirectory, String langName) {
         this.langFile = new File(langFolder,langName + ".yml");
         this.langName = langName;
-        this.langConfig = new LanguageConfig(this.langFile, langFolder, resourceDirectory, this.langName, this.plugin);
+        this.langConfig = new LanguageConfig(this.langFile, langFolder, resourceDirectory, this.langName);
     }
 
     /**
@@ -80,16 +76,5 @@ public class LanguageFile {
      */
     public String getFileVersion() {
         return langConfig.getConfig().getString("LanguageVersion");
-    }
-
-    /**
-     * The getPlugin function returns the plugin that is currently running.
-     *
-     *
-     *
-     * @return The plugin variable
-     */
-    public JavaPlugin getPlugin() {
-        return plugin;
     }
 }

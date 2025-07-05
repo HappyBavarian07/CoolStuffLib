@@ -18,16 +18,59 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * <p>Abstract base class for implementing sub-commands within the CoolStuffLib command management system.
+ * Sub-commands provide a structured way to organize complex command hierarchies with proper permission
+ * handling, argument validation, and sender-specific behavior.</p>
+ *
+ * <p>This class provides:</p>
+ * <ul>
+ * <li>Automatic integration with the command registry and language management system</li>
+ * <li>Flexible argument validation and sub-argument specification</li>
+ * <li>Permission-based access control with automatic registration</li>
+ * <li>Support for both player and console command execution</li>
+ * <li>Configurable behavior through CommandData annotations</li>
+ * </ul>
+ *
+ * <pre><code>
+ * public class ReloadCommand extends SubCommand {
+ *     public ReloadCommand() {
+ *         super("mycommand");
+ *     }
+ *
+ *     public String name() { return "reload"; }
+ *     public String info() { return "Reloads the plugin configuration"; }
+ *     public String[] aliases() { return new String[]{"rl"}; }
+ *     public String syntax() { return "/mycommand reload"; }
+ *     public String permissionAsString() { return "mycommand.reload"; }
+ *     public boolean autoRegisterPermission() { return true; }
+ *
+ *     public Map&lt;Integer, String[]&gt; subArgs(CommandSender sender, int isPlayer, String[] args) {
+ *         return new HashMap&lt;&gt;();
+ *     }
+ * }
+ * </code></pre>
+ */
 @CommandData
 public abstract class SubCommand implements Comparable<SubCommand> {
     protected CoolStuffLib lib = CoolStuffLib.getLib();
     protected LanguageManager lgm = lib.getLanguageManager();
     protected CommandManagerRegistry registry = lib.getCommandManagerRegistry();
     protected String mainCommandName = "";
-    /*
-    /<command> <subcommand> args[0] args[1]
-     */
 
+    /**
+     * <p>Constructs a new SubCommand instance associated with the specified main command.</p>
+     *
+     * <pre><code>
+     * public class MySubCommand extends SubCommand {
+     *     public MySubCommand() {
+     *         super("maincommand");
+     *     }
+     * }
+     * </code></pre>
+     *
+     * @param mainCommandName the name of the main command this sub-command belongs to
+     */
     public SubCommand(String mainCommandName) {
         this.mainCommandName = mainCommandName;
     }
@@ -87,6 +130,17 @@ public abstract class SubCommand implements Comparable<SubCommand> {
         return this.getClass().getAnnotation(CommandData.class).allowOnlySubCommandArgsThatFitToSubArgs();
     }
 
+    /**
+     * <p>Determines whether sub-arguments should be specific to the sender type (player vs console).</p>
+     *
+     * <pre><code>
+     * public boolean senderTypeSpecificSubArgs() {
+     *     return true; // Different args for players vs console
+     * }
+     * </code></pre>
+     *
+     * @return true if sub-arguments vary based on sender type, false otherwise
+     */
     public boolean senderTypeSpecificSubArgs() {
         if (!this.getClass().isAnnotationPresent(CommandData.class)) {
             return registry.senderTypeSpecificSubArgs(registry.getCommandManager(mainCommandName));
@@ -97,7 +151,15 @@ public abstract class SubCommand implements Comparable<SubCommand> {
     /**
      * <p>Gets the minimum number of arguments for this command.</p>
      * <p>If the command does not have a minimum number of arguments, then 0 is returned.</p>
-     * @return The minimum number of arguments for this command.
+     *
+     * <pre><code>
+     * if (args.length < minArgs()) {
+     *     sender.sendMessage("Not enough arguments!");
+     *     return false;
+     * }
+     * </code></pre>
+     *
+     * @return The minimum number of arguments for this command
      */
     public int minArgs() {
         if (!this.getClass().isAnnotationPresent(CommandData.class)) {
@@ -155,10 +217,43 @@ public abstract class SubCommand implements Comparable<SubCommand> {
         return false;
     }
 
+    /**
+     * <p>Gets the display name of this sub-command.</p>
+     *
+     * <pre><code>
+     * public String name() {
+     *     return "reload";
+     * }
+     * </code></pre>
+     *
+     * @return the name of this sub-command
+     */
     public abstract String name();
 
+    /**
+     * <p>Gets the description/help information for this sub-command.</p>
+     *
+     * <pre><code>
+     * public String info() {
+     *     return "Reloads the plugin configuration";
+     * }
+     * </code></pre>
+     *
+     * @return the description of this sub-command
+     */
     public abstract String info();
 
+    /**
+     * <p>Gets the alternative names (aliases) for this sub-command.</p>
+     *
+     * <pre><code>
+     * public String[] aliases() {
+     *     return new String[]{"rl", "refresh"};
+     * }
+     * </code></pre>
+     *
+     * @return array of aliases for this sub-command
+     */
     public abstract String[] aliases();
 
     /**
@@ -181,14 +276,61 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      */
     public abstract Map<Integer, String[]> subArgs(CommandSender sender, int isPlayer, String[] args);
 
+    /**
+     * <p>Gets the syntax for this sub-command.</p>
+     * <p>The syntax is used to display the command usage in help messages.</p>
+     *
+     * <pre><code>
+     * public String syntax() {
+     * // you should use getMainCommandName() to get the main command name, which is recommended
+     *     return "/mycommand reload";
+     * }
+     * </code></pre>
+     *
+     * @return the syntax of this sub-command
+     */
     public abstract String syntax();
 
+    /**
+     * <p>Converts the permission string to a Permission object for Bukkit integration.</p>
+     *
+     * <pre><code>
+     * Permission perm = permissionAsPermission();
+     * if (player.hasPermission(perm)) {
+     *     // Execute command
+     * }
+     * </code></pre>
+     *
+     * @return Permission object representing this sub-command's permission
+     */
     public Permission permissionAsPermission() {
         return new Permission(permissionAsString(), permissionAsString());
     }
 
+    /**
+     * <p>Gets the permission string required to execute this sub-command.</p>
+     *
+     * <pre><code>
+     * public String permissionAsString() {
+     *     return "mycommand.reload";
+     * }
+     * </code></pre>
+     *
+     * @return the permission string for this sub-command
+     */
     public abstract String permissionAsString();
 
+    /**
+     * <p>Determines whether this sub-command's permission should be automatically registered with Bukkit.</p>
+     *
+     * <pre><code>
+     * public boolean autoRegisterPermission() {
+     *     return true; // Auto-register with server
+     * }
+     * </code></pre>
+     *
+     * @return true if the permission should be auto-registered, false otherwise
+     */
     public abstract boolean autoRegisterPermission();
 
     /**

@@ -1,0 +1,8 @@
+LanguageFullName: English (Test)
+LanguageVersion: 1.0
+Messages:
+  Player.General.ReloadedLanguageFile: "Language file reloaded."
+  Player.General.NoPermissions: "You do not have permission: %permission%"
+MenuTitles:
+  integrationFeature: "Integration Test Menu"
+

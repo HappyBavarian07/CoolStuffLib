@@ -8,7 +8,6 @@ import de.happybavarian07.coolstufflib.languagemanager.expressionengine.interfac
 import de.happybavarian07.coolstufflib.languagemanager.expressionengine.interfaces.MaterialCondition;
 import de.happybavarian07.coolstufflib.utils.Head;
 import de.happybavarian07.coolstufflib.utils.Utils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
@@ -17,22 +16,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.profile.PlayerProfile;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * LanguageManager class.
  */
 public class LanguageManager {
+    private static Logger logger;
     private final JavaPlugin plugin;
     private final File langFolder;
     private final String resourceDirectory;
@@ -44,6 +41,9 @@ public class LanguageManager {
     private String currentLangName;
     private LanguageFile currentLang;
     private PerPlayerLanguageHandler playerLanguageHandler;
+
+    // TODO LanguageManager Menu Item Identification Optimization: inside E:\InteliJ Programs\CoolStuffLib\Menu_Item_ID_System.md
+
 
     /**
      * Constructs a new LanguageManager object.
@@ -66,6 +66,13 @@ public class LanguageManager {
         registerHeadFunction(defaultEngine);
         registerLangFunction(defaultEngine);
         this.expressionEnginePool = new ExpressionEnginePool("default", defaultEngine);
+    }
+
+    public static Logger getLogger() {
+        if (logger == null) {
+            logger = Logger.getLogger("LanguageManager");
+        }
+        return logger;
     }
 
     // Adds a new engine for a language and registers HEAD instantly
@@ -262,7 +269,7 @@ public class LanguageManager {
         }
         handleVariablesSection(currentLang, true);
         if (log)
-            plugin.getLogger().log(Level.INFO, "Current Language: " + currentLangName);
+            getLogger().log(Level.INFO, "Current Language: " + currentLangName);
     }
 
     /**
@@ -274,10 +281,10 @@ public class LanguageManager {
         File[] fileArray = langFolder.listFiles();
         if (fileArray != null) {
             for (File file : fileArray) {
-                LanguageFile languageFile = new LanguageFile(plugin, langFolder, resourceDirectory, file.getName().replace(".yml", ""));
+                LanguageFile languageFile = new LanguageFile(langFolder, resourceDirectory, file.getName().replace(".yml", ""));
                 if (!registeredLanguages.containsValue(languageFile) && !languageFile.getLangName().equals("default")) {
                     if (log)
-                        plugin.getLogger().log(Level.INFO, "Language: " + languageFile.getLangFile() + " successfully registered!");
+                        getLogger().log(Level.INFO, "Language: " + languageFile.getLangFile() + " successfully registered!");
                     registeredLanguages.put(languageFile.getLangName(), languageFile);
                     languageCaches.put(languageFile.getLangName(), new LanguageCache(languageFile.getLangName()));
                     addEngineForLanguage(languageFile.getLangName(), true, true);
@@ -297,8 +304,8 @@ public class LanguageManager {
         for (LanguageFile langFiles : getRegisteredLanguages().values()) {
             try {
                 String resourceName = resourceDirectory + "/" + langFiles.getLangFile().getName();
-                if (plugin.getResource(resourceName) == null) {
-                    if (plugin.getResource(resourceDirectory + "/" + plugin.getConfig().getString("Plugin.languageForUpdates") + ".yml") != null) {
+                if (Utils.getResource(resourceName) == null) {
+                    if (Utils.getResource(resourceDirectory + "/" + plugin.getConfig().getString("Plugin.languageForUpdates") + ".yml") != null) {
                         resourceName = resourceDirectory + "/" + plugin.getConfig().getString("Plugin.languageForUpdates") + ".yml";
                     } else {
                         resourceName = resourceDirectory + "/en.yml";
@@ -307,7 +314,9 @@ public class LanguageManager {
                 // "Test.Options", "Items.PlayerManager.TrollMenu.VillagerSounds.true.Options"
                 ConfigUpdater.update(plugin, resourceName, langFiles.getLangFile(), new ArrayList<>());
             } catch (IOException e) {
-                e.printStackTrace();
+                getLogger().log(Level.SEVERE, "Error updating language file: " + langFiles.getLangFile().getName(), e);
+            } catch (NullPointerException e) {
+                getLogger().log(Level.WARNING, "Language file not found: " + langFiles.getLangFile().getName(), e);
             }
         }
     }
@@ -343,7 +352,7 @@ public class LanguageManager {
         registeredLanguages.put(langName, langFile);
         languageCaches.put(langName, new LanguageCache(langName));
         addEngineForLanguage(langName, true, true);
-        plugin.getLogger().log(Level.INFO, "Language: " + langFile.getLangFile() + " successfully registered!");
+        getLogger().log(Level.INFO, "Language: " + langFile.getLangFile() + " successfully registered!");
     }
 
     /**
@@ -786,7 +795,7 @@ public class LanguageManager {
             if (headCondition.isHead()) {
                 item = headCondition.getHead().getAsItem();
             } else {
-                item = createCustomSkull(headCondition.getHeadValue(), headCondition.isTexture());
+                item = Utils.createSkull(headCondition.getHeadValue(), headCondition.getHeadValue(), headCondition.isTexture());
             }
         } else {
             String materialString = "";
@@ -813,7 +822,7 @@ public class LanguageManager {
             item = new ItemStack(material, 1);
         }
         String displayName = getObjectFromLanguageCacheOrConfig("Items." + path + ".displayName", langFile.getLangName(), String.class);
-        List<String> lore = getObjectFromLanguageCacheOrConfig("Items." + path + ".lore", langFile.getLangName(), List.class);
+        List<String> lore = this.<List>getObjectFromLanguageCacheOrConfig("Items." + path + ".lore", langFile.getLangName(), List.class);
         List<String> loreWithPlaceholders = new ArrayList<>();
         List<String> includedKeys = new ArrayList<>();
         ItemMeta meta = item.getItemMeta();
@@ -834,44 +843,6 @@ public class LanguageManager {
         item.setItemMeta(meta);
         if (resetAfter) resetSpecificPlaceholders(PlaceholderType.ITEM, includedKeys);
         return item;
-    }
-
-    /**
-     * Creates a custom skull ItemStack with the given head value and texture flag.
-     *
-     * @param headValue The value of the head to create.
-     * @param isTexture Whether the head value is a texture value.
-     * @return The created ItemStack with the custom skull.
-     */
-    public ItemStack createCustomSkull(String headValue, boolean isTexture) {
-        ItemStack head = new ItemStack(Utils.legacyServer() ? Objects.requireNonNull(Material.matchMaterial("SKULL_ITEM")) : Material.PLAYER_HEAD, 1);
-        if (headValue.isEmpty()) return head;
-
-        SkullMeta meta = (SkullMeta) head.getItemMeta();
-        if (meta == null) return head;
-
-        try {
-            Head headEnum = Head.valueOf(headValue);
-            return headEnum.getAsItem();
-        } catch (IllegalArgumentException ignored) {
-        }
-
-        meta.setDisplayName(Utils.chat(headValue));
-        if (!isTexture) {
-            meta.setOwningPlayer(Bukkit.getOfflinePlayer(headValue));
-            head.setItemMeta(meta);
-            return head;
-        }
-
-        PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID(), "CustomHead");
-        try {
-            profile.getTextures().setSkin(new URL("https://textures.minecraft.net/texture/" + headValue));
-        } catch (MalformedURLException ex) {
-            throw new RuntimeException(ex);
-        }
-        meta.setOwnerProfile(profile);
-        head.setItemMeta(meta);
-        return head;
     }
 
     /**
@@ -898,7 +869,7 @@ public class LanguageManager {
                     return Material.PLAYER_HEAD;
                 }
             } catch (Exception e) {
-                plugin.getLogger().warning("Invalid head: " + headName);
+                getLogger().warning("Invalid head: " + headName);
                 return Material.BARRIER;
             }
         }
@@ -908,8 +879,8 @@ public class LanguageManager {
             return cond.getMaterial();
         } catch (Exception e) {
             if (materialString.contains("if") || materialString.contains("else")) {
-                plugin.getLogger().warning("Error parsing conditional expression: " + materialString);
-                plugin.getLogger().warning(e.getMessage());
+                getLogger().warning("Error parsing conditional expression: " + materialString);
+                getLogger().warning(e.getMessage());
             }
         }
 
@@ -917,7 +888,7 @@ public class LanguageManager {
             return Material.valueOf(materialString.toUpperCase());
         } catch (IllegalArgumentException e) {
             if (!materialString.equals("PLAYER_HEAD")) {
-                plugin.getLogger().warning("Invalid material name: " + materialString);
+                getLogger().warning("Invalid material name: " + materialString);
             }
             return Material.BARRIER;
         }
