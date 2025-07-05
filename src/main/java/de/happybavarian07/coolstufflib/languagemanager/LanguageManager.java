@@ -106,6 +106,66 @@ public class LanguageManager {
         handleVariablesSection(langFile, clearBefore);
     }
 
+    /**
+     * <p>Adds a variable to the specified {@link ExpressionEngine}.</p>
+     * <pre><code>
+     * languageManager.addVariableForEngine(engine, "key", value);
+     * </code></pre>
+     * @param engine the expression engine to add the variable to
+     * @param key the variable name
+     * @param value the variable value
+     */
+    public void addVariableForEngine(ExpressionEngine engine, String key, Object value) {
+        if (engine != null) {
+            engine.setVariable(key, value);
+        }
+    }
+
+    /**
+     * <p>Adds a variable with the given key and value to all registered {@link ExpressionEngine} instances.</p>
+     * <pre><code>
+     * languageManager.addVariableGlobally("key", value);
+     * </code></pre>
+     * @param key the variable name
+     * @param value the variable value
+     */
+    public void addVariableGlobally(String key, Object value) {
+        getExpressionEnginePool().getEngineIterator().forEachRemaining(engine -> {
+            if (engine != null) {
+                engine.setVariable(key, value);
+            }
+        });
+    }
+
+    /**
+     * <p>Removes a variable with the given key from all registered {@link ExpressionEngine} instances.</p>
+     * <pre><code>
+     * languageManager.removeVariableGlobally("key");
+     * </code></pre>
+     * @param key the variable name to remove
+     */
+    public void removeVariableGlobally(String key) {
+        getExpressionEnginePool().getEngineIterator().forEachRemaining(engine -> {
+            if (engine != null) {
+                engine.removeVariable(key);
+            }
+        });
+    }
+
+    /**
+     * <p>Removes a variable with the given key from the specified {@link ExpressionEngine}.</p>
+     * <pre><code>
+     * languageManager.removeVariableForEngine(engine, "key");
+     * </code></pre>
+     * @param engine the expression engine to remove the variable from
+     * @param key the variable name to remove
+     */
+    public void removeVariableForEngine(ExpressionEngine engine, String key) {
+        if (engine != null) {
+            engine.removeVariable(key);
+        }
+    }
+
     private void handleVariablesSection(LanguageFile langFile, boolean clearBefore) {
         LanguageConfig langConfig = langFile.getLangConfig();
         if (langConfig == null || langConfig.getConfig() == null) return;

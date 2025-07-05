@@ -19,7 +19,7 @@ import java.util.Map;
  *
  * <pre><code>
  * ConfigFileHandler handler = new YamlConfigFileHandler();
- * Map<String, Object> data = handler.load(new File("config.yml"));
+ * Map&lt;String, Object&gt; data = handler.load(new File("config.yml"));
  *
  * data.put("server.port", 8080);
  * handler.save(new File("config.yml"), data);
@@ -31,7 +31,7 @@ public interface ConfigFileHandler {
      * <p>Saves configuration data to a file without comments.</p>
      *
      * <pre><code>
-     * Map<String, Object> config = Map.of(
+     * Map&lt;String, Object&gt; config = Map.of(
      *     "server.port", 8080,
      *     "database.url", "jdbc:mysql://localhost/db"
      * );
@@ -48,8 +48,8 @@ public interface ConfigFileHandler {
      * <p>Saves configuration data to a file with comments for supported formats.</p>
      *
      * <pre><code>
-     * Map<String, Object> config = Map.of("server.port", 8080);
-     * Map<String, String> comments = Map.of("server.port", "Web server port");
+     * Map&lt;String, Object&gt; config = Map.of("server.port", 8080);
+     * Map&lt;String, String&gt; comments = Map.of("server.port", "Web server port");
      * handler.save(new File("config.yml"), config, comments);
      * </code></pre>
      *
@@ -64,7 +64,7 @@ public interface ConfigFileHandler {
      * <p>Loads configuration data from a file.</p>
      *
      * <pre><code>
-     * Map<String, Object> config = handler.load(new File("config.yml"));
+     * Map&lt;String, Object&gt; config = handler.load(new File("config.yml"));
      * Integer port = (Integer) config.get("server.port");
      * </code></pre>
      *
@@ -78,7 +78,7 @@ public interface ConfigFileHandler {
      * <p>Loads comments from a file for formats that support comment preservation.</p>
      *
      * <pre><code>
-     * Map<String, String> comments = handler.loadComments(new File("config.yml"));
+     * Map&lt;String, String&gt; comments = handler.loadComments(new File("config.yml"));
      * String portComment = comments.get("server.port");
      * </code></pre>
      *
@@ -93,7 +93,7 @@ public interface ConfigFileHandler {
      *
      * <pre><code>
      * if (handler.supportsComments()) {
-     *     Map<String, String> comments = handler.loadComments(file);
+     *     Map&lt;String, String&gt; comments = handler.loadComments(file);
      * }
      * </code></pre>
      *
@@ -106,7 +106,7 @@ public interface ConfigFileHandler {
      *
      * <pre><code>
      * if (yamlHandler.canHandle(new File("config.yml"))) {
-     *     Map<String, Object> data = yamlHandler.load(file);
+     *     Map&lt;String, Object&gt; data = yamlHandler.load(file);
      * }
      * </code></pre>
      *

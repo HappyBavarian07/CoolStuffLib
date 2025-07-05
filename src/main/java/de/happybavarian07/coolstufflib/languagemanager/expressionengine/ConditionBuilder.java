@@ -179,14 +179,14 @@ public class ConditionBuilder {
      * // Check if (level + experience) > 50
      * builder.math(player.getLevel(), player.getExp(), "addition", ">", 50);
      *
-     * // Check if (health * 2) <= 40
-     * builder.math(player.getHealth(), 2, "multiplication", "<=", 40);
+     * // Check if (health * 2) &lt;= 40
+     * builder.math(player.getHealth(), 2, "multiplication", "&lt;=", 40);
      * </code></pre>
      *
      * @param value1 the first numeric value
      * @param value2 the second numeric value
      * @param operationName the name of the mathematical operation (addition, subtraction, multiplication, division, etc.)
-     * @param comparisonOperator the comparison operator (>, <, >=, <=, ==, !=)
+     * @param comparisonOperator the comparison operator (&gt;, &lt;, &gt;=, &lt;=, ==, !=)
      * @param comparisonValue the value to compare the operation result against
      * @return this builder instance for method chaining
      * @throws IllegalArgumentException if the operation name is unknown

@@ -16,12 +16,10 @@ import java.util.Set;
  *   <li>Bulk operations across multiple configurations</li>
  * </ul>
  *
+ * <p>Example usage:</p>
  * <pre><code>
- * AdvancedConfigGroup serverGroup = new AdvancedConfigGroupImpl("servers");
- * serverGroup.addConfig(webConfig);
- * serverGroup.addConfig(dbConfig);
- *
- * Map<String, Object> allPorts = serverGroup.getValuesFromAll("server.port");
+ * AdvancedConfigGroup serverGroup = configManager.getGroup("servers");
+ * Map&lt;String, Object&gt; allPorts = serverGroup.getValuesFromAll("server.port");
  * serverGroup.setValueInAll("logging.level", "INFO");
  * </code></pre>
  */
@@ -42,7 +40,7 @@ public interface AdvancedConfigGroup {
      * <p>Gets all configurations managed by this group.</p>
      *
      * <pre><code>
-     * Map<String, AdvancedConfig> configs = group.getConfigs();
+     * Map&lt;String, AdvancedConfig&gt; configs = group.getConfigs();
      * for (AdvancedConfig config : configs.values()) {
      *     config.save();
      * }
@@ -109,7 +107,7 @@ public interface AdvancedConfigGroup {
      * <p>Retrieves values at the same path from all configurations in the group.</p>
      *
      * <pre><code>
-     * Map<String, Object> allPorts = group.getValuesFromAll("server.port");
+     * Map&lt;String, Object&gt; allPorts = group.getValuesFromAll("server.port");
      * // Returns {"web": 8080, "api": 8081, "admin": 8082}
      * </code></pre>
      *

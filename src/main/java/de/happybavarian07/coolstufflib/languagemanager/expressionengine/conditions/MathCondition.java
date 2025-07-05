@@ -21,7 +21,7 @@ public class MathCondition extends AbstractMaterialCondition {
      * @param value1 the first value for the math operation
      * @param value2 the second value for the math operation
      * @param operation the math operation to perform
-     * @param comparisonOperator the comparison operator (">", "<", ">=", "<=", "==", "!=")
+     * @param comparisonOperator the comparison operator (&gt;, &lt;, &gt;=, &lt;=, ==, !=)
      * @param comparisonValue the value to compare the result of the math operation to
      */
     public MathCondition(Number value1, Number value2, MathOperation operation, String comparisonOperator, Number comparisonValue) {
@@ -39,7 +39,7 @@ public class MathCondition extends AbstractMaterialCondition {
      * @param value1 the first value for the math operation
      * @param value2 the second value for the math operation
      * @param operation the math operation to perform
-     * @param comparisonOperator the comparison operator (">", "<", ">=", "<=", "==", "!=")
+     * @param comparisonOperator the comparison operator (&gt;, &lt;, &gt;=, &lt;=, ==, !=)
      * @param comparisonValue the value to compare the result of the math operation to
      * @param trueMaterial the material to return when the condition is true
      * @param falseMaterial the material to return when the condition is false

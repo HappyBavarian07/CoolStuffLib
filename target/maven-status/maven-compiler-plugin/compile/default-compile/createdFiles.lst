@@ -1,11 +1,13 @@
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser$Expression$Logical.class
 de\happybavarian07\coolstufflib\menusystem\PlayerMenuUtility.class
 de\happybavarian07\coolstufflib\CoolStuffLibBuilder.class
+de\happybavarian07\coolstufflib\testing\TestCommand.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\ConfigChangeTrackerModule$1.class
 de\happybavarian07\coolstufflib\configstuff\advanced\section\meta\SectionMetadataManager.class
 de\happybavarian07\coolstufflib\configstuff\OldConfigUpdater.class
 de\happybavarian07\coolstufflib\menusystem\misc\ConfirmationMenu.class
 de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigSectionEvent$Type.class
+de\happybavarian07\coolstufflib\testing\LibraryTestInitializer.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\interfaces\AbstractCondition.class
 de\happybavarian07\coolstufflib\configstuff\advanced\filetypes\ConfigTypeConverterRegistry.class
 de\happybavarian07\coolstufflib\configstuff\advanced\core\SectionManager.class
@@ -23,6 +25,7 @@ de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenUtil
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser$Expression$Ternary.class
 de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedInMemoryConfig.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\ModuleManager.class
+de\happybavarian07\coolstufflib\testing\AutoTestRunner$TestResult.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\operations\ModuloOperation.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser.class
 de\happybavarian07\coolstufflib\menusystem\MenuAction.class
@@ -119,6 +122,8 @@ de\happybavarian07\coolstufflib\languagemanager\LanguageFileUpdater.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\Lexer.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\operations\AdditionOperation.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\PersistentHistoryModule.class
+de\happybavarian07\coolstufflib\testing\AutoTestRunner.class
+de\happybavarian07\coolstufflib\testing\TestInitializer.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\PersistentHistoryModule$ChangeType.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\misc\Key.class
 de\happybavarian07\coolstufflib\commandmanagement\CommandData.class
@@ -159,9 +164,11 @@ de\happybavarian07\coolstufflib\commandmanagement\NaturalOrderComparator.class
 de\happybavarian07\coolstufflib\configstuff\advanced\filetypes\ConfigTypeConverterRegistry$2.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\MathCondition.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\PersistentBackupModule$BackupResult.class
+de\happybavarian07\coolstufflib\testing\InGameTestRunner.class
 de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigManager$1.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser$Expression$Assignment.class
 de\happybavarian07\coolstufflib\languagemanager\PerPlayerLanguageHandler.class
+de\happybavarian07\coolstufflib\testing\InGameTest.class
 de\happybavarian07\coolstufflib\commandmanagement\SubCommand.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\TernaryCondition.class
 de\happybavarian07\coolstufflib\utils\StartUpLogger.class
@@ -175,6 +182,7 @@ de\happybavarian07\coolstufflib\configstuff\advanced\modules\CorruptionCheckModu
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\templates\AutoGenTemplate.class
 de\happybavarian07\coolstufflib\utils\PluginFileLogger.class
 de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedPersistentConfig.class
+de\happybavarian07\coolstufflib\testing\InGameTestRunner$TestResult.class
 de\happybavarian07\coolstufflib\backupmanager\FileBackup.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser$Expression$Call.class
 de\happybavarian07\coolstufflib\configstuff\advanced\filetypes\interfaces\converter\MapConfigTypeConverter.class

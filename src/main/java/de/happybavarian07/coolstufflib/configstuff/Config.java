@@ -151,7 +151,7 @@ public class Config implements Serializable, Comparable<Config> {
      * Config config1 = new Config(new File("config1.yml"));
      * Config config2 = new Config(new File("config2.yml"));
      * int comparison = config1.compareTo(config2);
-     * if (comparison < 0) {
+     * if (comparison &lt; 0) {
      *     // config1 comes before config2
      * }
      * </code></pre>

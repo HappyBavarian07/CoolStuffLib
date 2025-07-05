@@ -180,7 +180,7 @@ public interface GroupConfigModule {
      * <p>Gets the set of module names that are required by this module to function properly.</p>
      *
      * <pre><code>
-     * Set<String> dependencies = groupModule.getRequiredModules();
+     * Set&lt;String&gt; dependencies = groupModule.getRequiredModules();
      * </code></pre>
      *
      * @return a set of required module names, can be empty but never null
@@ -191,7 +191,7 @@ public interface GroupConfigModule {
      * <p>Gets the current state of the module, including any runtime data needed for operation.</p>
      *
      * <pre><code>
-     * Map<String, Object> state = groupModule.getModuleState();
+     * Map&lt;String, Object&gt; state = groupModule.getModuleState();
      * </code></pre>
      *
      * @return a map of state data, can be empty but never null

@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: de.happybavarian07.coolstufflib.languagemanager.LanguageManagerTest
 -------------------------------------------------------------------------------
-Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.022 s -- in de.happybavarian07.coolstufflib.languagemanager.LanguageManagerTest
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.173 s -- in de.happybavarian07.coolstufflib.languagemanager.LanguageManagerTest

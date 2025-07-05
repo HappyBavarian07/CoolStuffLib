@@ -53,7 +53,7 @@ public interface AdvancedConfig {
      *
      * <pre><code>
      * File configFile = config.getFile();
-     * if (configFile != null && configFile.exists()) {
+     * if (configFile != null &amp;&amp; configFile.exists()) {
      *     // File-based configuration
      * }
      * </code></pre>
@@ -264,7 +264,7 @@ public interface AdvancedConfig {
      *
      * <pre><code>
      * ConfigSection root = config.getRootSection();
-     * Map<String, Object> allData = root.toMap();
+     * Map&lt;String, Object&gt; allData = root.toMap();
      * </code></pre>
      *
      * @return the root section, never null
@@ -506,7 +506,7 @@ public interface AdvancedConfig {
      * <p>Gets a list value from the configuration.</p>
      *
      * <pre><code>
-     * List<?> items = config.getList("inventory.items");
+     * List&lt;?&gt; items = config.getList("inventory.items");
      * </code></pre>
      *
      * @param path the dot-separated path to the value
@@ -518,7 +518,7 @@ public interface AdvancedConfig {
      * <p>Gets a list value with a fallback default if the value is not present or not a list.</p>
      *
      * <pre><code>
-     * List<?> items = config.getList("inventory.items", new ArrayList<>());
+     * List&lt;?&gt; items = config.getList("inventory.items", new ArrayList&lt;&gt;());
      * </code></pre>
      *
      * @param path the dot-separated path to the value
@@ -531,7 +531,7 @@ public interface AdvancedConfig {
      * <p>Gets a string list value from the configuration.</p>
      *
      * <pre><code>
-     * List<String> names = config.getStringList("players.names");
+     * List&lt;String&gt; names = config.getStringList("players.names");
      * </code></pre>
      *
      * @param path the dot-separated path to the value
@@ -543,7 +543,7 @@ public interface AdvancedConfig {
      * <p>Gets a string list value with a fallback default if the value is not present or not a string list.</p>
      *
      * <pre><code>
-     * List<String> names = config.getStringList("players.names", new ArrayList<>());
+     * List&lt;String&gt; names = config.getStringList("players.names", new ArrayList&lt;&gt;());
      * </code></pre>
      *
      * @param path the dot-separated path to the value
@@ -572,7 +572,7 @@ public interface AdvancedConfig {
      * <p>Gets a strongly-typed value wrapped in an Optional for null safety.</p>
      *
      * <pre><code>
-     * Optional<Integer> port = config.getOptionalValue("database.port", Integer.class);
+     * Optional&lt;Integer&gt; port = config.getOptionalValue("database.port", Integer.class);
      * if (port.isPresent()) {
      *     // Use the port value
      * }
@@ -602,7 +602,7 @@ public interface AdvancedConfig {
      * <p>Sets multiple configuration values in a single operation for better performance.</p>
      *
      * <pre><code>
-     * Map<String, Object> dbConfig = Map.of(
+     * Map&lt;String, Object&gt; dbConfig = Map.of(
      *     "database.host", "localhost",
      *     "database.port", 5432
      * );
@@ -764,8 +764,8 @@ public interface AdvancedConfig {
      * <p>Gets all registered modules as a map of name to module instance.</p>
      *
      * <pre><code>
-     * Map<String, BaseConfigModule> modules = config.getModules();
-     * for (Map.Entry<String, BaseConfigModule> entry : modules.entrySet()) {
+     * Map&lt;String, BaseConfigModule&gt; modules = config.getModules();
+     * for (Map.Entry&lt;String, BaseConfigModule&gt; entry : modules.entrySet()) {
      *     String name = entry.getKey();
      *     BaseConfigModule module = entry.getValue();
      * }
@@ -779,8 +779,8 @@ public interface AdvancedConfig {
      * <p>Gets all configuration keys, optionally including nested keys from subsections.</p>
      *
      * <pre><code>
-     * List<String> allKeys = config.getKeys(true);
-     * List<String> topLevelKeys = config.getKeys(false);
+     * List&lt;String&gt; allKeys = config.getKeys(true);
+     * List&lt;String&gt; topLevelKeys = config.getKeys(false);
      * </code></pre>
      *
      * @param deep if true, includes keys from nested sections; if false, only top-level keys
@@ -845,7 +845,7 @@ public interface AdvancedConfig {
      * <p>Gets all metadata associated with the configuration.</p>
      *
      * <pre><code>
-     * Map<String, Object> metadata = config.getMetadata();
+     * Map&lt;String, Object&gt; metadata = config.getMetadata();
      * </code></pre>
      *
      * @return a map of metadata key-value pairs, never null
@@ -918,8 +918,8 @@ public interface AdvancedConfig {
      * <p>Returns all comments defined in the configuration.</p>
      *
      * <pre><code>
-     * Map<String, String> comments = config.getAllComments();
-     * for (Map.Entry<String, String> entry : comments.entrySet()) {
+     * Map&lt;String, String&gt; comments = config.getAllComments();
+     * for (Map.Entry&lt;String, String&gt; entry : comments.entrySet()) {
      *     String path = entry.getKey();
      *     String comment = entry.getValue();
      * }
@@ -1008,7 +1008,7 @@ public interface AdvancedConfig {
      * <p>Migrates configuration data from the given map into this config.</p>
      *
      * <pre><code>
-     * Map<String, Object> oldData = loadOldData();
+     * Map&lt;String, Object&gt; oldData = loadOldData();
      * config.migrate(context, oldData, false);
      * </code></pre>
      *

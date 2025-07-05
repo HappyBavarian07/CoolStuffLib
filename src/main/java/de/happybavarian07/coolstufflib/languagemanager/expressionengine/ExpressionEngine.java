@@ -17,14 +17,14 @@ import java.util.List;
  * <p>
  * The ExpressionParser combines the Lexer, Parser, and Interpreter components to provide a complete
  * pipeline for evaluating expressions within language files. It supports:
+ * </p>
  * <ul>
  *   <li>Mathematical expressions (e.g., "2 + 3 * 4")</li>
- *   <li>Logical expressions (e.g., "value > 10 && isAdmin")</li>
+ *   <li>Logical expressions (e.g., "value &gt; 10 &amp;&amp; isAdmin")</li>
  *   <li>Conditional chains (e.g., "if condition: valueA elif otherCondition: valueB else: valueC")</li>
- *   <li>Function calls (e.g., "Out<Material>(STONE)")</li>
+ *   <li>Function calls (e.g., "Out(STONE)")</li>
  *   <li>Variable references</li>
  * </ul>
- * </p>
  * <p>
  * This parser is particularly useful for dynamic content in language files, allowing
  * for conditional rendering and computation based on runtime context.
@@ -257,7 +257,6 @@ public class ExpressionEngine {
      * This method evaluates an expression and attempts to convert the result to the specified type.
      * It supports parsing direct values (like material names) as well as complex expressions
      * including conditional chains and function calls.
-     * </p>
      * <p>
      * Example usage:
      * <pre>
@@ -273,7 +272,6 @@ public class ExpressionEngine {
      * // Parse a numeric expression
      * Double value = parser.parse("2 * (3 + 4)", Double.class);
      * </pre>
-     * </p>
      *
      * @param <T>        the expected return type
      * @param expression the expression to parse
@@ -299,12 +297,12 @@ public class ExpressionEngine {
             }
 
             Parser.Expression expr = tokenizeAndParseExpression(expression);
-            System.out.println("Parsed expression: " + expr);
+            //System.out.println("Parsed expression: " + expr);
             if (expr == null) {
                 return null;
             } else if (expr instanceof Parser.Expression.Sequence seq) {
                 Object result = null;
-                System.out.println("Parsing sequence: " + seq);
+                //System.out.println("Parsing sequence: " + seq);
                 for (int i = 0; i < seq.exprs.size(); i++) {
                     result = interpreter.interpret(seq.exprs.get(i));
                 }

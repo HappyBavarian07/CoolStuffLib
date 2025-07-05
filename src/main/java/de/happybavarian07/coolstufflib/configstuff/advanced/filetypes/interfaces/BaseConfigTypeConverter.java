@@ -13,8 +13,8 @@ package de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.interface
  * </ul>
  *
  * <pre><code>
- * BaseConfigTypeConverter<UUID, String> uuidConverter =
- *     new BaseConfigTypeConverter<UUID, String>() {
+ * BaseConfigTypeConverter&lt;UUID, String&gt; uuidConverter =
+ *     new BaseConfigTypeConverter&lt;UUID, String&gt;() {
  *         public String toSerialized(UUID uuid) {
  *             return uuid.toString();
  *         }
@@ -96,7 +96,7 @@ public interface BaseConfigTypeConverter<T, K> {
      * <p>Gets the runtime type class this converter handles.</p>
      *
      * <pre><code>
-     * Class<?> inputType = converter.getInputType();
+     * Class&lt;?&gt; inputType = converter.getInputType();
      * // Returns UUID.class for UUID converter
      * </code></pre>
      *
@@ -108,7 +108,7 @@ public interface BaseConfigTypeConverter<T, K> {
      * <p>Gets the serialized type class this converter produces.</p>
      *
      * <pre><code>
-     * Class<?> outputType = converter.getOutputType();
+     * Class&lt;?&gt; outputType = converter.getOutputType();
      * // Returns String.class for UUID converter
      * </code></pre>
      *

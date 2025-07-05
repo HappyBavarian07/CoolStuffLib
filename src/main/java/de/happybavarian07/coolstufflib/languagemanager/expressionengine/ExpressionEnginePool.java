@@ -2,6 +2,8 @@ package de.happybavarian07.coolstufflib.languagemanager.expressionengine;
 
 import de.happybavarian07.coolstufflib.languagemanager.expressionengine.interfaces.FunctionCall;
 import org.bukkit.entity.Player;
+
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,6 +30,11 @@ import java.util.concurrent.ConcurrentHashMap;
  *   <li>Use {@link #addEngineForLanguage(String, ExpressionEngine)} to register a new engine for a language.</li>
  *   <li>Use {@link #updatePlayerEngine(Player, String)} to update a player's engine mapping when their language changes.</li>
  *   <li>Use {@link #clearPlayerEngine(Player)} and {@link #clearLanguageEngine(String)} for cleanup.</li>
+ *   <li>Use {@link #registerGlobalFunction(String, FunctionCall, String)} to register a function globally across all engines.</li>
+ *   <li>Use {@link #registerFunctionForLanguage(String, String, FunctionCall, String)} to register a function for a specific language engine.</li>
+ *   <li>Use {@link #unregisterGlobalFunction(String)} and {@link #unregisterFunctionForLanguage(String, String)} to remove functions.</li>
+ *   <li>Use {@link #getEngineIterator()} to iterate over all registered ExpressionEngines.</li>
+ *   <li>Use {@link #getDefaultLanguageEngine()} to retrieve the default ExpressionEngine instance.</li>
  * </ul>
  *
  * @author HappyBavarian07
@@ -45,6 +52,14 @@ public class ExpressionEnginePool {
      *
      * @param defaultLanguageName The name of the default language.
      * @param defaultEngine The ExpressionEngine instance for the default language.
+     */
+    /**
+     * <p>Creates a new pool for managing language-specific expression engines, setting up the default language and engine.</p>
+     * <pre><code>
+     * ExpressionEnginePool pool = new ExpressionEnginePool("en", new ExpressionEngine());
+     * </code></pre>
+     * @param defaultLanguageName the name of the default language
+     * @param defaultEngine the engine instance for the default language
      */
     public ExpressionEnginePool(String defaultLanguageName, ExpressionEngine defaultEngine) {
         this.defaultLanguageName = defaultLanguageName;
@@ -147,6 +162,13 @@ public class ExpressionEnginePool {
         }
     }
 
+    /**
+     * Registers a global function for all ExpressionEngines.
+     *
+     * @param functionName The name of the function.
+     * @param function The FunctionCall implementation.
+     * @param defaultType The default type for the function.
+     */
     public void registerGlobalFunction(String functionName, FunctionCall function, String defaultType) {
         for (ExpressionEngine engine : engines.values()) {
             if (engine != null) {
@@ -156,6 +178,14 @@ public class ExpressionEnginePool {
         getDefaultLanguageEngine().registerFunction(functionName, function, defaultType);
     }
 
+    /**
+     * Registers a function for a specific language's ExpressionEngine.
+     *
+     * @param languageName The language name.
+     * @param functionName The name of the function.
+     * @param function The FunctionCall implementation.
+     * @param defaultType The default type for the function.
+     */
     public void registerFunctionForLanguage(String languageName, String functionName, FunctionCall function, String defaultType) {
         ExpressionEngine engine = getEngineForLanguage(languageName);
         if (engine != null) {
@@ -163,6 +193,11 @@ public class ExpressionEnginePool {
         }
     }
 
+    /**
+     * Unregisters a global function from all ExpressionEngines.
+     *
+     * @param functionName The name of the function to unregister.
+     */
     public void unregisterGlobalFunction(String functionName) {
         for (ExpressionEngine engine : engines.values()) {
             if (engine != null) {
@@ -172,10 +207,25 @@ public class ExpressionEnginePool {
         getDefaultLanguageEngine().unregisterFunction(functionName);
     }
 
+    /**
+     * Unregisters a function from a specific language's ExpressionEngine.
+     *
+     * @param languageName The language name.
+     * @param functionName The name of the function to unregister.
+     */
     public void unregisterFunctionForLanguage(String languageName, String functionName) {
         ExpressionEngine engine = getEngineForLanguage(languageName);
         if (engine != null) {
             engine.unregisterFunction(functionName);
         }
+    }
+
+    /**
+     * Gets an iterator over all ExpressionEngines in the pool.
+     *
+     * @return An iterator for the ExpressionEngine instances.
+     */
+    public Iterator<ExpressionEngine> getEngineIterator() {
+        return engines.values().iterator();
     }
 }

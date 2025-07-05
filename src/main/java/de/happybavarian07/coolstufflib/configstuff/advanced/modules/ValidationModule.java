@@ -284,7 +284,7 @@ public class ValidationModule extends AbstractBaseConfigModule {
      * <pre><code>
      * validator.addStringValidator("username", "^[a-zA-Z0-9_]{3,16}$");
      * // or using a predicate
-     * validator.addStringValidator("username", value -> value != null && !value.toString().isEmpty());
+     * validator.addStringValidator("username", value -&gt; value != null &amp;&amp; !value.toString().isEmpty());
      * </code></pre>
      *
      * @param path the configuration key to apply the validation to

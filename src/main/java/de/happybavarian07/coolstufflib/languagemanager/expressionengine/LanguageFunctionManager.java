@@ -18,7 +18,6 @@ import org.bukkit.inventory.ItemStack;
  *   <li>Programmatically using the registerFunction methods</li>
  *   <li>Using a string-based syntax: "name(param1, param2) => expression"</li>
  * </ul>
- * </p>
  */
 public class LanguageFunctionManager {
     private final ExpressionEngine expressionEngine;
@@ -179,13 +178,13 @@ public class LanguageFunctionManager {
      * </p>
      * <p>
      * Examples:
+     * </p>
      * <ul>
      *   <li>"add(a, b) => a + b"</li>
-     *   <li>"isEven<number>(n:number) => n % 2 == 0"</li>
+     *   <li>"isEven(n:number) => n % 2 == 0"</li>
      *   <li>"getColor(rank) => if rank == 'admin': '#ff0000' elif rank == 'mod': '#00ff00' else: '#ffffff'"</li>
      * </ul>
-     * </p>
-     * 
+     *
      * @param functionString The function definition string
      * @throws IllegalArgumentException If the function string has invalid format
      */

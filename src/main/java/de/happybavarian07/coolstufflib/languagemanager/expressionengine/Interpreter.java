@@ -169,9 +169,9 @@ public class Interpreter implements Parser.Expression.Visitor<Object> {
 
         if (variables.containsKey(name)) {
             VariableWithUses v = variables.get(name);
-            System.out.println("[Variable tracking] Accessing variable " + name + " (remaining uses: " + v.remainingUses + ")");
+            //System.out.println("[Variable tracking] Accessing variable " + name + " (remaining uses: " + v.remainingUses + ")");
             Object value = v.getValue();
-            System.out.println("[Variable tracking] After access variable " + name + " (remaining uses: " + v.remainingUses + ")");
+            //System.out.println("[Variable tracking] After access variable " + name + " (remaining uses: " + v.remainingUses + ")");
             return value;
         }
 

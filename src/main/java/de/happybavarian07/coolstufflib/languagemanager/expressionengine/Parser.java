@@ -15,7 +15,7 @@ import java.util.List;
  * <li>or → and ("or" and)*</li>
  * <li>and → equality ("and" equality)*</li>
  * <li>equality → comparison (("==" | "!=") comparison)*</li>
- * <li>comparison → term ((">", ">=", "<", "<=") term)*</li>
+ * <li>comparison → term (("&gt;", "&gt;=", "&lt;", "&lt;=") term)*</li>
  * <li>term → factor (("+-") factor)*</li>
  * <li>factor → unary (("*" | "/" | "%" | "^") unary)*</li>
  * <li>unary → ("!" | "-") unary | primary</li>
@@ -33,7 +33,7 @@ import java.util.List;
  *
  * <pre><code>
  * // Basic expression parsing
- * Lexer lexer = new Lexer("player.level > 10 && player.hasPermission('admin')");
+ * Lexer lexer = new Lexer("player.level &gt; 10 &amp;&amp; player.hasPermission('admin')");
  * List&lt;Token&gt; tokens = lexer.scanTokens();
  * Parser parser = new Parser(tokens);
  * Expression result = parser.parse();
@@ -224,7 +224,7 @@ public class Parser {
             Token usesToken = consume(TokenType.NUMBER, "Expect number after 'as' for variable uses.");
             uses = ((Number) usesToken.literal()).intValue();
         }
-        System.out.println("Assigning variable: " + name.lexeme() + " with uses: " + uses);
+        //System.out.println("Assigning variable: " + name.lexeme() + " with uses: " + uses);
         return new Expression.Assignment(name, value, uses);
     }
 
@@ -513,7 +513,7 @@ public class Parser {
 
         /**
          * <p>Represents a binary operation expression with a left operand, operator, and right operand.
-         * Handles mathematical operations (+, -, *, /, %, ^) and comparison operations (==, !=, <, >, <=, >=).</p>
+         * Handles mathematical operations (+, -, *, /, %, ^) and comparison operations (==, !=, &lt;, &gt;, &lt;=, &gt;=).</p>
          *
          * <pre><code>
          * // Creates: 10 + 5
@@ -542,15 +542,16 @@ public class Parser {
         }
 
         /**
-         * <p>Represents a logical operation expression that performs short-circuit evaluation.
-         * Handles logical AND and OR operations where the right operand may not be evaluated
+         * <p>Represents a logical expression that combines two expressions with a logical operator.</p>
+         *
+         * <p>Handles logical AND and OR operations where the right operand may not be evaluated
          * if the left operand determines the result.</p>
          *
          * <pre><code>
-         * // Creates: player.isOnline() && player.hasPermission("admin")
+         * // Creates: player.isOnline() &amp;&amp; player.hasPermission("admin")
          * Expression expr = new Logical(
          *     new Call(new Token(TokenType.IDENTIFIER, "player.isOnline", null, 1), Collections.emptyList()),
-         *     new Token(TokenType.AND, "&&", null, 1),
+         *     new Token(TokenType.AND, "&amp;&amp;", null, 1),
          *     new Call(new Token(TokenType.IDENTIFIER, "player.hasPermission", null, 1),
          *         Arrays.asList(new Literal("admin")))
          * );

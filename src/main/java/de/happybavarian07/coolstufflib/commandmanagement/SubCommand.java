@@ -153,7 +153,7 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      * <p>If the command does not have a minimum number of arguments, then 0 is returned.</p>
      *
      * <pre><code>
-     * if (args.length < minArgs()) {
+     * if (args.length &lt; minArgs()) {
      *     sender.sendMessage("Not enough arguments!");
      *     return false;
      * }

@@ -10,7 +10,7 @@ public interface AutoGenTemplate {
     void applyTo(Group root);
 
     /**
-     * Returns the base path in the config where this template applies (e.g. "players.<uuid>").
+     * Returns the base path in the config where this template applies (e.g. "players.&lt;uuid&gt;").
      */
     default String getBasePath() { return ""; }
 

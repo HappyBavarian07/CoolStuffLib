@@ -138,7 +138,7 @@ public interface BaseConfigModule {
      * <p>Gets comprehensive state information about the module including configuration and metrics.</p>
      *
      * <pre><code>
-     * Map<String, Object> state = module.getModuleState();
+     * Map&lt;String, Object&gt; state = module.getModuleState();
      * String status = (String) state.get("status");
      * </code></pre>
      *
