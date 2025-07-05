@@ -890,6 +890,7 @@ public class LanguageManager {
      * @return The formatted message.
      */
     public String getMessage(String path, Player player, String langName, boolean resetAfter) {
+        applyPathExpressionVariables(player, path);
         LanguageFile langFile = getLangOrPlayerLang(true, langName, player);
         LanguageConfig langConfig = langFile.getLangConfig();
         if (langConfig == null || langConfig.getConfig() == null)
@@ -1106,6 +1107,7 @@ public class LanguageManager {
      * @return The formatted menu title for the player.
      */
     public String getMenuTitle(String path, Player player, String langName) {
+        applyPathExpressionVariables(player, path);
         LanguageFile langFile = getLangOrPlayerLang(false, langName, player);
         LanguageConfig langConfig = langFile.getLangConfig();
         if (langConfig == null || langConfig.getConfig() == null)
