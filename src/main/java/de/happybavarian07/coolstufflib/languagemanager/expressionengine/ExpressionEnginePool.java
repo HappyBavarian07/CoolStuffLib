@@ -228,4 +228,34 @@ public class ExpressionEnginePool {
     public Iterator<ExpressionEngine> getEngineIterator() {
         return engines.values().iterator();
     }
+
+    /**
+     * Peeks a variable from the first ExpressionEngine that contains it.
+     *
+     * @param key The variable key to peek.
+     * @return The value of the variable, or null if not found in any engine.
+     */
+    public Object peekVariable(String key) {
+        for (ExpressionEngine engine : engines.values()) {
+            if (engine != null && engine.getInterpreter().hasVariable(key)) {
+                return engine.peekVariable(key);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets a variable from the first ExpressionEngine that contains it.
+     *
+     * @param key The variable key to retrieve.
+     * @return The value of the variable, or null if not found in any engine.
+     */
+    public Object getVariable(String key) {
+        for (ExpressionEngine engine : engines.values()) {
+            if (engine != null && engine.getInterpreter().hasVariable(key)) {
+                return engine.getVariable(key);
+            }
+        }
+        return null;
+    }
 }

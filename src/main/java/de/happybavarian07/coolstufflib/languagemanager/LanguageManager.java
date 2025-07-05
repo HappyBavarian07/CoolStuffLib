@@ -36,6 +36,7 @@ public class LanguageManager {
     private final Map<String, LanguageFile> registeredLanguages;
     private final Map<String, Placeholder> placeholders;
     private final Map<String, LanguageCache> languageCaches; // New map for LanguageCache
+    private final Map<String, Map<String, Object>> playerPathVariables = new HashMap<>();
     private final ExpressionEnginePool expressionEnginePool;
     private String prefix;
     private String currentLangName;
@@ -111,13 +112,29 @@ public class LanguageManager {
      * <pre><code>
      * languageManager.addVariableForEngine(engine, "key", value);
      * </code></pre>
+     *
      * @param engine the expression engine to add the variable to
-     * @param key the variable name
-     * @param value the variable value
+     * @param key    the variable name
+     * @param value  the variable value
      */
     public void addVariableForEngine(ExpressionEngine engine, String key, Object value) {
+        addVariableForEngine(engine, key, value, -1);
+    }
+
+    /**
+     * <p>Adds a variable to the specified {@link ExpressionEngine} with a specified number of uses.</p>
+     * <pre><code>
+     * languageManager.addVariableForEngine(engine, "key", value, uses);
+     * </code></pre>
+     *
+     * @param engine the expression engine to add the variable to
+     * @param key    the variable name
+     * @param value  the variable value
+     * @param uses   the number of uses for the variable, -1 for unlimited
+     */
+    public void addVariableForEngine(ExpressionEngine engine, String key, Object value, int uses) {
         if (engine != null) {
-            engine.setVariable(key, value);
+            engine.setVariable(key, value, uses);
         }
     }
 
@@ -126,13 +143,28 @@ public class LanguageManager {
      * <pre><code>
      * languageManager.addVariableGlobally("key", value);
      * </code></pre>
-     * @param key the variable name
+     *
+     * @param key   the variable name
      * @param value the variable value
      */
     public void addVariableGlobally(String key, Object value) {
+        addVariableGlobally(key, value, -1);
+    }
+
+    /**
+     * <p>Adds a variable with the given key, value, and number of uses to all registered {@link ExpressionEngine} instances.</p>
+     * <pre><code>
+     * languageManager.addVariableGlobally("key", value, uses);
+     * </code></pre>
+     *
+     * @param key   the variable name
+     * @param value the variable value
+     * @param uses  the number of uses for the variable, -1 for unlimited
+     */
+    public void addVariableGlobally(String key, Object value, int uses) {
         getExpressionEnginePool().getEngineIterator().forEachRemaining(engine -> {
             if (engine != null) {
-                engine.setVariable(key, value);
+                engine.setVariable(key, value, uses);
             }
         });
     }
@@ -142,6 +174,7 @@ public class LanguageManager {
      * <pre><code>
      * languageManager.removeVariableGlobally("key");
      * </code></pre>
+     *
      * @param key the variable name to remove
      */
     public void removeVariableGlobally(String key) {
@@ -157,8 +190,9 @@ public class LanguageManager {
      * <pre><code>
      * languageManager.removeVariableForEngine(engine, "key");
      * </code></pre>
+     *
      * @param engine the expression engine to remove the variable from
-     * @param key the variable name to remove
+     * @param key    the variable name to remove
      */
     public void removeVariableForEngine(ExpressionEngine engine, String key) {
         if (engine != null) {
@@ -219,6 +253,98 @@ public class LanguageManager {
                 }
             }
         }
+    }
+
+
+    /**
+     * Sets an expression variable for a specific player and path.
+     * These variables will be added to the parser when getItem is called with matching player and path.
+     *
+     * @param playerUUID The UUID of the player this variable is for
+     * @param path       The path this variable is associated with
+     * @param key        The variable key
+     * @param value      The variable value
+     */
+    public void setPathExpressionVariable(String playerUUID, String path, String key, Object value) {
+        String mapKey = playerUUID + ":" + path;
+        if (!playerPathVariables.containsKey(mapKey)) {
+            playerPathVariables.put(mapKey, new HashMap<>());
+        }
+        playerPathVariables.get(mapKey).put(key, value);
+    }
+
+    /**
+     * Removes an expression variable for a specific player and path.
+     *
+     * @param playerUUID The UUID of the player this variable is for
+     * @param path       The path this variable is associated with
+     * @param key        The variable key to remove
+     */
+    public void removePathExpressionVariable(String playerUUID, String path, String key) {
+        String mapKey = playerUUID + ":" + path;
+        if (playerPathVariables.containsKey(mapKey)) {
+            playerPathVariables.get(mapKey).remove(key);
+            if (playerPathVariables.get(mapKey).isEmpty()) {
+                playerPathVariables.remove(mapKey);
+            }
+        }
+    }
+
+    /**
+     * Removes all expression variables for a specific player and path.
+     *
+     * @param playerUUID The UUID of the player
+     * @param path       The path
+     */
+    public void clearPathExpressionVariables(String playerUUID, String path) {
+        String mapKey = playerUUID + ":" + path;
+        playerPathVariables.remove(mapKey);
+    }
+
+    /**
+     * Gets an expression variable for a specific player and path.
+     *
+     * @param playerUUID The UUID of the player
+     * @param path       The path
+     * @param key        The variable key
+     * @return The variable value or null if not found
+     */
+    public Object getPathExpressionVariable(String playerUUID, String path, String key) {
+        String mapKey = playerUUID + ":" + path;
+        if (playerPathVariables.containsKey(mapKey)) {
+            return playerPathVariables.get(mapKey).get(key);
+        }
+        return null;
+    }
+
+    /**
+     * Applies path expression variables for a specific player and path.
+     * This method will add the variables to the global expression engine pool.
+     *
+     * @param player The player for whom to apply the path expression variables
+     * @param path   The path associated with the variables
+     */
+    private void applyPathExpressionVariables(Player player, String path) {
+        if (player == null) return;
+
+        String playerUUID = player.getUniqueId().toString();
+        String mapKey = playerUUID + ":" + path;
+
+        if (playerPathVariables.containsKey(mapKey)) {
+            Map<String, Object> variables = playerPathVariables.get(mapKey);
+            for (Map.Entry<String, Object> entry : variables.entrySet()) {
+                addVariableGlobally(entry.getKey(), entry.getValue(), 1);
+            }
+        }
+    }
+
+    /**
+     * Retrieves the ExpressionEnginePool associated with this LanguageManager.
+     *
+     * @return The ExpressionEnginePool associated with this LanguageManager.
+     */
+    public Object getExpressionVariable(String key, boolean peek) {
+        return peek ? getExpressionEnginePool().peekVariable(key) : getExpressionEnginePool().getVariable(key);
     }
 
     /**
@@ -713,11 +839,11 @@ public class LanguageManager {
             Object configObject = langConfig.getConfig().get(path);
             if (configObject == null || !langConfig.getConfig().contains(path))
                 return getDefaultInstance(clazz);
-            if (configObject.getClass().isInstance(clazz)) {
+            try {
                 T obj = clazz.cast(configObject);
                 langCache.addData(path, obj, true);
                 return obj;
-            } else {
+            } catch (ClassCastException e) {
                 return null;
             }
         }
@@ -774,11 +900,11 @@ public class LanguageManager {
         String rawMessage = getObjectFromLanguageCacheOrConfig("Messages." + path, langName, String.class);
 
         String message = Utils.format(player, rawMessage, prefix);
-        if (placeholders.isEmpty()) return message;
-
-        List<String> includedKeys = new ArrayList<>(getPlaceholderKeysInMessage(message, PlaceholderType.MESSAGE));
-        message = replacePlaceholders(PlaceholderType.MESSAGE, message);
-        if (resetAfter) resetSpecificPlaceholders(PlaceholderType.MESSAGE, includedKeys);
+        if (!placeholders.isEmpty()) {
+            List<String> includedKeys = new ArrayList<>(getPlaceholderKeysInMessage(message, PlaceholderType.MESSAGE));
+            message = replacePlaceholders(PlaceholderType.MESSAGE, message);
+            if (resetAfter) resetSpecificPlaceholders(PlaceholderType.MESSAGE, includedKeys);
+        }
         message = parseEmbeddedExpressions(message, player, langName);
         return message;
     }
@@ -826,6 +952,7 @@ public class LanguageManager {
      * @return An ItemStack based on the specified parameters.
      */
     public ItemStack getItem(String path, Player player, String langName, boolean resetAfter, MaterialCondition condition) {
+        applyPathExpressionVariables(player, path);
         LanguageFile langFile = getLangOrPlayerLang(false, langName, player);
         LanguageConfig langConfig = langFile.getLangConfig();
         ItemStack error = new ItemStack(Material.BARRIER);
