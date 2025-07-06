@@ -17,7 +17,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ConfigFileHandlerTest {
-    static final Path rootDir = Path.of("").resolve(ConfigFileHandlerTest.class.getSimpleName());
+    static final Path rootDir = Path.of("TestOutputs").resolve(ConfigFileHandlerTest.class.getSimpleName());
     private AdvancedConfigManager configManager;
 
     @BeforeEach

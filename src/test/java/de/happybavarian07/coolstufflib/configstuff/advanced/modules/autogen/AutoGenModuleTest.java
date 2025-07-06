@@ -42,7 +42,7 @@ class AutoGenModuleTest {
     }
 
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    private final Path CONFIG_PATH = Paths.get("AutoGenTestPlayerConfig.json");
+    private final Path CONFIG_PATH = Paths.get("TestOutputs/AutoGenTestPlayerConfig.json");
 
     @BeforeEach
     void setup() throws IOException {

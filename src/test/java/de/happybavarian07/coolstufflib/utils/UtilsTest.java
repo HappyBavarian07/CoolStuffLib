@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UtilsTest {
 
-    static final Path tempDir = Path.of("UtilsTest");
+    static final Path tempDir = Path.of("TestOutputs/UtilsTest");
 
     @Test
     void testFlattenMap() {

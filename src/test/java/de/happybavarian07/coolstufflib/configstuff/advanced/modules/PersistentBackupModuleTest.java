@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PersistentBackupModuleTest {
 
-    static final Path testDir = Path.of("PersistentBackupModuleTest");
+    static final Path testDir = Path.of("TestOutputs/PersistentBackupModuleTest");
 
     @BeforeEach
     void setUp() throws IOException {

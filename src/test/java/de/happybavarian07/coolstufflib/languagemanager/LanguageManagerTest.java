@@ -16,7 +16,7 @@ import static org.mockito.Mockito.*;
 
 class LanguageManagerTest {
 
-    static final Path tempDir = Path.of("LanguageManagerTest");
+    static final Path tempDir = Path.of("TestOutputs/LanguageManagerTest");
 
     @Mock
     private JavaPlugin mockPlugin;

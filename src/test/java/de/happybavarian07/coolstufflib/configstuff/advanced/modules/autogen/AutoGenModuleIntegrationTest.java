@@ -48,8 +48,8 @@ class AutoGenModuleIntegrationTest {
         }
     }
 
-    private static final Path JSON_PATH = Paths.get("AutoGenIntegrationTest.json");
-    private static final Path YAML_PATH = Paths.get("AutoGenIntegrationTest2.yaml");
+    private static final Path JSON_PATH = Paths.get("TestOutputs/AutoGenIntegrationTest.json");
+    private static final Path YAML_PATH = Paths.get("TestOutputs/AutoGenIntegrationTest2.yaml");
 
     @BeforeEach
     void setup() throws IOException {

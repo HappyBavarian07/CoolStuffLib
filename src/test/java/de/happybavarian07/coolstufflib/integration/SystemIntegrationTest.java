@@ -34,7 +34,7 @@ import static org.mockito.Mockito.*;
 
 class SystemIntegrationTest {
 
-    static final Path tempDir = Path.of("SystemIntegrationTest");
+    static final Path tempDir = Path.of("TestOutputs/SystemIntegrationTest");
 
     @Mock
     private JavaPlugin mockPlugin;

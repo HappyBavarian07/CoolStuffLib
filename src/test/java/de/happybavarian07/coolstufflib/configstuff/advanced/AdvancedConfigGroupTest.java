@@ -14,7 +14,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 class AdvancedConfigGroupTest {
-    static final Path tempDir = Path.of("AdvancedConfigGroupTest");
+    static final Path tempDir = Path.of("TestOutputs/AdvancedConfigGroupTest");
     private AdvancedConfigManager manager;
 
     @BeforeEach

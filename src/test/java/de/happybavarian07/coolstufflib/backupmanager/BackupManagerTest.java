@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BackupManagerTest {
-    private final Path tempDir = Path.of("");
+    private final Path tempDir = Path.of("TestOutputs");
     @Test
     void testRegisterFileBackup() {
         File testsRoot = new File(tempDir.toFile() + File.separator + "BackupManagerTest" + File.separator + "testRegisterFileBackup");

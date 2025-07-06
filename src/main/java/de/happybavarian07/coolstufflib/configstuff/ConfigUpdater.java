@@ -3,7 +3,6 @@ package de.happybavarian07.coolstufflib.configstuff;/*
  * @Date 28.04.2022 | 16:22
  */
 
-import de.happybavarian07.coolstufflib.CoolStuffLib;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -49,15 +48,16 @@ public class ConfigUpdater {
      * // Config file now has latest structure with preserved user values
      * </code></pre>
      *
-     * @param plugin the plugin instance providing access to bundled resources
-     * @param resourceName the name of the YAML resource file to use as template
-     * @param toUpdate the target configuration file to update
+     * @param plugin          the plugin instance providing access to bundled resources
+     * @param resourceName    the name of the YAML resource file to use as template
+     * @param toUpdate        the target configuration file to update
      * @param ignoredSections list of configuration section paths to preserve unchanged
      * @throws IOException if file reading, writing, or resource access fails
      */
     public static void update(Plugin plugin, String resourceName, File toUpdate, List<String> ignoredSections) throws IOException {
         DumperOptions dumperOptions = new DumperOptions();
         dumperOptions.setSplitLines(false);
+        dumperOptions.setPrettyFlow(true);
         // TODO Add Stats like Counting how many lines got changed/needed to be changed,
         //  Errors, Null Lines, New Lines, etc.
 
@@ -85,59 +85,46 @@ public class ConfigUpdater {
     }
 
     private static void write(FileConfiguration newConfig, FileConfiguration oldConfig, Map<String, String> comments, List<String> ignoredSections, BufferedWriter writer, Yaml yaml) throws IOException {
-        for (String key : newConfig.getKeys(true)) {
-            if (newConfig.isConfigurationSection(key)) {
-                continue;
-            }
-
-            Object oldValue = oldConfig.get(key);
-            if (oldValue != null) {
-                if (key.equals("LanguageFullName")) {
-
-                } else if (key.equals("LanguageVersion")) {
-                    newConfig.set(key, CoolStuffLib.getLib().getJavaPluginUsingLib().getDescription().getVersion());
-                } else {
-                    newConfig.set(key, oldValue);
-                }
-            }
-        }
-
-        outer:
-        for (String key : newConfig.getKeys(true)) {
-            if (newConfig.isConfigurationSection(key)) {
-                continue;
-            }
-
-            String[] keys = key.split("\\.");
-            String actualKey = keys[keys.length - 1];
-            String comment = comments.remove(key);
-
-            StringBuilder prefixBuilder = new StringBuilder();
-            int indents = keys.length - 1;
-            appendPrefixSpaces(prefixBuilder, indents);
-            String prefixSpaces = prefixBuilder.toString();
-
-            if (comment != null) {
-                writer.write(comment);
-            }
-
-            for (String ignoredSection : ignoredSections) {
-                if (key.equals(ignoredSection) || key.startsWith(ignoredSection + ".")) {
-                    continue outer;
-                }
-            }
-
-            Object configValue = newConfig.get(key);
-            write(configValue, actualKey, prefixSpaces, yaml, writer);
-        }
-
+        writeSectionRecursive(newConfig, oldConfig, comments, ignoredSections, writer, yaml, "", 0);
         String danglingComments = comments.get(null);
-
         if (danglingComments != null) {
             writer.write(danglingComments);
         }
-
         writer.close();
+    }
+
+    private static void writeSectionRecursive(ConfigurationSection section, FileConfiguration oldConfig, Map<String, String> comments, List<String> ignoredSections, BufferedWriter writer, Yaml yaml, String path, int indent) throws IOException {
+        Set<String> keys = section.getKeys(false);
+        List<String> filteredKeys = new ArrayList<>(keys);
+        filteredKeys.removeIf(key -> {
+            String fullKey = path.isEmpty() ? key : path + "." + key;
+            for (String ignored : ignoredSections) {
+                if (fullKey.equals(ignored) || fullKey.startsWith(ignored + ".")) {
+                    return true;
+                }
+            }
+            return false;
+        });
+        for (String key : filteredKeys) {
+            String fullKey = path.isEmpty() ? key : path + "." + key;
+            String comment = comments.remove(fullKey);
+            if (comment != null) writer.write(comment);
+            Object value = section.get(key);
+            String prefix = getPrefixSpaces(indent);
+            if (value instanceof ConfigurationSection) {
+                writer.write(prefix + key + ":\n");
+                writeSectionRecursive((ConfigurationSection) value, oldConfig, comments, ignoredSections, writer, yaml, fullKey, indent + 1);
+            } else if (value instanceof List) {
+                writer.write(getListAsString((List) value, key, prefix, yaml));
+            } else if (value instanceof ConfigurationSerializable) {
+                writer.write(prefix + key + ": " + yaml.dump(((ConfigurationSerializable) value).serialize()));
+            } else if (value instanceof String s) {
+                s = s.replace("\n", "\\n");
+                writer.write(prefix + key + ": " + yaml.dump(s));
+            } else {
+                writer.write(prefix + key + ": " + yaml.dump(value));
+            }
+        }
     }
 
     //Doesn't work with configuration sections, must be an actual object
@@ -146,8 +133,7 @@ public class ConfigUpdater {
         if (obj instanceof ConfigurationSerializable) {
             writer.write(prefixSpaces + actualKey + ": " + yaml.dump(((ConfigurationSerializable) obj).serialize()));
         } else if (obj instanceof String || obj instanceof Character) {
-            if (obj instanceof String) {
-                String s = (String) obj;
+            if (obj instanceof String s) {
                 obj = s.replace("\n", "\\n");
             }
 
@@ -217,7 +203,7 @@ public class ConfigUpdater {
             if (line != null && line.trim().startsWith("-"))
                 continue;
 
-            if (line == null || line.trim().equals("") || line.trim().startsWith("#")) {
+            if (line == null || line.trim().isEmpty() || line.trim().startsWith("#")) {
                 builder.append(line).append("\n");
             } else {
                 lastLineIndentCount = setFullKey(keyBuilder, line, lastLineIndentCount);
@@ -233,14 +219,14 @@ public class ConfigUpdater {
                     }
                 }
 
-                if (keyBuilder.length() > 0) {
+                if (!keyBuilder.isEmpty()) {
                     comments.put(keyBuilder.toString(), builder.toString());
                     builder.setLength(0);
                 }
             }
         }
 
-        if (builder.length() > 0) {
+        if (!builder.isEmpty()) {
             comments.put(null, builder.toString());
         }
 
@@ -313,13 +299,13 @@ public class ConfigUpdater {
         int currentIndents = countIndents(configLine);
         String key = configLine.trim().split(":")[0];
 
-        if (keyBuilder.length() == 0) {
+        if (keyBuilder.isEmpty()) {
             keyBuilder.append(key);
         } else if (currentIndents == lastLineIndentCount) {
             //Replace the last part of the key with current key
             removeLastKey(keyBuilder);
 
-            if (keyBuilder.length() > 0) {
+            if (!keyBuilder.isEmpty()) {
                 keyBuilder.append(".");
             }
 
@@ -334,7 +320,7 @@ public class ConfigUpdater {
                 removeLastKey(keyBuilder);
             }
 
-            if (keyBuilder.length() > 0) {
+            if (!keyBuilder.isEmpty()) {
                 keyBuilder.append(".");
             }
 
@@ -345,13 +331,7 @@ public class ConfigUpdater {
     }
 
     private static String getPrefixSpaces(int indents) {
-        StringBuilder builder = new StringBuilder();
-
-        for (int i = 0; i < indents; i++) {
-            builder.append("  ");
-        }
-
-        return builder.toString();
+        return "  ".repeat(Math.max(0, indents));
     }
 
     private static void appendPrefixSpaces(StringBuilder builder, int indents) {

@@ -10,7 +10,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FileBackupTest {
-    private final Path tempDir = Path.of("");
+    private final Path tempDir = Path.of("TestOutputs");
 
     @Test
     void testBackup() {

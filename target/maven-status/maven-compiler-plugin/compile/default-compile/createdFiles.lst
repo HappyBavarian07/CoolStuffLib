@@ -4,7 +4,6 @@ de\happybavarian07\coolstufflib\CoolStuffLibBuilder.class
 de\happybavarian07\coolstufflib\testing\TestCommand.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\ConfigChangeTrackerModule$1.class
 de\happybavarian07\coolstufflib\configstuff\advanced\section\meta\SectionMetadataManager.class
-de\happybavarian07\coolstufflib\configstuff\OldConfigUpdater.class
 de\happybavarian07\coolstufflib\menusystem\misc\ConfirmationMenu.class
 de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigSectionEvent$Type.class
 de\happybavarian07\coolstufflib\testing\LibraryTestInitializer.class

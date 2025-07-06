@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ConfigManagerTest {
 
-    static final Path tempDir = Path.of("ConfigManagerTest");
+    static final Path tempDir = Path.of("TestOutputs/ConfigManagerTest");
 
     private AdvancedConfigManager manager;
 

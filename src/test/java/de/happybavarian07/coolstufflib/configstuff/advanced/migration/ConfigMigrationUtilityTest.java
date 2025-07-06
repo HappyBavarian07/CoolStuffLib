@@ -38,7 +38,7 @@ class ConfigMigrationUtilityTest {
             return false;
         }
     }
-    static final Path tempDir = Path.of("ConfigMigrationUtilityTest");
+    static final Path tempDir = Path.of("TestOutputs/ConfigMigrationUtilityTest");
 
     @Test
     void testMigrateFromLegacyAdvanced() {

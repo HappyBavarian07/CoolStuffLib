@@ -37,7 +37,7 @@ class AdvancedPersistentConfigTest {
             return false;
         }
     }
-    Path tempDir = Path.of("AdvancedPersistentConfigTest");
+    Path tempDir = Path.of("TestOutputs/AdvancedPersistentConfigTest");
 
     @Test
     void testBasicCrudOperations() {

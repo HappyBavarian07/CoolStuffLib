@@ -15,7 +15,7 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ConfigIntegrationTest {
-    static final Path rootDir = Path.of("").resolve(ConfigIntegrationTest.class.getSimpleName());
+    static final Path rootDir = Path.of("TestOutputs").resolve(ConfigIntegrationTest.class.getSimpleName());
     private AdvancedConfigManager configManager;
 
     @BeforeEach
