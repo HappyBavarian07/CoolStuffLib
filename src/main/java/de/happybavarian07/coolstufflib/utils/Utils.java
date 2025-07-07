@@ -22,6 +22,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerProfile;
+import org.bukkit.profile.PlayerTextures;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -160,9 +161,9 @@ public class Utils {
         } catch (IllegalArgumentException ignored) {
         }
 
-        meta.setDisplayName(Utils.chat(name));
+        meta.setDisplayName(Utils.chat(name).substring(0, Math.min(15, name.length())));
         if (!isTexture) {
-            meta.setOwningPlayer(Bukkit.getOfflinePlayer(headValue));
+            meta.setOwningPlayer(Bukkit.getOfflinePlayer(headValue.substring(0, Math.min(15, name.length()))));
             head.setItemMeta(meta);
             return head;
         }
@@ -198,7 +199,7 @@ public class Utils {
 
         SkullMeta meta = (SkullMeta) head.getItemMeta();
         assert meta != null;
-        meta.setDisplayName(Utils.chat(name));
+        meta.setDisplayName(Utils.chat(name).substring(0, Math.min(15, name.length())));
         PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID(), "CustomHead");
 
         try {

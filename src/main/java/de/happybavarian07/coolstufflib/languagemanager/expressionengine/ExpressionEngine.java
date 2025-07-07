@@ -1,5 +1,7 @@
 package de.happybavarian07.coolstufflib.languagemanager.expressionengine;
 
+import de.happybavarian07.coolstufflib.cache.expression.ExpressionCache;
+import de.happybavarian07.coolstufflib.cache.expression.ExpressionCacheKey;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import de.happybavarian07.coolstufflib.languagemanager.expressionengine.conditions.HeadMaterialCondition;
 import de.happybavarian07.coolstufflib.languagemanager.expressionengine.exceptions.ExpressionEngineException;
@@ -9,7 +11,12 @@ import de.happybavarian07.coolstufflib.utils.Head;
 import org.bukkit.Material;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiConsumer;
 
 /**
  * A modern implementation of the conditional expression parser using a lexer/parser/interpreter pattern.
@@ -38,6 +45,8 @@ public class ExpressionEngine {
     private final Lexer lexer = new Lexer("");
     private final Parser parser = new Parser(null);
     private final LanguageFunctionManager functionManager;
+    private final ExpressionCache<Parser.Expression> parseCache = new ExpressionCache<>();
+    private final ExpressionCache<Object> evalCache = new ExpressionCache<>();
 
     public ExpressionEngine() {
         this.functionManager = new LanguageFunctionManager(this);
@@ -284,79 +293,49 @@ public class ExpressionEngine {
         if (expression == null) {
             throw new IllegalArgumentException("Expression cannot be null");
         }
-
         expression = expression.trim();
         if (expression.isEmpty()) {
             throw new IllegalArgumentException("Expression cannot be empty");
         }
-
         try {
             if (isMaterialName(expression)) {
                 Material material = Material.valueOf(expression.toUpperCase().replace("\"", "").replace("'", ""));
                 return type.cast(material);
             }
-
-            Parser.Expression expr = tokenizeAndParseExpression(expression);
-            //System.out.println("Parsed expression: " + expr);
-            if (expr == null) {
+            Map<String, Object> variableState = new HashMap<>();
+            Parser.Expression expr = getOrParseExpression(expression, variableState);
+            Object result = getOrEvalExpression(expr, expression, variableState);
+            if (result == null) {
                 return null;
-            } else if (expr instanceof Parser.Expression.Sequence seq) {
-                Object result = null;
-                //System.out.println("Parsing sequence: " + seq);
-                for (int i = 0; i < seq.exprs.size(); i++) {
-                    result = interpreter.interpret(seq.exprs.get(i));
-                }
-                return type.cast(result);
-            } else if (expr instanceof Parser.Expression.ConditionalChain chain) {
-                for (int i = 0; i < chain.branches.size(); i++) {
-                    Parser.Expression.ConditionalBranch branch = chain.branches.get(i);
-                    Object condResult = interpreter.interpret(branch.condition);
-                    if (isTruthy(condResult)) {
-                        Object output = interpreter.interpret(branch.output);
-                        return type.cast(output);
-                    }
-                }
-
-                if (chain.elseBranch != null) {
-                    Object output = interpreter.interpret(chain.elseBranch);
-                    return type.cast(output);
-                }
-                return null;
-            } else if (expr instanceof Parser.Expression.Literal lit) {
-                if (lit.value == null) {
-                    return null;
-                }
-                if (type.isPrimitive() && lit.value instanceof Number) {
-                    return type.cast(((Number) lit.value).doubleValue());
-                }
-                return type.cast(lit.value);
-            } else if (expr instanceof Parser.Expression.Variable var) {
-                Object value = interpreter.getVariable(var.name.lexeme());
-                if (value == null) {
-                    return null;
-                }
-                if (type.isPrimitive() && value instanceof Number) {
-                    return type.cast(((Number) value).doubleValue());
-                }
-                return type.cast(value);
             }
-
-            if (type.isInstance(expr) && !(expr instanceof Parser.Expression.Call)) {
-                return type.cast(expr);
+            if (type.isPrimitive() && result instanceof Number) {
+                return type.cast(((Number) result).doubleValue());
             }
-
-            Object result = interpreter.interpret(expr);
-
-            if (type.isPrimitive() && result.getClass().isPrimitive()) {
-                return type.cast(result);
-            }
-
             if (!type.isInstance(result)) {
-                throw new IllegalArgumentException("Unexpected result type: " +
-                        (result != null ? result.getClass().getSimpleName() : "null"));
+                throw new IllegalArgumentException("Unexpected result type: " + (result != null ? result.getClass().getSimpleName() : "null"));
             }
-
             return type.cast(result);
+        } catch (RuntimeException e) {
+            if (e instanceof ExpressionEngineException) throw e;
+            throw new ExpressionEngineException("Error parsing expression: " + expression + " - " + e.getMessage(), e);
+        }
+    }
+
+    public Object parsePrimitive(String expression) {
+        if (expression == null) {
+            throw new IllegalArgumentException("Expression cannot be null");
+        }
+        expression = expression.trim();
+        if (expression.isEmpty()) {
+            throw new IllegalArgumentException("Expression cannot be empty");
+        }
+        try {
+            if (isMaterialName(expression)) {
+                return Material.valueOf(expression.toUpperCase().replace("\"", "").replace("'", ""));
+            }
+            Map<String, Object> variableState = new HashMap<>();
+            Parser.Expression expr = getOrParseExpression(expression, variableState);
+            return getOrEvalExpression(expr, expression, variableState);
         } catch (RuntimeException e) {
             if (e instanceof ExpressionEngineException) throw e;
             throw new ExpressionEngineException("Error parsing expression: " + expression + " - " + e.getMessage(), e);
@@ -375,98 +354,115 @@ public class ExpressionEngine {
         return parser.parse();
     }
 
-    public Object parsePrimitive(String expression) {
+    public Object evaluate(String expression, Map<String, Object> variables) {
         if (expression == null) {
             throw new IllegalArgumentException("Expression cannot be null");
         }
-
         expression = expression.trim();
         if (expression.isEmpty()) {
             throw new IllegalArgumentException("Expression cannot be empty");
         }
 
         try {
+            if (interpreter.getLogger() != null) {
+                interpreter.getLogger().accept("Evaluating expression: {}", new Object[]{expression});
+            }
+
             if (isMaterialName(expression)) {
-                return Material.valueOf(expression.toUpperCase().replace("\"", "").replace("'", ""));
+                Material material = Material.valueOf(expression.toUpperCase().replace("\"", "").replace("'", ""));
+                return material;
             }
 
-            Parser.Expression expr = tokenizeAndParseExpression(expression);
-            if (expr == null) {
-                return null;
+            Parser.Expression expr = getOrParseExpression(expression, variables);
+            interpreter.clearVariables();
+            for (Map.Entry<String, Object> var : variables.entrySet()) {
+                interpreter.setVariable(var.getKey(), var.getValue());
             }
 
-            if (expr instanceof Parser.Expression.ConditionalChain chain) {
-                for (int i = 0; i < chain.branches.size(); i++) {
-                    Parser.Expression.ConditionalBranch branch = chain.branches.get(i);
-                    Object condResult = interpreter.interpret(branch.condition);
-                    if (isTruthy(condResult)) {
-                        return interpreter.interpret(branch.output);
-                    }
-                }
+            Object result = getOrEvalExpression(expr, expression, variables);
 
-                if (chain.elseBranch != null) {
-                    return interpreter.interpret(chain.elseBranch);
-                }
-                return null;
+            if (interpreter.getLogger() != null) {
+                interpreter.getLogger().accept("Expression evaluation completed. Result: {}", new Object[]{result});
             }
 
-            return interpreter.interpret(expr);
+            return result;
         } catch (RuntimeException e) {
+            if (interpreter.getErrorHandler() != null) {
+                interpreter.getErrorHandler().accept(this, e);
+            }
             if (e instanceof ExpressionEngineException) throw e;
-            throw new ExpressionEngineException("Error parsing expression: " + expression + " - " + e.getMessage(), e);
+            throw new ExpressionEngineException("Error evaluating expression: " + expression + " - " + e.getMessage(), e);
         }
     }
 
-    private boolean isTruthy(Object value) {
-        if (value == null) {
-            return false;
-        } else if (value instanceof Boolean b) {
-            return b;
-        } else if (value instanceof Number number) {
-            return number.doubleValue() != 0;
-        } else {
-            return true;
+    private Parser.Expression getOrParseExpression(String expression, Map<String, Object> variableState) {
+        Set<String> relevantVars = extractRelevantVariables(expression);
+        Map<String, Object> relevantState = new HashMap<>();
+        for (String var : relevantVars) {
+            if (variableState != null && variableState.containsKey(var)) {
+                relevantState.put(var, variableState.get(var));
+            }
         }
-    }
 
-    private boolean isMaterialName(String str) {
-        if (str == null || str.isEmpty()) return false;
-        String name = str.trim().toUpperCase();
-        name = name.replace("\"", "").replace("'", "");
-        try {
-            Material.valueOf(name);
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
+        ExpressionCacheKey key = new ExpressionCacheKey(expression, relevantState);
+        Parser.Expression expr = parseCache.get(key);
+        if (expr == null) {
+            if (interpreter.getLogger() != null) {
+                interpreter.getLogger().accept("Cache miss for parse: {}", new Object[]{expression});
+            }
+            lexer.setSource(expression);
+            List<Token> tokens = lexer.scanTokens();
+            parser.setTokens(tokens);
+            expr = parser.parse();
+            parseCache.put(key, expr);
+        } else if (interpreter.getLogger() != null) {
+            interpreter.getLogger().accept("Cache hit for parse: {}", new Object[]{expression});
         }
+        return expr;
     }
 
-    public void setVariable(String name, Object value) {
-        interpreter.setVariable(name, value);
+    private Object getOrEvalExpression(Parser.Expression expr, String expression, Map<String, Object> variableState) {
+        Set<String> relevantVars = extractRelevantVariables(expression);
+        Map<String, Object> relevantState = new HashMap<>();
+        for (String var : relevantVars) {
+            if (variableState != null && variableState.containsKey(var)) {
+                relevantState.put(var, variableState.get(var));
+            }
+        }
+
+        ExpressionCacheKey key = new ExpressionCacheKey(expression, relevantState);
+        Object result = evalCache.get(key);
+        if (result == null) {
+            if (interpreter.getLogger() != null) {
+                interpreter.getLogger().accept("Cache miss for eval: {}", new Object[]{expression});
+            }
+            result = interpreter.interpret(expr);
+            evalCache.put(key, result);
+        } else if (interpreter.getLogger() != null) {
+            interpreter.getLogger().accept("Cache hit for eval: {}", new Object[]{expression});
+        }
+        return result;
     }
 
-    public void setVariable(String name, Object value, int uses) {
-        interpreter.setVariable(name, value, uses);
+    private Set<String> extractRelevantVariables(String expression) {
+        Set<String> vars = new HashSet<>();
+        lexer.setSource(expression);
+        List<Token> tokens = lexer.scanTokens();
+        for (Token token : tokens) {
+            if (token.type() == TokenType.IDENTIFIER) {
+                vars.add(token.lexeme());
+            }
+        }
+        return vars;
     }
 
-    public Object getVariable(String name) {
-        return interpreter.getVariable(name);
-    }
-
-    public void clearVariables() {
-        interpreter.clearVariables();
-    }
-
-    public void clearFunctions() {
-        interpreter.clearFunctions();
-    }
-
-    public Object peekVariable(String key) {
-        return interpreter.peekVariable(key);
-    }
-
-    public void removeVariable(String key) {
-        interpreter.removeVariable(key);
+    private int computeVariableStateHash(Map<String, Object> variableState, Set<String> relevantVars) {
+        int hash = 1;
+        for (String var : relevantVars) {
+            Object value = variableState.get(var);
+            hash = 31 * hash + (value != null ? value.hashCode() : 0);
+        }
+        return hash;
     }
 
     /**
@@ -607,6 +603,46 @@ public class ExpressionEngine {
      */
     public void clearContext() {
         interpreter.clearContext();
+    }
+
+    public Object getVariable(String name) {
+        return interpreter.getVariable(name);
+    }
+
+    public void clearVariables() {
+        interpreter.clearVariables();
+    }
+
+    public void clearFunctions() {
+        interpreter.clearFunctions();
+    }
+
+    public Object peekVariable(String key) {
+        return interpreter.peekVariable(key);
+    }
+
+    public void removeVariable(String key) {
+        interpreter.removeVariable(key);
+    }
+
+    public void setVariable(String key, Object value, int uses) {
+        if (key == null || key.isEmpty()) {
+            throw new IllegalArgumentException("Variable key cannot be null or empty");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("Variable value cannot be null");
+        }
+        interpreter.setVariable(key, value, uses);
+    }
+
+    public void setVariable(String key, Object value) {
+        if (key == null || key.isEmpty()) {
+            throw new IllegalArgumentException("Variable key cannot be null or empty");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("Variable value cannot be null");
+        }
+        interpreter.setVariable(key, value);
     }
 
     private record DirectMaterialCondition(Material getMaterial) implements MaterialCondition {
@@ -750,5 +786,149 @@ public class ExpressionEngine {
      */
     public Object evaluate(String expression) {
         return parse(expression, Object.class);
+    }
+
+    /**
+     * Enables or disables strict mode for the parser.
+     * <p>
+     * In strict mode, the parser enforces stricter rules on the syntax and semantics of expressions.
+     * This may include restrictions on variable usage, function calls, and type conversions.
+     * </p>
+     *
+     * @param enabled True to enable strict mode, false to disable.
+     */
+    public void setStrictMode(boolean enabled) {
+        interpreter.setStrict(enabled);
+    }
+
+    /**
+     * Returns whether strict mode is enabled.
+     *
+     * @return True if strict mode is enabled, false otherwise.
+     */
+    public boolean isStrictMode() {
+        return interpreter.isStrict();
+    }
+
+    /**
+     * Sets the maximum depth for recursive expressions.
+     * <p>
+     * This prevents stack overflow errors in cases of deeply nested or recursive expressions.
+     * </p>
+     *
+     * @param maxDepth The maximum depth (default is 100)
+     */
+    public void setMaxRecursionDepth(int maxDepth) {
+        interpreter.setMaxRecursionDepth(maxDepth);
+    }
+
+    /**
+     * Gets the current maximum depth for recursive expressions.
+     *
+     * @return The maximum depth
+     */
+    public int getMaxRecursionDepth() {
+        return interpreter.getMaxRecursionDepth();
+    }
+
+    /**
+     * Sets the timeout for expression evaluation in milliseconds.
+     * <p>
+     * If an expression exceeds this time limit, it will be terminated and an exception will be thrown.
+     * </p>
+     *
+     * @param timeoutMillis The timeout in milliseconds
+     */
+    public void setEvaluationTimeout(int timeoutMillis) {
+        interpreter.setEvaluationTimeout(timeoutMillis);
+    }
+
+    /**
+     * Gets the current timeout for expression evaluation.
+     *
+     * @return The timeout in milliseconds
+     */
+    public int getEvaluationTimeout() {
+        return interpreter.getEvaluationTimeout();
+    }
+
+    /**
+     * Registers a custom variable type with the engine.
+     * <p>
+     * This allows expressions to use custom objects and types beyond the built-in ones.
+     * </p>
+     *
+     * @param name The name of the variable type
+     * @param clazz The class object representing the variable type
+     */
+    public void registerVariableType(String name, Class<?> clazz) {
+        interpreter.registerVariableType(name, clazz);
+    }
+
+    /**
+     * Registers a custom function type with the engine.
+     * <p>
+     * This allows expressions to use custom functions with specific signatures and behaviors.
+     * </p>
+     *
+     * @param name The name of the function type
+     * @param clazz The class object representing the function type
+     */
+    public void registerFunctionType(String name, Class<?> clazz) {
+        interpreter.registerFunctionType(name, clazz);
+    }
+
+    /**
+     * Sets a custom error handler for the expression engine.
+     * <p>
+     * The error handler is called when an error occurs during parsing or evaluation of expressions.
+     * </p>
+     *
+     * @param handler The error handler function
+     */
+    public void setErrorHandler(BiConsumer<ExpressionEngine, Exception> handler) {
+        interpreter.setErrorHandler(handler);
+    }
+
+    /**
+     * Gets the current error handler for the expression engine.
+     *
+     * @return The error handler function
+     */
+    public BiConsumer<ExpressionEngine, Exception> getErrorHandler() {
+        return interpreter.getErrorHandler();
+    }
+
+    /**
+     * Sets a custom logger for the expression engine.
+     * <p>
+     * The logger is used to log debug and trace information during expression parsing and evaluation.
+     * </p>
+     *
+     * @param logger The logger function
+     */
+    public void setLogger(BiConsumer<String, Object[]> logger) {
+        interpreter.setLogger(logger);
+    }
+
+    /**
+     * Gets the current logger for the expression engine.
+     *
+     * @return The logger function
+     */
+    public BiConsumer<String, Object[]> getLogger() {
+        return interpreter.getLogger();
+    }
+
+    private boolean isMaterialName(String str) {
+        if (str == null || str.isEmpty()) return false;
+        String name = str.trim().toUpperCase();
+        name = name.replace("\"", "").replace("'", "");
+        try {
+            Material.valueOf(name);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 }

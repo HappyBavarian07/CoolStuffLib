@@ -73,11 +73,12 @@ de\happybavarian07\coolstufflib\commandmanagement\PaginatedList$SubCommandCompar
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser$Expression$Sequence.class
 de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigLockManager.class
 de\happybavarian07\coolstufflib\configstuff\ConfigUpdater.class
-de\happybavarian07\coolstufflib\languagemanager\expressionengine\FunctionExample.class
+de\happybavarian07\coolstufflib\cache\expression\ExpressionCache.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\misc\Group.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\EqualCondition.class
 de\happybavarian07\coolstufflib\configstuff\advanced\filetypes\handlers\TomlConfigFileHandler.class
 de\happybavarian07\coolstufflib\backupmanager\BackupExecuteRunnable.class
+de\happybavarian07\coolstufflib\cache\PersistentCache.class
 de\happybavarian07\coolstufflib\utils\LogPrefix.class
 de\happybavarian07\coolstufflib\configstuff\advanced\section\internal\SectionHierarchyManager.class
 de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigLifecycleEvent.class
@@ -153,8 +154,10 @@ de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\templates\S
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\ConditionBuilder.class
 de\happybavarian07\coolstufflib\logging\ConfigLogger.class
 de\happybavarian07\coolstufflib\configstuff\KeyBuilder.class
+de\happybavarian07\coolstufflib\cache\FilePersistentCache.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser$Expression.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\operations\SubtractionOperation.class
+de\happybavarian07\coolstufflib\cache\CacheManager.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\ExpressionEngine.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\AbstractBaseConfigModule.class
 de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigManager.class
@@ -180,6 +183,7 @@ de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule$Pr
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\CorruptionCheckModule.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\templates\AutoGenTemplate.class
 de\happybavarian07\coolstufflib\utils\PluginFileLogger.class
+de\happybavarian07\coolstufflib\cache\InMemoryCache.class
 de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedPersistentConfig.class
 de\happybavarian07\coolstufflib\testing\InGameTestRunner$TestResult.class
 de\happybavarian07\coolstufflib\backupmanager\FileBackup.class
@@ -199,6 +203,7 @@ de\happybavarian07\coolstufflib\configstuff\advanced\migration\ConfigMigrationUt
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\interfaces\Condition.class
 de\happybavarian07\coolstufflib\configstuff\advanced\filetypes\ConfigTypeConverterRegistry$1.class
+de\happybavarian07\coolstufflib\cache\Cache.class
 de\happybavarian07\coolstufflib\configstuff\advanced\interfaces\AdvancedConfig.class
 de\happybavarian07\coolstufflib\commandmanagement\PaginatedList.class
 de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus$EventFilter.class
@@ -215,6 +220,7 @@ de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule$Va
 de\happybavarian07\coolstufflib\configstuff\advanced\section\meta\SectionCommentManager.class
 de\happybavarian07\coolstufflib\languagemanager\LanguageCache.class
 de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigModuleEvent$Type.class
+de\happybavarian07\coolstufflib\cache\expression\ExpressionCacheKey.class
 de\happybavarian07\coolstufflib\commandmanagement\PaginatedList$ListNotSortedException.class
 de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigChangeEvent.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\ExpressionEnginePool.class

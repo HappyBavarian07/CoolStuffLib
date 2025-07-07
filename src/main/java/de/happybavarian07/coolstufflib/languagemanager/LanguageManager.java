@@ -1009,18 +1009,18 @@ public class LanguageManager {
                 }
                 materialString = materialBuilder.toString().trim();
             }
-            Material material = getMaterial(materialString, player, langFile.getLangName());
-            if (material == null) {
+            ItemStack headItem = parseMaterialStringToItem(materialString, player, langFile.getLangName());
+            if (headItem == null) {
                 assert errorMeta != null;
-                errorMeta.setDisplayName("Material not found! (" + langConfig.getConfig().getString("Items." + path + ".material") + ")");
+                errorMeta.setDisplayName("Head Item not found! (" + langConfig.getConfig().getString("Items." + path + ".material") + ")");
                 errorMeta.setLore(Arrays.asList("If this happens,", "please change the Material from this Item", "to something existing", "Path: Items." + path + ".material"));
                 error.setItemMeta(errorMeta);
                 return error;
             }
-            item = new ItemStack(material, 1);
+            item = headItem;
         }
         String displayName = getObjectFromLanguageCacheOrConfig("Items." + path + ".displayName", langFile.getLangName(), String.class);
-        List<String> lore = this.<List>getObjectFromLanguageCacheOrConfig("Items." + path + ".lore", langFile.getLangName(), List.class);
+        List<String> lore = this.getObjectFromLanguageCacheOrConfig("Items." + path + ".lore", langFile.getLangName(), List.class);
         List<String> loreWithPlaceholders = new ArrayList<>();
         List<String> includedKeys = new ArrayList<>();
         ItemMeta meta = item.getItemMeta();
@@ -1044,37 +1044,62 @@ public class LanguageManager {
     }
 
     /**
-     * Gets a Material from the specified material string.
+     * Gets a Item from the specified material string.
      *
      * @param materialString The material string to get the Material from.
      * @param player         The player to use for placeholder replacements.
      * @param langName       The language name to use for placeholder replacements.
-     * @return The Material from the specified material string, or BARRIER if the
+     * @return The Item from the specified material string, or MHF_Question if the
      * material is invalid.
      */
-    public Material getMaterial(String materialString, Player player, String langName) {
+    public ItemStack parseMaterialStringToItem(String materialString, Player player, String langName) {
         if (materialString == null) {
-            return Material.BARRIER;
+            return Utils.createSkull("MHF_Question", "MHF_Question", false);
         }
 
-        if (materialString.startsWith("HEAD(") && materialString.endsWith(")")) {
+        if (materialString.startsWith("HEAD_OBJECT(") && materialString.endsWith(")")) {
             String headName = materialString.substring(5, materialString.length() - 1).trim();
             try {
                 try {
                     Head head = Head.valueOf(headName);
-                    return head.getAsItem().getType();
+                    return head.getAsItem();
                 } catch (IllegalArgumentException e) {
-                    return Material.PLAYER_HEAD;
+                    return Utils.createSkull(headName, headName, false);
                 }
             } catch (Exception e) {
                 getLogger().warning("Invalid head: " + headName);
-                return Material.BARRIER;
+                return Utils.createSkull("MHF_Question", "MHF_Question", false);
+            }
+        } else if (materialString.startsWith("HEAD_TEXTURE(") && materialString.endsWith(")")) {
+            String headTexture = materialString.substring(13, materialString.length() - 1).trim();
+            try {
+                return Utils.createSkull(headTexture, headTexture, true);
+            } catch (Exception e) {
+                getLogger().warning("Invalid head texture: " + headTexture);
+                return Utils.createSkull("MHF_Question", "MHF_Question", false);
+            }
+        } else if (materialString.startsWith("HEAD(") && materialString.endsWith(")")) {
+            String headValue = materialString.substring(11, materialString.length() - 1).trim();
+            try {
+                return Utils.createSkull(headValue, headValue, false);
+            } catch (Exception e) {
+                getLogger().warning("Invalid head value: " + headValue);
+                return Utils.createSkull("MHF_Question", "MHF_Question", false);
             }
         }
 
         try {
             MaterialCondition cond = getExpressionEngineFor(player, langName).parse(materialString, Material.BARRIER);
-            return cond.getMaterial();
+            if (cond instanceof HeadMaterialCondition headCondition) {
+                if (headCondition.isHead()) {
+                    return headCondition.getHead().getAsItem();
+                } else {
+                    return Utils.createSkull(headCondition.getHeadValue(), headCondition.getHeadValue().substring(0, 15), headCondition.isTexture());
+                }
+            } else {
+                getLogger().warning("Invalid material condition: " + materialString);
+                return new ItemStack(Material.BARRIER);
+            }
         } catch (Exception e) {
             if (materialString.contains("if") || materialString.contains("else")) {
                 getLogger().warning("Error parsing conditional expression: " + materialString);
@@ -1083,12 +1108,16 @@ public class LanguageManager {
         }
 
         try {
-            return Material.valueOf(materialString.toUpperCase());
+            Material material = Material.valueOf(materialString.toUpperCase(Locale.ROOT));
+            if (material == Material.PLAYER_HEAD) {
+                return Utils.createSkull("MHF_Question", "MHF_Question", false);
+            }
+            return new ItemStack(material);
         } catch (IllegalArgumentException e) {
             if (!materialString.equals("PLAYER_HEAD")) {
                 getLogger().warning("Invalid material name: " + materialString);
             }
-            return Material.BARRIER;
+            return Utils.createSkull("MHF_Question", "MHF_Question", false);
         }
     }
 

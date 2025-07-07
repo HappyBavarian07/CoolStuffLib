@@ -31,6 +31,13 @@ public class Interpreter implements Parser.Expression.Visitor<Object> {
     private final List<String> variableWhitelist = new ArrayList<>();
     private final List<String> variableBlacklist = new ArrayList<>();
     private boolean debug = false;
+    private boolean strict = false;
+    private int maxRecursionDepth = 100;
+    private int evaluationTimeout = 0;
+    private final Map<String, Class<?>> variableTypes = new HashMap<>();
+    private final Map<String, Class<?>> functionTypes = new HashMap<>();
+    private java.util.function.BiConsumer<ExpressionEngine, Exception> errorHandler;
+    private java.util.function.BiConsumer<String, Object[]> logger;
 
     /**
      * Evaluates the given expression and returns its result.
@@ -471,6 +478,19 @@ public class Interpreter implements Parser.Expression.Visitor<Object> {
         return true;
     }
 
+    public void setStrict(boolean enabled) { strict = enabled; }
+    public boolean isStrict() { return strict; }
+    public void setMaxRecursionDepth(int maxDepth) { maxRecursionDepth = maxDepth; }
+    public int getMaxRecursionDepth() { return maxRecursionDepth; }
+    public void setEvaluationTimeout(int timeoutMillis) { evaluationTimeout = timeoutMillis; }
+    public int getEvaluationTimeout() { return evaluationTimeout; }
+    public void registerVariableType(String name, Class<?> clazz) { if (name != null && clazz != null) variableTypes.put(name, clazz); }
+    public void registerFunctionType(String name, Class<?> clazz) { if (name != null && clazz != null) functionTypes.put(name, clazz); }
+    public void setErrorHandler(java.util.function.BiConsumer<ExpressionEngine, Exception> handler) { errorHandler = handler; }
+    public java.util.function.BiConsumer<ExpressionEngine, Exception> getErrorHandler() { return errorHandler; }
+    public void setLogger(java.util.function.BiConsumer<String, Object[]> logger) { this.logger = logger; }
+    public java.util.function.BiConsumer<String, Object[]> getLogger() { return logger; }
+
     private static class VariableWithUses {
         private final Object value;
         private final int maxUses;
@@ -490,17 +510,17 @@ public class Interpreter implements Parser.Expression.Visitor<Object> {
          * @throws ExpressionVariableException if the variable has no remaining uses.
          */
         Object getValue() {
-            System.out.println("[ExpressionEngine DEBUG] Getting value of variable: " + value + " (remaining uses: " + remainingUses + ")");
+            //System.out.println("[ExpressionEngine DEBUG] Getting value of variable: " + value + " (remaining uses: " + remainingUses + ")");
             if (remainingUses < 0) {
-                System.out.println("[ExpressionEngine DEBUG] Using variable with unlimited uses: " + value);
+                //System.out.println("[ExpressionEngine DEBUG] Using variable with unlimited uses: " + value);
                 return value;
             }
             if (remainingUses == 0) {
                 throw new ExpressionVariableException("Variable exceeded its allowed uses (0/" + maxUses + ")");
             }
-            System.out.println("[ExpressionEngine DEBUG] Using variable: " + value + " (remaining uses: " + remainingUses + ")");
+            //System.out.println("[ExpressionEngine DEBUG] Using variable: " + value + " (remaining uses: " + remainingUses + ")");
             remainingUses--;
-            System.out.println("[ExpressionEngine DEBUG] Using variable: " + value + " (remaining uses: " + remainingUses + ")");
+            //System.out.println("[ExpressionEngine DEBUG] Using variable: " + value + " (remaining uses: " + remainingUses + ")");
             return value;
         }
 

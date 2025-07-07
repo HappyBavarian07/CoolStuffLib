@@ -5,6 +5,7 @@ E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\t
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\exceptions\ExpressionVariableException.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\interfaces\ConfigSection.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\AndCondition.java
+E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\cache\FilePersistentCache.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\interfaces\BaseConfigModule.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\meta\SectionMetadataManager.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\interfaces\AbstractCondition.java
@@ -23,6 +24,7 @@ E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\l
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\templates\SimpleValueTemplate.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\Lexer.java
+E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\cache\CacheManager.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenModule.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\Placeholder.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\filetypes\ConfigTypeConverterRegistry.java
@@ -55,6 +57,7 @@ E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\c
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\backupmanager\RegexFileFilter.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\Token.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\testing\TestInitializer.java
+E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\cache\expression\ExpressionCache.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\templates\SimpleObjectTemplate.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\interfaces\Condition.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\NotCondition.java
@@ -73,6 +76,7 @@ E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\l
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\MapSection.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\CoolStuffLib.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\templates\SimpleMapTemplate.java
+E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\cache\InMemoryCache.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\testing\LibraryTestInitializer.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\misc\DefaultGroup.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\LanguageTranslator.java
@@ -85,6 +89,7 @@ E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\l
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\testing\InGameTest.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\MenuAddon.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\Head.java
+E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\cache\PersistentCache.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\commandmanagement\HelpCommand.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\section\ListSection.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\CoolStuffLibBuilder.java
@@ -107,7 +112,6 @@ E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\c
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\filetypes\handlers\PropertiesConfigFileHandler.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\EqualCondition.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.java
-E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\FunctionExample.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\exceptions\ExpressionFunctionException.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigMetadataEvent.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\HistoryModule.java
@@ -121,6 +125,7 @@ E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\c
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigManager.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\PluginUtils.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\operations\ModuloOperation.java
+E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\cache\Cache.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\InMemoryBackupModule.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\LanguageManager.java
@@ -165,4 +170,5 @@ E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\l
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\interfaces\GroupConfigModule.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\migration\ConfigMigrationUtility.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\ExpressionEnginePool.java
+E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\cache\expression\ExpressionCacheKey.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigCommentManager.java
