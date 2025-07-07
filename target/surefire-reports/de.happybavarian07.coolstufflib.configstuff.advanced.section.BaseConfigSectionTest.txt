@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: de.happybavarian07.coolstufflib.configstuff.advanced.section.BaseConfigSectionTest
 -------------------------------------------------------------------------------
-Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in de.happybavarian07.coolstufflib.configstuff.advanced.section.BaseConfigSectionTest
+Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in de.happybavarian07.coolstufflib.configstuff.advanced.section.BaseConfigSectionTest

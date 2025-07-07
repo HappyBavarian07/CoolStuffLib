@@ -91,6 +91,16 @@ public class LanguageManager {
             String headName = args.get(0).toString();
             return "HEAD(" + headName + ")";
         }, "string");
+        engine.registerFunction("HEAD_TEXTURE", (interpreter, args, type) -> {
+            if (args.size() != 1) throw new RuntimeException("HEAD_TEXTURE function expects exactly 1 argument (head texture)");
+            String headName = args.get(0).toString();
+            return "HEAD_TEXTURE(" + headName + ")";
+        }, "string");
+        engine.registerFunction("HEAD_OBJECT", (interpreter, args, type) -> {
+            if (args.size() != 1) throw new RuntimeException("HEAD_OBJECT function expects exactly 1 argument (csl head enum name)");
+            String headName = args.get(0).toString();
+            return "HEAD_OBJECT(" + headName + ")";
+        }, "string");
     }
 
     private void registerLangFunction(ExpressionEngine engine) {

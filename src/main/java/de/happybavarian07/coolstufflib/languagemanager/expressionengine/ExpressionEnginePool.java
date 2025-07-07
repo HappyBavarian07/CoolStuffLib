@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *   <li>Thread-safe via ConcurrentHashMap for all mappings.</li>
  *   <li>Provides methods to add, retrieve, update, and clear engines by language or player context.</li>
  * </ul>
- *
+ * <p>
  * Usage:
  * <ul>
  *   <li>Use {@link #getEngineForLanguage(String)} for per-language engine retrieval.</li>
@@ -44,6 +44,7 @@ public class ExpressionEnginePool {
     private final Map<UUID, ExpressionEngine> engines = new ConcurrentHashMap<>(); // engineUUID -> engine
     private final Map<String, UUID> languageToEngineUUID = new ConcurrentHashMap<>(); // languageName -> engineUUID
     private final Map<UUID, UUID> playerToEngineUUID = new ConcurrentHashMap<>(); // playerUUID -> engineUUID (cache)
+    private final Map<String, Map.Entry<FunctionCall, String>> globalFunctions = new ConcurrentHashMap<>(); // functionName -> FunctionCall
     private final UUID defaultEngineUUID;
     private final String defaultLanguageName;
 
@@ -58,8 +59,9 @@ public class ExpressionEnginePool {
      * <pre><code>
      * ExpressionEnginePool pool = new ExpressionEnginePool("en", new ExpressionEngine());
      * </code></pre>
+     *
      * @param defaultLanguageName the name of the default language
-     * @param defaultEngine the engine instance for the default language
+     * @param defaultEngine       the engine instance for the default language
      */
     public ExpressionEnginePool(String defaultLanguageName, ExpressionEngine defaultEngine) {
         this.defaultLanguageName = defaultLanguageName;
@@ -93,7 +95,7 @@ public class ExpressionEnginePool {
      * Gets the ExpressionEngine for a player and language context.
      * Uses player-to-engine mapping as a cache for efficient lookups.
      *
-     * @param player The player instance.
+     * @param player       The player instance.
      * @param languageName The language name.
      * @return The ExpressionEngine for the player-language context, or the default engine if not found.
      */
@@ -118,13 +120,16 @@ public class ExpressionEnginePool {
      * If the language already has an engine, returns the existing UUID.
      *
      * @param languageName The language name.
-     * @param engine The ExpressionEngine to register.
+     * @param engine       The ExpressionEngine to register.
      * @return The UUID of the registered engine.
      */
     public UUID addEngineForLanguage(String languageName, ExpressionEngine engine) {
         if (languageToEngineUUID.containsKey(languageName)) return languageToEngineUUID.get(languageName);
         UUID engineUUID = UUID.randomUUID();
         engines.put(engineUUID, engine);
+        for (String functionName : globalFunctions.keySet()) {
+            engine.registerFunction(functionName, globalFunctions.get(functionName).getKey(), globalFunctions.get(functionName).getValue());
+        }
         languageToEngineUUID.put(languageName, engineUUID);
         return engineUUID;
     }
@@ -132,7 +137,7 @@ public class ExpressionEnginePool {
     /**
      * Updates a player's engine mapping when their language changes.
      *
-     * @param player The player instance.
+     * @param player       The player instance.
      * @param languageName The new language name for the player.
      */
     public void updatePlayerEngine(Player player, String languageName) {
@@ -166,8 +171,8 @@ public class ExpressionEnginePool {
      * Registers a global function for all ExpressionEngines.
      *
      * @param functionName The name of the function.
-     * @param function The FunctionCall implementation.
-     * @param defaultType The default type for the function.
+     * @param function     The FunctionCall implementation.
+     * @param defaultType  The default type for the function.
      */
     public void registerGlobalFunction(String functionName, FunctionCall function, String defaultType) {
         for (ExpressionEngine engine : engines.values()) {
@@ -176,6 +181,7 @@ public class ExpressionEnginePool {
             }
         }
         getDefaultLanguageEngine().registerFunction(functionName, function, defaultType);
+        globalFunctions.put(functionName, Map.entry(function, defaultType));
     }
 
     /**
@@ -183,8 +189,8 @@ public class ExpressionEnginePool {
      *
      * @param languageName The language name.
      * @param functionName The name of the function.
-     * @param function The FunctionCall implementation.
-     * @param defaultType The default type for the function.
+     * @param function     The FunctionCall implementation.
+     * @param defaultType  The default type for the function.
      */
     public void registerFunctionForLanguage(String languageName, String functionName, FunctionCall function, String defaultType) {
         ExpressionEngine engine = getEngineForLanguage(languageName);
