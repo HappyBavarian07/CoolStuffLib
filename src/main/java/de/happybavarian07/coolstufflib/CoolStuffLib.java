@@ -8,6 +8,9 @@ import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import de.happybavarian07.coolstufflib.menusystem.MenuAddonManager;
 import de.happybavarian07.coolstufflib.menusystem.MenuListener;
 import de.happybavarian07.coolstufflib.menusystem.PlayerMenuUtility;
+import de.happybavarian07.coolstufflib.repository.RepositoryManager;
+import de.happybavarian07.coolstufflib.cache.CacheManager;
+import de.happybavarian07.coolstufflib.backupmanager.BackupManager;
 import de.happybavarian07.coolstufflib.testing.LibraryTestInitializer;
 import de.happybavarian07.coolstufflib.utils.LogPrefix;
 import de.happybavarian07.coolstufflib.utils.PluginFileLogger;
@@ -28,6 +31,9 @@ public class CoolStuffLib {
     private final LanguageManager languageManager;
     private final CommandManagerRegistry commandManagerRegistry;
     private final MenuAddonManager menuAddonManager;
+    private final RepositoryManager repositoryManager;
+    private final CacheManager cacheManager;
+    private final BackupManager backupManager;
     private final PluginFileLogger pluginFileLogger;
     // Directory of the Plugin using this Lib
     private final File workingDirectory;
@@ -36,11 +42,17 @@ public class CoolStuffLib {
     private final Consumer<Object[]> languageManagerStartingMethod;
     private final Consumer<Object[]> commandManagerRegistryStartingMethod;
     private final Consumer<Object[]> menuAddonManagerStartingMethod;
+    private final Consumer<Object[]> repositoryManagerStartingMethod;
+    private final Consumer<Object[]> cacheManagerStartingMethod;
+    private final Consumer<Object[]> backupManagerStartingMethod;
     private final File dataFile;
     private final Map<UUID, PlayerMenuUtility> playerMenuUtilityMap = new HashMap<>();
     private boolean languageManagerEnabled = false;
     private boolean commandManagerRegistryEnabled = false;
     private boolean menuAddonManagerEnabled = false;
+    private boolean repositoryManagerEnabled = false;
+    private boolean cacheManagerEnabled = false;
+    private boolean backupManagerEnabled = false;
     private boolean placeholderAPIEnabled = false;
     private LibraryTestInitializer testInitializer;
 
@@ -54,42 +66,58 @@ public class CoolStuffLib {
      * @param languageManager                      The Language Manager Class.
      * @param commandManagerRegistry               The Command Manager Registry Class.
      * @param menuAddonManager                     The Menu Addon Manager Class.
+     * @param repositoryManager                    The Repository Manager Class.
+     * @param cacheManager                         The Cache Manager Class.
+     * @param backupManager                        The Backup Manager Class.
      * @param pluginFileLogger                     The Plugin File Logger for logging purposes.
      * @param usePlayerLangHandler                 A boolean indicating if a PlayerLangHandler should be used.
      * @param sendSyntaxOnArgsZero                 A boolean indicating if the syntax should be sent when the command is executed with no arguments.
      * @param languageManagerStartingMethod        The method to execute when the Language Manager System is initiated.
      * @param commandManagerRegistryStartingMethod The method to execute when the Command Manager System is initiated.
      * @param menuAddonManagerStartingMethod       The method to execute when the Menu Manager System is initiated.
+     * @param repositoryManagerStartingMethod      The method to execute when the Repository Manager System is initiated.
+     * @param cacheManagerStartingMethod           The method to execute when the Cache Manager System is initiated.
+     * @param backupManagerStartingMethod          The method to execute when the Backup Manager System is initiated.
      * @param dataFile                             The data file for storing important data.
      */
     protected CoolStuffLib(JavaPlugin javaPluginUsingLib,
                            LanguageManager languageManager,
                            CommandManagerRegistry commandManagerRegistry,
                            MenuAddonManager menuAddonManager,
+                           RepositoryManager repositoryManager,
+                           CacheManager cacheManager,
+                           BackupManager backupManager,
                            PluginFileLogger pluginFileLogger,
                            boolean usePlayerLangHandler,
                            boolean sendSyntaxOnArgsZero,
                            Consumer<Object[]> languageManagerStartingMethod,
                            Consumer<Object[]> commandManagerRegistryStartingMethod,
                            Consumer<Object[]> menuAddonManagerStartingMethod,
+                           Consumer<Object[]> repositoryManagerStartingMethod,
+                           Consumer<Object[]> cacheManagerStartingMethod,
+                           Consumer<Object[]> backupManagerStartingMethod,
                            File dataFile) {
         lib = this;
         this.javaPluginUsingLib = javaPluginUsingLib;
         if (this.javaPluginUsingLib == null) {
             throw new RuntimeException("CoolStuffLib did not find a Plugin it got called from. Returning. Report the Issue to the Plugin Dev(s), that may have programmed the Plugin.");
         }
-        // TODO Future Updates: Permission System, Task Scheduler, Data Backup System
-        // TODO Add MySQL API (with class that can be inherited and then added into this constructor, Maybe other Things
         this.workingDirectory = javaPluginUsingLib.getDataFolder();
         this.languageManager = languageManager;
         this.commandManagerRegistry = commandManagerRegistry;
         this.menuAddonManager = menuAddonManager;
+        this.repositoryManager = repositoryManager;
+        this.cacheManager = cacheManager;
+        this.backupManager = backupManager;
         this.pluginFileLogger = pluginFileLogger;
         this.usePlayerLangHandler = usePlayerLangHandler;
         this.sendSyntaxOnArgsZero = sendSyntaxOnArgsZero;
         this.languageManagerStartingMethod = languageManagerStartingMethod;
         this.commandManagerRegistryStartingMethod = commandManagerRegistryStartingMethod;
         this.menuAddonManagerStartingMethod = menuAddonManagerStartingMethod;
+        this.repositoryManagerStartingMethod = repositoryManagerStartingMethod;
+        this.cacheManagerStartingMethod = cacheManagerStartingMethod;
+        this.backupManagerStartingMethod = backupManagerStartingMethod;
         this.dataFile = dataFile;
     }
 
@@ -113,24 +141,32 @@ public class CoolStuffLib {
             if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
                 placeholderAPIEnabled = true;
             }
-            // Language Manager Enable Code
             File langDir = languageManager.getLangFolder();
             if (!langDir.isDirectory()) langDir.mkdirs();
             executeMethod(languageManagerStartingMethod, languageManager, javaPluginUsingLib, usePlayerLangHandler, dataFile);
             languageManagerEnabled = true;
         }
         if (commandManagerRegistry != null) {
-            // Command Registry Enable Code
             executeMethod(commandManagerRegistryStartingMethod, commandManagerRegistry, languageManager);
             commandManagerRegistryEnabled = true;
         }
         if (menuAddonManager != null) {
-            // Menu Addon Manager Init Code
             executeMethod(menuAddonManagerStartingMethod, menuAddonManager);
             menuAddonManagerEnabled = true;
         }
+        if (repositoryManager != null) {
+            executeMethod(repositoryManagerStartingMethod, repositoryManager);
+            repositoryManagerEnabled = true;
+        }
+        if (cacheManager != null) {
+            executeMethod(cacheManagerStartingMethod, cacheManager);
+            cacheManagerEnabled = true;
+        }
+        if (backupManager != null) {
+            executeMethod(backupManagerStartingMethod, backupManager);
+            backupManagerEnabled = true;
+        }
         if (pluginFileLogger != null) {
-            // Plugin File Logger Init Code
             pluginFileLogger.createLogFile();
         }
         Bukkit.getPluginManager().registerEvents(new MenuListener(), javaPluginUsingLib);
@@ -146,6 +182,18 @@ public class CoolStuffLib {
 
     public MenuAddonManager getMenuAddonManager() {
         return menuAddonManager;
+    }
+
+    public RepositoryManager getRepositoryManager() {
+        return repositoryManager;
+    }
+
+    public CacheManager getCacheManager() {
+        return cacheManager;
+    }
+
+    public BackupManager getBackupManager() {
+        return backupManager;
     }
 
     public JavaPlugin getJavaPluginUsingLib() {
@@ -172,6 +220,10 @@ public class CoolStuffLib {
         return menuAddonManagerStartingMethod;
     }
 
+    public Consumer<Object[]> getRepositoryManagerStartingMethod() {
+        return repositoryManagerStartingMethod;
+    }
+
     public boolean isLanguageManagerEnabled() {
         return languageManagerEnabled;
     }
@@ -182,6 +234,18 @@ public class CoolStuffLib {
 
     public boolean isMenuAddonManagerEnabled() {
         return menuAddonManagerEnabled;
+    }
+
+    public boolean isRepositoryManagerEnabled() {
+        return repositoryManagerEnabled;
+    }
+
+    public boolean isCacheManagerEnabled() {
+        return cacheManagerEnabled;
+    }
+
+    public boolean isBackupManagerEnabled() {
+        return backupManagerEnabled;
     }
 
     public boolean isPlaceholderAPIEnabled() {

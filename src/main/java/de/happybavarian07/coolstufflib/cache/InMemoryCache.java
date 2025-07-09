@@ -5,6 +5,19 @@ import java.util.concurrent.ConcurrentMap;
 
 public class InMemoryCache<K, V> implements Cache<K, V> {
     private final ConcurrentMap<K, V> map = new ConcurrentHashMap<>();
+    private final int maxSize;
+    private final Object lock = new Object();
+
+    public InMemoryCache() {
+        this(Integer.MAX_VALUE);
+    }
+
+    public InMemoryCache(int maxSize) {
+        if (maxSize <= 0) {
+            throw new IllegalArgumentException("Max size must be positive");
+        }
+        this.maxSize = maxSize;
+    }
 
     @Override
     public V get(K key) {
@@ -19,8 +32,15 @@ public class InMemoryCache<K, V> implements Cache<K, V> {
         if (key == null || value == null) {
             throw new IllegalArgumentException("Key and value must not be null");
         }
-        if (overwrite || !map.containsKey(key)) {
-            map.put(key, value);
+        synchronized (lock) {
+            if (map.size() >= maxSize && !map.containsKey(key)) {
+                return;
+            }
+            if (overwrite) {
+                map.put(key, value);
+            } else {
+                map.putIfAbsent(key, value);
+            }
         }
     }
 
@@ -32,7 +52,12 @@ public class InMemoryCache<K, V> implements Cache<K, V> {
             }
             throw new IllegalArgumentException("Key and value must not be null");
         }
-        map.put(key, value);
+        synchronized (lock) {
+            if (map.size() >= maxSize && !map.containsKey(key)) {
+                return;
+            }
+            map.put(key, value);
+        }
     }
 
     @Override

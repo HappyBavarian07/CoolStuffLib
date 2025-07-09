@@ -25,13 +25,13 @@ public class FileBackup implements Comparable<FileBackup> {
     /**
      * Creates a FileBackup instance with the specified parameters.
      *
-     * @param indentifier                Unique identifier for the backup.
+     * @param identifier                Unique identifier for the backup.
      * @param filesToBackup              Array of files to be backed up.
      * @param destinationPathToBackupToo The directory where backups will be stored.
      * @param rootDirectory              The root directory where files will be searched for regex and unzipped after backup.
      */
-    public FileBackup(String indentifier, File[] filesToBackup, File destinationPathToBackupToo, File rootDirectory) {
-        this.identifier = indentifier;
+    public FileBackup(String identifier, File[] filesToBackup, File destinationPathToBackupToo, File rootDirectory) {
+        this.identifier = identifier;
         this.filesToBackup = filesToBackup;
         this.rootDirectory = rootDirectory;
         this.destinationPathToBackupToo = destinationPathToBackupToo;

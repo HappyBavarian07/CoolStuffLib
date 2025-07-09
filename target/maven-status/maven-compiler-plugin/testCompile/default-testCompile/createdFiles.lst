@@ -8,7 +8,6 @@ de\happybavarian07\coolstufflib\configstuff\advanced\section\MapSectionTest.clas
 de\happybavarian07\coolstufflib\menusystem\MenuTest$TestMenu.class
 de\happybavarian07\coolstufflib\utils\UtilsTest.class
 de\happybavarian07\coolstufflib\configstuff\core\ConfigManagerTest.class
-de\happybavarian07\coolstufflib\cache\CacheManagerTest.class
 de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigGroupTest.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenModuleIntegrationTest.class
 de\happybavarian07\coolstufflib\integration\SystemIntegrationTest$TestIntegratedCommandManager.class
@@ -20,7 +19,6 @@ de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedConfigUtilsTest.cla
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModuleTest$1.class
 de\happybavarian07\coolstufflib\configstuff\advanced\ConfigIntegrationTest.class
 de\happybavarian07\coolstufflib\commandmanagement\CommandManagerTest$TestCommandManager.class
-de\happybavarian07\coolstufflib\cache\InMemoryCacheTest.class
 de\happybavarian07\coolstufflib\integration\SystemIntegrationTest$TestSubCommand.class
 de\happybavarian07\coolstufflib\menusystem\MenuTest.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenModuleIntegrationTest$1.class
@@ -39,7 +37,6 @@ de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBusTest.cl
 de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedInMemoryConfigTest.class
 de\happybavarian07\coolstufflib\configstuff\advanced\filetypes\ConfigFileHandlerTest.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenModuleTest$DummyPlayer.class
-de\happybavarian07\coolstufflib\cache\FilePersistentCacheTest.class
 de\happybavarian07\coolstufflib\backupmanager\BackupManagerTest.class
 de\happybavarian07\coolstufflib\configstuff\advanced\filetypes\ConfigFileHandlerTest$1.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModuleTest$2.class

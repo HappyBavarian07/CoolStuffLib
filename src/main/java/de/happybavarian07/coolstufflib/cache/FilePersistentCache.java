@@ -9,16 +9,22 @@ import java.util.concurrent.*;
 public class FilePersistentCache<K, V> implements PersistentCache<K, V> {
     private final ConcurrentMap<K, V> memoryCache = new ConcurrentHashMap<>();
     private final String cacheFile;
+    private final int maxSize;
     private final Object fileLock = new Object();
     private final ScheduledExecutorService scheduler;
     private volatile boolean closed = false;
 
     public FilePersistentCache(String filename) {
-        this(filename, true, 30);
+        this(filename, Integer.MAX_VALUE, true, 30);
     }
 
-    public FilePersistentCache(String filename, boolean autoSave, int autoSaveIntervalSeconds) {
+    public FilePersistentCache(File file) {
+        this(file.getAbsolutePath(), Integer.MAX_VALUE, true, 30);
+    }
+
+    public FilePersistentCache(String filename, int maxSize, boolean autoSave, int autoSaveIntervalSeconds) {
         this.cacheFile = filename;
+        this.maxSize = maxSize;
 
         if (autoSave && autoSaveIntervalSeconds > 0) {
             this.scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -48,8 +54,15 @@ public class FilePersistentCache<K, V> implements PersistentCache<K, V> {
         if (key == null || value == null) {
             throw new IllegalArgumentException("Key and value must not be null");
         }
-        if (overwrite || !memoryCache.containsKey(key)) {
-            memoryCache.put(key, value);
+        synchronized (fileLock) {
+            if (memoryCache.size() >= maxSize && !memoryCache.containsKey(key)) {
+                return;
+            }
+            if (overwrite) {
+                memoryCache.put(key, value);
+            } else {
+                memoryCache.putIfAbsent(key, value);
+            }
         }
     }
 
@@ -61,7 +74,12 @@ public class FilePersistentCache<K, V> implements PersistentCache<K, V> {
             }
             throw new IllegalArgumentException("Key and value must not be null");
         }
-        memoryCache.put(key, value);
+        synchronized (fileLock) {
+            if (memoryCache.size() >= maxSize && !memoryCache.containsKey(key)) {
+                return;
+            }
+            memoryCache.put(key, value);
+        }
     }
 
 
