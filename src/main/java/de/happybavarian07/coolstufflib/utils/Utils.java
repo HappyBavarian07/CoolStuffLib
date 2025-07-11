@@ -149,7 +149,13 @@ public class Utils {
      * @return the created ItemStack representing the skull
      */
     public static ItemStack createSkull(String headValue, String name, boolean isTexture) {
-        ItemStack head = new ItemStack(Utils.legacyServer() ? Objects.requireNonNull(Material.matchMaterial("SKULL_ITEM")) : Material.PLAYER_HEAD, 1);
+        Material material;
+        try {
+            material = Material.matchMaterial("PLAYER_HEAD");
+        } catch (Exception e) {
+            material = Material.matchMaterial("SKULL_ITEM");
+        }
+        ItemStack head = new ItemStack(Objects.requireNonNullElse(material, Material.PLAYER_HEAD), 1);
         if (headValue.isEmpty()) return head;
 
         SkullMeta meta = (SkullMeta) head.getItemMeta();
@@ -194,7 +200,13 @@ public class Utils {
      * @return The skull
      */
     public static ItemStack createSkull(Head headTexture, String name) {
-        ItemStack head = new ItemStack(legacyServer() ? Objects.requireNonNull(Material.matchMaterial("SKULL_ITEM")) : Material.PLAYER_HEAD, 1);
+        Material material;
+        try {
+            material = Material.matchMaterial("PLAYER_HEAD");
+        } catch (Exception e) {
+            material = Material.matchMaterial("SKULL_ITEM");
+        }
+        ItemStack head = new ItemStack(Objects.requireNonNullElse(material, Material.PLAYER_HEAD), 1);
         if (headTexture.getTexture().isEmpty()) return head;
 
         SkullMeta meta = (SkullMeta) head.getItemMeta();

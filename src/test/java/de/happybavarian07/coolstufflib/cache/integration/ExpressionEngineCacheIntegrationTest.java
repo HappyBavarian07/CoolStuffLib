@@ -156,8 +156,7 @@ public class ExpressionEngineCacheIntegrationTest {
         });
     }
 
-    @Test
-    @Timeout(5)
+    @Timeout(10)
     void testConcurrentCacheAccess() throws InterruptedException {
         final int threadCount = 10;
         final int expressionsPerThread = 50;

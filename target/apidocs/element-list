@@ -21,6 +21,15 @@ de.happybavarian07.coolstufflib.configstuff.advanced.section
 de.happybavarian07.coolstufflib.configstuff.advanced.section.internal
 de.happybavarian07.coolstufflib.configstuff.advanced.section.meta
 de.happybavarian07.coolstufflib.configstuff.advanced.section.value
+de.happybavarian07.coolstufflib.jpa
+de.happybavarian07.coolstufflib.jpa.annotations
+de.happybavarian07.coolstufflib.jpa.cache
+de.happybavarian07.coolstufflib.jpa.connection
+de.happybavarian07.coolstufflib.jpa.exceptions
+de.happybavarian07.coolstufflib.jpa.interfaces
+de.happybavarian07.coolstufflib.jpa.repository
+de.happybavarian07.coolstufflib.jpa.transaction
+de.happybavarian07.coolstufflib.jpa.utils
 de.happybavarian07.coolstufflib.languagemanager
 de.happybavarian07.coolstufflib.languagemanager.expressionengine
 de.happybavarian07.coolstufflib.languagemanager.expressionengine.conditions
@@ -30,5 +39,6 @@ de.happybavarian07.coolstufflib.languagemanager.expressionengine.operations
 de.happybavarian07.coolstufflib.logging
 de.happybavarian07.coolstufflib.menusystem
 de.happybavarian07.coolstufflib.menusystem.misc
+de.happybavarian07.coolstufflib.repository
 de.happybavarian07.coolstufflib.testing
 de.happybavarian07.coolstufflib.utils

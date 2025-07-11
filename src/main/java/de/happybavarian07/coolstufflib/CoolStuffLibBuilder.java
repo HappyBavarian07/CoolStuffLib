@@ -164,43 +164,36 @@ public class CoolStuffLibBuilder {
         return this;
     }
 
-    @Deprecated
     public CoolStuffLibBuilder setLanguageManagerStartingMethod(Consumer<Object[]> languageManagerStartingMethod) {
         this.languageManagerStartingMethod = languageManagerStartingMethod;
         return this;
     }
 
-    @Deprecated
     public CoolStuffLibBuilder setCommandManagerRegistryStartingMethod(Consumer<Object[]> commandManagerRegistryStartingMethod) {
         this.commandManagerRegistryStartingMethod = commandManagerRegistryStartingMethod;
         return this;
     }
 
-    @Deprecated
     public CoolStuffLibBuilder setMenuAddonManagerStartingMethod(Consumer<Object[]> menuAddonManagerStartingMethod) {
         this.menuAddonManagerStartingMethod = menuAddonManagerStartingMethod;
         return this;
     }
 
-    @Deprecated
     public CoolStuffLibBuilder setRepositoryManagerStartingMethod(Consumer<Object[]> repositoryManagerStartingMethod) {
         this.repositoryManagerStartingMethod = repositoryManagerStartingMethod;
         return this;
     }
 
-    @Deprecated
     public CoolStuffLibBuilder setCacheManagerStartingMethod(Consumer<Object[]> cacheManagerStartingMethod) {
         this.cacheManagerStartingMethod = cacheManagerStartingMethod;
         return this;
     }
 
-    @Deprecated
     public CoolStuffLibBuilder setBackupManagerStartingMethod(Consumer<Object[]> backupManagerStartingMethod) {
         this.backupManagerStartingMethod = backupManagerStartingMethod;
         return this;
     }
 
-    @Deprecated
     public CoolStuffLibBuilder setDataFile(File dataFile) {
         this.dataFile = dataFile;
         return this;
@@ -231,16 +224,13 @@ public class CoolStuffLibBuilder {
 
     public static class LanguageManagerBuilder {
         private final CoolStuffLibBuilder parent;
-        private LanguageManager languageManager;
+        private String prefix;
+        private File languageFolder = null;
+        private String resourceDirectory;
         private boolean usePlayerLangHandler = false;
 
         private LanguageManagerBuilder(CoolStuffLibBuilder parent) {
             this.parent = parent;
-        }
-
-        public LanguageManagerBuilder create(LanguageManager languageManager) {
-            this.languageManager = languageManager;
-            return this;
         }
 
         public LanguageManagerBuilder enablePlayerLanguageHandler() {
@@ -248,16 +238,23 @@ public class CoolStuffLibBuilder {
             return this;
         }
 
-        public LanguageManagerBuilder setDefaultLanguage(String language) {
+        public LanguageManagerBuilder setResourceDirectory(String resourceDirectory) {
+            this.resourceDirectory = resourceDirectory;
+            return this;
+        }
+
+        public LanguageManagerBuilder setLanguageFolder(File languageFolder) {
+            this.languageFolder = languageFolder;
             return this;
         }
 
         public LanguageManagerBuilder setPrefix(String prefix) {
+            this.prefix = prefix;
             return this;
         }
 
         public CoolStuffLibBuilder build() {
-            parent.languageManager = this.languageManager;
+            parent.languageManager = new LanguageManager(parent.javaPluginUsingLib, languageFolder, resourceDirectory, prefix);
             parent.usePlayerLangHandler = this.usePlayerLangHandler;
             return parent;
         }
@@ -265,16 +262,10 @@ public class CoolStuffLibBuilder {
 
     public static class CommandManagerBuilder {
         private final CoolStuffLibBuilder parent;
-        private CommandManagerRegistry commandManagerRegistry;
         private boolean sendSyntaxOnZeroArgs = false;
 
         private CommandManagerBuilder(CoolStuffLibBuilder parent) {
             this.parent = parent;
-        }
-
-        public CommandManagerBuilder create(CommandManagerRegistry commandManagerRegistry) {
-            this.commandManagerRegistry = commandManagerRegistry;
-            return this;
         }
 
         public CommandManagerBuilder enableSyntaxOnZeroArgs() {
@@ -283,7 +274,7 @@ public class CoolStuffLibBuilder {
         }
 
         public CoolStuffLibBuilder build() {
-            parent.commandManagerRegistry = this.commandManagerRegistry;
+            parent.commandManagerRegistry = new CommandManagerRegistry(parent.javaPluginUsingLib);
             parent.sendSyntaxOnZeroArgs = this.sendSyntaxOnZeroArgs;
             return parent;
         }
@@ -291,19 +282,13 @@ public class CoolStuffLibBuilder {
 
     public static class MenuSystemBuilder {
         private final CoolStuffLibBuilder parent;
-        private MenuAddonManager menuAddonManager;
 
         private MenuSystemBuilder(CoolStuffLibBuilder parent) {
             this.parent = parent;
         }
 
-        public MenuSystemBuilder create(MenuAddonManager menuAddonManager) {
-            this.menuAddonManager = menuAddonManager;
-            return this;
-        }
-
         public CoolStuffLibBuilder build() {
-            parent.menuAddonManager = this.menuAddonManager;
+            parent.menuAddonManager = new MenuAddonManager();
             return parent;
         }
     }
