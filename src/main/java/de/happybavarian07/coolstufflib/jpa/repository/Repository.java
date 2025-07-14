@@ -1,6 +1,7 @@
 package de.happybavarian07.coolstufflib.jpa.repository;
 
 import de.happybavarian07.coolstufflib.jpa.utils.EntityQueryBuilder;
+
 import java.util.Optional;
 
 public interface Repository<T, ID> {
@@ -29,6 +30,10 @@ public interface Repository<T, ID> {
     void deleteAll();
 
     boolean isDatabaseReady();
+
+    void insert(T entity);
+
+    void update(T entity);
 
     EntityQueryBuilder<T> query();
 }

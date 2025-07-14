@@ -10,17 +10,19 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Optional;
+import java.sql.Timestamp;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class RepositoryProxy implements InvocationHandler {
     private final Class<?> repositoryInterface;
-    private String databasePrefix;
     private final SQLExecutor sqlExecutor;
     private final JavaPlugin plugin;
     private final TransactionManager transactionManager;
     private final EntityCache<Object, Object> entityCache;
+    private String databasePrefix;
 
     private RepositoryProxy(Class<?> repositoryInterface, String databasePrefix, SQLExecutor sqlExecutor, JavaPlugin plugin) {
         this.repositoryInterface = repositoryInterface;
@@ -72,8 +74,18 @@ public class RepositoryProxy implements InvocationHandler {
             return handleFindMethod(method, args);
         } else if (methodName.startsWith("count")) {
             return handleCountMethod(method, args);
+        } else if (methodName.startsWith("countColumns")) {
+            return handleCountColumnsMethod(method, args);
         } else if (methodName.startsWith("exists")) {
             return handleExistsMethod(method, args);
+        } else if (methodName.startsWith("get")) {
+            return handleGetMethod(method, args);
+        } else if (methodName.startsWith("set")) {
+            return handleSetMethod(method, args);
+        } else if (methodName.startsWith("update")) {
+            return handleUpdateMethod(method, args);
+        } else if (methodName.startsWith("insert")) {
+            return handleInsertMethod(method, args);
         } else if (methodName.startsWith("delete")) {
             return handleDeleteMethod(method, args);
         } else if ("save".equals(methodName) || "saveAll".equals(methodName)) {
@@ -119,10 +131,49 @@ public class RepositoryProxy implements InvocationHandler {
         try {
             String methodName = method.getName();
             Class<?> entityClass = getEntityClassFromRepository();
-
+            String tableName = getTableName(entityClass);
+            if (methodName.startsWith("findBy") || methodName.startsWith("findAllBy")) {
+                String fieldsPart = methodName.replaceFirst("find(All)?By", "");
+                String[] fieldNames = fieldsPart.split("And");
+                if (fieldNames.length == args.length) {
+                    StringBuilder whereClause = new StringBuilder();
+                    List<Object> queryArgs = new ArrayList<>();
+                    for (int i = 0; i < fieldNames.length; i++) {
+                        String javaFieldName = Character.toLowerCase(fieldNames[i].charAt(0)) + fieldNames[i].substring(1);
+                        Field field = null;
+                        for (Field f : entityClass.getDeclaredFields()) {
+                            if (f.getName().equalsIgnoreCase(javaFieldName)) {
+                                field = f;
+                                break;
+                            }
+                        }
+                        if (field == null) throw new RuntimeException("Field not found: " + javaFieldName);
+                        List<String> possibleNames = getPossibleColumnNames(field);
+                        String columnName = possibleNames.get(0);
+                        if (i > 0) whereClause.append(" AND ");
+                        whereClause.append(columnName).append(" = ?");
+                        queryArgs.add(args[i]);
+                    }
+                    String sql = "SELECT * FROM " + databasePrefix + tableName + " WHERE " + whereClause;
+                    List<Object> results = new ArrayList<>();
+                    try (ResultSet rs = sqlExecutor.executeQuery(sql, queryArgs.toArray())) {
+                        while (rs.next()) {
+                            Object entity = mapResultSetToEntity(rs, entityClass);
+                            results.add(entity);
+                        }
+                    }
+                    if (method.getReturnType().isAssignableFrom(List.class)) {
+                        return results;
+                    } else if (!results.isEmpty()) {
+                        return results.get(0);
+                    } else {
+                        return null;
+                    }
+                }
+            }
             if ("findById".equals(methodName) && args.length == 1) {
                 return findById(entityClass, args[0]);
-            } else if ("findAll".equals(methodName) && args.length == 0) {
+            } else if ("findAll".equals(methodName) && (args == null || args.length == 0)) {
                 return findAll(entityClass);
             } else if ("findAllById".equals(methodName) && args.length == 1) {
                 return findAllById(entityClass, (Iterable<?>) args[0]);
@@ -140,7 +191,7 @@ public class RepositoryProxy implements InvocationHandler {
             String tableName = getTableName(entityClass);
             String sql = "SELECT COUNT(*) FROM " + databasePrefix + tableName;
 
-            try (java.sql.ResultSet rs = sqlExecutor.executeQuery(sql)) {
+            try (ResultSet rs = sqlExecutor.executeQuery(sql)) {
                 if (rs.next()) {
                     return rs.getLong(1);
                 }
@@ -234,13 +285,34 @@ public class RepositoryProxy implements InvocationHandler {
         return entityClass.getSimpleName().toLowerCase();
     }
 
+    private List<String> getPossibleColumnNames(Field field) {
+        List<String> names = new ArrayList<>();
+        if (field.isAnnotationPresent(Column.class)) {
+            String annotated = field.getAnnotation(Column.class).name();
+            if (!annotated.isEmpty()) names.add(annotated);
+        }
+        String camel = field.getName();
+        names.add(camel);
+        StringBuilder snake = new StringBuilder();
+        for (int i = 0; i < camel.length(); i++) {
+            char c = camel.charAt(i);
+            if (Character.isUpperCase(c)) {
+                snake.append('_').append(Character.toLowerCase(c));
+            } else {
+                snake.append(c);
+            }
+        }
+        String snakeStr = snake.toString();
+        if (!snakeStr.equals(camel)) names.add(snakeStr);
+        return names;
+    }
+
     private String getIdColumnName(Class<?> entityClass) {
         for (Field field : entityClass.getDeclaredFields()) {
             if (field.isAnnotationPresent(Id.class)) {
-                if (field.isAnnotationPresent(Column.class)) {
-                    return field.getAnnotation(Column.class).name();
+                for (String name : getPossibleColumnNames(field)) {
+                    return name;
                 }
-                return field.getName();
             }
         }
         throw new IllegalStateException("No @Id field found in entity class: " + entityClass.getName());
@@ -259,7 +331,7 @@ public class RepositoryProxy implements InvocationHandler {
             String idColumn = getIdColumnName(entityClass);
             String sql = "SELECT * FROM " + databasePrefix + tableName + " WHERE " + idColumn + " = ?";
 
-            try (java.sql.ResultSet rs = sqlExecutor.executeQuery(sql, id)) {
+            try (ResultSet rs = sqlExecutor.executeQuery(sql, id)) {
                 if (rs.next()) {
                     Object entity = mapResultSetToEntity(rs, entityClass);
                     if (entityCache != null) {
@@ -279,8 +351,8 @@ public class RepositoryProxy implements InvocationHandler {
             String tableName = getTableName(entityClass);
             String sql = "SELECT * FROM " + databasePrefix + tableName;
 
-            java.util.List<Object> results = new java.util.ArrayList<>();
-            try (java.sql.ResultSet rs = sqlExecutor.executeQuery(sql)) {
+            List<Object> results = new ArrayList<>();
+            try (ResultSet rs = sqlExecutor.executeQuery(sql)) {
                 while (rs.next()) {
                     results.add(mapResultSetToEntity(rs, entityClass));
                 }
@@ -292,12 +364,12 @@ public class RepositoryProxy implements InvocationHandler {
     }
 
     private Iterable<?> findAllById(Class<?> entityClass, Iterable<?> ids) {
-        java.util.List<Object> results = new java.util.ArrayList<>();
+        List<Object> results = new ArrayList<>();
         for (Object id : ids) {
             Object entity = findById(entityClass, id);
-            if (entity instanceof java.util.Optional && ((java.util.Optional<?>) entity).isPresent()) {
-                results.add(((java.util.Optional<?>) entity).get());
-            } else if (!(entity instanceof java.util.Optional)) {
+            if (entity instanceof Optional && ((Optional<?>) entity).isPresent()) {
+                results.add(((Optional<?>) entity).get());
+            } else if (!(entity instanceof Optional)) {
                 results.add(entity);
             }
         }
@@ -323,7 +395,7 @@ public class RepositoryProxy implements InvocationHandler {
     }
 
     private Iterable<?> saveAll(Class<?> entityClass, Iterable<?> entities) {
-        java.util.List<Object> savedEntities = new java.util.ArrayList<>();
+        List<Object> savedEntities = new ArrayList<>();
         for (Object entity : entities) {
             savedEntities.add(save(entityClass, entity));
         }
@@ -381,21 +453,23 @@ public class RepositoryProxy implements InvocationHandler {
             invokeLifecycleMethod(entity, PrePersist.class);
 
             String tableName = getTableName(entityClass);
-            java.util.List<String> columns = new java.util.ArrayList<>();
-            java.util.List<Object> values = new java.util.ArrayList<>();
+            List<String> columns = new ArrayList<>();
+            List<Object> values = new ArrayList<>();
 
             for (Field field : entityClass.getDeclaredFields()) {
                 if (field.isAnnotationPresent(Column.class)) {
                     field.setAccessible(true);
-                    String columnName = field.getAnnotation(Column.class).name();
-                    columns.add(columnName);
-                    values.add(field.get(entity));
+                    for (String columnName : getPossibleColumnNames(field)) {
+                        columns.add(columnName);
+                        values.add(field.get(entity));
+                        break;
+                    }
                 }
             }
 
             String sql = "INSERT INTO " + databasePrefix + tableName + " (" +
                     String.join(", ", columns) + ") VALUES (" +
-                    String.join(", ", java.util.Collections.nCopies(columns.size(), "?")) + ")";
+                    String.join(", ", Collections.nCopies(columns.size(), "?")) + ")";
 
             sqlExecutor.executeUpdate(sql, values.toArray());
             return entity;
@@ -412,16 +486,18 @@ public class RepositoryProxy implements InvocationHandler {
             String idColumn = getIdColumnName(entityClass);
             Object id = getEntityId(entity);
 
-            java.util.List<String> setClauses = new java.util.ArrayList<>();
-            java.util.List<Object> values = new java.util.ArrayList<>();
+            List<String> setClauses = new ArrayList<>();
+            List<Object> values = new ArrayList<>();
 
             for (Field field : entityClass.getDeclaredFields()) {
                 if (field.isAnnotationPresent(Column.class) &&
                         !field.isAnnotationPresent(Id.class)) {
                     field.setAccessible(true);
-                    String columnName = field.getAnnotation(Column.class).name();
-                    setClauses.add(columnName + " = ?");
-                    values.add(field.get(entity));
+                    for (String columnName : getPossibleColumnNames(field)) {
+                        setClauses.add(columnName + " = ?");
+                        values.add(field.get(entity));
+                        break;
+                    }
                 }
             }
 
@@ -451,21 +527,40 @@ public class RepositoryProxy implements InvocationHandler {
         }
     }
 
-    private Object mapResultSetToEntity(java.sql.ResultSet rs, Class<?> entityClass) {
+    private Object mapResultSetToEntity(ResultSet rs, Class<?> entityClass) {
         try {
             Object entity = entityClass.getDeclaredConstructor().newInstance();
-
             for (Field field : entityClass.getDeclaredFields()) {
                 if (field.isAnnotationPresent(Column.class)) {
                     field.setAccessible(true);
-                    String columnName = field.getAnnotation(Column.class).name();
-                    Object value = rs.getObject(columnName);
+                    Object value = null;
+                    for (String columnName : getPossibleColumnNames(field)) {
+                        try {
+                            value = rs.getObject(columnName);
+                            if (value != null) break;
+                        } catch (SQLException ignored) {}
+                    }
                     if (value != null) {
+                        if (field.getType().equals(UUID.class)) {
+                            if (value instanceof String) {
+                                value = UUID.fromString((String) value);
+                            } else if (value instanceof byte[]) {
+                                value = UUID.nameUUIDFromBytes((byte[]) value);
+                            }
+                        } else if (field.getType().equals(Date.class) && value instanceof Timestamp) {
+                            value = new Date(((Timestamp) value).getTime());
+                        } else if (field.getType().equals(boolean.class) || field.getType().equals(Boolean.class)) {
+                            if (value instanceof Number) {
+                                value = ((Number) value).intValue() != 0;
+                            } else if (value instanceof String) {
+                                String s = ((String) value).toLowerCase();
+                                value = s.equals("true") || s.equals("1");
+                            }
+                        }
                         field.set(entity, value);
                     }
                 }
             }
-
             loadRelationships(entity, entityClass);
             invokeLifecycleMethod(entity, PostLoad.class);
             if (entityCache != null) {
@@ -524,7 +619,7 @@ public class RepositoryProxy implements InvocationHandler {
         Object foreignKeyValue = getFieldValue(entity, joinColumnName);
         if (foreignKeyValue != null) {
             String sql = "SELECT * FROM " + databasePrefix + relatedTableName + " WHERE " + relatedIdColumn + " = ?";
-            try (java.sql.ResultSet rs = sqlExecutor.executeQuery(sql, foreignKeyValue)) {
+            try (ResultSet rs = sqlExecutor.executeQuery(sql, foreignKeyValue)) {
                 if (rs.next()) {
                     Object relatedEntity = mapResultSetToEntity(rs, relatedEntityClass);
                     field.set(entity, relatedEntity);
@@ -572,8 +667,8 @@ public class RepositoryProxy implements InvocationHandler {
     }
 
     private void addRelatedEntries(Object entity, Field field, Object entityId, Class<?> relatedEntityClass, String sql) throws SQLException, IllegalAccessException {
-        java.util.List<Object> relatedEntities = new java.util.ArrayList<>();
-        try (java.sql.ResultSet rs = sqlExecutor.executeQuery(sql, entityId)) {
+        List<Object> relatedEntities = new ArrayList<>();
+        try (ResultSet rs = sqlExecutor.executeQuery(sql, entityId)) {
             while (rs.next()) {
                 Object relatedEntity = mapResultSetToEntity(rs, relatedEntityClass);
                 relatedEntities.add(relatedEntity);
@@ -586,10 +681,11 @@ public class RepositoryProxy implements InvocationHandler {
     private Object getFieldValue(Object entity, String fieldName) throws Exception {
         for (Field field : entity.getClass().getDeclaredFields()) {
             if (field.isAnnotationPresent(Column.class)) {
-                Column column = field.getAnnotation(Column.class);
-                if (column.name().equals(fieldName)) {
-                    field.setAccessible(true);
-                    return field.get(entity);
+                for (String name : getPossibleColumnNames(field)) {
+                    if (name.equals(fieldName)) {
+                        field.setAccessible(true);
+                        return field.get(entity);
+                    }
                 }
             }
         }
@@ -602,5 +698,90 @@ public class RepositoryProxy implements InvocationHandler {
             return (Class<?>) paramType.getActualTypeArguments()[0];
         }
         return Object.class;
+    }
+
+    private Object handleInsertMethod(Method method, Object[] args) {
+        Class<?> entityClass = getEntityClassFromRepository();
+        if (args.length == 1) {
+            return insertEntity(entityClass, args[0]);
+        }
+        throw new UnsupportedOperationException("Insert method not implemented: " + method.getName());
+    }
+
+    private Object handleUpdateMethod(Method method, Object[] args) {
+        Class<?> entityClass = getEntityClassFromRepository();
+        if (args.length == 1) {
+            return updateEntity(entityClass, args[0]);
+        }
+        throw new UnsupportedOperationException("Update method not implemented: " + method.getName());
+    }
+
+    private Object handleSetMethod(Method method, Object[] args) {
+        Class<?> entityClass = getEntityClassFromRepository();
+        if (args.length == 2) {
+            Object entity = findById(entityClass, args[0]);
+            if (entity instanceof Optional<?> opt && opt.isPresent()) {
+                Object obj = opt.get();
+                String fieldName = method.getName().substring(3);
+                for (Field field : entityClass.getDeclaredFields()) {
+                    for (String name : getPossibleColumnNames(field)) {
+                        if (name.equalsIgnoreCase(Character.toLowerCase(fieldName.charAt(0)) + fieldName.substring(1))) {
+                            field.setAccessible(true);
+                            try {
+                                field.set(obj, args[1]);
+                                updateEntity(entityClass, obj);
+                                return obj;
+                            } catch (Exception e) {
+                                throw new RuntimeException("Error setting field value", e);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        throw new UnsupportedOperationException("Set method not implemented: " + method.getName());
+    }
+
+    private Object handleGetMethod(Method method, Object[] args) {
+        Class<?> entityClass = getEntityClassFromRepository();
+        if (args.length == 1) {
+            Object entity = findById(entityClass, args[0]);
+            if (entity instanceof Optional<?> opt && opt.isPresent()) {
+                Object obj = opt.get();
+                String fieldName = method.getName().substring(3);
+                for (Field field : entityClass.getDeclaredFields()) {
+                    for (String name : getPossibleColumnNames(field)) {
+                        if (name.equalsIgnoreCase(Character.toLowerCase(fieldName.charAt(0)) + fieldName.substring(1))) {
+                            field.setAccessible(true);
+                            try {
+                                return field.get(obj);
+                            } catch (Exception e) {
+                                throw new RuntimeException("Error getting field value", e);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        throw new UnsupportedOperationException("Get method not implemented: " + method.getName());
+    }
+
+    private Object handleCountColumnsMethod(Method method, Object[] args) {
+        Class<?> entityClass = getEntityClassFromRepository();
+        String tableName = getTableName(entityClass);
+        String columnName = method.getName().substring("countColumnsBy".length());
+        columnName = Character.toLowerCase(columnName.charAt(0)) + columnName.substring(1);
+        if (args.length == 1) {
+            String sql = "SELECT COUNT(*) FROM " + databasePrefix + tableName + " WHERE " + columnName + " = ?";
+            try (ResultSet rs = sqlExecutor.executeQuery(sql, args[0])) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+                return 0L;
+            } catch (Exception e) {
+                throw new RuntimeException("Error in countColumns method", e);
+            }
+        }
+        throw new UnsupportedOperationException("CountColumns method not implemented: " + method.getName());
     }
 }

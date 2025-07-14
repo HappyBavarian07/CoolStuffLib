@@ -32,4 +32,6 @@ replay_pid*
 *.iml
 out
 gen
-/target/
+/target/*
+/target/apidocs/
+/TestOutputs/*

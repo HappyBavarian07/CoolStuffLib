@@ -14,27 +14,23 @@ The Language Manager provides multi-language support, dynamic placeholders, per-
 
 ---
 
-## Initialization
+## Initialization (Preferred Method)
 
-### 1. Setup using CoolStuffLibBuilder
-You must use `CoolStuffLibBuilder` to create the API object:
+The recommended way to initialize the Language Manager is via the builder pattern:
+
 ```java
-CoolStuffLib lib = new CoolStuffLibBuilder(pluginInstance)
-    .setLanguageManager(new LanguageManager(pluginInstance, langFolder, "languages", "&7[Prefix] "))
-    // .setCommandManagerRegistry(...)
-    // .setMenuAddonManager(...)
-    .setUsePlayerLangHandler(true)
+CoolStuffLib lib = new CoolStuffLibBuilder(plugin)
+    .withLanguageManager()
+        .setLanguageFolder(langFolder)
+        .setResourceDirectory("languages")
+        .setPrefix("&7[Prefix] ")
+        .enablePlayerLanguageHandler()
+    .build()
     .setDataFile(dataFile)
-    .build();
-lib.setup();
+    .createCoolStuffLib();
 ```
 
-### 2. Registering Languages
-Languages are registered automatically from the language folder:
-```java
-LanguageManager langManager = lib.getLanguageManager();
-langManager.addLanguagesToList(true); // true = log registration
-```
+This ensures all language features and per-player handling are enabled and integrated with other systems.
 
 ---
 

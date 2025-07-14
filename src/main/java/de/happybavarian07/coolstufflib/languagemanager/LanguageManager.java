@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -1299,5 +1300,16 @@ public class LanguageManager {
         }
         matcher.appendTail(sb);
         return sb.toString();
+    }
+
+    public LanguageFileMigrator createMigratorForLanguage(String langName) {
+        LanguageFile langFile = getLang(langName, true);
+        File langConfigFile = langFile.getLangFile();
+        String resourceName = resourceDirectory + "/" + langFile.getLangFile().getName();
+        InputStream resourceStream = plugin.getResource(resourceName);
+        if (resourceStream == null) {
+            resourceStream = plugin.getResource(resourceDirectory + "/en.yml");
+        }
+        return new LanguageFileMigrator(langConfigFile, resourceStream);
     }
 }

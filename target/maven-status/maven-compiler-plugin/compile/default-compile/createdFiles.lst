@@ -85,6 +85,7 @@ de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigValueEvent.clas
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\interfaces\FunctionCall.class
 de\happybavarian07\coolstufflib\CoolStuffLibBuilder$CacheManagerBuilder.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser$ExpressionSyntaxException.class
+de\happybavarian07\coolstufflib\menusystem\PaginatedMenu$MenuItemType.class
 de\happybavarian07\coolstufflib\commandmanagement\PaginatedList$SubCommandComparator.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser$Expression$Sequence.class
 de\happybavarian07\coolstufflib\jpa\annotations\Column.class
@@ -248,6 +249,7 @@ de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigSectionEvent.cl
 de\happybavarian07\coolstufflib\configstuff\advanced\migration\ConfigMigrationUtility.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\interfaces\Condition.class
+de\happybavarian07\coolstufflib\menusystem\misc\CasinoMenu.class
 de\happybavarian07\coolstufflib\configstuff\advanced\filetypes\ConfigTypeConverterRegistry$1.class
 de\happybavarian07\coolstufflib\cache\Cache.class
 de\happybavarian07\coolstufflib\configstuff\advanced\interfaces\AdvancedConfig.class
