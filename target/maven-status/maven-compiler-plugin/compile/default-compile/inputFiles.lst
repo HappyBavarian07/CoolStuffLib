@@ -107,6 +107,7 @@ E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\c
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\repository\RepositoryManager.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigValueEvent.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\LessThanOrEqualCondition.java
+E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\jpa\utils\FieldTypeCaster.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\testing\TestCommand.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\conditions\AndCondition.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\jpa\utils\DatabaseProperties.java
@@ -179,6 +180,7 @@ E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\c
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\utils\PluginUtils.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\expressionengine\operations\ModuloOperation.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\cache\Cache.java
+E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\languagemanager\LanguageFileMigrator.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\configstuff\advanced\modules\InMemoryBackupModule.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\misc\CustomPlayerSelector.java
 E:\InteliJ Programs\CoolStuffLib\src\main\java\de\happybavarian07\coolstufflib\menusystem\MenuAddonManager.java

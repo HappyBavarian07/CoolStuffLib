@@ -38,7 +38,7 @@ public class HeadMaterialCondition implements MaterialCondition {
 
     @Override
     public Material getMaterial() {
-        // This returns just the basic material, the actual head creation happens in LanguageManager
+        // This returns just the basic material, the actual head creation happens in LanguageManager or somewhere else
         return Material.PLAYER_HEAD;
     }
 

@@ -1,6 +1,7 @@
 package de.happybavarian07.coolstufflib.jpa;
 
 import de.happybavarian07.coolstufflib.jpa.annotations.Column;
+import de.happybavarian07.coolstufflib.jpa.annotations.ElementCollection;
 import de.happybavarian07.coolstufflib.jpa.annotations.Entity;
 import de.happybavarian07.coolstufflib.jpa.annotations.Table;
 import de.happybavarian07.coolstufflib.jpa.exceptions.MySQLSystemExceptions;
@@ -34,7 +35,17 @@ public class SQLExecutor {
         Connection conn = getConnection(defaultConnection);
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             bindParameters(stmt, params);
-            return stmt.executeUpdate();
+            try {
+                return stmt.executeUpdate();
+            } catch (SQLException e) {
+                StringBuilder paramStr = new StringBuilder();
+                for (Object param : params) {
+                    paramStr.append(param).append(", ");
+                }
+                throw new SQLException("Error executing update. SQL: " + sql + ", Params: [" + paramStr + "]", e);
+            }
+        } catch (SQLException e) {
+            throw new SQLException("Error preparing statement. SQL: " + sql, e);
         } finally {
             releaseConnection(defaultConnection, conn);
         }
@@ -45,7 +56,19 @@ public class SQLExecutor {
         try {
             PreparedStatement stmt = conn.prepareStatement(sql);
             bindParameters(stmt, params);
-            return stmt.executeQuery();
+            try {
+                return stmt.executeQuery();
+            } catch (SQLException e) {
+                StringBuilder paramStr = new StringBuilder();
+                if (params != null) {
+                    for (Object param : params) {
+                        paramStr.append(param).append(", ");
+                    }
+                }
+                throw new SQLException("Error executing query. SQL: " + sql + ", Params: [" + paramStr + "]", e);
+            }
+        } catch (SQLException e) {
+            throw new SQLException("Error preparing statement. SQL: " + sql, e);
         } finally {
             releaseConnection(defaultConnection, conn);
         }
@@ -55,6 +78,52 @@ public class SQLExecutor {
         for (int i = 0; i < params.length; i++) {
             stmt.setObject(i + 1, params[i]);
         }
+    }
+
+    private String getColumnDefinition(Field field) {
+        if (!field.isAnnotationPresent(Column.class)) {
+            throw new IllegalArgumentException("Field " + field.getName() + " has no Column annotation");
+        }
+        if (field.isAnnotationPresent(de.happybavarian07.coolstufflib.jpa.annotations.ElementCollection.class)) {
+            return null;
+        }
+        Column column = field.getAnnotation(Column.class);
+        String columnName = column.name().isEmpty() ? field.getName() : column.name();
+        String sqlType = getSQLType(field);
+        StringBuilder definition = new StringBuilder();
+        definition.append(columnName).append(" ").append(sqlType);
+        if (!column.nullable()) {
+            definition.append(" NOT NULL");
+        }
+        if (column.unique()) {
+            definition.append(" UNIQUE");
+        }
+        if (column.primaryKey()) {
+            definition.append(" PRIMARY KEY");
+        }
+        if (column.autoIncrement()) {
+            definition.append(" AUTO_INCREMENT");
+        }
+        return definition.toString();
+    }
+
+    private String generateCreateTableSQL(Class<?> entityClass, String tableName, String schema) {
+        StringBuilder sql = new StringBuilder("CREATE TABLE IF NOT EXISTS ");
+        if (!schema.isEmpty()) {
+            sql.append(schema).append(".");
+        }
+        sql.append(dbProperties.getDatabasePrefix()).append(tableName).append(" (");
+        Field[] fields = entityClass.getDeclaredFields();
+        List<String> columnDefinitions = new ArrayList<>();
+        for (Field field : fields) {
+            if (field.isAnnotationPresent(Column.class) && !field.isAnnotationPresent(de.happybavarian07.coolstufflib.jpa.annotations.ElementCollection.class)) {
+                String def = getColumnDefinition(field);
+                if (def != null) columnDefinitions.add(def);
+            }
+        }
+        sql.append(String.join(", ", columnDefinitions));
+        sql.append(");");
+        return sql.toString();
     }
 
     public void generateSchema(Class<?> entityClass) throws SQLException {
@@ -69,11 +138,10 @@ public class SQLExecutor {
         try {
             DatabaseMetaData meta = conn.getMetaData();
             ResultSet tables = meta.getTables(conn.getCatalog(), schema, dbProperties.getDatabasePrefix() + tableName, new String[]{"TABLE"});
-
             if (tables.next()) {
                 Field[] fields = entityClass.getDeclaredFields();
                 for (Field field : fields) {
-                    if (!field.isAnnotationPresent(Column.class)) continue;
+                    if (!field.isAnnotationPresent(Column.class) || field.isAnnotationPresent(ElementCollection.class)) continue;
                     Column colAnn = field.getAnnotation(Column.class);
                     String columnName = colAnn.name();
                     ResultSet cols = meta.getColumns(conn.getCatalog(), schema, dbProperties.getDatabasePrefix() + tableName, columnName);
@@ -81,6 +149,8 @@ public class SQLExecutor {
                         String alterSQL = "ALTER TABLE " + fullTableName + " ADD COLUMN " + getColumnDefinition(field) + ";";
                         try (Statement stmt = conn.createStatement()) {
                             stmt.executeUpdate(alterSQL);
+                        } catch (SQLException e) {
+                            throw new SQLException("Error executing ALTER TABLE. SQL: " + alterSQL + ", Field: " + field.getName(), e);
                         }
                     }
                     cols.close();
@@ -89,6 +159,8 @@ public class SQLExecutor {
                 String createTableSQL = generateCreateTableSQL(entityClass, tableName, schema);
                 try (Statement stmt = conn.createStatement()) {
                     stmt.executeUpdate(createTableSQL);
+                } catch (SQLException e) {
+                    throw new SQLException("Error executing CREATE TABLE. SQL: " + createTableSQL, e);
                 }
             }
             tables.close();
@@ -97,59 +169,10 @@ public class SQLExecutor {
         }
     }
 
-    private String getColumnDefinition(Field field) {
-        if (!field.isAnnotationPresent(Column.class)) {
-            throw new IllegalArgumentException("Field " + field.getName() + " has no Column annotation");
-        }
-        Column column = field.getAnnotation(Column.class);
-        String columnName = column.name().isEmpty() ? field.getName() : column.name();
-        String sqlType = getSQLType(field);
-
-        StringBuilder definition = new StringBuilder();
-        definition.append(columnName).append(" ").append(sqlType);
-
-        if (!column.nullable()) {
-            definition.append(" NOT NULL");
-        }
-
-        if (column.unique()) {
-            definition.append(" UNIQUE");
-        }
-
-        if (column.primaryKey()) {
-            definition.append(" PRIMARY KEY");
-        }
-
-        if (column.autoIncrement()) {
-            definition.append(" AUTO_INCREMENT");
-        }
-
-        return definition.toString();
-    }
-
-    private String generateCreateTableSQL(Class<?> entityClass, String tableName, String schema) {
-        StringBuilder sql = new StringBuilder("CREATE TABLE IF NOT EXISTS ");
-        if (!schema.isEmpty()) {
-            sql.append(schema).append(".");
-        }
-        sql.append(dbProperties.getDatabasePrefix()).append(tableName).append(" (");
-
-        Field[] fields = entityClass.getDeclaredFields();
-        List<String> columnDefinitions = new ArrayList<>();
-
-        for (Field field : fields) {
-            if (field.isAnnotationPresent(Column.class)) {
-                columnDefinitions.add(getColumnDefinition(field));
-            }
-        }
-
-        sql.append(String.join(", ", columnDefinitions));
-        sql.append(");");
-
-        return sql.toString();
-    }
-
     private String getSQLType(Field field) {
+        if (field.isAnnotationPresent(ElementCollection.class)) {
+            throw new IllegalArgumentException("ElementCollection fields are not supported in main table: " + field.getName());
+        }
         Class<?> type = field.getType();
         if (type == int.class || type == Integer.class) {
             return "INT";

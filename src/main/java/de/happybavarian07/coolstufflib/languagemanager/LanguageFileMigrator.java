@@ -6,14 +6,12 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.LinkedHashMap;
 
 public class LanguageFileMigrator {
     private final File userConfigFile;
@@ -84,7 +82,9 @@ public class LanguageFileMigrator {
         }
         for (String key : userMap.keySet()) {
             if (!resourceMap.containsKey(key)) {
-                migrationEntries.add(new MigrationEntry(key, userMap.get(key), null, MigrationStatus.UNCHANGED));
+                migrationEntries.add(new MigrationEntry(key, userMap.get(key), null, MigrationStatus.MISSING_IN_RESOURCE));
+            } else if (resourceMap.get(key).equals(userMap.get(key))) {
+                migrationEntries.add(new MigrationEntry(key, userMap.get(key), resourceMap.get(key), MigrationStatus.UNCHANGED));
             }
         }
     }
@@ -117,14 +117,22 @@ public class LanguageFileMigrator {
         }
         try {
             userConfig.save(userConfigFile);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
+    }
+
+    public enum MigrationStatus {
+        MISSING_IN_USER,
+        MISSING_IN_RESOURCE,
+        DIFFERENT_VALUE,
+        UNCHANGED
     }
 
     public static class MigrationEntry {
         private final String key;
-        private Object userValue;
         private final Object resourceValue;
         private final MigrationStatus status;
+        private Object userValue;
         private boolean selectedForMigration;
 
         public MigrationEntry(String key, Object userValue, Object resourceValue, MigrationStatus status) {
@@ -135,19 +143,54 @@ public class LanguageFileMigrator {
             this.selectedForMigration = status == MigrationStatus.MISSING_IN_USER || status == MigrationStatus.DIFFERENT_VALUE;
         }
 
-        public String getKey() { return key; }
-        public Object getUserValue() { return userValue; }
-        public Object getResourceValue() { return resourceValue; }
-        public MigrationStatus getStatus() { return status; }
-        public boolean isSelectedForMigration() { return selectedForMigration; }
-        public void setSelectedForMigration(boolean selected) { this.selectedForMigration = selected; }
-        public void setUserValue(Object value) { this.userValue = value; }
-    }
+        public String getKey() {
+            return key;
+        }
 
-    public enum MigrationStatus {
-        MISSING_IN_USER,
-        DIFFERENT_VALUE,
-        NEW_IN_RESOURCE,
-        UNCHANGED
+        public Object getUserValue() {
+            return userValue;
+        }
+
+        public void setUserValue(Object value) {
+            this.userValue = value;
+        }
+
+        public Object getResourceValue() {
+            return resourceValue;
+        }
+
+        public MigrationStatus getStatus() {
+            return status;
+        }
+
+        public boolean isSelectedForMigration() {
+            return selectedForMigration;
+        }
+
+        public void setSelectedForMigration(boolean selected) {
+            this.selectedForMigration = selected;
+        }
+
+        @Override
+        public String toString() {
+            return "MigrationEntry{" + "key='" + key + '\'' +
+                    ", userValue=" + userValue +
+                    ", resourceValue=" + resourceValue +
+                    ", status=" + status +
+                    ", selectedForMigration=" + selectedForMigration +
+                    '}';
+        }
+
+        public static MigrationEntry fromString(String str) {
+            String[] parts = str.split(",");
+            String key = parts[0].split("=")[1].trim();
+            Object userValue = parts[1].split("=")[1].trim();
+            Object resourceValue = parts[2].split("=")[1].trim();
+            MigrationStatus status = MigrationStatus.valueOf(parts[3].split("=")[1].trim());
+            boolean selectedForMigration = Boolean.parseBoolean(parts[4].split("=")[1].trim());
+            MigrationEntry entry = new MigrationEntry(key, userValue, resourceValue, status);
+            entry.setSelectedForMigration(selectedForMigration);
+            return entry;
+        }
     }
 }

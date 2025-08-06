@@ -12,7 +12,6 @@ import java.io.File;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class LanguageManagerTest {
 
@@ -48,7 +47,7 @@ class LanguageManagerTest {
     void testPlaceholderRegistration() {
         languageManager.addPlaceholder(PlaceholderType.MESSAGE, "%test%", "testValue", false);
         assertTrue(languageManager.getPlaceholders().containsKey("%test%"));
-        assertEquals("testValue", languageManager.getPlaceholders().get("%test%").getValue());
+        assertEquals("testValue", languageManager.getPlaceholders().get("%test%").value());
     }
 
     @Test
@@ -56,8 +55,8 @@ class LanguageManagerTest {
         languageManager.addPlaceholder(PlaceholderType.MESSAGE, "%player%", "TestPlayer", false);
         Placeholder retrieved = languageManager.getPlaceholders().get("%player%");
         assertNotNull(retrieved);
-        assertEquals("TestPlayer", retrieved.getValue());
-        assertEquals(PlaceholderType.MESSAGE, retrieved.getType());
+        assertEquals("TestPlayer", retrieved.value());
+        assertEquals(PlaceholderType.MESSAGE, retrieved.type());
     }
 
     @Test

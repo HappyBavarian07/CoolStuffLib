@@ -31,6 +31,7 @@ de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser$Expressi
 de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedInMemoryConfig.class
 de\happybavarian07\coolstufflib\jpa\annotations\FetchType.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\ModuleManager.class
+de\happybavarian07\coolstufflib\jpa\utils\EntityPersistenceHandler.class
 de\happybavarian07\coolstufflib\testing\AutoTestRunner$TestResult.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\operations\ModuloOperation.class
 de\happybavarian07\coolstufflib\jpa\exceptions\MySQLSystemExceptions$DatabaseConnectionException.class
@@ -73,6 +74,7 @@ de\happybavarian07\coolstufflib\commandmanagement\CommandManager.class
 de\happybavarian07\coolstufflib\jpa\transaction\TransactionManager.class
 de\happybavarian07\coolstufflib\languagemanager\OldLanguageFileUpdater.class
 de\happybavarian07\coolstufflib\jpa\annotations\GenerationType.class
+de\happybavarian07\coolstufflib\jpa\utils\ElementCollectionHandler.class
 de\happybavarian07\coolstufflib\jpa\annotations\PostLoad.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\misc\DefaultGroup.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\AutoGenModule.class
@@ -89,6 +91,7 @@ de\happybavarian07\coolstufflib\menusystem\PaginatedMenu$MenuItemType.class
 de\happybavarian07\coolstufflib\commandmanagement\PaginatedList$SubCommandComparator.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser$Expression$Sequence.class
 de\happybavarian07\coolstufflib\jpa\annotations\Column.class
+de\happybavarian07\coolstufflib\jpa\utils\EntityReflectionUtil.class
 de\happybavarian07\coolstufflib\configstuff\advanced\core\ConfigLockManager.class
 de\happybavarian07\coolstufflib\configstuff\ConfigUpdater.class
 de\happybavarian07\coolstufflib\cache\expression\ExpressionCache.class
@@ -116,6 +119,7 @@ de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus$EventP
 de\happybavarian07\coolstufflib\menusystem\MenuAddon.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\LanguageFunctionManager.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\Token.class
+de\happybavarian07\coolstufflib\languagemanager\LanguageFileMigrator$MigrationEntry.class
 de\happybavarian07\coolstufflib\configstuff\advanced\core\ValueAccessor.class
 de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus$ListenerEntry.class
 de\happybavarian07\coolstufflib\jpa\annotations\Transactional.class
@@ -227,18 +231,22 @@ de\happybavarian07\coolstufflib\configstuff\advanced\modules\autogen\templates\A
 de\happybavarian07\coolstufflib\utils\PluginFileLogger.class
 de\happybavarian07\coolstufflib\cache\InMemoryCache.class
 de\happybavarian07\coolstufflib\configstuff\advanced\AdvancedPersistentConfig.class
+de\happybavarian07\coolstufflib\jpa\annotations\ElementCollection.class
 de\happybavarian07\coolstufflib\testing\InGameTestRunner$TestResult.class
 de\happybavarian07\coolstufflib\backupmanager\FileBackup.class
 de\happybavarian07\coolstufflib\jpa\repository\AsyncRepository.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser$Expression$Call.class
+de\happybavarian07\coolstufflib\jpa\utils\FieldTypeCaster.class
 de\happybavarian07\coolstufflib\configstuff\advanced\filetypes\interfaces\converter\MapConfigTypeConverter.class
 de\happybavarian07\coolstufflib\jpa\annotations\CascadeType.class
 de\happybavarian07\coolstufflib\jpa\transaction\TransactionManager$TransactionalOperation.class
+de\happybavarian07\coolstufflib\languagemanager\LanguageFileMigrator.class
 de\happybavarian07\coolstufflib\configstuff\advanced\filetypes\interfaces\BaseConfigTypeConverter.class
 de\happybavarian07\coolstufflib\configstuff\advanced\filetypes\handlers\YamlConfigFileHandler.class
 de\happybavarian07\coolstufflib\commandmanagement\HelpCommand.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\ValidationModule$TypedValidationRule.class
 de\happybavarian07\coolstufflib\jpa\utils\MySQLUtils.class
+de\happybavarian07\coolstufflib\languagemanager\LanguageFileMigrator$MigrationStatus.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\Parser$Expression$ConditionalBranch.class
 de\happybavarian07\coolstufflib\configstuff\advanced\interfaces\AdvancedConfigGroup.class
 de\happybavarian07\coolstufflib\configstuff\advanced\modules\PersistentBackupModule.class

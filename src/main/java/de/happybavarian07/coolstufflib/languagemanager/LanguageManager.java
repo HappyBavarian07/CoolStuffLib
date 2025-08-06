@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
 
 /**
  * LanguageManager class.
@@ -37,7 +38,7 @@ public class LanguageManager {
     private final Map<String, LanguageFile> registeredLanguages;
     private final Map<String, Placeholder> placeholders;
     private final Map<String, LanguageCache> languageCaches; // New map for LanguageCache
-    private final Map<String, Map<String, Object>> playerPathVariables = new HashMap<>();
+    private final Map<String, Map<String, Map.Entry<Object, Integer>>> playerPathVariables = new HashMap<>();
     private final ExpressionEnginePool expressionEnginePool;
     private String prefix;
     private String currentLangName;
@@ -276,12 +277,12 @@ public class LanguageManager {
      * @param key        The variable key
      * @param value      The variable value
      */
-    public void setPathExpressionVariable(String playerUUID, String path, String key, Object value) {
+    public void setPathExpressionVariable(String playerUUID, String path, String key, Object value, int uses) {
         String mapKey = playerUUID + ":" + path;
         if (!playerPathVariables.containsKey(mapKey)) {
             playerPathVariables.put(mapKey, new HashMap<>());
         }
-        playerPathVariables.get(mapKey).put(key, value);
+        playerPathVariables.get(mapKey).put(key, new AbstractMap.SimpleEntry<>(value, uses));
     }
 
     /**
@@ -342,9 +343,9 @@ public class LanguageManager {
         String mapKey = playerUUID + ":" + path;
 
         if (playerPathVariables.containsKey(mapKey)) {
-            Map<String, Object> variables = playerPathVariables.get(mapKey);
-            for (Map.Entry<String, Object> entry : variables.entrySet()) {
-                addVariableGlobally(entry.getKey(), entry.getValue(), 1);
+            Map<String, Map.Entry<Object, Integer>> variables = playerPathVariables.get(mapKey);
+            for (Map.Entry<String, Map.Entry<Object, Integer>> entry : variables.entrySet()) {
+                addVariableGlobally(entry.getKey(), entry.getValue().getKey(), entry.getValue().getValue());
             }
         }
     }
@@ -479,7 +480,7 @@ public class LanguageManager {
         if (fileArray != null) {
             for (File file : fileArray) {
                 LanguageFile languageFile = new LanguageFile(langFolder, resourceDirectory, file.getName().replace(".yml", ""));
-                if (!registeredLanguages.containsValue(languageFile) && !languageFile.getLangName().equals("default")) {
+                if (!registeredLanguages.containsValue(languageFile) && !languageFile.getLangName().equals("default") && !registeredLanguages.containsKey(languageFile.getLangName())) {
                     if (log)
                         getLogger().log(Level.INFO, "Language: " + languageFile.getLangFile() + " successfully registered!");
                     registeredLanguages.put(languageFile.getLangName(), languageFile);
@@ -621,7 +622,7 @@ public class LanguageManager {
      */
     public void removePlaceholder(PlaceholderType type, String key) {
         if (!placeholders.containsKey(key)) return;
-        if (!placeholders.get(key).getType().equals(type) && !placeholders.get(key).getType().equals(PlaceholderType.ALL))
+        if (!placeholders.get(key).type().equals(type) && !placeholders.get(key).type().equals(PlaceholderType.ALL))
             return;
 
         placeholders.remove(key);
@@ -636,7 +637,7 @@ public class LanguageManager {
     public void removePlaceholders(PlaceholderType type, List<String> keys) {
         for (String key : keys) {
             if (!placeholders.containsKey(key)) continue;
-            if (!placeholders.get(key).getType().equals(type) && !placeholders.get(key).getType().equals(PlaceholderType.ALL))
+            if (!placeholders.get(key).type().equals(type) && !placeholders.get(key).type().equals(PlaceholderType.ALL))
                 continue;
 
             this.placeholders.remove(key);
@@ -655,7 +656,7 @@ public class LanguageManager {
         List<String> keysToRemove = new ArrayList<>();
         for (String key : placeholders.keySet()) {
             if (excludeKeys != null && excludeKeys.contains(key)) continue;
-            if (!placeholders.get(key).getType().equals(type) && !placeholders.get(key).getType().equals(PlaceholderType.ALL))
+            if (!placeholders.get(key).type().equals(type) && !placeholders.get(key).type().equals(PlaceholderType.ALL))
                 continue;
 
             keysToRemove.add(key);
@@ -676,7 +677,7 @@ public class LanguageManager {
         List<String> keysToRemove = new ArrayList<>();
         for (String key : placeholders.keySet()) {
             if (includeKeys != null && !includeKeys.contains(key)) continue;
-            if (!placeholders.get(key).getType().equals(type) && !placeholders.get(key).getType().equals(PlaceholderType.ALL))
+            if (!placeholders.get(key).type().equals(type) && !placeholders.get(key).type().equals(PlaceholderType.ALL))
                 continue;
 
             keysToRemove.add(key);
@@ -718,7 +719,7 @@ public class LanguageManager {
         List<String> keys = new ArrayList<>();
         for (String key : placeholders.keySet()) {
             if (!message.contains(key)) continue;
-            if (!placeholders.get(key).getType().equals(type) && !placeholders.get(key).getType().equals(PlaceholderType.ALL))
+            if (!placeholders.get(key).type().equals(type) && !placeholders.get(key).type().equals(PlaceholderType.ALL))
                 continue;
 
             keys.add(key);
@@ -735,7 +736,7 @@ public class LanguageManager {
      */
     public String replacePlaceholders(PlaceholderType type, String message) {
         for (String key : placeholders.keySet()) {
-            if (!placeholders.get(key).getType().equals(type) && !placeholders.get(key).getType().equals(PlaceholderType.ALL))
+            if (!placeholders.get(key).type().equals(type) && !placeholders.get(key).type().equals(PlaceholderType.ALL))
                 continue;
 
             message = placeholders.get(key).replace(message);
@@ -964,7 +965,6 @@ public class LanguageManager {
      * @return An ItemStack based on the specified parameters.
      */
     public ItemStack getItem(String path, Player player, String langName, boolean resetAfter, MaterialCondition condition) {
-        applyPathExpressionVariables(player, path);
         LanguageFile langFile = getLangOrPlayerLang(false, langName, player);
         LanguageConfig langConfig = langFile.getLangConfig();
         ItemStack error = new ItemStack(Material.BARRIER);
@@ -989,13 +989,23 @@ public class LanguageManager {
         }
         ItemStack item;
 
-
+        applyPathExpressionVariables(player, path);
         if (condition instanceof HeadMaterialCondition headCondition) {
             if (headCondition.isHead()) {
                 item = headCondition.getHead().getAsItem();
             } else {
                 item = Utils.createSkull(headCondition.getHeadValue(), headCondition.getHeadValue(), headCondition.isTexture());
             }
+        } else if (condition != null) {
+            Material material = condition.getMaterial();
+            if (material == null) {
+                assert errorMeta != null;
+                errorMeta.setDisplayName("Material not found! (" + langConfig.getConfig().getString("Items." + path + ".material") + ")");
+                errorMeta.setLore(Arrays.asList("If this happens,", "please change the Material from this Item", "to something existing", "Path: Items." + path + ".material"));
+                error.setItemMeta(errorMeta);
+                return error;
+            }
+            item = new ItemStack(material);
         } else {
             String materialString = "";
             if (getObjectFromLanguageCacheOrConfig("Items." + path + ".material", langFile.getLangName(), String.class) != null) {
@@ -1090,13 +1100,25 @@ public class LanguageManager {
         }
 
         try {
-            MaterialCondition cond = getExpressionEngineFor(player, langName).parse(materialString, Material.BARRIER);
+            String expr = materialString;
+            if ((expr.startsWith("EXPR(") && expr.endsWith(")")) || (expr.startsWith("EXPRESSION(") && expr.endsWith(")"))) {
+                int open = expr.indexOf('(');
+                expr = expr.substring(open + 1, expr.length() - 1).trim();
+            }
+            MaterialCondition cond = getExpressionEngineFor(player, langName).parse(expr, Material.BARRIER);
             if (cond instanceof HeadMaterialCondition headCondition) {
                 if (headCondition.isHead()) {
                     return headCondition.getHead().getAsItem();
                 } else {
                     return Utils.createSkull(headCondition.getHeadValue(), headCondition.getHeadValue().substring(0, 15), headCondition.isTexture());
                 }
+            } else if (cond != null) {
+                Material material = cond.getMaterial();
+                if (material == null) {
+                    getLogger().warning("Invalid material condition: " + materialString);
+                    return new ItemStack(Material.BARRIER);
+                }
+                return new ItemStack(material);
             } else {
                 getLogger().warning("Invalid material condition: " + materialString);
                 return new ItemStack(Material.BARRIER);
@@ -1292,7 +1314,7 @@ public class LanguageManager {
             Object result;
             try {
                 result = engine.parse(expr, Object.class);
-                matcher.appendReplacement(sb, result == null ? "null" : java.util.regex.Matcher.quoteReplacement(result.toString()));
+                matcher.appendReplacement(sb, result == null ? "null" : Matcher.quoteReplacement(result.toString()));
             } catch (Exception e) {
                 matcher.appendReplacement(sb, matcher.group(0));
                 break;
