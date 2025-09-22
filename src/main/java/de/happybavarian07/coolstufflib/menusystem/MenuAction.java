@@ -6,8 +6,7 @@ package de.happybavarian07.coolstufflib.menusystem;/*
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
+@FunctionalInterface
 public interface MenuAction {
     void execute(Player player, InventoryClickEvent event);
-    // TODO: Add more methods to this interface
-    // TODO: Implement this interface in the Menu Class and make it actually work haha
 }

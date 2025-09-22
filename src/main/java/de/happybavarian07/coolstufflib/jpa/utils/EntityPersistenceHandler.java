@@ -2,11 +2,10 @@ package de.happybavarian07.coolstufflib.jpa.utils;
 
 import de.happybavarian07.coolstufflib.jpa.SQLExecutor;
 import de.happybavarian07.coolstufflib.jpa.annotations.Column;
+import de.happybavarian07.coolstufflib.jpa.annotations.ElementCollection;
 import de.happybavarian07.coolstufflib.jpa.annotations.Id;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,13 +23,15 @@ class EntityPersistenceHandler {
     }
 
     Object insertEntity(Class<?> entityClass, Object entity) {
-        String tableName = entityClass.getSimpleName().toLowerCase();
+        String tableName = EntityReflectionUtil.getTableName(entityClass);
         List<String> columns = new ArrayList<>();
         List<Object> values = new ArrayList<>();
         for (Field field : entityClass.getDeclaredFields()) {
-            if (field.isAnnotationPresent(Column.class)) {
+            if (field.isAnnotationPresent(Column.class) && !field.isAnnotationPresent(ElementCollection.class)) {
                 field.setAccessible(true);
-                columns.add(field.getName());
+                String colName = field.getAnnotation(Column.class).name();
+                if (colName == null || colName.isEmpty()) colName = field.getName();
+                columns.add(colName);
                 try {
                     values.add(field.get(entity));
                 } catch (IllegalAccessException ignored) {}
@@ -42,23 +43,25 @@ class EntityPersistenceHandler {
         try {
             sqlExecutor.executeUpdate(sql, values.toArray());
         } catch (SQLException e) {
-            throw new RuntimeException("Error executing insertEntity SQL", e);
+            throw new RuntimeException("Error executing insertEntity SQL: " + sql, e);
         }
         elementCollectionHandler.persistCollections(entityClass, entity, true);
         return entity;
     }
 
     Object updateEntity(Class<?> entityClass, Object entity) {
-        String tableName = entityClass.getSimpleName().toLowerCase();
-        String idColumn = getIdColumnName(entityClass);
-        Object id = getEntityId(entity);
+        String tableName = EntityReflectionUtil.getTableName(entityClass);
+        String idColumn = EntityReflectionUtil.getIdColumnName(entityClass);
+        Object id = EntityReflectionUtil.getEntityId(entity);
         List<String> setClauses = new ArrayList<>();
         List<Object> values = new ArrayList<>();
         for (Field field : entityClass.getDeclaredFields()) {
             if (field.isAnnotationPresent(Column.class) &&
-                    !field.isAnnotationPresent(Id.class)) {
+                    !field.isAnnotationPresent(Id.class) && !field.isAnnotationPresent(ElementCollection.class)) {
                 field.setAccessible(true);
-                setClauses.add(field.getName() + " = ?");
+                String colName = field.getAnnotation(Column.class).name();
+                if (colName == null || colName.isEmpty()) colName = field.getName();
+                setClauses.add(colName + " = ?");
                 try {
                     values.add(field.get(entity));
                 } catch (IllegalAccessException ignored) {}
@@ -70,50 +73,21 @@ class EntityPersistenceHandler {
         try {
             sqlExecutor.executeUpdate(sql, values.toArray());
         } catch (SQLException e) {
-            throw new RuntimeException("Error executing updateEntity SQL", e);
+            throw new RuntimeException("Error executing updateEntity SQL: " + sql, e);
         }
         elementCollectionHandler.persistCollections(entityClass, entity, false);
         return entity;
     }
 
-    static Object getEntityId(Object entity) {
-        for (Field field : entity.getClass().getDeclaredFields()) {
-            if (field.isAnnotationPresent(Id.class)) {
-                field.setAccessible(true);
-                try {
-                    return field.get(entity);
-                } catch (IllegalAccessException ignored) {}
-            }
-        }
-        return null;
-    }
-
-    static String getIdColumnName(Class<?> entityClass) {
-        for (Field field : entityClass.getDeclaredFields()) {
-            if (field.isAnnotationPresent(Id.class)) {
-                return field.getName();
-            }
-        }
-        throw new IllegalStateException("No @Id field found in entity class: " + entityClass.getName());
-    }
-
-    static Class<?> getGenericTypeFromField(Field field) {
-        Type genericType = field.getGenericType();
-        if (genericType instanceof ParameterizedType paramType) {
-            return (Class<?>) paramType.getActualTypeArguments()[0];
-        }
-        return Object.class;
-    }
-
     public Object deleteEntity(Class<?> entityClass, Object entity) {
-        String tableName = entityClass.getSimpleName().toLowerCase();
-        String idColumn = getIdColumnName(entityClass);
-        Object id = getEntityId(entity);
+        String tableName = EntityReflectionUtil.getTableName(entityClass);
+        String idColumn = EntityReflectionUtil.getIdColumnName(entityClass);
+        Object id = EntityReflectionUtil.getEntityId(entity);
         String sql = "DELETE FROM " + databasePrefix + tableName + " WHERE " + idColumn + " = ?";
         try {
             sqlExecutor.executeUpdate(sql, id);
         } catch (SQLException e) {
-            throw new RuntimeException("Error executing deleteEntity SQL", e);
+            throw new RuntimeException("Error executing deleteEntity SQL: " + sql, e);
         }
         elementCollectionHandler.persistCollections(entityClass, entity, false);
         return entity;

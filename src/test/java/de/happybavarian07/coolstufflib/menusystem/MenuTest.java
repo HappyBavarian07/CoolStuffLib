@@ -17,6 +17,9 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -55,12 +58,15 @@ class MenuTest {
 
         playerMenuUtility = new PlayerMenuUtility(mockPlayer.getUniqueId());
 
+        ItemStack fillerItem = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+        // Ensure meta matches what Menu expects
+        fillerItem.setItemMeta(fillerItem.getItemMeta());
+
         try (MockedStatic<CoolStuffLib> mockedStatic = mockStatic(CoolStuffLib.class)) {
             mockedStatic.when(CoolStuffLib::getLib).thenReturn(mockCoolStuffLib);
             when(mockCoolStuffLib.getLanguageManager()).thenReturn(mockLanguageManager);
             when(mockCoolStuffLib.getJavaPluginUsingLib()).thenReturn(mockJavaPlugin);
 
-            ItemStack fillerItem = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
             when(mockLanguageManager.getItem("General.FillerItem", null, false)).thenReturn(fillerItem);
 
             testMenu = new TestMenu(playerMenuUtility);
@@ -155,6 +161,79 @@ class MenuTest {
             mockedBukkit.when(() -> Bukkit.getServer().getVersion()).thenReturn("1.8.8");
             assertTrue(testMenu.legacyServer());
         }
+    }
+
+    @Test
+    void testRegisterButtonPlacesItemAndCallback() {
+        ItemStack button = new ItemStack(Material.DIAMOND);
+        MenuAction action = (player, event) -> player.sendMessage("Clicked!");
+        testMenu.inventory = mockInventory;
+        when(mockInventory.getItem(5)).thenReturn(null);
+        boolean result = testMenu.registerButton(5, button, action, null);
+        assertTrue(result);
+        assertEquals(action, testMenu.slotActions.get(5));
+        verify(mockInventory).setItem(5, button);
+    }
+
+    @Test
+    void testRegisterButtonAutoPlacementSkipsFillerAndForbidden() {
+        ItemStack button = new ItemStack(Material.EMERALD);
+        MenuAction action = (player, event) -> {};
+        testMenu.inventory = mockInventory;
+        when(mockInventory.getItem(0)).thenReturn(testMenu.FILLER);
+        when(mockInventory.getItem(1)).thenReturn(null);
+        Set<Integer> forbidden = new HashSet<>();
+        forbidden.add(1);
+        when(mockInventory.getItem(2)).thenReturn(null);
+        boolean result = testMenu.registerButton(button, action, forbidden);
+        assertTrue(result);
+        assertEquals(action, testMenu.slotActions.get(2));
+        verify(mockInventory).setItem(2, button);
+    }
+
+    @Test
+    void testTryRegisterButtonReturnsFalseOnForbiddenOrOccupied() {
+        ItemStack button = new ItemStack(Material.GOLD_INGOT);
+        MenuAction action = (player, event) -> {};
+        testMenu.inventory = mockInventory;
+        when(mockInventory.getItem(3)).thenReturn(new ItemStack(Material.STONE));
+        Set<Integer> forbidden = new HashSet<>();
+        forbidden.add(4);
+        assertFalse(testMenu.tryRegisterButton(3, button, action, null));
+        assertFalse(testMenu.tryRegisterButton(4, button, action, forbidden));
+    }
+
+    @Test
+    void testClearRegisteredButtonsRemovesAllCallbacks() {
+        testMenu.slotActions.put(1, (player, event) -> {});
+        testMenu.slotActions.put(2, (player, event) -> {});
+        testMenu.clearRegisteredButtons();
+        assertTrue(testMenu.slotActions.isEmpty());
+    }
+
+    @Test
+    void testFindFirstEmptySlotRespectsFillerAndForbidden() {
+        testMenu.inventory = mockInventory;
+        when(mockInventory.getItem(0)).thenReturn(testMenu.FILLER);
+        when(mockInventory.getItem(1)).thenReturn(null);
+        when(mockInventory.getItem(2)).thenReturn(new ItemStack(Material.STONE));
+        Set<Integer> forbidden = new HashSet<>();
+        forbidden.add(1);
+        when(mockInventory.getItem(3)).thenReturn(null);
+        int slot = testMenu.findFirstEmptySlot(forbidden);
+        assertEquals(3, slot);
+    }
+
+    @Test
+    void testClickRoutingPrefersRegisteredActionOverHandleMenu() {
+        testMenu.inventory = mockInventory;
+        ItemStack button = new ItemStack(Material.IRON_INGOT);
+        MenuAction action = mock(MenuAction.class);
+        testMenu.slotActions.put(7, action);
+        when(mockClickEvent.getRawSlot()).thenReturn(7);
+        when(mockClickEvent.getWhoClicked()).thenReturn(mockPlayer);
+        testMenu.slotActions.get(7).execute(mockPlayer, mockClickEvent);
+        verify(action).execute(mockPlayer, mockClickEvent);
     }
 
     static class TestMenu extends Menu {

@@ -28,6 +28,8 @@ public abstract class Menu implements InventoryHolder {
     protected PlayerMenuUtility playerMenuUtility;
     protected Inventory inventory;
     protected List<Inventory> inventories = new ArrayList<>();
+    protected final Map<Integer, MenuAction> slotActions = new HashMap<>();
+    protected final Set<Integer> forbiddenSlots = new HashSet<>();
 
     //Constructor for Menu. Pass on a PlayerMenuUtility so that
     // we have information on whose menu this is and
@@ -216,5 +218,42 @@ public abstract class Menu implements InventoryHolder {
     public int getSlot(String path, int defaultInt) {
         return lgm.getCustomObject("Items." + path + ".slot", null, defaultInt, false);
     }
-}
 
+    public boolean registerButton(int slot, ItemStack item, MenuAction action, Set<Integer> forbidden) {
+        if (forbidden != null && forbidden.contains(slot)) throw new IllegalArgumentException("Slot forbidden");
+        if (forbiddenSlots.contains(slot)) throw new IllegalArgumentException("Slot forbidden");
+        ItemStack stack = inventory.getItem(slot);
+        if (stack != null && !(stack.getType().isAir() || stack.isSimilar(FILLER))) throw new IllegalStateException("Slot occupied");
+        inventory.setItem(slot, item);
+        slotActions.put(slot, action);
+        return true;
+    }
+
+    public boolean registerButton(ItemStack item, MenuAction action, Set<Integer> forbidden) {
+        int slot = findFirstEmptySlot(forbidden);
+        if (slot == -1) return false;
+        return registerButton(slot, item, action, forbidden);
+    }
+
+    public boolean tryRegisterButton(int slot, ItemStack item, MenuAction action, Set<Integer> forbidden) {
+        try { return registerButton(slot, item, action, forbidden); } catch (Exception e) { return false; }
+    }
+
+    public void clearRegisteredButtons() {
+        slotActions.clear();
+    }
+
+    public int findFirstEmptySlot(Set<Integer> forbidden) {
+        for (int i = 0; i < getSlots(); i++) {
+            if ((forbidden != null && forbidden.contains(i)) || forbiddenSlots.contains(i)) continue;
+            ItemStack stack = inventory.getItem(i);
+            if (stack == null || stack.getType().isAir() || stack.isSimilar(FILLER)) return i;
+        }
+        return -1;
+    }
+
+    public void setForbiddenSlots(Set<Integer> slots) {
+        forbiddenSlots.clear();
+        if (slots != null) forbiddenSlots.addAll(slots);
+    }
+}

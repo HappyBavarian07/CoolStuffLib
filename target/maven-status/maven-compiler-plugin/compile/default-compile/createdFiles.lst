@@ -116,6 +116,7 @@ de\happybavarian07\coolstufflib\configstuff\advanced\filetypes\interfaces\Abstra
 de\happybavarian07\coolstufflib\configstuff\advanced\filetypes\interfaces\converter\StringConfigTypeConverter.class
 de\happybavarian07\coolstufflib\jpa\connection\ConnectionPool.class
 de\happybavarian07\coolstufflib\configstuff\advanced\event\ConfigEventBus$EventPriority.class
+de\happybavarian07\coolstufflib\menusystem\MenuAddonManager$AddonButtonSpec.class
 de\happybavarian07\coolstufflib\menusystem\MenuAddon.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\LanguageFunctionManager.class
 de\happybavarian07\coolstufflib\languagemanager\expressionengine\Token.class

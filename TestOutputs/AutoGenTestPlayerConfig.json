@@ -1,7 +1,7 @@
 {
   "name": "TestPlayer",
-  "displayName": "§aTestPlayer",
-  "uuid": "ea7d7767-5fb3-4da1-89a7-4f63877b43e3",
+  "displayName": "Â§aTestPlayer",
+  "uuid": "12faecf0-50cc-43aa-84c9-6f1909190f14",
   "health": 20,
   "position": {
     "x": 100.5,

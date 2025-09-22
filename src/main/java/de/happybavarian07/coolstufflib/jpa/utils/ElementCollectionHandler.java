@@ -35,14 +35,13 @@ class ElementCollectionHandler {
                     if (val instanceof Collection<?>) {
                         collection = (Collection<?>) val;
                     }
-                } catch (IllegalAccessException ignored) {
-                }
+                } catch (IllegalAccessException ignored) {}
                 if (!isInsert) {
                     String delSql = "DELETE FROM " + databasePrefix + collectionTable + " WHERE " + fkColumn + " = ?";
                     try {
                         sqlExecutor.executeUpdate(delSql, entityId);
                     } catch (SQLException e) {
-                        throw new RuntimeException("Error executing insertEntity SQL", e);
+                        throw new RuntimeException("Error deleting old @ElementCollection rows. SQL: " + delSql, e);
                     }
                 }
                 if (collection != null && !collection.isEmpty()) {
@@ -51,7 +50,7 @@ class ElementCollectionHandler {
                         try {
                             sqlExecutor.executeUpdate(insSql, entityId, element);
                         } catch (SQLException e) {
-                            throw new RuntimeException("Error executing insertEntity SQL", e);
+                            throw new RuntimeException("Error inserting @ElementCollection row. SQL: " + insSql, e);
                         }
                     }
                 }
@@ -99,19 +98,11 @@ class ElementCollectionHandler {
     void createCollectionTables(Class<?> entityClass) {
         for (Field field : entityClass.getDeclaredFields()) {
             if (field.isAnnotationPresent(ElementCollection.class)) {
-                ElementCollection ec = field.getAnnotation(ElementCollection.class);
-                String collectionTable = ec.tableName().isEmpty() ?
-                        EntityReflectionUtil.getTableName(entityClass) + "_" + field.getName() : ec.tableName();
-                String fkColumn = EntityReflectionUtil.getIdColumnName(entityClass);
-                String valueColumn = ec.columnName().isEmpty() ? "element" : ec.columnName();
-                String sql = "CREATE TABLE IF NOT EXISTS " + databasePrefix + collectionTable +
-                        " (" + fkColumn + " VARCHAR(255) NOT NULL, " + valueColumn + " VARCHAR(255) NOT NULL, " +
-                        "FOREIGN KEY(" + fkColumn + ") REFERENCES " + databasePrefix + EntityReflectionUtil.getTableName(entityClass) +
-                        "(" + fkColumn + ") ON DELETE CASCADE)";
+                String entityTable = EntityReflectionUtil.getTableName(entityClass);
                 try {
-                    sqlExecutor.executeUpdate(sql);
+                    sqlExecutor.createElementCollectionTable(entityClass, field, entityTable, "");
                 } catch (SQLException e) {
-                    throw new RuntimeException("Error creating join table for @ElementCollection. SQL: " + sql, e);
+                    throw new RuntimeException("Error creating join table for @ElementCollection", e);
                 }
             }
         }

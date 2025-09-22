@@ -5,6 +5,14 @@ package de.happybavarian07.coolstufflib.menusystem;/*
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ArrayList;
+import com.google.gson.Gson;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 
 public class MenuAddonManager {
     private final Map<String, Map<String, MenuAddon>> menuAddonList = new HashMap<>();
@@ -51,5 +59,48 @@ public class MenuAddonManager {
 
     public boolean isMenuAddonManagerReady() {
         return menuAddonManagerReady;
+    }
+
+    public static class AddonButtonSpec {
+        public String menuTypeId;
+        public Integer slot;
+        public String serializedItem;
+        public String handlerId;
+        public Set<Integer> forbiddenSlots;
+    }
+
+    private final Map<String, AddonButtonSpec> globalButtonSpecs = new HashMap<>();
+    private final Map<String, MenuAction> handlerIdRegistry = new HashMap<>();
+
+    public void registerGlobalButton(AddonButtonSpec spec, MenuAction action) {
+        globalButtonSpecs.put(spec.handlerId, spec);
+        handlerIdRegistry.put(spec.handlerId, action);
+    }
+
+    public void persistGlobalButtons(File file) throws Exception {
+        Gson gson = new Gson();
+        try (FileWriter writer = new FileWriter(file)) {
+            gson.toJson(new ArrayList<>(globalButtonSpecs.values()), writer);
+        }
+    }
+
+    public void loadGlobalButtons(File file) throws Exception {
+        Gson gson = new Gson();
+        try (FileReader reader = new FileReader(file)) {
+            AddonButtonSpec[] specs = gson.fromJson(reader, AddonButtonSpec[].class);
+            for (AddonButtonSpec spec : specs) {
+                globalButtonSpecs.put(spec.handlerId, spec);
+            }
+        }
+    }
+
+    public void rebindHandlers(Map<String, MenuAction> runtimeHandlers) {
+        for (String handlerId : globalButtonSpecs.keySet()) {
+            if (runtimeHandlers.containsKey(handlerId)) {
+                handlerIdRegistry.put(handlerId, runtimeHandlers.get(handlerId));
+            } else {
+                // log warning or handle missing handler
+            }
+        }
     }
 }

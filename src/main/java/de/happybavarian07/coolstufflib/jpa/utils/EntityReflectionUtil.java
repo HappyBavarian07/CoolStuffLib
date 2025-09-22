@@ -1,5 +1,6 @@
 package de.happybavarian07.coolstufflib.jpa.utils;
 
+import de.happybavarian07.coolstufflib.jpa.annotations.Column;
 import de.happybavarian07.coolstufflib.jpa.annotations.Id;
 import de.happybavarian07.coolstufflib.jpa.annotations.Table;
 import java.lang.reflect.Field;
@@ -9,17 +10,13 @@ import java.lang.reflect.Type;
 public final class EntityReflectionUtil {
     private EntityReflectionUtil() {}
 
-    public static String getTableName(Class<?> entityClass) {
-        Table table = entityClass.getAnnotation(Table.class);
-        if (table != null && table.name() != null && !table.name().isEmpty()) {
-            return table.name();
-        }
-        return entityClass.getSimpleName().toLowerCase();
-    }
-
     public static String getIdColumnName(Class<?> entityClass) {
         for (Field field : entityClass.getDeclaredFields()) {
             if (field.isAnnotationPresent(Id.class)) {
+                Column col = field.getAnnotation(Column.class);
+                if (col != null && col.name() != null && !col.name().isEmpty()) {
+                    return col.name();
+                }
                 return field.getName();
             }
         }
@@ -33,7 +30,7 @@ public final class EntityReflectionUtil {
                 try {
                     return field.get(entity);
                 } catch (IllegalAccessException e) {
-                    throw new RuntimeException("Unable to access @Id field", e);
+                    throw new RuntimeException(e);
                 }
             }
         }
@@ -46,5 +43,13 @@ public final class EntityReflectionUtil {
             return (Class<?>) paramType.getActualTypeArguments()[0];
         }
         return Object.class;
+    }
+
+    public static String getTableName(Class<?> entityClass) {
+        if (entityClass.isAnnotationPresent(Table.class)) {
+            String n = entityClass.getAnnotation(Table.class).name();
+            if (n != null && !n.isEmpty()) return n;
+        }
+        return entityClass.getSimpleName().toLowerCase();
     }
 }
