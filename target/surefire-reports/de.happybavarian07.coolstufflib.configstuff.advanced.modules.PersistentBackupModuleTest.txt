@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: de.happybavarian07.coolstufflib.configstuff.advanced.modules.PersistentBackupModuleTest
--------------------------------------------------------------------------------
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.062 s -- in de.happybavarian07.coolstufflib.configstuff.advanced.modules.PersistentBackupModuleTest

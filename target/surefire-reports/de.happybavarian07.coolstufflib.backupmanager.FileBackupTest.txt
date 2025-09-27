@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: de.happybavarian07.coolstufflib.backupmanager.FileBackupTest
--------------------------------------------------------------------------------
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.578 s -- in de.happybavarian07.coolstufflib.backupmanager.FileBackupTest

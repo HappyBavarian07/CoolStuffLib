@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -215,8 +216,8 @@ public class ExpressionEngineCacheIntegrationTest {
 
     @Test
     void testVariableWhitelistBlacklist() {
-        engine.setVariableWhitelist(java.util.List.of("allowed_var"));
-        engine.setVariableBlacklist(java.util.List.of("blocked_var"));
+        engine.setVariableWhitelist(List.of("allowed_var"));
+        engine.setVariableBlacklist(List.of("blocked_var"));
 
         Map<String, Object> allowedVars = Map.of("allowed_var", 42);
         Object result = engine.evaluate("allowed_var", allowedVars);
@@ -228,8 +229,8 @@ public class ExpressionEngineCacheIntegrationTest {
         engine.registerFunction("allowed_func", (interpreter, args, type) -> "allowed");
         engine.registerFunction("blocked_func", (interpreter, args, type) -> "blocked");
 
-        engine.setFunctionWhitelist(java.util.List.of("allowed_func"));
-        engine.setFunctionBlacklist(java.util.List.of("blocked_func"));
+        engine.setFunctionWhitelist(List.of("allowed_func"));
+        engine.setFunctionBlacklist(List.of("blocked_func"));
 
         Object result = engine.evaluate("allowed_func()", Map.of());
         assertEquals("allowed", result);
