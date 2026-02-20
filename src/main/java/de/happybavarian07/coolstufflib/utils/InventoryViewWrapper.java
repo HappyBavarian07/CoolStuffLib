@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.logging.Logger;
 
-public class InventoryViewWrapper extends InventoryView {
+public class InventoryViewWrapper implements InventoryView {
 
     private static final Logger LOGGER = Bukkit.getLogger();
 
@@ -86,6 +86,47 @@ public class InventoryViewWrapper extends InventoryView {
     public ItemStack getItem(int slot) {
         Object result = invokeMethod("getItem", new Class<?>[]{int.class}, slot);
         return result instanceof ItemStack ? (ItemStack) result : null;
+    }
+
+    @Override
+    public void setCursor(@Nullable ItemStack itemStack) {
+        invokeMethod("setCursor", new Class<?>[]{ItemStack.class}, itemStack);
+    }
+
+    @Override
+    public @Nullable ItemStack getCursor() {
+        return invokeMethod("getCursor", new Class<?>[0]) instanceof ItemStack ? (ItemStack) invokeMethod("getCursor", new Class<?>[0]) : null;
+    }
+
+    @Override
+    public @Nullable Inventory getInventory(int i) {
+        return invokeMethod("getInventory", new Class<?>[]{int.class}, i) instanceof Inventory ? (Inventory) invokeMethod("getInventory", new Class<?>[]{int.class}, i) : null;
+    }
+
+    @Override
+    public int convertSlot(int i) {
+        Object result = invokeMethod("convertSlot", new Class<?>[]{int.class}, i);
+        return result instanceof Integer ? (Integer) result : -1;
+    }
+
+    @Override
+    public @NotNull InventoryType.SlotType getSlotType(int i) {
+        return null;
+    }
+
+    @Override
+    public void close() {
+
+    }
+
+    @Override
+    public int countSlots() {
+        return 0;
+    }
+
+    @Override
+    public boolean setProperty(@NotNull InventoryView.Property property, int i) {
+        return false;
     }
 
     @Override
