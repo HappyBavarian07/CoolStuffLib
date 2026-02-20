@@ -1,6 +1,6 @@
 {
   "players": {
-    "5967a122-0b03-4229-b996-170f0bccda53": {
+    "2d61627c-8906-42e5-b2c8-408ba0a7595c": {
       "displayName": "jsonDisp",
       "name": "JsonPlayer",
       "health": 18,
@@ -10,7 +10,7 @@
         "y": 64.0,
         "z": 10.0
       },
-      "uuid": "5967a122-0b03-4229-b996-170f0bccda53"
+      "uuid": "2d61627c-8906-42e5-b2c8-408ba0a7595c"
     }
   }
 }
