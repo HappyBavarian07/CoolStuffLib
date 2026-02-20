@@ -44,7 +44,11 @@ public class ConnectionPool {
                 usedConnections.add(connection);
                 return connection;
             }
-            return connectionQueue.take();
+            Connection connection = connectionQueue.poll(5, TimeUnit.SECONDS);
+            if (connection == null) {
+                throw new SQLException("Connection pool exhausted. Used: " + usedConnections.size() + ", Max: " + maxPoolSize);
+            }
+            return connection;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new SQLException("Interrupted while waiting for a connection.", e);

@@ -5,6 +5,7 @@ package de.happybavarian07.coolstufflib.commandmanagement;/*
 
 import de.happybavarian07.coolstufflib.CoolStuffLib;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
+import de.happybavarian07.coolstufflib.utils.CardboardCommandGuard;
 import de.happybavarian07.coolstufflib.utils.LogPrefix;
 import org.bukkit.Bukkit;
 import org.bukkit.command.*;
@@ -512,65 +513,70 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
      */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, String[] args) {
-        for (CommandManager cm : commandManagers.keySet()) {
-            try {
-                if (cm.getCommandName().equalsIgnoreCase(cmd.getName())) {
-                    if (args.length == 0) {
-                        if (CoolStuffLib.getLib().isSendSyntaxOnArgsZero()) {
-                            Player playerTemp = null;
-                            if (sender instanceof Player) {
-                                playerTemp = (Player) sender;
-                            }
-                            sender.sendMessage(format(lgm.getMessage("Player.Commands.UsageMessage", playerTemp, true), cm));
-                            return true;
-                        }
-                        sender.sendMessage(lgm.getMessage("Player.Commands.TooFewArguments", (sender instanceof Player) ? (Player) sender : null, true));
-                        return true;
-                    }
-                    if (!(sender instanceof Player)) {
-                        if (isPlayerRequired(cm)) {
-                            sender.sendMessage(lgm.getMessage("Console.ExecutesPlayerCommand", null, true));
-                            return true;
-                        }
-                    }
-                    if (isOpRequired(cm)) {
-                        if (!sender.isOp()) {
-                            sender.sendMessage(lgm.getMessage("Player.Commands.NoPermission", (sender instanceof Player) ? (Player) sender : null, true));
-                            return true;
-                        }
-                    }
-                    if (args.length < minArgs(cm)) {
-                        sender.sendMessage(lgm.getMessage("Player.Commands.TooFewArguments", (sender instanceof Player) ? (Player) sender : null, true));
-                        return true;
-                    }
-                    if (args.length > maxArgs(cm)) {
-                        sender.sendMessage(lgm.getMessage("Player.Commands.TooManyArguments", (sender instanceof Player) ? (Player) sender : null, true));
-                        return true;
-                    }
-
-                    boolean commandResult = cm.onCommand(sender, args);
-
-                    // Logging the command execution
-                    String logMessage = "Command execution for command: " + cmd.getName() + ", Args: " + Arrays.toString(args) + ", Sender: " + sender.getName();
-
-                    // Log the command result (success or failure)
-                    if (commandResult) {
-                        logMessage += " - Success";
-                    } else {
-                        logMessage += " - Failure";
-                    }
-
-                    CoolStuffLib.getLib().writeToLog(Level.INFO, logMessage, LogPrefix.COOLSTUFFLIB_COMMANDS, false);
-                    return commandResult;
-                }
-            } catch (Exception e) {
-                // Error occurred during command execution, log it.
-                String logMessage = "Error during command execution for command: " + cmd.getName() + ", Args: " + Arrays.toString(args)
-                        + ", Error: " + e.getMessage() + ", Stacktrace: " + Arrays.toString(e.getStackTrace());
-                CoolStuffLib.getLib().writeToLog(Level.SEVERE, logMessage, LogPrefix.ERROR, true);
-            }
+        if (!CardboardCommandGuard.enterCommand()) {
+            return true;
         }
-        return true;
+
+        try {
+            for (CommandManager cm : commandManagers.keySet()) {
+                try {
+                    if (cm.getCommandName().equalsIgnoreCase(cmd.getName())) {
+                        if (args.length == 0) {
+                            if (CoolStuffLib.getLib().isSendSyntaxOnArgsZero()) {
+                                Player playerTemp = null;
+                                if (sender instanceof Player) {
+                                    playerTemp = (Player) sender;
+                                }
+                                sender.sendMessage(format(lgm.getMessage("Player.Commands.UsageMessage", playerTemp, true), cm));
+                                return true;
+                            }
+                            sender.sendMessage(lgm.getMessage("Player.Commands.TooFewArguments", (sender instanceof Player) ? (Player) sender : null, true));
+                            return true;
+                        }
+                        if (!(sender instanceof Player)) {
+                            if (isPlayerRequired(cm)) {
+                                sender.sendMessage(lgm.getMessage("Console.ExecutesPlayerCommand", null, true));
+                                return true;
+                            }
+                        }
+                        if (isOpRequired(cm)) {
+                            if (!sender.isOp()) {
+                                sender.sendMessage(lgm.getMessage("Player.Commands.NoPermission", (sender instanceof Player) ? (Player) sender : null, true));
+                                return true;
+                            }
+                        }
+                        if (args.length < minArgs(cm)) {
+                            sender.sendMessage(lgm.getMessage("Player.Commands.TooFewArguments", (sender instanceof Player) ? (Player) sender : null, true));
+                            return true;
+                        }
+                        if (args.length > maxArgs(cm)) {
+                            sender.sendMessage(lgm.getMessage("Player.Commands.TooManyArguments", (sender instanceof Player) ? (Player) sender : null, true));
+                            return true;
+                        }
+
+                        boolean commandResult = cm.onCommand(sender, args);
+
+                        String logMessage = "Command execution for command: " + cmd.getName() + ", Args: " + Arrays.toString(args) + ", Sender: " + sender.getName();
+
+                        if (commandResult) {
+                            logMessage += " - Success";
+                        } else {
+                            logMessage += " - Failure";
+                        }
+
+                        CoolStuffLib.getLib().writeToLog(Level.INFO, logMessage, LogPrefix.COOLSTUFFLIB_COMMANDS, false);
+                        return commandResult;
+                    }
+                } catch (Exception e) {
+                    String logMessage = "Error during command execution for command: " + cmd.getName() + ", Args: " + Arrays.toString(args)
+                            + ", Error: " + e.getMessage() + ", Stacktrace: " + Arrays.toString(e.getStackTrace());
+                    CoolStuffLib.getLib().writeToLog(Level.SEVERE, logMessage, LogPrefix.ERROR, true);
+                }
+            }
+            return true;
+        } finally {
+            CardboardCommandGuard.exitCommand();
+        }
     }
 
     /**

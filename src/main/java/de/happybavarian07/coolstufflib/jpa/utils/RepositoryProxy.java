@@ -10,6 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -85,7 +86,17 @@ public class RepositoryProxy implements InvocationHandler {
             return proxy == args[0];
         }
         if ("isDatabaseReady".equals(methodName)) {
-            return sqlExecutor.getConnection(sqlExecutor.getDefaultConnection()) != null;
+            Connection conn = null;
+            try {
+                conn = sqlExecutor.getConnection(sqlExecutor.getDefaultConnection());
+                return conn != null && !conn.isClosed();
+            } catch (SQLException e) {
+                return false;
+            } finally {
+                if (conn != null) {
+                    sqlExecutor.releaseConnection(sqlExecutor.getDefaultConnection(), conn);
+                }
+            }
         }
         if (method.isAnnotationPresent(Transactional.class)) {
             return transactionManager.executeInTransaction(method, args, () -> invokeMethod(method, args));

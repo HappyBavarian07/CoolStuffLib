@@ -7,6 +7,7 @@ import de.happybavarian07.coolstufflib.CoolStuffLib;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import de.happybavarian07.coolstufflib.languagemanager.Placeholder;
 import de.happybavarian07.coolstufflib.languagemanager.PlaceholderType;
+import de.happybavarian07.coolstufflib.utils.CardboardCommandGuard;
 import de.happybavarian07.coolstufflib.utils.LogPrefix;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -95,50 +96,58 @@ public abstract class CommandManager {
      * @return True if the command was handled successfully, false otherwise.
      */
     public boolean onCommand(CommandSender sender, String[] args) {
-        SubCommand target = this.getSubCommand(args[0]);
-
-        if (target == null) {
-            sender.sendMessage(lgm.getMessage("Player.Commands.InvalidSubCommand", getPlayerForSender(sender), true));
+        if (!CardboardCommandGuard.enterCommand()) {
             return true;
-        }
-
-        if (!hasPermission(sender, target)) {
-            sender.sendMessage(format(lgm.getMessage("Player.General.NoPermissions", getPlayerForSender(sender), true), target));
-            return true;
-        }
-
-        String[] updatedArgs = removeFirstArgument(args);
-
-        if (target.isPlayerRequired() && !(sender instanceof Player)) {
-            sender.sendMessage(lgm.getMessage("Console.ExecutesPlayerCommand", null, true));
-            return true;
-        }
-        if (target.allowOnlySubCommandArgsThatFitToSubArgs()) {
-            Map<Integer, String> invalidArgs = findInvalidArgs(updatedArgs, target, (sender instanceof Player) ? 1 : 0);
-            if (!invalidArgs.isEmpty()) {
-                lgm.addPlaceholder(PlaceholderType.MESSAGE, "%invalidArgs%", invalidArgs.toString(), false);
-                sender.sendMessage(format(lgm.getMessage("Player.Commands.CommandContainsInvalidArgs", getPlayerForSender(sender), true), target));
-                return false;
-            }
         }
 
         try {
-            boolean callResult = handleSubCommand(sender, target, updatedArgs);
-            if (!callResult) {
-                sender.sendMessage(format(lgm.getMessage("Player.Commands.UsageMessage", getPlayerForSender(sender), true), target));
+            SubCommand target = this.getSubCommand(args[0]);
+
+            if (target == null) {
+                sender.sendMessage(lgm.getMessage("Player.Commands.InvalidSubCommand", getPlayerForSender(sender), true));
+                return true;
             }
-        } catch (Exception e) {
-            lgm.addPlaceholder(PlaceholderType.MESSAGE, "%error%", e + ": " + e.getMessage(), false);
-            lgm.addPlaceholder(PlaceholderType.MESSAGE, "%stacktrace%", Arrays.toString(e.getStackTrace()), false);
-            sender.sendMessage(format(lgm.getMessage("Player.Commands.ErrorPerformingSubCommand", getPlayerForSender(sender), true), target));
-            String stacktraceWithLineBreaks = Arrays.toString(e.getStackTrace()).replace(", ", "\n");
-            coolStuffLib.getPluginFileLogger().writeToLog(Level.SEVERE,
-                    "Error performing subcommand: " + target.name() +
-                            "(Error: " + e + ": " + e.getLocalizedMessage() + ", Stacktrace: " + stacktraceWithLineBreaks + ")",
-                    LogPrefix.COOLSTUFFLIB_COMMANDS,
-                    true);
+
+            if (!hasPermission(sender, target)) {
+                sender.sendMessage(format(lgm.getMessage("Player.General.NoPermissions", getPlayerForSender(sender), true), target));
+                return true;
+            }
+
+            String[] updatedArgs = removeFirstArgument(args);
+
+            if (target.isPlayerRequired() && !(sender instanceof Player)) {
+                sender.sendMessage(lgm.getMessage("Console.ExecutesPlayerCommand", null, true));
+                return true;
+            }
+            if (target.allowOnlySubCommandArgsThatFitToSubArgs()) {
+                Map<Integer, String> invalidArgs = findInvalidArgs(updatedArgs, target, (sender instanceof Player) ? 1 : 0);
+                if (!invalidArgs.isEmpty()) {
+                    lgm.addPlaceholder(PlaceholderType.MESSAGE, "%invalidArgs%", invalidArgs.toString(), false);
+                    sender.sendMessage(format(lgm.getMessage("Player.Commands.CommandContainsInvalidArgs", getPlayerForSender(sender), true), target));
+                    return false;
+                }
+            }
+
+            try {
+                boolean callResult = handleSubCommand(sender, target, updatedArgs);
+                if (!callResult) {
+                    sender.sendMessage(format(lgm.getMessage("Player.Commands.UsageMessage", getPlayerForSender(sender), true), target));
+                }
+            } catch (Exception e) {
+                lgm.addPlaceholder(PlaceholderType.MESSAGE, "%error%", e + ": " + e.getMessage(), false);
+                lgm.addPlaceholder(PlaceholderType.MESSAGE, "%stacktrace%", Arrays.toString(e.getStackTrace()), false);
+                sender.sendMessage(format(lgm.getMessage("Player.Commands.ErrorPerformingSubCommand", getPlayerForSender(sender), true), target));
+                String stacktraceWithLineBreaks = Arrays.toString(e.getStackTrace()).replace(", ", "\n");
+                coolStuffLib.getPluginFileLogger().writeToLog(Level.SEVERE,
+                        "Error performing subcommand: " + target.name() +
+                                "(Error: " + e + ": " + e.getLocalizedMessage() + ", Stacktrace: " + stacktraceWithLineBreaks + ")",
+                        LogPrefix.COOLSTUFFLIB_COMMANDS,
+                        true);
+            }
+            return true;
+        } finally {
+            CardboardCommandGuard.exitCommand();
         }
-        return true;
     }
 
     /**

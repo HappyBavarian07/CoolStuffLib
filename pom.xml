@@ -6,7 +6,7 @@
 
     <groupId>io.github.happybavarian07</groupId>
     <artifactId>CoolStuffLib</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
 
     <name>CoolStuffLib</name>
     <description>The Library that houses my Command Manager And Menu Manager And Language Manager as well as Config
@@ -207,7 +207,7 @@
         </repository>
         <repository>
             <id>placeholderapi</id>
-            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+            <url>https://repo.extendedclip.com/releases/</url>
         </repository>
         <repository>
             <id>maven_central</id>
@@ -232,7 +232,7 @@
         <dependency>
             <groupId>me.clip</groupId>
             <artifactId>placeholderapi</artifactId>
-            <version>2.10.9</version>
+            <version>2.11.7</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

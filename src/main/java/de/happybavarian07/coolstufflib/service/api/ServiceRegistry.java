@@ -1,7 +1,10 @@
 package de.happybavarian07.coolstufflib.service.api;
 
+import de.happybavarian07.coolstufflib.service.util.Tuples;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public interface ServiceRegistry {
@@ -11,8 +14,9 @@ public interface ServiceRegistry {
      *
      * @param descriptor the service descriptor
      * @param impl       the service implementation
+     * @param uuid       the UUID to assign (or null for random)
      */
-    void register(ServiceDescriptor descriptor, Service impl);
+    Tuples.Tuple2<Service, UUID> register(ServiceDescriptor descriptor, Service impl, UUID uuid);
 
     /**
      * <p>Registers a factory for lazy service instantiation.</p>
@@ -20,8 +24,9 @@ public interface ServiceRegistry {
      *
      * @param descriptor the service descriptor
      * @param factory    the service factory
+     * @param uuid       the UUID to assign (or null for random)
      */
-    <T extends Service> void registerFactory(ServiceDescriptor descriptor, ServiceFactory<T> factory);
+    <T extends Service> Tuples.Tuple2<T, UUID> registerFactory(ServiceDescriptor descriptor, ServiceFactory<T> factory, UUID uuid);
 
     /**
      * <p>Retrieves a service by its ID.</p>
@@ -30,7 +35,25 @@ public interface ServiceRegistry {
      * @param id the service ID
      * @return the service, or empty if not found
      */
-    Optional<Service> get(String id);
+    Optional<Service> get(UUID id);
+
+    /**
+     * <p>Retrieves a service by its name.</p>
+     * <pre><code>Optional&lt;Service&gt; svc = registry.getByName("serviceA");</code></pre>
+     *
+     * @param serviceName the service name
+     * @return the service, or empty if not found
+     */
+    Optional<Service> getByName(String serviceName);
+
+    /**
+     * <p>Gets the ID of a service by its name.</p>
+     * <pre><code>UUID id = registry.getIdByName("serviceA");</code></pre>
+     *
+     * @param id the service ID
+     * @return the service name, or null ("") if not found
+     */
+    String getNameById(UUID id);
 
     /**
      * <p>Retrieves a service by its ID and type.</p>
@@ -40,7 +63,17 @@ public interface ServiceRegistry {
      * @param type the expected service type
      * @return the service, or empty if not found or type mismatch
      */
-    <T extends Service> Optional<T> getAs(String id, Class<T> type);
+    <T extends Service> Optional<T> getAs(UUID id, Class<T> type);
+
+    /**
+     * <p>Retrieves a service by its name and type.</p>
+     * <pre><code>Optional&lt;MyService&gt; svc = registry.getAsByName("serviceA", MyService.class);</code></pre>
+     *
+     * @param serviceName the service name
+     * @param type        the expected service type
+     * @return the service, or empty if not found or type mismatch
+     */
+    <T extends Service> Optional<T> getAsByName(String serviceName, Class<T> type);
 
     /**
      * <p>Gets the current state of a service.</p>
@@ -49,7 +82,16 @@ public interface ServiceRegistry {
      * @param id the service ID
      * @return the service state
      */
-    ServiceState getState(String id);
+    ServiceState getState(UUID id);
+
+    /**
+     * <p>Gets the current state of a service by its name.</p>
+     * <pre><code>ServiceState state = registry.getStateByName("serviceA");</code></pre>
+     *
+     * @param serviceName the service name
+     * @return the service state
+     */
+    ServiceState getStateByName(String serviceName);
 
     /**
      * <p>Returns a snapshot of all service states.</p>
@@ -57,7 +99,15 @@ public interface ServiceRegistry {
      *
      * @return map of service IDs to states
      */
-    Map<String, ServiceState> snapshotStates();
+    Map<UUID, ServiceState> snapshotStates();
+
+    /**
+     * <p>Returns a snapshot of all service states indexed by service name.</p>
+     * <pre><code>Map&lt;String, ServiceState&gt; states = registry.snapshotStatesByName();</code></pre>
+     *
+     * @return map of service names to states
+     */
+    Map<String, ServiceState> snapshotStatesByName();
 
     /**
      * <p>Starts all registered services asynchronously.</p>
@@ -82,7 +132,7 @@ public interface ServiceRegistry {
      * @param id the service ID
      * @return a future that completes when the service is started
      */
-    CompletableFuture<Void> start(String id);
+    CompletableFuture<Void> start(UUID id);
 
     /**
      * <p>Stops a specific service asynchronously.</p>
@@ -91,7 +141,7 @@ public interface ServiceRegistry {
      * @param id the service ID
      * @return a future that completes when the service is stopped
      */
-    CompletableFuture<Void> stop(String id);
+    CompletableFuture<Void> stop(UUID id);
 
     /**
      * <p>Restarts a specific service asynchronously.</p>
@@ -100,7 +150,7 @@ public interface ServiceRegistry {
      * @param id the service ID
      * @return a future that completes when the service is restarted
      */
-    CompletableFuture<Void> restart(String id);
+    CompletableFuture<Void> restart(UUID id);
 
     /**
      * <p>Adds a lifecycle listener for service events.</p>
@@ -125,7 +175,7 @@ public interface ServiceRegistry {
      * @param serviceId the service ID
      * @param check     the health check
      */
-    void registerHealthCheck(String serviceId, HealthCheck check);
+    void registerHealthCheck(UUID serviceId, HealthCheck check);
 
     /**
      * <p>Checks if a service is healthy asynchronously.</p>
@@ -134,7 +184,7 @@ public interface ServiceRegistry {
      * @param serviceId the service ID
      * @return a future with the health status
      */
-    CompletableFuture<Boolean> isHealthy(String serviceId);
+    CompletableFuture<Boolean> isHealthy(UUID serviceId);
 
     /**
      * <p>Registers all annotated services in a package.</p>
@@ -143,7 +193,7 @@ public interface ServiceRegistry {
      * @param packageName the package to scan
      * @param config      the config to inject
      */
-    <T extends Service> void registerAnnotatedServices(String packageName, Config config);
+    List<Tuples.Tuple2<Service, UUID>> registerAnnotatedServices(String packageName, Config config);
 
     /**
      * <p>Reloads a specific service asynchronously.</p>
@@ -152,7 +202,7 @@ public interface ServiceRegistry {
      * @param id the service ID
      * @return a future that completes when reload is done
      */
-    CompletableFuture<Void> reload(String id);
+    CompletableFuture<Void> reload(UUID id);
 
     /**
      * <p>Reloads all services asynchronously.</p>
@@ -161,4 +211,13 @@ public interface ServiceRegistry {
      * @return a future that completes when reload is done
      */
     CompletableFuture<Void> reloadAll();
+
+    /**
+     * <p>Gets the ID of a service by its name.</p>
+     * <pre><code>UUID id = registry.getIdByName("serviceA");</code></pre>
+     *
+     * @param serviceA the service name
+     * @return the service ID, or null if not found
+     */
+    UUID getIdByName(String serviceA);
 }

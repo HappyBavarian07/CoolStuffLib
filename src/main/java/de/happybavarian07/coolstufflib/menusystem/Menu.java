@@ -2,7 +2,9 @@ package de.happybavarian07.coolstufflib.menusystem;
 
 import de.happybavarian07.coolstufflib.CoolStuffLib;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
+import de.happybavarian07.coolstufflib.utils.HybridInventoryUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -10,6 +12,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -30,6 +33,7 @@ public abstract class Menu implements InventoryHolder {
     protected List<Inventory> inventories = new ArrayList<>();
     protected final Map<Integer, MenuAction> slotActions = new HashMap<>();
     protected final Set<Integer> forbiddenSlots = new HashSet<>();
+    protected boolean forceHybridMode = false;
 
     //Constructor for Menu. Pass on a PlayerMenuUtility so that
     // we have information on whose menu this is and
@@ -140,8 +144,20 @@ public abstract class Menu implements InventoryHolder {
             Bukkit.getPluginManager().registerEvents((Listener) this, CoolStuffLib.getLib().getJavaPluginUsingLib());
         }
 
-        //open the inventory for the player
-        playerMenuUtility.getOwner().openInventory(inventory);
+        if (forceHybridMode) {
+            HybridInventoryUtils.setCompatibilityMode(true);
+        }
+
+        InventoryView view = HybridInventoryUtils.openInventorySafe(playerMenuUtility.getOwner(), inventory);
+
+        if (view == null) {
+            Bukkit.getLogger().severe("[CoolStuffLib] Failed to open menu for " +
+                                      playerMenuUtility.getOwner().getName());
+            playerMenuUtility.getOwner().sendMessage(
+                    ChatColor.RED + "Failed to open menu. Please contact an administrator.");
+            playerMenuUtility.getOwner().closeInventory();
+            return;
+        }
 
         // Try executing Menu Addons onOpenEvent
         for (Map.Entry<String, MenuAddon> menuAddonName : addonList.entrySet()) {

@@ -1,6 +1,7 @@
 package de.happybavarian07.coolstufflib.service.api;
 
-public interface ServiceLifecycleListener {
-    void onStateChange(String serviceId, ServiceState from, ServiceState to, Throwable failure);
-}
+import java.util.UUID;
 
+public interface ServiceLifecycleListener {
+    void onStateChange(UUID serviceId, String serviceName, ServiceState from, ServiceState to, Throwable failure);
+}

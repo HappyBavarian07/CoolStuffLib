@@ -1,12 +1,13 @@
 package de.happybavarian07.coolstufflib.service.api;
+
 import java.util.Map;
+import java.util.UUID;
 
 public interface ServiceMetrics {
-    long getStartupTime(String serviceId);
-    long getReloadTime(String serviceId);
-    Map<String, Long> getAllStartupTimes();
-    Map<String, Long> getAllReloadTimes();
-    int getHealthCheckFailures(String serviceId);
-    Map<String, Integer> getAllHealthCheckFailures();
+    long getStartupTime(UUID serviceId);
+    long getReloadTime(UUID serviceId);
+    Map<UUID, Long> getAllStartupTimes();
+    Map<UUID, Long> getAllReloadTimes();
+    int getHealthCheckFailures(UUID serviceId);
+    Map<UUID, Integer> getAllHealthCheckFailures();
 }
-

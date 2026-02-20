@@ -4,24 +4,28 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public final class ServiceDescriptor {
-    private final String id;
-    private final List<String> dependsOn;
+    private final UUID id;
+    private final String serviceName;
+    private final List<UUID> dependsOn;
     private final Duration startTimeout;
     private final Duration stopTimeout;
 
     /**
      * <p>Creates a new service descriptor.</p>
-     * <pre><code>ServiceDescriptor desc = new ServiceDescriptor("id", List.of("dep"), Duration.ofSeconds(5), Duration.ofSeconds(5));</code></pre>
+     * <pre><code>ServiceDescriptor desc = new ServiceDescriptor(UUID.randomUUID(), "ServiceName", List.of(UUID.randomUUID()), Duration.ofSeconds(5), Duration.ofSeconds(5));</code></pre>
      *
      * @param id           the service ID
+     * @param serviceName  the service name
      * @param dependsOn    list of dependent service IDs
      * @param startTimeout startup timeout
      * @param stopTimeout  shutdown timeout
      */
-    public ServiceDescriptor(String id, List<String> dependsOn, Duration startTimeout, Duration stopTimeout) {
+    public ServiceDescriptor(UUID id, String serviceName, List<UUID> dependsOn, Duration startTimeout, Duration stopTimeout) {
         this.id = Objects.requireNonNull(id);
+        this.serviceName = Objects.requireNonNull(serviceName);
         this.dependsOn = dependsOn == null ? Collections.emptyList() : List.copyOf(dependsOn);
         this.startTimeout = startTimeout == null ? Duration.ofSeconds(20) : startTimeout;
         this.stopTimeout = stopTimeout == null ? Duration.ofSeconds(10) : stopTimeout;
@@ -29,21 +33,31 @@ public final class ServiceDescriptor {
 
     /**
      * <p>Returns the service ID.</p>
-     * <pre><code>String id = desc.id();</code></pre>
+     * <pre><code>UUID id = desc.id();</code></pre>
      *
      * @return the service ID
      */
-    public String id() {
+    public UUID id() {
         return id;
     }
 
     /**
+     * <p>Returns the service name.</p>
+     * <pre><code>String name = desc.serviceName();</code></pre>
+     *
+     * @return the service name
+     */
+    public String serviceName() {
+        return serviceName;
+    }
+
+    /**
      * <p>Returns the list of dependent service IDs.</p>
-     * <pre><code>List&lt;String&gt; deps = desc.dependsOn();</code></pre>
+     * <pre><code>List&lt;UUID&gt; deps = desc.dependsOn();</code></pre>
      *
      * @return list of dependencies
      */
-    public List<String> dependsOn() {
+    public List<UUID> dependsOn() {
         return dependsOn;
     }
 

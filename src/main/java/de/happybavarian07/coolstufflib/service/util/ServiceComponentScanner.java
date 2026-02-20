@@ -141,7 +141,7 @@ public class ServiceComponentScanner {
     }
 
     private static Service findDependency(Class<?> type, ServiceRegistry registry) {
-        for (String id : registry.snapshotStates().keySet()) {
+        for (UUID id : registry.snapshotStates().keySet()) {
             Service s = registry.get(id).orElse(null);
             if (s != null && type.isInstance(s)) return s;
         }
