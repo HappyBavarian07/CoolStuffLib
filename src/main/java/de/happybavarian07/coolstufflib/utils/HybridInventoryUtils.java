@@ -19,6 +19,10 @@ public class HybridInventoryUtils {
             return null;
         }
 
+        // lets disable all this till we fix it since this is kinda useless since it doesnt work at all most of the time anyways so just open inv normally
+        return player.openInventory(inventory);
+
+        /*
         if (compatibilityModeEnabled || ServerPlatformDetector.isHybridServer()) {
             return openInventoryReflective(player, inventory);
         }
@@ -38,7 +42,7 @@ public class HybridInventoryUtils {
             LOGGER.severe("[CoolStuffLib] Unexpected error opening inventory: " + e.getClass().getName());
             LOGGER.severe("[CoolStuffLib] Error message: " + e.getMessage());
             return null;
-        }
+        }*/
     }
 
     private static InventoryView openInventoryReflective(Player player, Inventory inventory) {

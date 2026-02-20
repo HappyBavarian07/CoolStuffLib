@@ -1046,7 +1046,7 @@ public class LanguageManager {
         includedKeys.addAll(getPlaceholderKeysInMessage(Utils.format(player, displayName, prefix), PlaceholderType.ITEM));
         meta.setDisplayName(replacePlaceholders(PlaceholderType.ITEM, Utils.format(player, displayName, prefix)));
         if (getObjectFromLanguageCacheOrConfig("Items." + path + ".enchanted", langFile.getLangName(), Boolean.class)) {
-            meta.addEnchant(Enchantment.DURABILITY, 0, true);
+            meta.addEnchant(Enchantment.UNBREAKING, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
         item.setItemMeta(meta);

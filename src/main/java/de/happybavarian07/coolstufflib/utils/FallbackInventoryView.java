@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class FallbackInventoryView extends InventoryView {
+public class FallbackInventoryView implements InventoryView {
 
     private final HumanEntity player;
     private final Inventory topInventory;
@@ -52,6 +52,46 @@ public class FallbackInventoryView extends InventoryView {
         } else {
             return bottomInventory.getItem(slot - topInventory.getSize());
         }
+    }
+
+    @Override
+    public void setCursor(@Nullable ItemStack itemStack) {
+
+    }
+
+    @Override
+    public @Nullable ItemStack getCursor() {
+        return null;
+    }
+
+    @Override
+    public @Nullable Inventory getInventory(int i) {
+        return null;
+    }
+
+    @Override
+    public int convertSlot(int i) {
+        return 0;
+    }
+
+    @Override
+    public @NotNull InventoryType.SlotType getSlotType(int i) {
+        return null;
+    }
+
+    @Override
+    public void close() {
+
+    }
+
+    @Override
+    public int countSlots() {
+        return 0;
+    }
+
+    @Override
+    public boolean setProperty(@NotNull InventoryView.Property property, int i) {
+        return false;
     }
 
     @Override
