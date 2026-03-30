@@ -13,15 +13,6 @@ players:
       y: 80.0
       z: 0.0
     uuid: "7f25e0c3-41f5-4eae-a378-28104136ba38"
-  aa2c0e63-da16-4f9f-b76d-8ed48a52be42:
-    displayName: "yamlDisp"
-    name: "YamlPlayer"
-    health: 15
-    position:
-      world: "nether"
-      x: 0.0
-      y: 80.0
-      z: 0.0
   a4b5422e-a4ab-43cb-83e6-af83114c3da6:
     displayName: "yamlDisp"
     name: "YamlPlayer"
@@ -32,6 +23,15 @@ players:
       y: 80.0
       z: 0.0
     uuid: "a4b5422e-a4ab-43cb-83e6-af83114c3da6"
+  aa2c0e63-da16-4f9f-b76d-8ed48a52be42:
+    displayName: "yamlDisp"
+    name: "YamlPlayer"
+    health: 15
+    position:
+      world: "nether"
+      x: 0.0
+      y: 80.0
+      z: 0.0
   7b2dd99b-df2a-4d84-81af-f6e58a53f193:
     displayName: "yamlDisp"
   5f39e71a-f05b-4072-9211-ce842f9dba5b:
