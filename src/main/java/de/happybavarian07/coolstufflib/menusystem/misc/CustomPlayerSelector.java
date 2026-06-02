@@ -146,7 +146,7 @@ public class CustomPlayerSelector<T, R> extends PaginatedMenu<Player> {
         addMenuBorder();
         lgm.addPlaceholder(PlaceholderType.ITEM, "%action%", action, false);
         ItemStack infoItem = lgm.getItem("CustomPlayerSelector.InfoItem", playerMenuUtility.getOwner(), false);
-        setItemWithAction(4, infoItem, (p, e) -> {}); // No action on info item
+        registerButton(4, infoItem, (p, e) -> {}, null); // No action on info item
         
         if (multiSelect) {
             MenuAction confirmAction = (p, e) -> {
@@ -162,8 +162,8 @@ public class CustomPlayerSelector<T, R> extends PaginatedMenu<Player> {
                 super.open();
             };
 
-            setItemWithAction(getSlots() - 6, lgm.getItem("CustomPlayerSelector.Confirm", null, false), confirmAction);
-            setItemWithAction(getSlots() - 7, lgm.getItem("CustomPlayerSelector.DeSelect", null, false), deselectAction);
+            registerButton(getSlots() - 6, lgm.getItem("CustomPlayerSelector.Confirm", null, false), confirmAction, null);
+            registerButton(getSlots() - 7, lgm.getItem("CustomPlayerSelector.DeSelect", null, false), deselectAction, null);
         }
     }
 

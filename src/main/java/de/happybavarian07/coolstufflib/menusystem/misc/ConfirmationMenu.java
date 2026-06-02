@@ -76,14 +76,14 @@ public class ConfirmationMenu extends Menu {
         // Fill the left side with Confirm buttons
         for (int i = 0; i < leftSideSlots; i++) {
             if (i % 9 != 4) { // Skip the middle column
-                setItemWithAction(i, confirmItem, confirmAction);
+                registerButton(i, confirmItem, confirmAction, null);
             }
         }
 
         // Fill the right side with Cancel buttons
         for (int i = getSlots() - 1; i >= getSlots() - rightSideSlots; i--) {
             if (i % 9 != 4) { // Skip the middle column
-                setItemWithAction(i, cancelItem, cancelAction);
+                registerButton(i, cancelItem, cancelAction, null);
             }
         }
 
