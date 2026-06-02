@@ -1,10 +1,7 @@
 package de.happybavarian07.coolstufflib.menusystem;
 
-import de.happybavarian07.coolstufflib.menusystem.pagination.InstantPageTransition;
-import de.happybavarian07.coolstufflib.menusystem.pagination.PageControlLayout;
-import de.happybavarian07.coolstufflib.menusystem.pagination.PageDirection;
-import de.happybavarian07.coolstufflib.menusystem.pagination.PageRenderContext;
-import de.happybavarian07.coolstufflib.menusystem.pagination.PageTransition;
+import de.happybavarian07.coolstufflib.menusystem.pagination.*;
+import org.bukkit.NamespacedKey;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -202,7 +199,7 @@ public abstract class MultiPaginatedMenu extends Menu {
     protected static class Zone<T> {
         private final String id;
         private final PaginationZone zone;
-        private final org.bukkit.NamespacedKey zoneKey;
+        private final NamespacedKey zoneKey;
         private final List<T> data;
         private final Function<T, ItemStack> renderer;
         private final Map<Integer, Integer> slotToDataIndex = new HashMap<>();
@@ -217,7 +214,7 @@ public abstract class MultiPaginatedMenu extends Menu {
             this.zone = zone;
             this.data = data;
             this.renderer = renderer;
-            this.zoneKey = new org.bukkit.NamespacedKey("coolstufflib-menusystem", "multi_paginated_item_" + id);
+            this.zoneKey = new NamespacedKey("coolstufflib-menusystem", "multi_paginated_item_" + id);
         }
     }
 

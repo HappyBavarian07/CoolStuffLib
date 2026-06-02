@@ -41,7 +41,8 @@ public class CasinoMenu<T, R> extends Menu {
 
     @Override
     public String getMenuName() {
-        return "Casino";
+        ensurePrepared();
+        return lgm.getMenuTitle("Misc.CasinoMenu", playerMenuUtility.getOwner());
     }
 
     @Override
@@ -82,7 +83,8 @@ public class CasinoMenu<T, R> extends Menu {
 
     @Override
     public void setMenuItems() {
-        setFillerGlass();
+        ensurePrepared();
+        setFillerGlass(13);
         if (!expandedPool.isEmpty()) {
             inventory.setItem(13, animationFunction.apply(expandedPool.get(0)));
         }

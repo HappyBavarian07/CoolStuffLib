@@ -57,6 +57,7 @@ public abstract class Menu implements InventoryHolder {
     public Menu(PlayerMenuUtility playerMenuUtility, Menu savedMenu) {
         this.playerMenuUtility = playerMenuUtility;
         this.savedMenu = savedMenu;
+        ensurePrepared();
     }
 
     /**

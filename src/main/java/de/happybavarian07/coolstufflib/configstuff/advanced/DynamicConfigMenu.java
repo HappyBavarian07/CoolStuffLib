@@ -62,7 +62,6 @@ public class DynamicConfigMenu extends PaginatedMenu<Map.Entry<String, Object>> 
 
     @Override
     public void preSetMenuItems() {
-        ensurePrepared();
         List<Map.Entry<String, Object>> entries = new ArrayList<>();
         if (currentSection != null) {
             entries.addAll(currentSection.toSerializableMap().entrySet());
