@@ -8,12 +8,21 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * <p>Fallback implementation for inventory views.</p>
+ */
 public class FallbackInventoryView implements InventoryView {
 
     private final HumanEntity player;
     private final Inventory topInventory;
     private final Inventory bottomInventory;
 
+    /**
+     * <p>Creates a new fallback inventory view.</p>
+     *
+     * @param player       The human entity
+     * @param topInventory The top inventory
+     */
     public FallbackInventoryView(HumanEntity player, Inventory topInventory) {
         this.player = player;
         this.topInventory = topInventory;

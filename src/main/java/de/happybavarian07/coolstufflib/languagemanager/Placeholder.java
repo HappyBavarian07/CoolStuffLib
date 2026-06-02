@@ -1,7 +1,4 @@
-package de.happybavarian07.coolstufflib.languagemanager;/*
- * @Author HappyBavarian07
- * @Date 25.04.2022 | 17:07
- */
+package de.happybavarian07.coolstufflib.languagemanager;
 
 import de.happybavarian07.coolstufflib.utils.Utils;
 import org.bukkit.ChatColor;
@@ -19,10 +16,10 @@ public record Placeholder(String key, Object value, PlaceholderType type) {
     }
 
     /**
-     * The replace function replaces the placeholder with the value.
+     * <p>Replaces the placeholder in the given message.</p>
      *
-     * @param s Get the string that needs to be replaced
-     * @return A string
+     * @param s The input string
+     * @return The string with the placeholder replaced
      */
     public String replace(String s) {
         if (!stringContainsPlaceholder(s)) return s;
@@ -43,6 +40,12 @@ public record Placeholder(String key, Object value, PlaceholderType type) {
         return s.replace(key, value.toString());
     }
 
+    /**
+     * <p>Checks if the string contains the placeholder.</p>
+     *
+     * @param s The string
+     * @return {@code true} if present
+     */
     public boolean stringContainsPlaceholder(String s) {
         return s.contains(key);
     }

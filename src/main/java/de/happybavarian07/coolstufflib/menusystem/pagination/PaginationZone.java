@@ -5,18 +5,17 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * Defines which inventory slots are used by a paginated data area.
- * <p>
- * Supports both contiguous ranges and explicit slot lists.
+ * <p>Defines which inventory slots are used by a paginated data area.</p>
+ * <p>Supports both contiguous ranges and explicit slot lists.</p>
  */
 public class PaginationZone {
     private final int[] slots;
 
     /**
-     * Creates a contiguous slot range (inclusive).
+     * <p>Creates a contiguous slot range (inclusive).</p>
      *
-     * @param startSlot first slot (inclusive)
-     * @param endSlot last slot (inclusive)
+     * @param startSlot First slot (inclusive)
+     * @param endSlot   Last slot (inclusive)
      */
     public PaginationZone(int startSlot, int endSlot) {
         if (startSlot < 0 || endSlot < 0) throw new IllegalArgumentException("Slots must be >= 0");
@@ -27,9 +26,9 @@ public class PaginationZone {
     }
 
     /**
-     * Creates a zone from explicit slots.
+     * <p>Creates a zone from explicit slots.</p>
      *
-     * @param slots target slots in display order
+     * @param slots Target slots in display order
      */
     public PaginationZone(int... slots) {
         if (slots == null || slots.length == 0) throw new IllegalArgumentException("At least one slot is required");
@@ -44,9 +43,9 @@ public class PaginationZone {
     }
 
     /**
-     * Returns the configured slots in display order.
+     * <p>Returns the configured slots in display order.</p>
      *
-     * @return copied slot array
+     * @return Copied slot array
      */
     public int[] getSlots() {
         return Arrays.copyOf(slots, slots.length);

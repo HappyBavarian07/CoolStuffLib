@@ -31,13 +31,15 @@ public class CacheManager implements Service {
         return CompletableFuture.runAsync(this::clearAll);
     }
 
+    /**
+     * <p>Registers a new cache instance.</p>
+     *
+     * <pre><code>cacheManager.registerCache("myCache", new InMemoryCache<>());</code></pre>
+     *
+     * @param name  Cache name
+     * @param cache Cache instance
+     */
     public <K, V> void registerCache(String name, Cache<K, V> cache) {
-        if (name == null) {
-            throw new IllegalArgumentException("Cache name must not be null");
-        }
-        if (cache == null) {
-            throw new IllegalArgumentException("Cache instance must not be null");
-        }
         caches.put(name, cache);
     }
 

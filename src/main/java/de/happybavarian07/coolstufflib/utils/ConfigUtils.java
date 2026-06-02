@@ -20,6 +20,14 @@ public final class ConfigUtils {
 
     private ConfigUtils() {}
 
+    /**
+     * <p>Flattens a configuration structure into a map of dot-notated keys.</p>
+     *
+     * @param registry The type converter registry
+     * @param prefix   The key prefix
+     * @param value    The value to flatten
+     * @return A map of flattened keys and values
+     */
     public static Map<String, Object> flatten(ConfigTypeConverterRegistry registry, String prefix, Object value) {
         Map<String, Object> map = new HashMap<>();
         if (value instanceof Map m && m.containsKey("__type__")) {
@@ -71,6 +79,13 @@ public final class ConfigUtils {
         return map;
     }
 
+    /**
+     * <p>Unflattens a map of dot-notated keys back into a nested object structure.</p>
+     *
+     * @param registry The type converter registry
+     * @param map      The flattened map
+     * @return The unflattened object structure
+     */
     @SuppressWarnings("unchecked")
     public static Object unflatten(ConfigTypeConverterRegistry registry, Map<String, String> map) {
         Map<String, Object> result = new HashMap<>();

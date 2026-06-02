@@ -20,30 +20,24 @@ public class LanguageConfig {
     private final File langFolder;
 
     /**
-     * The LanguageConfig function is used to create a new LanguageConfig object.
-     * This function will also save the default language file if it does not exist,
-     * and load the configuration from that file into memory.
-
+     * <p>Creates a new LanguageConfig instance and initializes it.</p>
      *
-     * @param langFile Set the file variable
-     * @param langFolder Create the folder where the language file is stored
-     * @param resourceDirectory Specify the folder in which the language file is located
-     * @param langName Set the name of the language file
-     * @see LanguageManager
+     * @param langFile          The language file
+     * @param langFolder        The folder containing language files
+     * @param resourceDirectory The resource directory
+     * @param langName          The language name
      */
     public LanguageConfig(File langFile, File langFolder, String resourceDirectory, String langName) {
         this.langName = langName;
         this.file = langFile;
         this.resourceDirectory = resourceDirectory;
         this.langFolder = langFolder;
-        //System.out.println("Creating Language Config: " + this.langName + "  |  " + this.file);
         saveDefaultConfig();
         this.config = YamlConfiguration.loadConfiguration(file);
     }
 
     /**
-     * The reloadConfig function reloads the config file from disk.
-     * It is called when the plugin is enabled, and whenever a player uses /reload.
+     * <p>Reloads the configuration file from disk.</p>
      */
     public void reloadConfig() {
         if (this.file == null)
@@ -61,10 +55,9 @@ public class LanguageConfig {
     }
 
     /**
-     * The getConfig function is used to get the configuration file for this plugin.
-     * If the config file does not exist, it will be created.
+     * <p>Retrieves the configuration.</p>
      *
-     * @return The config file
+     * @return The {@link FileConfiguration}
      */
     public FileConfiguration getConfig() {
         if (this.config == null)
@@ -74,7 +67,7 @@ public class LanguageConfig {
     }
 
     /**
-     * The saveConfig function saves the config file to disk.
+     * <p>Saves the configuration to disk.</p>
      */
     public void saveConfig() {
         if (this.config == null || this.file == null)
@@ -88,8 +81,7 @@ public class LanguageConfig {
     }
 
     /**
-     * The saveDefaultConfig function is used to save the default configuration file from the plugin's jar.
-     * This function will only run if there is no existing config file in the plugins data folder.
+     * <p>Saves the default configuration from resources if it doesn't exist.</p>
      */
     public void saveDefaultConfig() {
         if (this.file == null)
@@ -101,24 +93,10 @@ public class LanguageConfig {
         }
     }
 
-    /**
-     * The getLangName function returns the name of the language.
-     *
-     *
-     *
-     * @return The name of the language
-     */
     public String getLangName() {
         return langName;
     }
 
-    /**
-     * The getFile function returns the file that is being read from.
-     *
-     *
-     *
-     * @return A file object
-     */
     public File getFile() {
         return file;
     }

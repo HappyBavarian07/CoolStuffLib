@@ -6,6 +6,9 @@ import de.happybavarian07.coolstufflib.utils.PluginFileLogger;
 import java.io.File;
 import java.util.logging.Level;
 
+/**
+ * <p>Centralized logger for configuration-related events.</p>
+ */
 public final class ConfigLogger {
 
     private static final String LOG_FILE = "config.log";
@@ -13,9 +16,13 @@ public final class ConfigLogger {
     private static boolean initialized = false;
 
     private ConfigLogger() {
-        // Private constructor to prevent instantiation
     }
 
+    /**
+     * <p>Initializes the logger.</p>
+     *
+     * @param rootDirectory The root directory
+     */
     public static void initialize(File rootDirectory) {
         if (initialized) {
             return;
@@ -30,21 +37,50 @@ public final class ConfigLogger {
         initialized = true;
     }
 
+    /**
+     * <p>Logs an info message.</p>
+     *
+     * @param message The message
+     * @param source  The log source
+     * @param console Whether to log to console
+     */
     public static void info(String message, String source, boolean console) {
         checkInitialized();
         logger.writeToLog(Level.INFO, message, source, console);
     }
 
+    /**
+     * <p>Logs a warning message.</p>
+     *
+     * @param message The warning
+     * @param source  The log source
+     * @param console Whether to log to console
+     */
     public static void warning(String message, String source, boolean console) {
         checkInitialized();
         logger.writeToLog(Level.WARNING, message, source, console);
     }
 
+    /**
+     * <p>Logs an error message.</p>
+     *
+     * @param message The error message
+     * @param source  The log source
+     * @param console Whether to log to console
+     */
     public static void error(String message, String source, boolean console) {
         checkInitialized();
         logger.writeToLog(Level.SEVERE, message, source, console);
     }
 
+    /**
+     * <p>Logs an error with stack trace.</p>
+     *
+     * @param message   The error message
+     * @param throwable The exception
+     * @param source    The log source
+     * @param console   Whether to log to console
+     */
     public static void error(String message, Throwable throwable, String source, boolean console) {
         checkInitialized();
         StringBuilder fullMessage = new StringBuilder();

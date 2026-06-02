@@ -51,6 +51,16 @@ public class SQLExecutor {
         }
     }
 
+    /**
+     * <p>Executes an SQL query and returns the ResultSet.</p>
+     *
+     * <pre><code>ResultSet rs = sqlExecutor.executeQuery("SELECT...", params);</code></pre>
+     *
+     * @param sql    The SQL query
+     * @param params Query parameters
+     * @return The ResultSet
+     * @throws SQLException If query execution fails
+     */
     public ResultSet executeQuery(String sql, Object... params) throws SQLException {
         Connection conn = getConnection(defaultConnection);
         try {
@@ -175,6 +185,14 @@ public class SQLExecutor {
         return sql.toString();
     }
 
+    /**
+     * <p>Generates the database schema for the specified entity class.</p>
+     *
+     * <pre><code>sqlExecutor.generateSchema(PlayerData.class);</code></pre>
+     *
+     * @param entityClass The entity class
+     * @throws SQLException If schema generation fails
+     */
     public void generateSchema(Class<?> entityClass) throws SQLException {
         if (!entityClass.isAnnotationPresent(Entity.class) || !entityClass.isAnnotationPresent(Table.class)) {
             throw new IllegalArgumentException("Class must be annotated with @Entity and @Table");

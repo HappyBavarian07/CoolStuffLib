@@ -25,7 +25,7 @@ public class FileBackup implements Comparable<FileBackup> {
     /**
      * Creates a FileBackup instance with the specified parameters.
      *
-     * @param identifier                Unique identifier for the backup.
+     * @param identifier                 Unique identifier for the backup.
      * @param filesToBackup              Array of files to be backed up.
      * @param destinationPathToBackupToo The directory where backups will be stored.
      * @param rootDirectory              The root directory where files will be searched for regex and unzipped after backup.
@@ -104,15 +104,20 @@ public class FileBackup implements Comparable<FileBackup> {
     }
 
     /**
-     * Error Codes:
-     * 0 = Success,
-     * -1 = Files to Backup is null or there are none,
-     * -2 = IO Exception,
-     * -3 = There is no Destination to backup too or its not a Directory,
-     * -4 = The Backups exceed the maxBackups Number
+     * <p>Creates a new backup.</p>
+     * <br>
+     * <p>
+     * Error Codes:<br>
+     * 0 = Success,<br>
+     * -1 = Files to Backup is null or there are none,<br>
+     * -2 = IO Exception,<br>
+     * -3 = There is no Destination to backup too or its not a Directory,<br>
+     * -4 = The Backups exceed the maxBackups Number<br>
+     * </p>
      *
-     * @param maxBackups Number of Backups before deleting existing ones
-     * @return Error Code
+     * @param maxBackups                Number of backups to retain
+     * @param removeOldBackupsIfHitsCap Whether to auto-delete old backups
+     * @return 0 on success, negative error code on failure
      */
     public int backup(int maxBackups, boolean removeOldBackupsIfHitsCap) {
         if (maxBackups <= 0) maxBackups = 1;
@@ -174,14 +179,19 @@ public class FileBackup implements Comparable<FileBackup> {
     }
 
     /**
-     * Error Codes:
-     * 0 = Success,
-     * -1 = Files to Backup is null or there are none,
-     * -2 = IO Exception,
-     * -3 = Zip File is null or doesn't exist
+     * <p>Loads a backup from a ZIP file.</p>
+     * <br>
+     * <p>
+     * Error Codes:<br>
+     * 0 = Success,<br>
+     * -1 = Files to Backup is null or there are none,<br>
+     * -2 = IO Exception,<br>
+     * -3 = There is no Destination to backup too or its not a Directory,<br>
+     * -4 = The Backups exceed the maxBackups Number<br>
+     * </p>
      *
-     * @param zipFile The Zip File
-     * @return Error Code
+     * @param zipFile The ZIP file
+     * @return 0 on success, negative error code on failure
      */
     public int loadBackup(File zipFile) {
         if (filesToBackup == null || filesToBackup.length == 0) return -1;
@@ -274,7 +284,7 @@ public class FileBackup implements Comparable<FileBackup> {
     }
 
     public File getBackupFileFromNumber(int number) {
-        if(number >= backupsDone.size()) {
+        if (number >= backupsDone.size()) {
             throw new IndexOutOfBoundsException("Backup number is out of bounds: " + number);
         }
         if (number < 0) {

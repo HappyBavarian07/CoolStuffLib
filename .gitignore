@@ -35,3 +35,4 @@ gen
 /target/*
 /target/apidocs/
 /TestOutputs/*
+/temp/

@@ -2,11 +2,12 @@ package de.happybavarian07.coolstufflib.utils;
 
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * <p>Enum containing player head textures and utility methods.</p>
+ */
 public enum Head {
-    // General Items
     WORLD("1289d5b178626ea23d0b0c3d2df5c085e8375056bf685b5ed5bb477fe8472d94", "World Item"),
 
-    // Colors
     BLANK_GREEN("a3e9f4dbadde0f727c5803d75d8bb378fb9fcb4b60d33bec19092a3a2e7b07a9", "GREEN"),
     BLANK_LIME_GREEN("58e9325dd19289a11401ad844950bc319c3e3cb0e5034d2a5ccfb2d5099ff6e1", "LIME_GREEN"),
     BLANK_RED("c65f3bae0d203ba16fe1dc3d1307a86a638be924471f23e82abd9d78f8a3fca", "RED"),

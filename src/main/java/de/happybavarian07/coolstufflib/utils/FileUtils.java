@@ -23,6 +23,12 @@ public final class FileUtils {
 
     private FileUtils() {}
 
+    /**
+     * <p>Gets an input stream for a resource.</p>
+     *
+     * @param filename The resource name
+     * @return The input stream, or {@code null} if not found
+     */
     @Nullable
     public static InputStream getResource(@NotNull String filename) {
         try {
@@ -37,6 +43,13 @@ public final class FileUtils {
         }
     }
 
+    /**
+     * <p>Saves a resource from the JAR to the local folder.</p>
+     *
+     * @param configFolder The folder
+     * @param resourcePath The path to resource
+     * @param replace      Whether to replace existing
+     */
     public static void saveResource(File configFolder, @NotNull String resourcePath, boolean replace) {
         if (resourcePath == null || resourcePath.isEmpty()) {
             throw new IllegalArgumentException("ResourcePath cannot be null or empty");

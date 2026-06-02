@@ -14,10 +14,22 @@ public class ExpressionCache<V> {
         this.cache = cache;
     }
 
+    /**
+     * <p>Retrieves a cached value.</p>
+     *
+     * @param key The cache key
+     * @return The cached value
+     */
     public V get(ExpressionCacheKey key) {
         return cache.get(key);
     }
 
+    /**
+     * <p>Stores a value in the cache.</p>
+     *
+     * @param key   The cache key
+     * @param value The value
+     */
     public void put(ExpressionCacheKey key, V value) {
         cache.put(key, value);
     }

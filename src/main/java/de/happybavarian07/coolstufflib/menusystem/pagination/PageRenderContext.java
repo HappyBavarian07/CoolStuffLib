@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Immutable render context passed to {@link PageTransition} implementations.
+ * <p>Immutable render context passed to {@link PageTransition} implementations.</p>
  *
  * @param <T> data type
  */
@@ -23,6 +23,10 @@ public class PageRenderContext<T> {
     private final Map<Integer, Integer> slotToDataIndex;
     private final int animationTickDelay;
 
+    /**
+     * <p>Creates a new context.</p>
+     * ...
+     */
     public PageRenderContext(Menu menu,
                              Inventory inventory,
                              List<T> data,

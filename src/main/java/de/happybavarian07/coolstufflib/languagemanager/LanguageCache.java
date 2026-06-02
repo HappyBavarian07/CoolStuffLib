@@ -28,6 +28,13 @@ public class LanguageCache {
         }, 6000, 6000, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * <p>Adds data to the cache.</p>
+     *
+     * @param key     The data key
+     * @param value   The data value
+     * @param replace Whether to replace existing data
+     */
     public void addData(String key, Object value, boolean replace) {
         if (replace) {
             languageCache.put(key, value);
@@ -37,11 +44,23 @@ public class LanguageCache {
         lastAccess = System.currentTimeMillis();
     }
 
+    /**
+     * <p>Retrieves data from the cache.</p>
+     *
+     * @param key The data key
+     * @return The cached object, or {@code null} if not found
+     */
     public Object getData(String key) {
         lastAccess = System.currentTimeMillis();
         return languageCache.get(key);
     }
 
+    /**
+     * <p>Checks if the cache contains a key.</p>
+     *
+     * @param key The data key
+     * @return {@code true} if key exists
+     */
     public boolean containsKey(String key) {
         return languageCache.containsKey(key);
     }

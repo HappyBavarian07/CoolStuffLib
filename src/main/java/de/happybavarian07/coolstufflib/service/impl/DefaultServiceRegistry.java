@@ -83,6 +83,14 @@ public class DefaultServiceRegistry implements ServiceRegistry, ServiceMetrics, 
         } catch (Exception ignored) { }
     }
 
+    /**
+     * <p>Registers a service with the registry.</p>
+     *
+     * @param descriptor The service descriptor
+     * @param impl       The service implementation
+     * @param uuid       The UUID for the service
+     * @return Tuple containing service and UUID
+     */
     @Override
     public Tuples.Tuple2<Service, UUID> register(ServiceDescriptor descriptor, Service impl, UUID uuid) {
         uuid = uuid == null ? UUID.randomUUID() : uuid;
@@ -113,6 +121,15 @@ public class DefaultServiceRegistry implements ServiceRegistry, ServiceMetrics, 
         }
     }
 
+    /**
+     * <p>Registers a factory for lazy service instantiation.</p>
+     *
+     * @param descriptor The service descriptor
+     * @param factory    The service factory
+     * @param uuid       The UUID for the service
+     * @param <T>        Service type
+     * @return Tuple containing service instance and UUID
+     */
     @Override
     public <T extends Service> Tuples.Tuple2<T, UUID> registerFactory(ServiceDescriptor descriptor, ServiceFactory<T> factory, UUID uuid) {
         uuid = uuid == null ? UUID.randomUUID() : uuid;
@@ -123,6 +140,13 @@ public class DefaultServiceRegistry implements ServiceRegistry, ServiceMetrics, 
         return Tuples.of(instance, uuid);
     }
 
+    /**
+     * <p>Registers all annotated services in a package.</p>
+     *
+     * @param packageName The package to scan
+     * @param config      The config to inject
+     * @return List of registered services
+     */
     @Override
     public List<Tuples.Tuple2<Service, UUID>> registerAnnotatedServices(String packageName, Config config) {
         List<Class<?>> annotated = ServiceComponentScanner.findAnnotatedServices(packageName);
@@ -206,6 +230,11 @@ public class DefaultServiceRegistry implements ServiceRegistry, ServiceMetrics, 
         return result;
     }
 
+    /**
+     * <p>Starts all services asynchronously.</p>
+     *
+     * @return CompletableFuture completing when started
+     */
     @Override
     public CompletableFuture<Void> startAll() {
         List<UUID> ids = new ArrayList<>(services.keySet());
@@ -217,6 +246,11 @@ public class DefaultServiceRegistry implements ServiceRegistry, ServiceMetrics, 
         });
     }
 
+    /**
+     * <p>Stops all services asynchronously.</p>
+     *
+     * @return CompletableFuture completing when stopped
+     */
     @Override
     public CompletableFuture<Void> stopAll() {
         List<UUID> ids = new ArrayList<>(services.keySet());

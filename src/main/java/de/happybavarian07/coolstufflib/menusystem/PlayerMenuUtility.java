@@ -9,25 +9,20 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Companion class to all menus. This is needed to pass information across the entire
- * menu system no matter how many inventories are opened or closed.
- *
- * Each player has one of these objects, and only one.
+ * <p>Companion class to all menus to pass information across the entire menu system.</p>
  */
 public class PlayerMenuUtility {
 
     private final CoolStuffLib lib;
     private final UUID ownerUUID;
     private UUID targetUUID;
-
-    // Stores all temporary Data for the PlayerMenuUtility
     private final Map<String, Object> data = new HashMap<>();
 
     /**
-     * Constructs a new instance of {@code PlayerMenuUtility} for the specified player.
+     * <p>Constructs a new instance.</p>
      *
-     * @param lib       The CoolStuffLib instance.
-     * @param ownerUUID The UUID of the owner.
+     * @param lib       The library instance
+     * @param ownerUUID The owner's UUID
      */
     public PlayerMenuUtility(CoolStuffLib lib, UUID ownerUUID) {
         this.lib = lib;
