@@ -12,10 +12,24 @@ public final class ChatUtils {
 
     private ChatUtils() {}
 
+    /**
+     * <p>Translates ampersand color codes to ChatColors.</p>
+     *
+     * @param s The string
+     * @return The colored string
+     */
     public static String chat(String s) {
         return ChatColor.translateAlternateColorCodes('&', s);
     }
 
+    /**
+     * <p>Formats a message with colors, placeholders, and prefixes.</p>
+     *
+     * @param player  The player context
+     * @param message The message
+     * @param prefix  The prefix
+     * @return The formatted message
+     */
     public static String format(Player player, String message, String prefix) {
         try {
             String withColor = ChatColor.translateAlternateColorCodes('&', message.replace("%prefix%", prefix));
@@ -26,6 +40,12 @@ public final class ChatUtils {
         }
     }
 
+    /**
+     * <p>Applies a log prefix to a message.</p>
+     *
+     * @param testMessage The message
+     * @return The prefixed message
+     */
     public static String logPrefix(String testMessage) {
         String prefix = "&c[&6CoolStuffLib&c]";
         if (CoolStuffLib.getLib() != null && CoolStuffLib.getLib().getLanguageManager() != null) {

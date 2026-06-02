@@ -2,11 +2,19 @@ package de.happybavarian07.coolstufflib.utils;
 
 import org.bukkit.Bukkit;
 
+/**
+ * <p>Thread-safe guard to detect and prevent command recursion.</p>
+ */
 public class CardboardCommandGuard {
     private static final ThreadLocal<Boolean> EXECUTING = ThreadLocal.withInitial(() -> false);
     private static final int MAX_DEPTH = 3;
     private static final ThreadLocal<Integer> DEPTH = ThreadLocal.withInitial(() -> 0);
 
+    /**
+     * <p>Enters a command context.</p>
+     *
+     * @return {@code true} if allowed, {@code false} if recursion detected
+     */
     public static boolean enterCommand() {
         if (EXECUTING.get()) {
             int depth = DEPTH.get();
@@ -24,6 +32,9 @@ public class CardboardCommandGuard {
         return true;
     }
 
+    /**
+     * <p>Exits the command context.</p>
+     */
     public static void exitCommand() {
         int depth = DEPTH.get();
         if (depth == 0) {
@@ -33,6 +44,11 @@ public class CardboardCommandGuard {
         }
     }
 
+    /**
+     * <p>Checks if the execution is in a Cardboard Brigadier context.</p>
+     *
+     * @return {@code true} if in Brigadier context
+     */
     public static boolean isCardboardBrigadierContext() {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         int brigadierCount = 0;
@@ -48,6 +64,9 @@ public class CardboardCommandGuard {
         return false;
     }
 
+    /**
+     * <p>Cleans up thread-local variables.</p>
+     */
     public static void cleanup() {
         EXECUTING.remove();
         DEPTH.remove();

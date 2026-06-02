@@ -5,6 +5,7 @@ import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.ConfigType
 import com.google.gson.Gson;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.interfaces.AbstractConfigFileHandler;
 import de.happybavarian07.coolstufflib.logging.ConfigLogger;
+import de.happybavarian07.coolstufflib.utils.ConfigUtils;
 import de.happybavarian07.coolstufflib.utils.Utils;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.MapSection;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.ListSection;
@@ -42,7 +43,7 @@ public class Json5ConfigFileHandler extends AbstractConfigFileHandler {
     @Override
     public void doSave(File file, Map<String, Object> data) throws IOException {
         try (Writer writer = new FileWriter(file)) {
-            Map<String, Object> nested = Utils.unflattenObjectMap(converterRegistry, data);
+            Map<String, Object> nested = ConfigUtils.unflattenObjectMap(converterRegistry, data);
             Object plain = addSectionTypeFields(nested);
             gson.toJson(plain, writer);
         }

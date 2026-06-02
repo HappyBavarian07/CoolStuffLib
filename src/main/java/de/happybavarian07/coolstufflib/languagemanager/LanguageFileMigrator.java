@@ -13,6 +13,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * <p>Handles migration of language files to synchronize with resource files.</p>
+ */
 public class LanguageFileMigrator {
     private final File userConfigFile;
     private final InputStream resourceStream;
@@ -20,6 +23,12 @@ public class LanguageFileMigrator {
     private final FileConfiguration resourceConfig;
     private final List<MigrationEntry> migrationEntries;
 
+    /**
+     * <p>Creates a new migrator instance.</p>
+     *
+     * @param userConfigFile The user configuration file
+     * @param resourceStream The resource input stream
+     */
     public LanguageFileMigrator(File userConfigFile, InputStream resourceStream) {
         this.userConfigFile = userConfigFile;
         this.resourceStream = resourceStream;
@@ -29,6 +38,11 @@ public class LanguageFileMigrator {
         scanForMigrations();
     }
 
+    /**
+     * <p>Checks if the files differ by hash.</p>
+     *
+     * @return {@code true} if files differ
+     */
     public boolean filesDifferByHash() {
         String userHash = getFileHash(userConfigFile);
         String resourceHash = getStreamHash(resourceStream);
@@ -100,15 +114,29 @@ public class LanguageFileMigrator {
         return map;
     }
 
+    /**
+     * <p>Returns the list of migration entries.</p>
+     *
+     * @return The migration entries
+     */
     public List<MigrationEntry> getMigrationEntries() {
         return new ArrayList<>(migrationEntries);
     }
 
+    /**
+     * <p>Edits a migration entry.</p>
+     *
+     * @param entry    The migration entry
+     * @param newValue The new value
+     */
     public void editEntry(MigrationEntry entry, Object newValue) {
         entry.setUserValue(newValue);
         entry.setSelectedForMigration(true);
     }
 
+    /**
+     * <p>Applies the selected migrations to the user configuration.</p>
+     */
     public void migrateSelected() {
         for (MigrationEntry entry : migrationEntries) {
             if (entry.isSelectedForMigration() && entry.getResourceValue() != null) {

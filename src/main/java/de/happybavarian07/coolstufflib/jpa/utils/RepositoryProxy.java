@@ -26,10 +26,6 @@ public class RepositoryProxy implements InvocationHandler {
     private final ElementCollectionHandler elementCollectionHandler;
     private String databasePrefix;
 
-    public TransactionManager getTransactionManager() {
-        return transactionManager;
-    }
-
     private RepositoryProxy(Class<?> repositoryInterface, String databasePrefix, SQLExecutor sqlExecutor, JavaPlugin plugin) {
         this.repositoryInterface = repositoryInterface;
         this.databasePrefix = databasePrefix;
@@ -297,11 +293,13 @@ public class RepositoryProxy implements InvocationHandler {
             Field field = null;
             for (Field f : entityClass.getDeclaredFields()) {
                 if (f.getName().equalsIgnoreCase(javaFieldName)) {
-                    field = f; break;
+                    field = f;
+                    break;
                 }
                 Column col = f.getAnnotation(Column.class);
                 if (col != null && !col.name().isEmpty() && col.name().equalsIgnoreCase(javaFieldName)) {
-                    field = f; break;
+                    field = f;
+                    break;
                 }
             }
             if (field == null) throw new RuntimeException("Field not found: " + javaFieldName);
@@ -701,5 +699,14 @@ public class RepositoryProxy implements InvocationHandler {
         } catch (Exception e) {
             throw new RuntimeException("Error initializing schema for entity: " + entityClass.getName(), e);
         }
+    }
+
+    /**
+     * <p>Retrieves the transaction manager instance.</p>
+     *
+     * @return The {@link TransactionManager} instance
+     */
+    public TransactionManager getTransactionManager() {
+        return transactionManager;
     }
 }

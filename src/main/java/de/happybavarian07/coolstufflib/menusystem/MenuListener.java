@@ -11,15 +11,19 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.InventoryHolder;
 
+/**
+ * <p>Handles inventory events for menus.</p>
+ */
 public class MenuListener implements Listener {
 
+    /**
+     * <p>Handles inventory click events for menus.</p>
+     *
+     * @param e The event
+     */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onMenuClick(InventoryClickEvent e) {
-
         InventoryHolder holder = e.getInventory().getHolder();
-        // If the inventory holder of the inventory clicked on
-        // Is an instance of Menu, then gg.
-        // The reason we can check if the holder is an instance of Menu is because the Menu Class implements InventoryHolder.
         if (holder instanceof Menu menu) {
             e.setCancelled(true);
             if (e.getCurrentItem() == null) {
@@ -39,11 +43,14 @@ public class MenuListener implements Listener {
         }
     }
 
+    /**
+     * <p>Handles inventory close events for menus.</p>
+     *
+     * @param event The event
+     */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInvClose(InventoryCloseEvent event) {
-        if (event.getInventory().getHolder() instanceof Menu) {
-            Menu holder = (Menu) event.getInventory().getHolder();
-
+        if (event.getInventory().getHolder() instanceof Menu holder) {
             holder.handleCloseMenu(event);
 
             if (holder.getClass().isAssignableFrom(Listener.class)) HandlerList.unregisterAll((Listener) holder);
@@ -56,11 +63,14 @@ public class MenuListener implements Listener {
         }
     }
 
+    /**
+     * <p>Handles inventory open events for menus.</p>
+     *
+     * @param event The event
+     */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInvOpen(InventoryOpenEvent event) {
-        if (event.getInventory().getHolder() instanceof Menu) {
-            Menu holder = (Menu) event.getInventory().getHolder();
-
+        if (event.getInventory().getHolder() instanceof Menu holder) {
             holder.handleOpenMenu(event);
         }
     }

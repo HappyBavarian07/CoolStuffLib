@@ -11,7 +11,7 @@ import de.happybavarian07.coolstufflib.menusystem.actions.MenuAction;
 import de.happybavarian07.coolstufflib.menusystem.pagination.PaginationZone;
 import de.happybavarian07.coolstufflib.menusystem.pagination.NavigationDirection;
 import de.happybavarian07.coolstufflib.menusystem.pagination.PageDirection;
-import de.happybavarian07.coolstufflib.menusystem.pagination.transitions.InstantPageTransition;
+import de.happybavarian07.coolstufflib.menusystem.pagination.InstantPageTransition;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
@@ -82,7 +82,7 @@ public class CustomPlayerSelector<T, R> extends PaginatedMenu<Player> {
         // Use full Pagination API
         setPaginationZone(new PaginationZone(9, 44)); // Example zone
         setNavigationDirection(NavigationDirection.HORIZONTAL);
-        setPageDirection(PageDirection.LEFT_TO_RIGHT);
+        setPageDirection(PageDirection.NORMAL);
         setPageTransition(new InstantPageTransition());
     }
 

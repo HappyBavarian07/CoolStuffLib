@@ -89,10 +89,12 @@ public class BackupManager implements Service {
     }
 
     /**
-     * Executes a manual backup.
+     * <p>Executes a manual backup.</p>
      *
-     * @param identifier The unique identifier for the backup.
-     * @return 0 on success, or -100 if the backup identifier is invalid.
+     * <pre><code>backupManager.startBackup("players_data");</code></pre>
+     *
+     * @param identifier The backup identifier
+     * @return 0 on success, -100 if invalid identifier
      */
     public int startBackup(String identifier) {
         FileBackup backup = fileBackupList.get(identifier);
@@ -103,11 +105,13 @@ public class BackupManager implements Service {
     }
 
     /**
-     * Restores a backup.
+     * <p>Restores a backup.</p>
      *
-     * @param identifier The unique identifier for the backup.
-     * @param backupNumber The backup index, or -1 for the latest.
-     * @return 0 on success, or -100 if the backup is not found.
+     * <pre><code>backupManager.loadBackup("players_data", -1);</code></pre>
+     *
+     * @param identifier   The backup identifier
+     * @param backupNumber The index, -1 for latest
+     * @return 0 on success, -100 if not found
      */
     public int loadBackup(String identifier, int backupNumber) {
         FileBackup backup = fileBackupList.get(identifier);
@@ -140,11 +144,11 @@ public class BackupManager implements Service {
     }
 
     /**
-     * Deletes a specific backup file.
+     * <p>Deletes a specific backup file.</p>
      *
-     * @param identifier The unique identifier for the backup.
-     * @param backupFile The file identifier or index.
-     * @return 0 on success, or -100 if the backup identifier is invalid.
+     * @param identifier The backup identifier
+     * @param backupFile The file identifier or index
+     * @return 0 on success, -100 if invalid
      */
     public int deleteBackupFile(String identifier, String backupFile) {
         FileBackup backup = fileBackupList.get(identifier);

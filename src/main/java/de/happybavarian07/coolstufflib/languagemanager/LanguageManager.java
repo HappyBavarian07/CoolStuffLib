@@ -590,12 +590,14 @@ public class LanguageManager implements Service {
     }
 
     /**
-     * Adds a placeholder to the LanguageManager.
+     * <p>Adds a new placeholder for message replacement.</p>
      *
-     * @param type        The type of placeholder.
-     * @param key         The key associated with the placeholder.
-     * @param value       The value to replace the placeholder with.
-     * @param resetBefore Whether to reset all placeholders of the specified type before adding the new one.
+     * <pre><code>lgm.addPlaceholder(PlaceholderType.MESSAGE, "%player%", player.getName(), false);</code></pre>
+     *
+     * @param type        The placeholder type
+     * @param key         The placeholder key
+     * @param value       The placeholder value
+     * @param resetBefore Whether to reset existing placeholders before adding
      */
     public void addPlaceholder(PlaceholderType type, String key, Object value, boolean resetBefore) {
         if (resetBefore) resetPlaceholders(type, null);
@@ -619,11 +621,12 @@ public class LanguageManager implements Service {
     }
 
     /**
-     * Removes a placeholder from the LanguageManager. The placeholder must match the
-     * specified type and key in order to be removed.
+     * <p>Removes a placeholder by key and type.</p>
      *
-     * @param type The type of placeholder to remove.
-     * @param key  The key of the placeholder to remove.
+     * <pre><code>lgm.removePlaceholder(PlaceholderType.MESSAGE, "%player%");</code></pre>
+     *
+     * @param type The placeholder type
+     * @param key  The placeholder key
      */
     public void removePlaceholder(PlaceholderType type, String key) {
         if (!placeholders.containsKey(key)) return;

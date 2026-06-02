@@ -1,5 +1,6 @@
 package de.happybavarian07.coolstufflib.menusystem.actions;
 
+import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import de.happybavarian07.coolstufflib.CoolStuffLib;

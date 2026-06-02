@@ -31,11 +31,10 @@ public abstract class CommandManager {
     protected List<String> commandSubArgs = new ArrayList<>();
 
     /**
-     * Injects the necessary dependencies into the CommandManager.
-     * This is called by the CommandManagerRegistry during registration.
+     * <p>Injects dependencies.</p>
      *
-     * @param lib The CoolStuffLib instance.
-     * @param lgm The LanguageManager instance.
+     * @param lib The library instance
+     * @param lgm The language manager instance
      */
     public void setDependencies(CoolStuffLib lib, LanguageManager lgm) {
         this.coolStuffLib = lib;
@@ -101,11 +100,11 @@ public abstract class CommandManager {
     public abstract boolean autoRegisterPermission();
 
     /**
-     * Executes the main command or one of its subcommands.
+     * <p>Executes the command or subcommand.</p>
      *
-     * @param sender The sender of the command.
-     * @param args   The arguments provided the command.
-     * @return True if the command was handled successfully, false otherwise.
+     * @param sender The command sender
+     * @param args   The command arguments
+     * @return {@code true} if handled, {@code false} otherwise
      */
     public boolean onCommand(CommandSender sender, String[] args) {
         if (!CardboardCommandGuard.enterCommand()) {

@@ -73,9 +73,11 @@ public class RepositoryController {
     }
 
     /**
-     * Setzt die zu verwendende Verbindung.
+     * <p>Sets the connection to be used.</p>
+     * 
+     * <pre><code>controller.setDefaultConnection("default");</code></pre>
      *
-     * @param name Name der Verbindung
+     * @param name Name of the connection
      */
     public void setDefaultConnection(String name) {
         try {
@@ -98,15 +100,18 @@ public class RepositoryController {
     }
 
     /**
-     * Registriert ein Repository-Interface und gibt eine Implementierung zurück.
+     * <p>Registers a repository interface and returns its implementation.</p>
      *
-     * @param <T>                 Repository-Typ
-     * @param <E>                 Entity-Typ
-     * @param <ID>                ID-Typ
-     * @param repositoryInterface Repository-Interface
-     * @param entityClass         Entity-Klasse
-     * @return Implementierung des Repository-Interfaces
+     * <pre><code>MyRepo repo = controller.registerRepository(MyRepo.class, MyEntity.class);</code></pre>
+     *
+     * @param repositoryInterface The repository interface class
+     * @param entityClass         The entity class
+     * @param <T>                 Repository type
+     * @param <E>                 Entity type
+     * @param <ID>                ID type
+     * @return The repository implementation
      */
+    @SuppressWarnings("unchecked")
     public <T extends Repository<E, ID>, E, ID> T registerRepository(Class<T> repositoryInterface, Class<E> entityClass) {
         if (repositories.containsKey(repositoryInterface) && repositories.get(repositoryInterface) != null &&
                 repositories.get(repositoryInterface).getClass().isAssignableFrom(repositoryInterface)) {
@@ -150,11 +155,11 @@ public class RepositoryController {
     }
 
     /**
-     * Gibt ein registriertes Repository zurück.
+     * <p>Returns a registered repository.</p>
      *
-     * @param <T>                 Repository-Typ
-     * @param repositoryInterface Repository-Interface
-     * @return Repository-Implementierung oder null, wenn nicht gefunden
+     * @param repositoryInterface The repository interface class
+     * @param <T>                 Repository type
+     * @return Repository implementation or null if not found
      */
     @SuppressWarnings("unchecked")
     public <T extends Repository<?, ?>> T getRepository(Class<T> repositoryInterface) {
@@ -162,38 +167,40 @@ public class RepositoryController {
     }
 
     /**
-     * Prüft, ob ein Repository bereits registriert ist.
+     * <p>Checks if a repository is registered.</p>
      *
-     * @param repositoryInterface Repository-Interface
-     * @return true, wenn das Repository registriert ist, sonst false
+     * @param repositoryInterface The repository interface class
+     * @return true if registered, false otherwise
      */
     public boolean isRepositoryRegistered(Class<?> repositoryInterface) {
         return repositories.containsKey(repositoryInterface);
     }
 
     /**
-     * Gibt alle registrierten Repository-Interfaces zurück.
+     * <p>Returns all registered repository interfaces.</p>
      *
-     * @return Set mit allen registrierten Repository-Interfaces
+     * @return Set of registered repository interfaces
      */
     public Set<Class<?>> getAllRepositoryInterfaces() {
         return new HashSet<>(repositories.keySet());
     }
 
     /**
-     * Gibt alle registrierten Repository-Instanzen zurück.
+     * <p>Returns all registered repository instances.</p>
      *
-     * @return Collection mit allen registrierten Repository-Instanzen
+     * @return Collection of registered repositories
      */
     public Collection<Repository<?, ?>> getAllRepositories() {
         return new HashSet<>(repositories.values());
     }
 
     /**
-     * Entfernt ein Repository aus der Registrierung.
+     * <p>Removes a repository from the registry.</p>
      *
-     * @param repositoryInterface Repository-Interface, das entfernt werden soll
-     * @return true, wenn das Repository entfernt wurde, false wenn es nicht registriert war
+     * <pre><code>boolean removed = controller.unregisterRepository(MyRepo.class);</code></pre>
+     *
+     * @param repositoryInterface The repository interface to remove
+     * @return {@code true} if removed, {@code false} if not registered
      */
     public boolean unregisterRepository(Class<?> repositoryInterface) {
         if (repositories.containsKey(repositoryInterface)) {
@@ -205,40 +212,40 @@ public class RepositoryController {
     }
 
     /**
-     * Führt eine SQL-Abfrage direkt über den SQLExecutor aus.
+     * <p>Executes a SQL query directly via the SQLExecutor.</p>
      *
-     * @param sql    SQL-Abfrage
-     * @param params Parameter für die Abfrage
-     * @return ResultSet der Abfrage
-     * @throws SQLException Bei Fehlern in der Abfrage
+     * @param sql    SQL query
+     * @param params Query parameters
+     * @return ResultSet of the query
+     * @throws SQLException If an error occurs
      */
     public java.sql.ResultSet executeQuery(String sql, Object... params) throws SQLException {
         return sqlExecutor.executeQuery(sql, params);
     }
 
     /**
-     * Führt ein SQL-Update direkt über den SQLExecutor aus.
+     * <p>Executes a SQL update directly via the SQLExecutor.</p>
      *
-     * @param sql    SQL-Update
-     * @param params Parameter für das Update
-     * @throws SQLException Bei Fehlern beim Update
+     * @param sql    SQL update statement
+     * @param params Update parameters
+     * @throws SQLException If an error occurs
      */
     public void executeUpdate(String sql, Object... params) throws SQLException {
         sqlExecutor.executeUpdate(sql, params);
     }
 
     /**
-     * Führt mehrere SQL-Statements als Transaktion aus.
+     * <p>Executes multiple SQL statements as a transaction.</p>
      *
-     * @param statements Liste von SQL-Statements
-     * @throws SQLException Bei Fehlern in der Transaktion
+     * @param statements List of SQL statements
+     * @throws SQLException If an error occurs
      */
     public void executeTransaction(List<String> statements) throws SQLException {
         sqlExecutor.executeTransaction(statements);
     }
 
     /**
-     * Lädt Repository-Registrierungen aus einer Datei.
+     * <p>Loads repository registrations from a file.</p>
      */
     @SuppressWarnings("unchecked")
     public void loadRepositoriesFromFile() {
@@ -305,13 +312,16 @@ public class RepositoryController {
     }
 
     /**
-     * Fügt ein Repository zur Registrierungsdatei hinzu.
+     * <p>Adds a repository to the registration file.</p>
      *
-     * @param <T>             Repository-Typ
-     * @param <E>             Entity-Typ
-     * @param repositoryClass Repository-Klasse
-     * @param entityClass     Entity-Klasse
-     * @param description     Beschreibung des Repositories
+     * <pre><code>controller.addRepositoryToRegistrationFile(MyRepo.class, MyEntity.class, "desc", true);</code></pre>
+     *
+     * @param <T>             The repository type
+     * @param <E>             The entity type
+     * @param repositoryClass The repository class
+     * @param entityClass     The entity class
+     * @param description     Description of the repository
+     * @param register        Whether to register immediately
      */
     public <T extends Repository<E, ?>, E> void addRepositoryToRegistrationFile(
             Class<T> repositoryClass,
@@ -370,11 +380,13 @@ public class RepositoryController {
     }
 
     /**
-     * Entfernt ein Repository aus der Registrierungsdatei.
+     * <p>Removes a repository from the registration file.</p>
      *
-     * @param repositoryClass Repository-Klasse
-     * @param entityClass     Entity-Klasse
-     * @return true, wenn das Repository entfernt wurde, sonst false
+     * <pre><code>boolean removed = controller.removeRepositoryFromRegistrationFile(MyRepo.class, MyEntity.class);</code></pre>
+     *
+     * @param repositoryClass The repository class
+     * @param entityClass     The entity class
+     * @return {@code true} if removed, {@code false} otherwise
      */
     public boolean removeRepositoryFromRegistrationFile(Class<?> repositoryClass, Class<?> entityClass) {
         if (!defaultRegistrationFile.exists()) {
@@ -418,22 +430,26 @@ public class RepositoryController {
     }
 
     /**
-     * Gibt eine Entity-Klasse anhand ihres Namens zurück.
+     * <p>Retrieves an entity class by its name.</p>
      *
-     * @param entityClassName Klassenname der Entity
-     * @return Optional mit der Entity-Klasse oder leer, wenn nicht gefunden
+     * <pre><code>Optional<Class<?>> entity = controller.getEntityClassByName("PlayerData");</code></pre>
+     *
+     * @param entityClassName The entity class name
+     * @return An Optional containing the entity class, or empty if not found
      */
     public Optional<Class<?>> getEntityClassByName(String entityClassName) {
         return Optional.ofNullable(entityClasses.get(entityClassName));
     }
 
     /**
-     * Aktualisiert den Status eines Repositories in der Registrierungsdatei.
+     * <p>Updates the status of a repository in the registration file.</p>
      *
-     * @param repositoryClass Repository-Klasse
-     * @param entityClass     Entity-Klasse
-     * @param enabled         Neuer Status (aktiviert/deaktiviert)
-     * @return true bei erfolgreicher Aktualisierung, sonst false
+     * <pre><code>controller.updateRepositoryStatus(MyRepo.class, MyEntity.class, true);</code></pre>
+     *
+     * @param repositoryClass The repository class
+     * @param entityClass     The entity class
+     * @param enabled         The new status (enabled/disabled)
+     * @return {@code true} if updated, {@code false} otherwise
      */
     public boolean updateRepositoryStatus(Class<?> repositoryClass, Class<?> entityClass, boolean enabled) {
         if (!defaultRegistrationFile.exists()) {
@@ -478,7 +494,9 @@ public class RepositoryController {
     }
 
     /**
-     * Schließt alle Datenbankverbindungen.
+     * <p>Closes all database connections.</p>
+     *
+     * <pre><code>controller.closeConnections();</code></pre>
      */
     public void closeConnections() {
         try {
@@ -493,10 +511,12 @@ public class RepositoryController {
     }
 
     /**
-     * Schließt eine spezifische Datenbankverbindung.
+     * <p>Closes a specific database connection pool.</p>
      *
-     * @param connectionName Name der zu schließenden Verbindung
-     * @return true, wenn die Verbindung geschlossen wurde, sonst false
+     * <pre><code>boolean closed = controller.closeConnection("pool-name");</code></pre>
+     *
+     * @param connectionName Name of the pool to close
+     * @return {@code true} if closed, {@code false} otherwise
      */
     public boolean closeConnection(String connectionName) {
         ConnectionPool pool = connectionPools.get(connectionName);

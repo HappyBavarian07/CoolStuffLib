@@ -20,12 +20,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
 
-/*
-    Defines the behavior and attributes of all menus in our plugin
+/**
+ * <p>Base class for defining inventory-based menus.</p>
  */
 public abstract class Menu implements InventoryHolder {
 
-    // Dependencies injected via PlayerMenuUtility
     protected CoolStuffLib lib;
     protected LanguageManager lgm;
     protected ItemStack FILLER;
@@ -40,20 +39,21 @@ public abstract class Menu implements InventoryHolder {
     protected boolean forceHybridMode = false;
     protected Menu savedMenu;
 
-    //Constructor for Menu. Pass on a PlayerMenuUtility so that
-    // we have information on whose menu this is and
-    // what info is to be transfered.
-
     /**
-     * The Menu function is the main function of this class. It creates a menu for the player to interact with, and
-     * allows them to choose what they want to do next. The Menu function takes in no parameters.
+     * <p>Constructs a new Menu instance.</p>
      *
-     * @param playerMenuUtility Pass the playermenuutility object to the menu class
+     * @param playerMenuUtility The menu utility
      */
     public Menu(PlayerMenuUtility playerMenuUtility) {
         this(playerMenuUtility, null);
     }
 
+    /**
+     * <p>Constructs a new Menu instance with a parent menu.</p>
+     *
+     * @param playerMenuUtility The menu utility
+     * @param savedMenu         The parent menu
+     */
     public Menu(PlayerMenuUtility playerMenuUtility, Menu savedMenu) {
         this.playerMenuUtility = playerMenuUtility;
         this.savedMenu = savedMenu;
@@ -61,8 +61,7 @@ public abstract class Menu implements InventoryHolder {
     }
 
     /**
-     * Ensures that dependencies (lib, lgm, filler) are injected from the PlayerMenuUtility.
-     * This is called before any operation requiring the library or language manager.
+     * <p>Ensures dependencies are injected.</p>
      */
     protected void ensurePrepared() {
         if (prepared) return;
@@ -130,15 +129,11 @@ public abstract class Menu implements InventoryHolder {
     //When called, an inventory is created and opened for the player
 
     /**
-     * The open function is the main function that opens a menu.
-     * It creates an inventory, sets the items in it, and then opens it for the player.
+     * <p>Opens the menu for the player.</p>
      */
     public void open() {
         ensurePrepared();
 
-        //The owner of the inventory created is the Menu itself,
-        // so we are able to reverse engineer the Menu object from the
-        // inventoryHolder in the MenuListener class when handling clicks
         if (!playerMenuUtility.getOwner().hasPermission(this.openingPermission)) {
             playerMenuUtility.getOwner().sendMessage(
                     lgm.getMessage("Player.General.NoPermissions", playerMenuUtility.getOwner(), true));
@@ -153,7 +148,6 @@ public abstract class Menu implements InventoryHolder {
             addonList = lib.getMenuAddonManager().getMenuAddons(this.getConfigMenuAddonFeatureName());
         }
 
-        //grab all the items specified to be used for this menu and add to inventory
         this.setMenuItems();
 
         for (Map.Entry<String, MenuAddon> menuAddonName : addonList.entrySet()) {
@@ -180,7 +174,6 @@ public abstract class Menu implements InventoryHolder {
             return;
         }
 
-        // Try executing Menu Addons onOpenEvent
         for (Map.Entry<String, MenuAddon> menuAddonName : addonList.entrySet()) {
             MenuAddon addon = menuAddonName.getValue();
             addon.onOpenEvent();

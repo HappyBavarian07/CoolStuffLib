@@ -66,6 +66,12 @@ public class DatabaseProperties {
         this.databasePrefix = databasePrefix;
     }
 
+    /**
+     * <p>Generates the JDBC connection string based on the configured properties.</p>
+     *
+     * @return The connection string
+     * @throws IllegalArgumentException If the driver is unsupported
+     */
     public String getConnectionString() {
         if (connectionString != null) {
             return connectionString;

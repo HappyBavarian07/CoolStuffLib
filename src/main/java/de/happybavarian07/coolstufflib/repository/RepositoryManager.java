@@ -47,10 +47,33 @@ public class RepositoryManager implements Service {
         this.repositoryRegistrationFile = new File(plugin.getDataFolder(), "repositories.json");
     }
 
+    /**
+     * <p>Registers a repository interface and returns its implementation using the default controller.</p>
+     *
+     * <pre><code>MyRepo repo = manager.registerRepository(MyRepo.class, MyEntity.class);</code></pre>
+     *
+     * @param <T>                 Repository type
+     * @param <E>                 Entity type
+     * @param <ID>                ID type
+     * @param repositoryInterface The repository interface
+     * @param entityClass         The entity class
+     * @return The repository implementation
+     */
     public <T extends Repository<E, ID>, E, ID> T registerRepository(Class<T> repositoryInterface, Class<E> entityClass) {
         return getController(defaultController).registerRepository(repositoryInterface, entityClass);
     }
 
+    /**
+     * <p>Registers a repository interface with a specific controller.</p>
+     *
+     * @param controllerName      The name of the controller
+     * @param repositoryInterface The repository interface
+     * @param entityClass         The entity class
+     * @param <T>                 Repository type
+     * @param <E>                 Entity type
+     * @param <ID>                ID type
+     * @return The repository implementation
+     */
     public <T extends Repository<E, ID>, E, ID> T registerRepository(String controllerName, Class<T> repositoryInterface, Class<E> entityClass) {
         return getController(controllerName).registerRepository(repositoryInterface, entityClass);
     }

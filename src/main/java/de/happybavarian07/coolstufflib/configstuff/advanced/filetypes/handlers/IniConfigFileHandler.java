@@ -3,6 +3,7 @@ package de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.handlers;
 import de.happybavarian07.coolstufflib.logging.ConfigLogger;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.ConfigTypeConverterRegistry;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.interfaces.AbstractConfigFileHandler;
+import de.happybavarian07.coolstufflib.utils.ConfigUtils;
 import de.happybavarian07.coolstufflib.utils.Utils;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.MapSection;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.ListSection;
@@ -38,8 +39,8 @@ public class IniConfigFileHandler extends AbstractConfigFileHandler {
     @Override
     protected void doSave(File file, Map<String, Object> data, Map<String, String> comments) throws IOException {
         try (Writer writer = new FileWriter(file)) {
-            Map<String, Object> nested = Utils.unflattenObjectMap(converterRegistry, data);
-            Map<String, Object> flatMap = Utils.flatten(converterRegistry, "", (Map<String, Object>) addSectionTypeFields(nested));
+            Map<String, Object> nested = ConfigUtils.unflattenObjectMap(converterRegistry, data);
+            Map<String, Object> flatMap = ConfigUtils.flatten(converterRegistry, "", (Map<String, Object>) addSectionTypeFields(nested));
             writer.write("; Configuration file managed by CoolStuffLib\n");
             writer.write("; DO NOT EDIT COMMENT LINES MANUALLY\n\n");
             Map<String, Map<String, Object>> sections = new LinkedHashMap<>();
@@ -237,7 +238,7 @@ public class IniConfigFileHandler extends AbstractConfigFileHandler {
             ConfigLogger.error("Failed to load INI file: " + file.getPath(), e, "IniConfigFileHandler", true);
             return map;
         }
-        Map<String, Object> nested = (Map<String, Object>) Utils.unflatten(converterRegistry, stringMap);
+        Map<String, Object> nested = (Map<String, Object>) ConfigUtils.unflatten(converterRegistry, stringMap);
         Object withTypes = ensureSectionType(nested);
         return withTypes instanceof Map ? (Map<String, Object>) withTypes : new LinkedHashMap<>();
     }
@@ -276,7 +277,7 @@ public class IniConfigFileHandler extends AbstractConfigFileHandler {
                         lastComment = null;
                     }
                 } else if (lastComment != null) {
-                    Utils.logMalformedLine(file, lineNum, line, "Expected key=value after comment");
+                    ConfigUtils.logMalformedLine(file, lineNum, line, "Expected key=value after comment");
                     lastComment = null;
                 }
             }

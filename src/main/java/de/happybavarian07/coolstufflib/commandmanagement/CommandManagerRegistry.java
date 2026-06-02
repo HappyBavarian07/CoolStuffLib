@@ -5,6 +5,8 @@ package de.happybavarian07.coolstufflib.commandmanagement;/*
 
 import de.happybavarian07.coolstufflib.CoolStuffLib;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
+import de.happybavarian07.coolstufflib.service.annotation.ServiceComponent;
+import de.happybavarian07.coolstufflib.service.api.Service;
 import de.happybavarian07.coolstufflib.utils.CardboardCommandGuard;
 import de.happybavarian07.coolstufflib.utils.LogPrefix;
 import org.bukkit.Bukkit;
@@ -17,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
 /**

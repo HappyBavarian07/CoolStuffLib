@@ -2,10 +2,6 @@ package de.happybavarian07.coolstufflib.backupmanager;
 
 import de.happybavarian07.coolstufflib.CoolStuffLib;
 
-/*
- * @Author HappyBavarian07
- * @Date September 12, 2024 | 15:41
- */
 public class BackupExecuteRunnable implements Runnable {
     private final BackupManager backupManager;
     private final String identifier;
@@ -15,6 +11,9 @@ public class BackupExecuteRunnable implements Runnable {
         this.identifier = identifier;
     }
 
+    /**
+     * <p>Executes the backup task.</p>
+     */
     @Override
     public void run() {
         backupManager.startBackup(identifier);

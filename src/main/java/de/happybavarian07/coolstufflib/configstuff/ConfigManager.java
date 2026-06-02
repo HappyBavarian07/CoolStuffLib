@@ -60,15 +60,11 @@ public class ConfigManager {
     }
 
     /**
-     * <p>Reloads a specific configuration from its file, discarding any unsaved changes
-     * and loading fresh data from the file system.</p>
+     * <p>Reloads a specific configuration from its file.</p>
      *
-     * <pre><code>
-     * manager.reloadConfig("settings");
-     * // Configuration "settings" now reflects current file contents
-     * </code></pre>
+     * <pre><code>manager.reloadConfig("settings");</code></pre>
      *
-     * @param configName the name of the configuration to reload
+     * @param configName The configuration name
      */
     public void reloadConfig(String configName) {
         if (configs.containsKey(configName)) {
@@ -223,17 +219,12 @@ public class ConfigManager {
     }
 
     /**
-     * <p>Saves a specific configuration to its file, persisting any changes made
-     * since the last save operation.</p>
+     * <p>Saves a specific configuration to its file.</p>
      *
-     * <pre><code>
-     * manager.setConfigValue("players", "max-players", 150);
-     * manager.saveConfig("players");
-     * // Changes are now persisted to file
-     * </code></pre>
+     * <pre><code>manager.saveConfig("players");</code></pre>
      *
-     * @param configName the name of the configuration to save
-     * @throws RuntimeException if the file cannot be written
+     * @param configName The configuration name
+     * @throws RuntimeException If the file cannot be written
      */
     public void saveConfig(String configName) {
         if (configs.containsKey(configName)) {

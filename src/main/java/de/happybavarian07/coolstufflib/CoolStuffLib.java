@@ -22,7 +22,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -62,41 +64,25 @@ public class CoolStuffLib {
     /**
      * Initializes the CoolStuffLib library core.
      *
-     * @param javaPluginUsingLib The plugin instance using this library.
-     * @param languageManager The language manager.
-     * @param commandManagerRegistry The command manager registry.
-     * @param menuAddonManager The menu addon manager.
-     * @param repositoryManager The repository manager.
-     * @param cacheManager The cache manager.
-     * @param backupManager The backup manager.
-     * @param pluginFileLogger The plugin logger.
-     * @param usePlayerLangHandler Whether to use per-player language handling.
-     * @param sendSyntaxOnArgsZero Whether to send syntax when no args are provided.
-     * @param languageManagerStartingMethod Initialization logic for the language manager.
+     * @param javaPluginUsingLib                   The plugin instance using this library.
+     * @param languageManager                      The language manager.
+     * @param commandManagerRegistry               The command manager registry.
+     * @param menuAddonManager                     The menu addon manager.
+     * @param repositoryManager                    The repository manager.
+     * @param cacheManager                         The cache manager.
+     * @param backupManager                        The backup manager.
+     * @param pluginFileLogger                     The plugin logger.
+     * @param usePlayerLangHandler                 Whether to use per-player language handling.
+     * @param sendSyntaxOnArgsZero                 Whether to send syntax when no args are provided.
+     * @param languageManagerStartingMethod        Initialization logic for the language manager.
      * @param commandManagerRegistryStartingMethod Initialization logic for the command manager registry.
-     * @param menuAddonManagerStartingMethod Initialization logic for the menu addon manager.
-     * @param repositoryManagerStartingMethod Initialization logic for the repository manager.
-     * @param cacheManagerStartingMethod Initialization logic for the cache manager.
-     * @param backupManagerStartingMethod Initialization logic for the backup manager.
-     * @param dataFile The data file used for persistent storage.
+     * @param menuAddonManagerStartingMethod       Initialization logic for the menu addon manager.
+     * @param repositoryManagerStartingMethod      Initialization logic for the repository manager.
+     * @param cacheManagerStartingMethod           Initialization logic for the cache manager.
+     * @param backupManagerStartingMethod          Initialization logic for the backup manager.
+     * @param dataFile                             The data file used for persistent storage.
      */
-    protected CoolStuffLib(JavaPlugin javaPluginUsingLib,
-                           LanguageManager languageManager,
-                           CommandManagerRegistry commandManagerRegistry,
-                           MenuAddonManager menuAddonManager,
-                           RepositoryManager repositoryManager,
-                           CacheManager cacheManager,
-                           BackupManager backupManager,
-                           PluginFileLogger pluginFileLogger,
-                           boolean usePlayerLangHandler,
-                           boolean sendSyntaxOnArgsZero,
-                           Consumer<Object[]> languageManagerStartingMethod,
-                           Consumer<Object[]> commandManagerRegistryStartingMethod,
-                           Consumer<Object[]> menuAddonManagerStartingMethod,
-                           Consumer<Object[]> repositoryManagerStartingMethod,
-                           Consumer<Object[]> cacheManagerStartingMethod,
-                           Consumer<Object[]> backupManagerStartingMethod,
-                           File dataFile) {
+    protected CoolStuffLib(JavaPlugin javaPluginUsingLib, LanguageManager languageManager, CommandManagerRegistry commandManagerRegistry, MenuAddonManager menuAddonManager, RepositoryManager repositoryManager, CacheManager cacheManager, BackupManager backupManager, PluginFileLogger pluginFileLogger, boolean usePlayerLangHandler, boolean sendSyntaxOnArgsZero, Consumer<Object[]> languageManagerStartingMethod, Consumer<Object[]> commandManagerRegistryStartingMethod, Consumer<Object[]> menuAddonManagerStartingMethod, Consumer<Object[]> repositoryManagerStartingMethod, Consumer<Object[]> cacheManagerStartingMethod, Consumer<Object[]> backupManagerStartingMethod, File dataFile) {
         lib = this;
         this.javaPluginUsingLib = javaPluginUsingLib;
         if (this.javaPluginUsingLib == null) {
@@ -138,15 +124,23 @@ public class CoolStuffLib {
         LogPrefix.setup();
         // Register services
         ServiceRegistry registry = this.serviceRegistry;
-        if (languageManager != null) registry.register(new ServiceDescriptor("language-manager"), languageManager, null);
-        if (commandManagerRegistry != null) registry.register(new ServiceDescriptor("command-manager-registry"), commandManagerRegistry, null);
-        if (menuAddonManager != null) registry.register(new ServiceDescriptor("menu-addon-manager"), menuAddonManager, null);
-        if (repositoryManager != null) registry.register(new ServiceDescriptor("repository-manager"), repositoryManager, null);
-        if (cacheManager != null) registry.register(new ServiceDescriptor("cache-manager"), cacheManager, null);
-        if (backupManager != null) registry.register(new ServiceDescriptor("backup-manager"), backupManager, null);
-        
+        // TODO maybe change the service descriptor a bit and make it easier to use and not require so much stuff since uuid can be handled by the registry
+        // TODO maybe also add a servicecomponent annotation to all the services below
+        if (languageManager != null)
+            registry.register(new ServiceDescriptor(UUID.randomUUID(), "language-manager", null, Duration.ofSeconds(5), Duration.ofSeconds(5)), languageManager, null);
+        if (commandManagerRegistry != null)
+            registry.register(new ServiceDescriptor(UUID.randomUUID(), "command-manager-registry", null, Duration.ofSeconds(5), Duration.ofSeconds(5)), commandManagerRegistry, null);
+        if (menuAddonManager != null)
+            registry.register(new ServiceDescriptor(UUID.randomUUID(), "menu-addon-manager", null, Duration.ofSeconds(5), Duration.ofSeconds(5)), menuAddonManager, null);
+        if (repositoryManager != null)
+            registry.register(new ServiceDescriptor(UUID.randomUUID(), "repository-manager", null, Duration.ofSeconds(5), Duration.ofSeconds(5)), repositoryManager, null);
+        if (cacheManager != null)
+            registry.register(new ServiceDescriptor(UUID.randomUUID(), "cache-manager", null, Duration.ofSeconds(5), Duration.ofSeconds(5)), cacheManager, null);
+        if (backupManager != null)
+            registry.register(new ServiceDescriptor(UUID.randomUUID(), "backup-manager", null, Duration.ofSeconds(5), Duration.ofSeconds(5)), backupManager, null);
+
         ChatInputService chatInputService = new ChatInputService();
-        registry.register(new ServiceDescriptor("chat-input-service"), chatInputService, null);
+        registry.register(new ServiceDescriptor(UUID.randomUUID(), "chat-input-service", null, Duration.ofSeconds(5), Duration.ofSeconds(5)), chatInputService, null);
 
         registry.startAll().join();
 
@@ -194,27 +188,27 @@ public class CoolStuffLib {
      * <p>Retrieves a service from the registry by name and class. If the service is not registered,
      * it will attempt to instantiate it via its no-argument constructor, register it, and start it.
      * If the service is registered but stopped or failed, it will attempt to start it.</p>
-     * 
-     * @param name The service name.
+     *
+     * @param name  The service name.
      * @param clazz The service class.
-     * @param <T> The service type.
+     * @param <T>   The service type.
      * @return A guaranteed running instance of the service.
      */
     public <T extends Service> T requireService(String name, Class<T> clazz) {
+        // TODO move this into the registry perhaps (seperation of concerns and also better handling) and this handling of instantiation is very fragile and dumb
         T service = serviceRegistry.getAsByName(name, clazz).orElse(null);
         if (service == null) {
             try {
                 service = clazz.getDeclaredConstructor().newInstance();
-                serviceRegistry.register(new ServiceDescriptor(name), service, null);
+                UUID randomUUID = UUID.randomUUID();
+                serviceRegistry.register(new ServiceDescriptor(randomUUID, name, null, Duration.ofSeconds(5), Duration.ofSeconds(5)), service, randomUUID);
                 serviceRegistry.start(service.id()).join();
             } catch (Exception e) {
                 throw new RuntimeException("Failed to auto-instantiate service: " + name, e);
             }
         } else {
             ServiceState state = serviceRegistry.getState(service.id());
-            if (state == ServiceState.REGISTERED || 
-                state == ServiceState.STOPPED || 
-                state == ServiceState.FAILED) {
+            if (state == ServiceState.REGISTERED || state == ServiceState.STOPPED || state == ServiceState.FAILED) {
                 serviceRegistry.start(service.id()).join();
             }
         }
@@ -321,9 +315,9 @@ public class CoolStuffLib {
     /**
      * Writes a message to the log file if enabled.
      *
-     * @param info The log level.
-     * @param logMessage The message to log.
-     * @param logPrefix The prefix to apply.
+     * @param info          The log level.
+     * @param logMessage    The message to log.
+     * @param logPrefix     The prefix to apply.
      * @param sendToConsole Whether to output to the console.
      */
     public void writeToLog(Level info, String logMessage, LogPrefix logPrefix, boolean sendToConsole) {
@@ -354,14 +348,13 @@ public class CoolStuffLib {
     /**
      * Creates a new PlayerMenuUtility for the specified player, overwriting any existing instance.
      *
-     * @param player The UUID of the player.
+     * @param player    The UUID of the player.
      * @param addToList Whether to store the utility in the internal map.
      * @return The created PlayerMenuUtility.
      */
     public PlayerMenuUtility createPlayerMenuUtility(UUID player, boolean addToList) {
         PlayerMenuUtility playerMenuUtility = new PlayerMenuUtility(this, player);
-        if (addToList)
-            playerMenuUtilityMap.put(player, playerMenuUtility);
+        if (addToList) playerMenuUtilityMap.put(player, playerMenuUtility);
 
         return playerMenuUtility;
     }

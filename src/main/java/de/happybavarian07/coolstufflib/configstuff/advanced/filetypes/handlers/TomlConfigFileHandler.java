@@ -4,6 +4,7 @@ import de.happybavarian07.coolstufflib.configstuff.advanced.section.BaseConfigSe
 import de.happybavarian07.coolstufflib.logging.ConfigLogger;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.ConfigTypeConverterRegistry;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.interfaces.AbstractConfigFileHandler;
+import de.happybavarian07.coolstufflib.utils.ConfigUtils;
 import de.happybavarian07.coolstufflib.utils.Utils;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.MapSection;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.ListSection;
@@ -42,7 +43,7 @@ public class TomlConfigFileHandler extends AbstractConfigFileHandler {
     protected void doSave(File file, Map<String, Object> data, Map<String, String> comments) throws IOException {
         try (Writer writer = new FileWriter(file)) {
             Map<String, Object> flatMap = new LinkedHashMap<>();
-            flattenTomlMap(flatMap, "", Utils.unflattenObjectMap(converterRegistry, data));
+            flattenTomlMap(flatMap, "", ConfigUtils.unflattenObjectMap(converterRegistry, data));
             writeTomlFromFlat(writer, flatMap, comments);
         }
     }
@@ -358,7 +359,7 @@ public class TomlConfigFileHandler extends AbstractConfigFileHandler {
                         lastComment = null;
                     }
                 } else if (lastComment != null) {
-                    Utils.logMalformedLine(file, lineNum, line, "Expected key=value after comment");
+                    ConfigUtils.logMalformedLine(file, lineNum, line, "Expected key=value after comment");
                     lastComment = null;
                 }
             }

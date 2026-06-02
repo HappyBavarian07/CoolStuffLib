@@ -6,6 +6,7 @@ import de.happybavarian07.coolstufflib.configstuff.advanced.section.SetSection;
 import de.happybavarian07.coolstufflib.logging.ConfigLogger;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.ConfigTypeConverterRegistry;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.interfaces.AbstractConfigFileHandler;
+import de.happybavarian07.coolstufflib.utils.ConfigUtils;
 import de.happybavarian07.coolstufflib.utils.Utils;
 
 import java.io.*;
@@ -37,7 +38,7 @@ public class PropertiesConfigFileHandler extends AbstractConfigFileHandler {
     @Override
     protected void doSave(File file, Map<String, Object> data, Map<String, String> comments) {
         try (Writer writer = new FileWriter(file)) {
-            Map<String, Object> flatMap = Utils.flatten(converterRegistry, "", addSectionTypeFields(data));
+            Map<String, Object> flatMap = ConfigUtils.flatten(converterRegistry, "", addSectionTypeFields(data));
             for (Map.Entry<String, Object> entry : flatMap.entrySet()) {
                 String key = entry.getKey();
                 if (comments.containsKey(key)) {
@@ -202,7 +203,7 @@ public class PropertiesConfigFileHandler extends AbstractConfigFileHandler {
             if (name.startsWith(COMMENTS_PREFIX)) continue;
             objectMap.put(name, properties.getProperty(name));
         }
-        Map<String, Object> nested = Utils.unflattenObjectMap(converterRegistry, objectMap);
+        Map<String, Object> nested = ConfigUtils.unflattenObjectMap(converterRegistry, objectMap);
         Object withTypes = ensureSectionType(nested);
         return withTypes instanceof Map ? (Map<String, Object>) withTypes : new HashMap<>();
     }
@@ -233,7 +234,7 @@ public class PropertiesConfigFileHandler extends AbstractConfigFileHandler {
                         lastComment = null;
                     }
                 } else if (lastComment != null) {
-                    Utils.logMalformedLine(file, lineNum, trimmed, "Expected key=value after comment");
+                    ConfigUtils.logMalformedLine(file, lineNum, trimmed, "Expected key=value after comment");
                     lastComment = null;
                 }
             }

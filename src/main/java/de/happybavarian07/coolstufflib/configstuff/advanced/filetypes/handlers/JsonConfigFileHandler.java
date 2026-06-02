@@ -11,6 +11,7 @@ import de.happybavarian07.coolstufflib.configstuff.advanced.section.ListSection;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.MapSection;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.SetSection;
 import de.happybavarian07.coolstufflib.logging.ConfigLogger;
+import de.happybavarian07.coolstufflib.utils.ConfigUtils;
 import de.happybavarian07.coolstufflib.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 
@@ -54,7 +55,7 @@ public class JsonConfigFileHandler extends AbstractConfigFileHandler {
     @Override
     public void doSave(File file, Map<String, Object> data) throws IOException {
         try (Writer writer = new FileWriter(file)) {
-            Map<String, Object> nested = Utils.unflattenObjectMap(converterRegistry, data);
+            Map<String, Object> nested = ConfigUtils.unflattenObjectMap(converterRegistry, data);
             Object plain = addSectionTypeFields(nested);
             gson.toJson(plain, writer);
         }
@@ -96,7 +97,7 @@ public class JsonConfigFileHandler extends AbstractConfigFileHandler {
     @Override
     protected void doSave(File file, Map<String, Object> data, Map<String, String> comments) throws IOException {
         try (Writer writer = new FileWriter(file)) {
-            Map<String, Object> nested = Utils.unflattenObjectMap(converterRegistry, data);
+            Map<String, Object> nested = ConfigUtils.unflattenObjectMap(converterRegistry, data);
             Object withTypes = addSectionTypeFields(nested);
             if (!comments.isEmpty()) {
                 Map<String, Object> commentsMap = new LinkedHashMap<>(comments);

@@ -6,18 +6,26 @@ import de.happybavarian07.coolstufflib.jpa.annotations.Table;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class EntityReflectionUtil {
     private static final java.util.concurrent.ConcurrentHashMap<Class<?>, EntityMetadata> METADATA_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
 
     private EntityReflectionUtil() {}
 
+    /**
+     * <p>Gets cached metadata for an entity class.</p>
+     *
+     * @param entityClass The entity class
+     * @return The entity metadata
+     */
     public static EntityMetadata getMetadata(Class<?> entityClass) {
         return METADATA_CACHE.computeIfAbsent(entityClass, clazz -> {
             String tableName = getTableNameInternal(clazz);
             String idColumnName = null;
             Field idField = null;
-            List<ColumnMapping> mappings = new java.util.ArrayList<>();
+            List<ColumnMapping> mappings = new ArrayList<>();
 
             for (Field field : clazz.getDeclaredFields()) {
                 field.setAccessible(true);
@@ -42,10 +50,22 @@ public final class EntityReflectionUtil {
         });
     }
 
+    /**
+     * <p>Gets the ID column name for an entity class.</p>
+     *
+     * @param entityClass The entity class
+     * @return The ID column name
+     */
     public static String getIdColumnName(Class<?> entityClass) {
         return getMetadata(entityClass).idColumnName();
     }
 
+    /**
+     * <p>Gets the unique ID of an entity instance.</p>
+     *
+     * @param entity The entity instance
+     * @return The entity ID
+     */
     public static Object getEntityId(Object entity) {
         EntityMetadata metadata = getMetadata(entity.getClass());
         try {
