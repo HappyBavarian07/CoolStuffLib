@@ -1,288 +1,360 @@
 # CoolStuffLib Menu System Tutorial
 
-## Table of Contents
+This tutorial covers the current menu architecture, including constrained pagination zones, multi-zone pagination, pluggable page transitions, and reusable menu actions.
 
-1. Introduction
-2. Architecture Overview
-3. Initialization (CoolStuffLibBuilder)
-4. Core Components
-5. Creating Menus
-6. Menu Actions and Listeners
-7. Paginated, Confirmation, Player Selector, and Casino Menus
-8. Player Menu Utility
-9. Menu Addons and Extensibility
-10. Advanced Features
-11. Example Workflow
-12. Troubleshooting & Tips
-13. References
-
----
-
-## 1. Introduction
-
-The CoolStuffLib Menu System provides a flexible framework for building interactive, extensible menus in Java
-applications, especially for plugin-based environments. It supports custom actions, pagination, player utilities, and
-addon integration.
+## Contents
+1. Quick Start
+2. Core Concepts
+3. Build a Basic Menu
+4. Build a Paginated Menu (Single Data Source)
+5. Pagination Zones (Constrained Layouts)
+6. MultiPaginatedMenu (Multiple Independent Lists)
+7. Transition Strategies and Animation
+8. Reusable Actions
+9. Smart Filler API (No Manual Frame Loops)
+10. PlayerMenuUtility
+11. Migration Notes
+12. Troubleshooting
 
 ---
 
-## 2. Architecture Overview
+## 1) Quick Start
 
-- **Menu**: Base class for all menus.
-- **MenuAction**: Represents actions triggered by menu interactions.
-- **MenuListener**: Handles menu events.
-- **PaginatedMenu**: Supports multi-page menus.
-- **PlayerMenuUtility**: Manages player-specific menu state.
-- **MenuAddon/Manager**: Extends menu functionality via plugins.
-- **ConfirmationMenu**: Specialized menu for confirmations.
-
----
-
-## 3. Initialization (CoolStuffLibBuilder)
-
-The preferred way to initialize CoolStuffLib is via the builder pattern. This ensures all systems are properly
-configured and ready for use.
+Initialize via `CoolStuffLibBuilder`:
 
 ```java
-CoolStuffLib lib = new CoolStuffLibBuilder(plugin)
-    .withMenuSystem()
-    .build()
-    .createCoolStuffLib();
-```
-
-You can chain other systems (language manager, command manager, etc.) as needed before calling `createCoolStuffLib()`.
-
----
-
-## 4. Core Components
-
-### Menu
-
-Defines the structure and behavior of a menu. Extend this class to create custom menus.
-
-```java
-public class MyMenu extends Menu {
-    public MyMenu(PlayerMenuUtility playerMenuUtility) {
-        super(playerMenuUtility);
-    }
-    // Implement required abstract methods
-    @Override
-    public String getMenuName() { return "My Custom Menu"; }
-    @Override
-    public String getConfigMenuAddonFeatureName() { return "MyMenuFeature"; }
-    @Override
-    public void handleMenu(InventoryClickEvent event) { /* ... */ }
-    @Override
-    public void handleCloseMenu(InventoryCloseEvent event) { /* ... */ }
-}
-```
-
-### PaginatedMenu
-
-For menus with multiple pages, extend `PaginatedMenu`:
-
-```java
-public class MyPaginatedMenu extends PaginatedMenu {
-    public MyPaginatedMenu(PlayerMenuUtility util) {
-        super(util);
-    }
-    // Implement required methods
-}
-```
-
-Open a paginated menu just like a normal menu:
-
-```java
-PlayerMenuUtility util = lib.getPlayerMenuUtility(player.getUniqueId());
-MyPaginatedMenu menu = new MyPaginatedMenu(util);
-menu.open();
-```
-
----
-
-## 5. Menu Actions and Listeners
-
-Menu actions are handled via the `handleMenu` method in your menu class. The `MenuListener` automatically routes
-inventory events to your menu instance.
-
----
-
-## 6. Confirmation, Paginated, Player Selector, and Casino Menus
-
-### Confirmation Menu
-
-Do **not** instantiate `ConfirmationMenu` directly. Use the utility method:
-
-```java
-Utils.openConfirmationMenu(
-    "Are you sure?", // reason
-    "MenuToOpenAfter", // menu to open after
-    "menu.package", // menu package
-    methodToExecuteAfter, // Method to execute
-    objectToInvokeOn, // Object to invoke method on
-    Arrays.asList(arg1, arg2), // Method arguments
-    Arrays.asList(Exception.class), // Exceptions to catch
-    player // Player
-);
-```
-
-### Paginated Menus
-
-Extend `PaginatedMenu<T>` for multi-page menus. Implement the abstract methods for paginated and custom item clicks:
-
-```java
-public class MyPaginatedMenu extends PaginatedMenu<MyType> {
-    public MyPaginatedMenu(PlayerMenuUtility util) {
-        super(util);
-    }
-    @Override
-    protected void handlePageItemClick(int slot, ItemStack item, InventoryClickEvent event) {
-        // Handle paginated item click
-    }
-    @Override
-    protected void handleCustomItemClick(int slot, ItemStack item, InventoryClickEvent event) {
-        // Handle custom item click
-    }
-}
-```
-
-You can use `setSavedMenu(Menu menu)` to set a menu to return to when closing.
-
-### CustomPlayerSelector
-
-`CustomPlayerSelector` is a paginated menu for selecting one or multiple players. It uses PersistentDataContainer to mark player head items for robust detection.
-
-```java
-CustomPlayerSelector<Player, ResultType> selector = new CustomPlayerSelector<>(
-    action, // String describing the action
-    infoItemExtraInfos, // Extra info for the info item
-    playerMenuUtility, // PlayerMenuUtility instance
-    functionToExecute, // Function to execute after selection
-    functionForDecidingItemColor, // Function for coloring player names
-    previousMenu, // Menu to return to after selection
-    players, // List of Player objects
-    multiSelect // true for multi-select, false for single
-);
-selector.open();
-```
-
-- Handles single and multi-select.
-- Uses PersistentDataContainer for player head item detection.
-- Returns to the previous menu or closes inventory after selection.
-
-### CasinoMenu
-
-`CasinoMenu` is a flexible paginated menu for casino-like item selection and animation. You can specify any item pool and handle results with custom logic, similar to CustomPlayerSelector.
-
-```java
-CasinoMenu<ItemType, ResultType> casinoMenu = new CasinoMenu<>(
-    playerMenuUtility,
-    itemPool, // List<ItemType> or any type you want to display/animate
-    animationFunction, // Function<ItemType, ItemStack> to render each item
-    resultHandler, // Function<ResultType, Void> to handle the result
-    previousMenu // Menu to return to after animation or selection
-);
-casinoMenu.open();
-```
-
-- Specify any item pool and animation logic.
-- Handle the result of the casino roll with a custom function.
-- Returns to the previous menu or closes inventory after completion.
-
----
-
-## 7. Player Menu Utility
-
-`PlayerMenuUtility` is used to store and retrieve player-specific menu state. Always obtain it via:
-
-```java
-PlayerMenuUtility util = lib.getPlayerMenuUtility(player.getUniqueId());
-```
-
-You can store custom data for use across menu transitions:
-
-```java
-util.setData("key", value, true);
-Object value = util.getData("key");
-```
-
----
-
-## 8. Menu Addons and Extensibility
-
-Extend menu functionality by creating `MenuAddon` classes and registering them with `MenuAddonManager`.
-
-```java
-MenuAddonManager mam = lib.getMenuAddonManager();
-mam.addMenuAddon(new MyMenuAddon(...));
-```
-
-Addons can hook into menu events and provide additional features.
-
----
-
-## 9. Advanced Features
-
-- Multi-menu workflows
-- Dynamic menu content
-- Integration with other CoolStuffLib systems
-
----
-
-## 10. Example Workflow
-
-```java
-import de.happybavarian07.coolstufflib.CoolStuffLib;
-import de.happybavarian07.coolstufflib.CoolStuffLibBuilder;
-import de.happybavarian07.coolstufflib.menusystem.PlayerMenuUtility;
-
-// Initialization
 CoolStuffLib lib = new CoolStuffLibBuilder(plugin)
         .withMenuSystem()
         .build()
         .createCoolStuffLib();
+```
 
-// Open a paginated menu
+Get player utility:
+
+```java
 PlayerMenuUtility util = lib.getPlayerMenuUtility(player.getUniqueId());
-MyPaginatedMenu menu = new MyPaginatedMenu(util);
-menu.open();
-
-// Open a CustomPlayerSelector
-        CustomPlayerSelector<Player,ResultType>selector=new CustomPlayerSelector<>(
-        "Invite Player",
-        "Select a player to invite.",
-        util,
-        functionToExecute,
-        functionForDecidingItemColor,
-        previousMenu,
-        Bukkit.getOnlinePlayers().stream().toList(),
-        false // single select
-        );
-        selector.open();
-
-// Open a CasinoMenu
-CasinoMenu<ItemType, ResultType> casinoMenu = new CasinoMenu<>(
-    util,
-    itemPool,
-    animationFunction,
-    resultHandler,
-    previousMenu
-);
-casinoMenu.open();
 ```
 
 ---
 
-## 11. Troubleshooting & Tips
+## 2) Core Concepts
 
-- Always use the builder for initialization.
-- Use PlayerMenuUtility for all menu state.
-- Register custom menu addons before opening menus.
-- Use provided utility methods for confirmation flows.
+- `Menu`: Base class for all inventory menus.
+- `PaginatedMenu<T>`: One paginated data source, now with optional constrained zones and pluggable transitions.
+- `MultiPaginatedMenu`: Multiple independent paginated zones in one inventory.
+- `MenuListener`: Routes inventory events to your menu instances.
+- `MenuAction`: Reusable click action interface and wrappers/decorators.
 
 ---
 
-## 12. References
+## 3) Build a Basic Menu
 
-- Source code: [CoolStuffLib GitHub](https://github.com/HappyBavarian07/CoolStuffLib)
-- API docs: See project Javadocs
+```java
+public class AdminMenu extends Menu {
+    public AdminMenu(PlayerMenuUtility util) {
+        super(util);
+    }
+
+    @Override
+    public String getMenuName() { return "Admin Panel"; }
+
+    @Override
+    public String getConfigMenuAddonFeatureName() { return "AdminPanel"; }
+
+    @Override
+    public int getSlots() { return 54; }
+
+    @Override
+    public void setMenuItems() {
+        setFillerGlass();
+        // place/register buttons here
+    }
+
+    @Override
+    public void handleMenu(InventoryClickEvent e) {}
+
+    @Override
+    public void handleOpenMenu(InventoryOpenEvent e) {}
+
+    @Override
+    public void handleCloseMenu(InventoryCloseEvent e) {}
+}
+```
+
+Open it:
+
+```java
+new AdminMenu(util).open();
+```
+
+---
+
+## 4) Build a Paginated Menu (Single Data Source)
+
+```java
+public class WorldSelectMenu extends PaginatedMenu<World> {
+    public WorldSelectMenu(PlayerMenuUtility util, Menu previous) {
+        super(util, previous);
+    }
+
+    @Override
+    public String getMenuName() { return "Select World"; }
+
+    @Override
+    public String getConfigMenuAddonFeatureName() { return "WorldSelect"; }
+
+    @Override
+    public int getSlots() { return 54; }
+
+    @Override
+    public void preSetMenuItems() {}
+
+    @Override
+    public void postSetMenuItems() {}
+
+    @Override
+    protected void handlePageItemClick(int slot, ItemStack item, InventoryClickEvent event) {
+        World world = getPaginatedDataForSlot(slot, item);
+        if (world == null) return;
+        event.getWhoClicked().sendMessage("Selected: " + world.getName());
+    }
+
+    @Override
+    protected void handleCustomItemClick(int slot, ItemStack item, InventoryClickEvent event) {}
+
+    @Override
+    public void handleOpenMenu(InventoryOpenEvent e) {}
+
+    @Override
+    public void handleCloseMenu(InventoryCloseEvent e) {}
+}
+```
+
+Set data:
+
+```java
+menu.setPaginatedData(Bukkit.getWorlds(), world -> {
+    ItemStack item = new ItemStack(Material.GRASS_BLOCK);
+    ItemMeta meta = item.getItemMeta();
+    meta.setDisplayName("§a" + world.getName());
+    item.setItemMeta(meta);
+    return item;
+});
+```
+
+If you do nothing else, `PaginatedMenu` keeps its default behavior.
+
+---
+
+## 5) Pagination Zones (Constrained Layouts)
+
+Use zones when the content area should not occupy the full default region.
+
+```java
+import de.happybavarian07.coolstufflib.menusystem.pagination.PaginationZone;
+
+// contiguous zone
+menu.setPaginationZone(new PaginationZone(10, 16));
+
+// or explicit slots
+menu.setPaginationZone(new PaginationZone(10, 11, 12, 19, 20, 21, 28, 29, 30));
+```
+
+This enables frame/header/sidebar layouts while preserving page-click mapping.
+
+---
+
+## 6) MultiPaginatedMenu (Multiple Independent Lists)
+
+Use when one inventory needs multiple paginated data blocks with separate page states.
+
+```java
+public class DashboardMenu extends MultiPaginatedMenu {
+    public DashboardMenu(PlayerMenuUtility util, Menu previous) {
+        super(util, previous);
+    }
+
+    @Override
+    public String getMenuName() { return "Dashboard"; }
+
+    @Override
+    public String getConfigMenuAddonFeatureName() { return "Dashboard"; }
+
+    @Override
+    public int getSlots() { return 54; }
+
+    @Override
+    protected void preSetMenuItems() {}
+
+    @Override
+    protected void postSetMenuItems() {}
+
+    @Override
+    protected void handleZoneItemClick(String zoneId, Object data, int dataIndex, int slot, ItemStack item, InventoryClickEvent event) {
+        event.getWhoClicked().sendMessage(zoneId + " -> " + data);
+    }
+
+    @Override
+    protected void handleOutsideZoneClick(int slot, ItemStack item, InventoryClickEvent event) {}
+
+    @Override
+    public void handleOpenMenu(InventoryOpenEvent e) {}
+
+    @Override
+    public void handleCloseMenu(InventoryCloseEvent e) {}
+}
+```
+
+Define zones:
+
+```java
+dashboard.defineZone("top", new PaginationZone(10, 16), topData, topRenderer);
+dashboard.defineZone("middle", new PaginationZone(19, 25), middleData, middleRenderer);
+dashboard.defineZone("bottom", new PaginationZone(28, 34), bottomData, bottomRenderer);
+```
+
+Each zone can have its own controls, direction, and transition strategy.
+
+---
+
+## 7) Transition Strategies and Animation
+
+Available built-ins (`menusystem.pagination`):
+- `InstantPageTransition`
+- `ClearThenInstantPageTransition`
+- `SequentialPageTransition`
+
+`PaginatedMenu` setup:
+
+```java
+menu.setPageTransition(new SequentialPageTransition<>());
+menu.setAnimationTickDelay(2);
+```
+
+Directional controls:
+
+```java
+menu.setNavigationDirection(NavigationDirection.VERTICAL); // uses Up/Down if present
+menu.setPageDirection(PageDirection.REVERSED);            // invert logical page direction
+menu.setControlLayout(new PageControlLayout(45, 49, 53, 50));
+```
+
+You can implement your own transition by implementing `PageTransition<T>`.
+
+---
+
+## 8) Reusable Actions
+
+Available action helpers in `menusystem.actions`:
+- `PermissionAction`
+- `ConfirmationAction`
+- `CompositeAction`
+- `CooldownAction`
+- `SoundAction`
+- `OpenMenuAction`
+
+Example composition:
+
+```java
+MenuAction action = new CompositeAction(
+        new PermissionAction("admin.menu.use",
+                new CooldownAction(750,
+                        new SoundAction(Sound.UI_BUTTON_CLICK, 1f, 1f,
+                                new OpenMenuAction(targetMenu)
+                        ),
+                        "Please wait before clicking again."
+                )
+        )
+);
+```
+
+Register on a slot:
+
+```java
+registerButton(13, icon, action, null);
+```
+
+---
+
+## 9) Smart Filler API (No Manual Frame Loops)
+
+`setFillerGlass()` is now zone-aware:
+
+- In `PaginatedMenu`, it skips:
+  - the active pagination slots
+  - pagination control slots
+- In `MultiPaginatedMenu`, it skips:
+  - all defined zone slots
+  - all zone control slots
+
+So in most paginated menus, this is enough:
+
+```java
+@Override
+public void preSetMenuItems() {
+    setFillerGlass(); // smart filler
+    // add custom static buttons/labels only where needed
+}
+```
+
+You can still exclude extra slots explicitly:
+
+```java
+setFillerGlass(4, 49, 50);
+```
+
+or
+
+```java
+setFillerGlass(Set.of(4, 49, 50));
+```
+
+---
+
+## 10) PlayerMenuUtility
+
+Use `PlayerMenuUtility` for state across menu transitions:
+
+```java
+util.setData("selected_world", worldName, true);
+String world = util.getData("selected_world", String.class, null);
+```
+
+Always resolve utility through the library:
+
+```java
+PlayerMenuUtility util = CoolStuffLib.getLib().getPlayerMenuUtility(player.getUniqueId());
+```
+
+---
+
+## 11) Migration Notes
+
+- Existing `PaginatedMenu` implementations continue to work with default behavior.
+- Prefer `menusystem.pagination.PaginationZone` for new code.
+- Legacy `menusystem.PaginationZone` is available as a compatibility wrapper.
+- Move one menu at a time:
+  1. Keep existing pagination.
+  2. Add a zone.
+  3. Add custom controls/direction.
+  4. Add transition strategy.
+  5. Migrate advanced menus to `MultiPaginatedMenu` only where needed.
+
+---
+
+## 12) Troubleshooting
+
+- Clicks not handled:
+  - Ensure inventory holder is your menu instance and menu is opened via `menu.open()`.
+- Page controls do nothing:
+  - Verify control slots are valid and not overwritten later in `setMenuItems`.
+- Null data on click:
+  - Use `getPaginatedDataForSlot(slot, item)` in `PaginatedMenu`.
+  - In `MultiPaginatedMenu`, handle via `handleZoneItemClick(...)` arguments.
+- Animation oddities:
+  - Increase `setAnimationTickDelay(...)`.
+  - Switch to `InstantPageTransition` to isolate rendering issues.
+
+---
+
+Use this tutorial as the baseline pattern for all new menu work in CoolStuffLib.

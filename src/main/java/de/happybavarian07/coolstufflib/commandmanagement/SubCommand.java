@@ -53,10 +53,24 @@ import java.util.Map;
  */
 @CommandData
 public abstract class SubCommand implements Comparable<SubCommand> {
-    protected CoolStuffLib lib = CoolStuffLib.getLib();
-    protected LanguageManager lgm = lib.getLanguageManager();
-    protected CommandManagerRegistry registry = lib.getCommandManagerRegistry();
+    protected CoolStuffLib lib;
+    protected LanguageManager lgm;
+    protected CommandManagerRegistry registry;
     protected String mainCommandName = "";
+
+    /**
+     * Injects the necessary dependencies into the SubCommand.
+     * This is called by the CommandManagerRegistry during registration.
+     *
+     * @param lib      The CoolStuffLib instance.
+     * @param lgm      The LanguageManager instance.
+     * @param registry The CommandManagerRegistry instance.
+     */
+    public void setDependencies(CoolStuffLib lib, LanguageManager lgm, CommandManagerRegistry registry) {
+        this.lib = lib;
+        this.lgm = lgm;
+        this.registry = registry;
+    }
 
     /**
      * <p>Constructs a new SubCommand instance associated with the specified main command.</p>

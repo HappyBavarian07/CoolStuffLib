@@ -15,7 +15,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class CasinoMenu<T, R> extends Menu {
-    private final List<T> itemPool;
     private final Function<T, ItemStack> animationFunction;
     private final Function<T, R> resultFunction;
     private final Consumer<R> resultHandler;
@@ -24,7 +23,7 @@ public class CasinoMenu<T, R> extends Menu {
     private int animationTicks = 0;
     private int finalIndex = -1;
     private T finalItem;
-    private List<T> expandedPool;
+    private final List<T> expandedPool;
 
     public CasinoMenu(PlayerMenuUtility playerMenuUtility,
                       List<T> itemPool,
@@ -33,7 +32,6 @@ public class CasinoMenu<T, R> extends Menu {
                       Consumer<R> resultHandler,
                       Menu previousMenu) {
         super(playerMenuUtility);
-        this.itemPool = itemPool;
         this.animationFunction = animationFunction;
         this.resultFunction = resultFunction;
         this.resultHandler = resultHandler;
@@ -94,6 +92,7 @@ public class CasinoMenu<T, R> extends Menu {
         animationTicks = 0;
         finalIndex = -1;
         finalItem = null;
+        assert lib != null;
         Bukkit.getScheduler().runTaskTimer(lib.getJavaPluginUsingLib(), () -> {
             if (animationTicks < 20) {
                 int idx = random.nextInt(expandedPool.size());

@@ -1,0 +1,49 @@
+=== LGM Keys Found ===
+ConfigUI.MenuTitle
+Console.ExecutesPlayerCommand
+CustomPlayerSelector
+CustomPlayerSelector.Confirm
+CustomPlayerSelector.DeSelect
+CustomPlayerSelector.InfoItem
+CustomPlayerSelector.PlayerItem
+General.Close
+General.ConfirmationMenu.Cancel
+General.ConfirmationMenu.Confirm
+General.ConfirmationMenu.ReasonItem
+General.FillerItem
+General.Left
+General.Refresh
+General.Right
+Items.
+Items.ConfigUI.Folder
+Items.ConfigUI.NumberValue
+Items.ConfigUI.StringValue
+Misc.ConfirmationMenu
+Player.Commands.CommandContainsInvalidArgs
+Player.Commands.ErrorPerformingSubCommand
+Player.Commands.HelpMessages.Footer
+Player.Commands.HelpMessages.Format
+Player.Commands.HelpMessages.Header
+Player.Commands.HelpPageDoesNotExist
+Player.Commands.InvalidSubCommand
+Player.Commands.NoPermission
+Player.Commands.NotANumber
+Player.Commands.TooFewArguments
+Player.Commands.TooManyArguments
+Player.Commands.UsageMessage
+Player.ConfigUI.BooleanToggled
+Player.ConfigUI.InputCancelled
+Player.ConfigUI.InvalidNumber
+Player.ConfigUI.PromptCancel
+Player.ConfigUI.PromptInput
+Player.ConfigUI.ValueUpdated
+Player.General.AlreadyOnFirstPage
+Player.General.AlreadyOnLastPage
+Player.General.Error
+Player.General.NoPermissions
+
+=== Potential Hardcoded Messages ===
+src/main/java\de\happybavarian07\coolstufflib\commandmanagement\SubCommand.java:171: *     sender.sendMessage("Not enough arguments!");
+src/main/java\de\happybavarian07\coolstufflib\testing\InGameTestRunner.java:82: sender.sendMessage("§6=== Test Results ===");
+src/main/java\de\happybavarian07\coolstufflib\testing\TestCommand.java:60: sender.sendMessage("§6Running all tests...");
+src/main/java\de\happybavarian07\coolstufflib\testing\TestCommand.java:68: sender.sendMessage("§6Available test classes:");

@@ -68,7 +68,6 @@ public class CoolStuffLibBuilder {
     private Consumer<Object[]> cacheManagerStartingMethod = (args) -> {
         if (args.length != 1) return;
         CacheManager cacheManager = (CacheManager) args[0];
-        // No default startup action needed for CacheManager
     };
     private Consumer<Object[]> backupManagerStartingMethod = (args) -> {
         if (args.length != 1) return;
@@ -77,41 +76,76 @@ public class CoolStuffLibBuilder {
     private File dataFile = null;
 
     /**
-     * Constructs a new CoolStuffLibBuilder.
+     * Initializes a new CoolStuffLibBuilder instance.
      *
-     * @param javaPluginUsingLib The JavaPlugin instance using this library.
+     * @param javaPluginUsingLib The plugin instance using this library.
      */
     public CoolStuffLibBuilder(JavaPlugin javaPluginUsingLib) {
         this.javaPluginUsingLib = javaPluginUsingLib;
         if (this.javaPluginUsingLib == null) {
-            throw new RuntimeException("CoolStuffLib did not find a Plugin it got called from. Returning. Report the Issue to the Plugin Dev(s), that may have programmed the Plugin.");
+            throw new RuntimeException("CoolStuffLib did not find a Plugin it got called from.");
         }
     }
 
+    /**
+     * Creates a builder for the language manager component.
+     *
+     * @return The language manager builder.
+     */
     public LanguageManagerBuilder withLanguageManager() {
         return new LanguageManagerBuilder(this);
     }
 
+    /**
+     * Creates a builder for the command manager component.
+     *
+     * @return The command manager builder.
+     */
     public CommandManagerBuilder withCommandManager() {
         return new CommandManagerBuilder(this);
     }
 
+    /**
+     * Creates a builder for the menu system component.
+     *
+     * @return The menu system builder.
+     */
     public MenuSystemBuilder withMenuSystem() {
         return new MenuSystemBuilder(this);
     }
 
+    /**
+     * Creates a builder for the repository manager component.
+     *
+     * @return The repository manager builder.
+     */
     public RepositoryManagerBuilder withRepositoryManager() {
         return new RepositoryManagerBuilder(this);
     }
 
+    /**
+     * Creates a builder for the cache manager component.
+     *
+     * @return The cache manager builder.
+     */
     public CacheManagerBuilder withCacheManager() {
         return new CacheManagerBuilder(this);
     }
 
+    /**
+     * Creates a builder for the backup manager component.
+     *
+     * @return The backup manager builder.
+     */
     public BackupManagerBuilder withBackupManager() {
         return new BackupManagerBuilder(this);
     }
 
+    /**
+     * Creates a builder for the logging system.
+     *
+     * @return The logging builder.
+     */
     public LoggingBuilder withLogging() {
         return new LoggingBuilder(this);
     }

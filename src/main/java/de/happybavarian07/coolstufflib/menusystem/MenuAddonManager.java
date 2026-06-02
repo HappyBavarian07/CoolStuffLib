@@ -6,15 +6,31 @@ package de.happybavarian07.coolstufflib.menusystem;/*
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.List;
 import java.util.ArrayList;
 import com.google.gson.Gson;
+import de.happybavarian07.coolstufflib.menusystem.actions.MenuAction;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 
-public class MenuAddonManager {
+import de.happybavarian07.coolstufflib.service.api.Service;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
+public class MenuAddonManager implements Service {
+    private final UUID serviceId = UUID.randomUUID();
+    // ... existing fields ...
+
+    @Override
+    public UUID id() { return serviceId; }
+    @Override
+    public String serviceName() { return "menu-addon-manager"; }
+    @Override
+    public CompletableFuture<Void> init() { return CompletableFuture.completedFuture(null); }
+    @Override
+    public CompletableFuture<Void> shutdown() { return CompletableFuture.completedFuture(null); }
+
     private final Map<String, Map<String, MenuAddon>> menuAddonList = new HashMap<>();
     private boolean menuAddonManagerReady = false;
 

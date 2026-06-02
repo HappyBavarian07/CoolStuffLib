@@ -47,11 +47,25 @@ import java.util.logging.Level;
  * <p>Designed for advanced handling, this class assumes familiarity with
  * Bukkit's Plugin and Command APIs, as well as Java's reflection mechanisms.</p>
  */
-public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
+public class CommandManagerRegistry implements CommandExecutor, TabCompleter, Service {
+    private final UUID serviceId = UUID.randomUUID();
     private final JavaPlugin plugin;
     private final Map<CommandManager, CommandData> commandManagers;
     private LanguageManager lgm;
     private boolean commandManagerRegistryReady = false;
+
+    @Override
+    public UUID id() { return serviceId; }
+    @Override
+    public String serviceName() { return "command-manager-registry"; }
+    @Override
+    public CompletableFuture<Void> init() {
+        return CompletableFuture.runAsync(() -> this.commandManagerRegistryReady = true);
+    }
+    @Override
+    public CompletableFuture<Void> shutdown() {
+        return CompletableFuture.runAsync(this::unregisterAll);
+    }
 
     /**
      * Constructs a new {@code CommandManagerRegistry} instance.
@@ -166,8 +180,13 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter {
         if (!commandManagerRegistryReady)
             throw new RuntimeException("CommandManagerRegistry (CMR) not ready to use yet. The Start Method has not been called yet.");
 
+        // Inject dependencies into CommandManager
+        CoolStuffLib lib = CoolStuffLib.getLib();
+        cm.setDependencies(lib, lgm);
+
         // Pre Init SubCommands
         for (SubCommand subCommand : cm.getSubCommands()) {
+            subCommand.setDependencies(lib, lgm, this);
             subCommand.preInit();
         }
 

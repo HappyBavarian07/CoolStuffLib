@@ -5,22 +5,17 @@ package de.happybavarian07.coolstufflib.menusystem.misc;/*
 
 import de.happybavarian07.coolstufflib.languagemanager.PlaceholderType;
 import de.happybavarian07.coolstufflib.menusystem.Menu;
+import de.happybavarian07.coolstufflib.menusystem.actions.MenuAction;
 import de.happybavarian07.coolstufflib.menusystem.PlayerMenuUtility;
-import de.happybavarian07.coolstufflib.utils.Utils;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class ConfirmationMenu extends Menu {
-    public ConfirmationMenu(PlayerMenuUtility playerMenuUtility) {
-        super(playerMenuUtility);
+    public ConfirmationMenu(PlayerMenuUtility playerMenuUtility, Menu savedMenu) {
+        super(playerMenuUtility, savedMenu);
     }
 
     @Override
@@ -49,61 +44,15 @@ public class ConfirmationMenu extends Menu {
         // Handle Confirm button click
         assert item != null;
         if (item.isSimilar(confirmItem)) {
-            // Implement the confirmation action here
-            // Create a list to collect method arguments
-            List<Object> methodArgs = new ArrayList<>();
-
-            // Initialize the index to 0
-            int i = 0;
-
-            // Loop until data with the key "ConfirmationMenu_MethodArgs_<i>" is found.
-            while (playerMenuUtility.hasData("ConfirmationMenu_MethodArgs_" + i)) {
-                Object dataValue = playerMenuUtility.getData("ConfirmationMenu_MethodArgs_" + i);
-                // Add the data to the list of method arguments
-                methodArgs.add(dataValue);
-                i++; // Increment the index
+            // Execute the confirmation action
+            MenuAction action = (MenuAction) playerMenuUtility.getData("ConfirmationMenu_Action");
+            if (action != null) {
+                action.execute(player, e);
             }
 
-            // Execute the method given in the data with methodArgs as arguments.
-            Method methodToExecute = (Method) playerMenuUtility.getData("ConfirmationMenu_MethodToExecuteAfter");
-            Object objectToInvokeOn = playerMenuUtility.getData("ConfirmationMenu_ObjectToInvokeMethodOn");
-            List<Class<? extends Exception>> exceptionsToCatch = (List<Class<? extends Exception>>) playerMenuUtility.getData("ConfirmationMenu_ExceptionsToCatch");
-            if (methodToExecute != null) {
-                try {
-                    methodToExecute.invoke(objectToInvokeOn, methodArgs.toArray());
-                } catch (Exception ex) {
-                    if(exceptionsToCatch.contains(ex.getClass())) {
-                        lgm.addPlaceholder(PlaceholderType.MESSAGE, "%error%", ex + ": " + ex.getMessage(), false);
-                        lgm.addPlaceholder(PlaceholderType.MESSAGE, "%stacktrace%", Arrays.toString(ex.getStackTrace()), false);
-                        player.sendMessage(lgm.getMessage("Player.General.Error", player, true));
-                    }
-                    ex.printStackTrace();
-                }
-            }
-
-
-            // Open the old menu
-            String menuToOpenAfter = (String) playerMenuUtility.getData("ConfirmationMenu_MenuToOpenAfter");
-            String menuPackage = (String) playerMenuUtility.getData("ConfirmationMenu_MenuPackage");
-            openOldMenuFromNameAndPackage(menuToOpenAfter, menuPackage, player);
+            closeAndReturnOrClose();
         } else if (item.isSimilar(cancelItem)) {
-            // Open the old menu
-            String menuToOpenAfter = (String) playerMenuUtility.getData("ConfirmationMenu_MenuToOpenAfter");
-            String menuPackage = (String) playerMenuUtility.getData("ConfirmationMenu_MenuPackage");
-            openOldMenuFromNameAndPackage(menuToOpenAfter, menuPackage, player);
-        }
-    }
-
-    private void openOldMenuFromNameAndPackage(String menuToOpenAfter, String menuPackage, Player player) {
-        if (menuToOpenAfter != null && menuPackage != null && !menuToOpenAfter.isEmpty() && !menuPackage.isEmpty()) {
-            Menu oldMenu = Utils.getMenuByClassName(menuPackage, menuToOpenAfter, player);
-            if (oldMenu != null) {
-                oldMenu.open();
-            } else {
-                player.closeInventory();
-            }
-        } else {
-            player.closeInventory();
+            closeAndReturnOrClose();
         }
     }
 

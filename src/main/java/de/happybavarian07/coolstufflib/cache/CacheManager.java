@@ -1,11 +1,35 @@
 package de.happybavarian07.coolstufflib.cache;
 
+import de.happybavarian07.coolstufflib.service.api.Service;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class CacheManager {
+public class CacheManager implements Service {
+    private final UUID serviceId = UUID.randomUUID();
     private final Map<String, Cache<?, ?>> caches = new ConcurrentHashMap<>();
+
+    @Override
+    public UUID id() {
+        return serviceId;
+    }
+
+    @Override
+    public String serviceName() {
+        return "cache-manager";
+    }
+
+    @Override
+    public CompletableFuture<Void> init() {
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    public CompletableFuture<Void> shutdown() {
+        return CompletableFuture.runAsync(this::clearAll);
+    }
 
     public <K, V> void registerCache(String name, Cache<K, V> cache) {
         if (name == null) {

@@ -3,21 +3,44 @@ package de.happybavarian07.coolstufflib.repository;
 import de.happybavarian07.coolstufflib.jpa.RepositoryController;
 import de.happybavarian07.coolstufflib.jpa.repository.Repository;
 import de.happybavarian07.coolstufflib.jpa.utils.DatabaseProperties;
+import de.happybavarian07.coolstufflib.service.api.Service;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
-public class RepositoryManager {
+public class RepositoryManager implements Service {
+    private final UUID serviceId = UUID.randomUUID();
     private final JavaPlugin plugin;
     private final Map<String, RepositoryController> controllers = new HashMap<>();
     private final Map<String, DatabaseProperties> connectionProperties = new HashMap<>();
     private boolean repositoryManagerEnabled = false;
     private String defaultController = "default";
     private final File repositoryRegistrationFile;
+
+    @Override
+    public UUID id() {
+        return serviceId;
+    }
+
+    @Override
+    public String serviceName() {
+        return "repository-manager";
+    }
+
+    @Override
+    public CompletableFuture<Void> init() {
+        return CompletableFuture.runAsync(() -> {
+            loadRepositoriesFromFile();
+        });
+    }
+
+    @Override
+    public CompletableFuture<Void> shutdown() {
+        return CompletableFuture.runAsync(this::closeAllConnections);
+    }
 
     public RepositoryManager(JavaPlugin plugin) {
         this.plugin = plugin;

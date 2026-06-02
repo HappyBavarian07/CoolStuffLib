@@ -1,7 +1,4 @@
-package de.happybavarian07.coolstufflib;/*
- * @Author HappyBavarian07
- * @Date 24.04.2023 | 17:14
- */
+package de.happybavarian07.coolstufflib;
 
 import de.happybavarian07.coolstufflib.commandmanagement.CommandManagerRegistry;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
@@ -14,6 +11,12 @@ import de.happybavarian07.coolstufflib.backupmanager.BackupManager;
 import de.happybavarian07.coolstufflib.testing.LibraryTestInitializer;
 import de.happybavarian07.coolstufflib.utils.LogPrefix;
 import de.happybavarian07.coolstufflib.utils.PluginFileLogger;
+import de.happybavarian07.coolstufflib.service.api.ServiceRegistry;
+import de.happybavarian07.coolstufflib.service.api.ServiceDescriptor;
+import de.happybavarian07.coolstufflib.service.api.ServiceState;
+import de.happybavarian07.coolstufflib.service.api.Service;
+import de.happybavarian07.coolstufflib.service.impl.ChatInputService;
+import de.happybavarian07.coolstufflib.service.impl.DefaultServiceRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
@@ -28,6 +31,7 @@ import java.util.logging.Level;
 public class CoolStuffLib {
     private static CoolStuffLib lib;
     private final JavaPlugin javaPluginUsingLib;
+    private final ServiceRegistry serviceRegistry;
     private final LanguageManager languageManager;
     private final CommandManagerRegistry commandManagerRegistry;
     private final MenuAddonManager menuAddonManager;
@@ -35,7 +39,6 @@ public class CoolStuffLib {
     private final CacheManager cacheManager;
     private final BackupManager backupManager;
     private final PluginFileLogger pluginFileLogger;
-    // Directory of the Plugin using this Lib
     private final File workingDirectory;
     private final boolean usePlayerLangHandler;
     private final boolean sendSyntaxOnArgsZero;
@@ -56,29 +59,26 @@ public class CoolStuffLib {
     private boolean placeholderAPIEnabled = false;
     private LibraryTestInitializer testInitializer;
 
-
     /**
-     * Initializes the CoolStuffLib with the provided parameters.
-     * For a full tutorial on using this library, refer to [insert link here].
-     * Additionally, a video explaining the library and demonstrating an example is available.
+     * Initializes the CoolStuffLib library core.
      *
-     * @param javaPluginUsingLib                   Your Java Plugin instance for integration.
-     * @param languageManager                      The Language Manager Class.
-     * @param commandManagerRegistry               The Command Manager Registry Class.
-     * @param menuAddonManager                     The Menu Addon Manager Class.
-     * @param repositoryManager                    The Repository Manager Class.
-     * @param cacheManager                         The Cache Manager Class.
-     * @param backupManager                        The Backup Manager Class.
-     * @param pluginFileLogger                     The Plugin File Logger for logging purposes.
-     * @param usePlayerLangHandler                 A boolean indicating if a PlayerLangHandler should be used.
-     * @param sendSyntaxOnArgsZero                 A boolean indicating if the syntax should be sent when the command is executed with no arguments.
-     * @param languageManagerStartingMethod        The method to execute when the Language Manager System is initiated.
-     * @param commandManagerRegistryStartingMethod The method to execute when the Command Manager System is initiated.
-     * @param menuAddonManagerStartingMethod       The method to execute when the Menu Manager System is initiated.
-     * @param repositoryManagerStartingMethod      The method to execute when the Repository Manager System is initiated.
-     * @param cacheManagerStartingMethod           The method to execute when the Cache Manager System is initiated.
-     * @param backupManagerStartingMethod          The method to execute when the Backup Manager System is initiated.
-     * @param dataFile                             The data file for storing important data.
+     * @param javaPluginUsingLib The plugin instance using this library.
+     * @param languageManager The language manager.
+     * @param commandManagerRegistry The command manager registry.
+     * @param menuAddonManager The menu addon manager.
+     * @param repositoryManager The repository manager.
+     * @param cacheManager The cache manager.
+     * @param backupManager The backup manager.
+     * @param pluginFileLogger The plugin logger.
+     * @param usePlayerLangHandler Whether to use per-player language handling.
+     * @param sendSyntaxOnArgsZero Whether to send syntax when no args are provided.
+     * @param languageManagerStartingMethod Initialization logic for the language manager.
+     * @param commandManagerRegistryStartingMethod Initialization logic for the command manager registry.
+     * @param menuAddonManagerStartingMethod Initialization logic for the menu addon manager.
+     * @param repositoryManagerStartingMethod Initialization logic for the repository manager.
+     * @param cacheManagerStartingMethod Initialization logic for the cache manager.
+     * @param backupManagerStartingMethod Initialization logic for the backup manager.
+     * @param dataFile The data file used for persistent storage.
      */
     protected CoolStuffLib(JavaPlugin javaPluginUsingLib,
                            LanguageManager languageManager,
@@ -100,7 +100,7 @@ public class CoolStuffLib {
         lib = this;
         this.javaPluginUsingLib = javaPluginUsingLib;
         if (this.javaPluginUsingLib == null) {
-            throw new RuntimeException("CoolStuffLib did not find a Plugin it got called from. Returning. Report the Issue to the Plugin Dev(s), that may have programmed the Plugin.");
+            throw new RuntimeException("CoolStuffLib did not find a Plugin it got called from.");
         }
         this.workingDirectory = javaPluginUsingLib.getDataFolder();
         this.languageManager = languageManager;
@@ -119,6 +119,7 @@ public class CoolStuffLib {
         this.cacheManagerStartingMethod = cacheManagerStartingMethod;
         this.backupManagerStartingMethod = backupManagerStartingMethod;
         this.dataFile = dataFile;
+        this.serviceRegistry = new DefaultServiceRegistry();
     }
 
     public static @Nullable CoolStuffLib getLib() {
@@ -126,17 +127,30 @@ public class CoolStuffLib {
     }
 
     /**
-     * <p>Initializes all core managers and addons for the plugin.</p>
-     * <ul>
-     *   <li>Enables LanguageManager, CommandManagerRegistry, and MenuAddonManager if present</li>
-     *   <li>Checks for PlaceholderAPI and sets internal state</li>
-     *   <li>Registers MenuListener events</li>
-     * </ul>
+     * Initializes all core systems and managers.
+     *
+     * <p>Enables components like LanguageManager and CommandManagerRegistry, and registers required event listeners.</p>
      * <pre><code>
      * coolStuffLib.setup();
      * </code></pre>
      */
     public void setup() {
+        LogPrefix.setup();
+        // Register services
+        ServiceRegistry registry = this.serviceRegistry;
+        if (languageManager != null) registry.register(new ServiceDescriptor("language-manager"), languageManager, null);
+        if (commandManagerRegistry != null) registry.register(new ServiceDescriptor("command-manager-registry"), commandManagerRegistry, null);
+        if (menuAddonManager != null) registry.register(new ServiceDescriptor("menu-addon-manager"), menuAddonManager, null);
+        if (repositoryManager != null) registry.register(new ServiceDescriptor("repository-manager"), repositoryManager, null);
+        if (cacheManager != null) registry.register(new ServiceDescriptor("cache-manager"), cacheManager, null);
+        if (backupManager != null) registry.register(new ServiceDescriptor("backup-manager"), backupManager, null);
+        
+        ChatInputService chatInputService = new ChatInputService();
+        registry.register(new ServiceDescriptor("chat-input-service"), chatInputService, null);
+
+        registry.startAll().join();
+
+        // ... existing setup logic ...
         if (languageManager != null) {
             if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
                 placeholderAPIEnabled = true;
@@ -170,6 +184,41 @@ public class CoolStuffLib {
             pluginFileLogger.createLogFile();
         }
         Bukkit.getPluginManager().registerEvents(new MenuListener(), javaPluginUsingLib);
+    }
+
+    public ServiceRegistry getServiceRegistry() {
+        return serviceRegistry;
+    }
+
+    /**
+     * <p>Retrieves a service from the registry by name and class. If the service is not registered,
+     * it will attempt to instantiate it via its no-argument constructor, register it, and start it.
+     * If the service is registered but stopped or failed, it will attempt to start it.</p>
+     * 
+     * @param name The service name.
+     * @param clazz The service class.
+     * @param <T> The service type.
+     * @return A guaranteed running instance of the service.
+     */
+    public <T extends Service> T requireService(String name, Class<T> clazz) {
+        T service = serviceRegistry.getAsByName(name, clazz).orElse(null);
+        if (service == null) {
+            try {
+                service = clazz.getDeclaredConstructor().newInstance();
+                serviceRegistry.register(new ServiceDescriptor(name), service, null);
+                serviceRegistry.start(service.id()).join();
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to auto-instantiate service: " + name, e);
+            }
+        } else {
+            ServiceState state = serviceRegistry.getState(service.id());
+            if (state == ServiceState.REGISTERED || 
+                state == ServiceState.STOPPED || 
+                state == ServiceState.FAILED) {
+                serviceRegistry.start(service.id()).join();
+            }
+        }
+        return service;
     }
 
     public LanguageManager getLanguageManager() {
@@ -270,67 +319,47 @@ public class CoolStuffLib {
     }
 
     /**
-     * The writeToLog function is used to write a message to the log file.
+     * Writes a message to the log file if enabled.
      *
-     * @param info          Define the log level, which is used to filter out some messages
-     * @param logMessage    Write the message to the log
-     * @param logPrefix     Add a prefix to the log message
-     * @param sendToConsole Determine if the message should be sent to the console
+     * @param info The log level.
+     * @param logMessage The message to log.
+     * @param logPrefix The prefix to apply.
+     * @param sendToConsole Whether to output to the console.
      */
     public void writeToLog(Level info, String logMessage, LogPrefix logPrefix, boolean sendToConsole) {
         if (pluginFileLogger != null) {
             pluginFileLogger.writeToLog(info, logMessage, logPrefix, sendToConsole);
             return;
         }
-        System.out.println("PluginFileLogger is not enabled. Please enable it in the CoolStuffLibBuilder, if you want to see Error Messages and such Things.");
+        System.out.println("PluginFileLogger is not enabled.");
     }
 
     /**
-     * The getPlayerMenuUtility function is used to get the PlayerMenuUtility object of a player.
-     * <p>
-     * If the player doesn't have a PlayerMenuUtility object, it will be created.
-     * <p>
-     * The Menu API uses this function.
+     * Retrieves or creates a PlayerMenuUtility for the specified player.
      *
-     * @param player Get the player, whose PlayerMenuUtility object should be returned
-     * @return The PlayerMenuUtility object of the player
-     * @see PlayerMenuUtility
-     * @see MenuListener
-     * @see MenuAddonManager
-     * @see de.happybavarian07.coolstufflib.menusystem.Menu
+     * @param player The UUID of the player.
+     * @return The PlayerMenuUtility instance.
      */
     public PlayerMenuUtility getPlayerMenuUtility(UUID player) {
         PlayerMenuUtility playerMenuUtility;
-        if (!(playerMenuUtilityMap.containsKey(player))) { //See if the player has a playermenuutility "saved" for them
-
-            //This player doesn't. Make one of them and add it to the hashmap
-            playerMenuUtility = new PlayerMenuUtility(player);
+        if (!(playerMenuUtilityMap.containsKey(player))) {
+            playerMenuUtility = new PlayerMenuUtility(this, player);
             playerMenuUtilityMap.put(player, playerMenuUtility);
-
             return playerMenuUtility;
         } else {
-            return playerMenuUtilityMap.get(player); //Return the object by using the provided player
+            return playerMenuUtilityMap.get(player);
         }
     }
 
     /**
-     * The createPlayerMenuUtility function is used to create a PlayerMenuUtility object for a player.
-     * <p>
-     * If the player already has a PlayerMenuUtility object, it will be overwritten.
-     * <p>
-     * The Menu API uses this function.
+     * Creates a new PlayerMenuUtility for the specified player, overwriting any existing instance.
      *
-     * @param player    Get the player, whose PlayerMenuUtility object should be created
-     * @param addToList Determine if the PlayerMenuUtility object should be added to the hashmap
-     * @return The PlayerMenuUtility object of the player
-     * @see PlayerMenuUtility
-     * @see MenuListener
-     * @see MenuAddonManager
-     * @see de.happybavarian07.coolstufflib.menusystem.Menu
+     * @param player The UUID of the player.
+     * @param addToList Whether to store the utility in the internal map.
+     * @return The created PlayerMenuUtility.
      */
     public PlayerMenuUtility createPlayerMenuUtility(UUID player, boolean addToList) {
-        //This player doesn't. Make one of them and add it to the hashmap
-        PlayerMenuUtility playerMenuUtility = new PlayerMenuUtility(player);
+        PlayerMenuUtility playerMenuUtility = new PlayerMenuUtility(this, player);
         if (addToList)
             playerMenuUtilityMap.put(player, playerMenuUtility);
 
@@ -338,13 +367,9 @@ public class CoolStuffLib {
     }
 
     /**
-     * The removePlayerMenuUtility function is used to remove a PlayerMenuUtility object from the hashmap.
-     * <p>
-     * The Menu API uses this function.
-     * <p>
+     * Removes the PlayerMenuUtility for the specified player from the cache.
      *
-     * @param player Get the player, whose PlayerMenuUtility object should be removed
-     * @see PlayerMenuUtility
+     * @param player The UUID of the player.
      */
     public void removePlayerMenuUtility(UUID player) {
         playerMenuUtilityMap.remove(player);

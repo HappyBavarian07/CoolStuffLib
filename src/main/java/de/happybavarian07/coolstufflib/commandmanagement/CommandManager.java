@@ -25,10 +25,22 @@ import java.util.logging.Level;
 @CommandData
 public abstract class CommandManager {
     private final ArrayList<SubCommand> commands = new ArrayList<>();
-    protected final CoolStuffLib coolStuffLib = CoolStuffLib.getLib();
-    protected final LanguageManager lgm = coolStuffLib.getLanguageManager();
+    protected CoolStuffLib coolStuffLib;
+    protected LanguageManager lgm;
     protected List<String> commandArgs = new ArrayList<>();
     protected List<String> commandSubArgs = new ArrayList<>();
+
+    /**
+     * Injects the necessary dependencies into the CommandManager.
+     * This is called by the CommandManagerRegistry during registration.
+     *
+     * @param lib The CoolStuffLib instance.
+     * @param lgm The LanguageManager instance.
+     */
+    public void setDependencies(CoolStuffLib lib, LanguageManager lgm) {
+        this.coolStuffLib = lib;
+        this.lgm = lgm;
+    }
 
     /**
      * Gets the name of the main command.

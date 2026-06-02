@@ -23,17 +23,15 @@ class EntityPersistenceHandler {
     }
 
     Object insertEntity(Class<?> entityClass, Object entity) {
-        String tableName = EntityReflectionUtil.getTableName(entityClass);
+        EntityMetadata metadata = EntityReflectionUtil.getMetadata(entityClass);
+        String tableName = metadata.tableName();
         List<String> columns = new ArrayList<>();
         List<Object> values = new ArrayList<>();
-        for (Field field : entityClass.getDeclaredFields()) {
-            if (field.isAnnotationPresent(Column.class) && !field.isAnnotationPresent(ElementCollection.class)) {
-                field.setAccessible(true);
-                String colName = field.getAnnotation(Column.class).name();
-                if (colName == null || colName.isEmpty()) colName = field.getName();
-                columns.add(colName);
+        for (ColumnMapping mapping : metadata.columnMappings()) {
+            if (!mapping.field().isAnnotationPresent(ElementCollection.class)) {
+                columns.add(mapping.columnName());
                 try {
-                    values.add(field.get(entity));
+                    values.add(mapping.field().get(entity));
                 } catch (IllegalAccessException ignored) {}
             }
         }
@@ -50,20 +48,17 @@ class EntityPersistenceHandler {
     }
 
     Object updateEntity(Class<?> entityClass, Object entity) {
-        String tableName = EntityReflectionUtil.getTableName(entityClass);
-        String idColumn = EntityReflectionUtil.getIdColumnName(entityClass);
+        EntityMetadata metadata = EntityReflectionUtil.getMetadata(entityClass);
+        String tableName = metadata.tableName();
+        String idColumn = metadata.idColumnName();
         Object id = EntityReflectionUtil.getEntityId(entity);
         List<String> setClauses = new ArrayList<>();
         List<Object> values = new ArrayList<>();
-        for (Field field : entityClass.getDeclaredFields()) {
-            if (field.isAnnotationPresent(Column.class) &&
-                    !field.isAnnotationPresent(Id.class) && !field.isAnnotationPresent(ElementCollection.class)) {
-                field.setAccessible(true);
-                String colName = field.getAnnotation(Column.class).name();
-                if (colName == null || colName.isEmpty()) colName = field.getName();
-                setClauses.add(colName + " = ?");
+        for (ColumnMapping mapping : metadata.columnMappings()) {
+            if (mapping.field() != metadata.idField() && !mapping.field().isAnnotationPresent(ElementCollection.class)) {
+                setClauses.add(mapping.columnName() + " = ?");
                 try {
-                    values.add(field.get(entity));
+                    values.add(mapping.field().get(entity));
                 } catch (IllegalAccessException ignored) {}
             }
         }

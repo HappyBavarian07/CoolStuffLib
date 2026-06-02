@@ -126,12 +126,20 @@ public class TransactionManager {
         return context != null ? context.getConnection() : null;
     }
 
+    public TransactionContext getTransactionContext() {
+        return currentTransaction.get();
+    }
+
+    public void setTransactionContext(TransactionContext context) {
+        currentTransaction.set(context);
+    }
+
     @FunctionalInterface
     public interface TransactionalOperation<T> {
         T execute() throws Throwable;
     }
 
-    private static class TransactionContext {
+    public static class TransactionContext {
         private final Connection connection;
         private final boolean readOnly;
         private boolean rollbackOnly;

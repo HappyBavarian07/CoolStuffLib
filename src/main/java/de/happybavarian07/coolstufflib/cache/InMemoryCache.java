@@ -1,10 +1,10 @@
 package de.happybavarian07.coolstufflib.cache;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class InMemoryCache<K, V> implements Cache<K, V> {
-    private final ConcurrentMap<K, V> map = new ConcurrentHashMap<>();
+    private final Map<K, V> map;
     private final int maxSize;
     private final Object lock = new Object();
 
@@ -17,6 +17,12 @@ public class InMemoryCache<K, V> implements Cache<K, V> {
             throw new IllegalArgumentException("Max size must be positive");
         }
         this.maxSize = maxSize;
+        this.map = new LinkedHashMap<K, V>(16, 0.75f, true) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+                return size() > InMemoryCache.this.maxSize;
+            }
+        };
     }
 
     @Override
@@ -24,7 +30,9 @@ public class InMemoryCache<K, V> implements Cache<K, V> {
         if (key == null) {
             throw new IllegalArgumentException("Key must not be null");
         }
-        return map.get(key);
+        synchronized (lock) {
+            return map.get(key);
+        }
     }
 
     @Override
@@ -33,9 +41,6 @@ public class InMemoryCache<K, V> implements Cache<K, V> {
             throw new IllegalArgumentException("Key and value must not be null");
         }
         synchronized (lock) {
-            if (map.size() >= maxSize && !map.containsKey(key)) {
-                return;
-            }
             if (overwrite) {
                 map.put(key, value);
             } else {
@@ -53,9 +58,6 @@ public class InMemoryCache<K, V> implements Cache<K, V> {
             throw new IllegalArgumentException("Key and value must not be null");
         }
         synchronized (lock) {
-            if (map.size() >= maxSize && !map.containsKey(key)) {
-                return;
-            }
             map.put(key, value);
         }
     }

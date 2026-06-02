@@ -2,10 +2,12 @@ package de.happybavarian07.coolstufflib.menusystem;
 
 import de.happybavarian07.coolstufflib.CoolStuffLib;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
+import de.happybavarian07.coolstufflib.menusystem.actions.MenuAction;
 import de.happybavarian07.coolstufflib.utils.HybridInventoryUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -23,10 +25,12 @@ import java.util.*;
  */
 public abstract class Menu implements InventoryHolder {
 
-    //Protected values that can be accessed in the menus
-    protected final CoolStuffLib lib = CoolStuffLib.getLib();
-    protected final LanguageManager lgm = lib.getLanguageManager();
-    protected ItemStack FILLER = lgm.getItem("General.FillerItem", null, false);
+    // Dependencies injected via PlayerMenuUtility
+    protected CoolStuffLib lib;
+    protected LanguageManager lgm;
+    protected ItemStack FILLER;
+    protected boolean prepared = false;
+
     protected String openingPermission = "";
     protected PlayerMenuUtility playerMenuUtility;
     protected Inventory inventory;
@@ -34,19 +38,37 @@ public abstract class Menu implements InventoryHolder {
     protected final Map<Integer, MenuAction> slotActions = new HashMap<>();
     protected final Set<Integer> forbiddenSlots = new HashSet<>();
     protected boolean forceHybridMode = false;
+    protected Menu savedMenu;
 
     //Constructor for Menu. Pass on a PlayerMenuUtility so that
     // we have information on whose menu this is and
     // what info is to be transfered.
+
     /**
      * The Menu function is the main function of this class. It creates a menu for the player to interact with, and
      * allows them to choose what they want to do next. The Menu function takes in no parameters.
-
      *
      * @param playerMenuUtility Pass the playermenuutility object to the menu class
      */
     public Menu(PlayerMenuUtility playerMenuUtility) {
+        this(playerMenuUtility, null);
+    }
+
+    public Menu(PlayerMenuUtility playerMenuUtility, Menu savedMenu) {
         this.playerMenuUtility = playerMenuUtility;
+        this.savedMenu = savedMenu;
+    }
+
+    /**
+     * Ensures that dependencies (lib, lgm, filler) are injected from the PlayerMenuUtility.
+     * This is called before any operation requiring the library or language manager.
+     */
+    protected void ensurePrepared() {
+        if (prepared) return;
+        this.lib = playerMenuUtility.getLib();
+        this.lgm = lib.getLanguageManager();
+        this.FILLER = lgm.getItem("General.FillerItem", null, false);
+        this.prepared = true;
     }
 
     //let each menu decide their name
@@ -72,8 +94,6 @@ public abstract class Menu implements InventoryHolder {
     /**
      * The getOpeningPermission function returns the openingPermission variable.
      *
-     *
-     *
      * @return The openingpermission variable
      */
     public String getOpeningPermission() {
@@ -82,7 +102,6 @@ public abstract class Menu implements InventoryHolder {
 
     /**
      * The setOpeningPermission function sets the openingPermission variable to a new value.
-     *
      *
      * @param permission Set the openingpermission variable
      */
@@ -94,8 +113,6 @@ public abstract class Menu implements InventoryHolder {
      * The legacyServer function checks the server version and returns true if it is 1.12 or older,
      * false otherwise. This is used to determine whether to use legacy methods for certain
      * things like setting a player's skin (which changed in 1.13).
-
-     *
      *
      * @return A boolean value, true or false
      */
@@ -110,17 +127,20 @@ public abstract class Menu implements InventoryHolder {
     }
 
     //When called, an inventory is created and opened for the player
+
     /**
      * The open function is the main function that opens a menu.
      * It creates an inventory, sets the items in it, and then opens it for the player.
      */
     public void open() {
+        ensurePrepared();
+
         //The owner of the inventory created is the Menu itself,
         // so we are able to reverse engineer the Menu object from the
         // inventoryHolder in the MenuListener class when handling clicks
         if (!playerMenuUtility.getOwner().hasPermission(this.openingPermission)) {
             playerMenuUtility.getOwner().sendMessage(
-                    lib.getLanguageManager().getMessage("Player.General.NoPermissions", playerMenuUtility.getOwner(), true));
+                    lgm.getMessage("Player.General.NoPermissions", playerMenuUtility.getOwner(), true));
             playerMenuUtility.getOwner().closeInventory();
             return;
         }
@@ -141,7 +161,7 @@ public abstract class Menu implements InventoryHolder {
         }
 
         if (Listener.class.isAssignableFrom(this.getClass())) {
-            Bukkit.getPluginManager().registerEvents((Listener) this, CoolStuffLib.getLib().getJavaPluginUsingLib());
+            Bukkit.getPluginManager().registerEvents((Listener) this, lib.getJavaPluginUsingLib());
         }
 
         if (forceHybridMode) {
@@ -152,7 +172,7 @@ public abstract class Menu implements InventoryHolder {
 
         if (view == null) {
             Bukkit.getLogger().severe("[CoolStuffLib] Failed to open menu for " +
-                                      playerMenuUtility.getOwner().getName());
+                    playerMenuUtility.getOwner().getName());
             playerMenuUtility.getOwner().sendMessage(
                     ChatColor.RED + "Failed to open menu. Please contact an administrator.");
             playerMenuUtility.getOwner().closeInventory();
@@ -166,6 +186,17 @@ public abstract class Menu implements InventoryHolder {
         }
     }
 
+    public void closeAndReturnOrClose() {
+        if (savedMenu != null) {
+            savedMenu.open();
+        } else {
+            Player player = playerMenuUtility.getOwner();
+            if (player != null) {
+                player.closeInventory();
+            }
+        }
+    }
+
     /**
      * Opens a menu for the player. This function is thread-safe.
      */
@@ -174,10 +205,9 @@ public abstract class Menu implements InventoryHolder {
     }
 
     //Overridden method from the InventoryHolder interface
+
     /**
      * The getInventory function returns the inventory of the player.
-     *
-     *
      *
      * @return The inventory object
      */
@@ -187,12 +217,24 @@ public abstract class Menu implements InventoryHolder {
     }
 
     //Helpful utility method to fill all remaining slots with "filler glass"
+
     /**
      * The setFillerGlass function is used to fill the empty slots in a player's inventory with glass panes.
      * This function is called when a player opens their inventory, and it ensures that all of the empty slots are filled with glass panes.
      */
     public void setFillerGlass() {
+        setFillerGlass(Collections.emptySet());
+    }
+
+    /**
+     * Fills all empty slots with the configured filler item while skipping the provided slots.
+     *
+     * @param excludedSlots slots that should never be filled by this call
+     */
+    public void setFillerGlass(Set<Integer> excludedSlots) {
+        Set<Integer> excluded = excludedSlots == null ? Collections.emptySet() : excludedSlots;
         for (int i = 0; i < getSlots(); i++) {
+            if (excluded.contains(i)) continue;
             if (inventory.getItem(i) == null) {
                 inventory.setItem(i, FILLER);
             }
@@ -200,13 +242,28 @@ public abstract class Menu implements InventoryHolder {
     }
 
     /**
+     * Convenience overload for excluding slots while filling.
+     *
+     * @param excludedSlots slots to skip
+     */
+    public void setFillerGlass(int... excludedSlots) {
+        if (excludedSlots == null || excludedSlots.length == 0) {
+            setFillerGlass();
+            return;
+        }
+        Set<Integer> excluded = new HashSet<>();
+        for (int slot : excludedSlots) {
+            if (slot >= 0 && slot < getSlots()) excluded.add(slot);
+        }
+        setFillerGlass(excluded);
+    }
+
+    /**
      * The makeItem function is a function that creates an ItemStack with the given parameters.
      *
-     *
-     * @param material Set the material of the item
+     * @param material    Set the material of the item
      * @param displayName Set the name of the item
-     * @param lore Make the lore variable a string array
-     *
+     * @param lore        Make the lore variable a string array
      * @return An itemstack
      */
     public ItemStack makeItem(Material material, String displayName, String... lore) {
@@ -225,13 +282,12 @@ public abstract class Menu implements InventoryHolder {
     /**
      * The getSlot function is used to get the slot of an item.
      *
-     *
-     * @param path Get the path of the item
+     * @param path       Get the path of the item
      * @param defaultInt Set a default value for the slot if it is not found in the config
-     *
      * @return The slot of the item
      */
     public int getSlot(String path, int defaultInt) {
+        ensurePrepared();
         return lgm.getCustomObject("Items." + path + ".slot", null, defaultInt, false);
     }
 
@@ -239,7 +295,8 @@ public abstract class Menu implements InventoryHolder {
         if (forbidden != null && forbidden.contains(slot)) throw new IllegalArgumentException("Slot forbidden");
         if (forbiddenSlots.contains(slot)) throw new IllegalArgumentException("Slot forbidden");
         ItemStack stack = inventory.getItem(slot);
-        if (stack != null && !(stack.getType().isAir() || stack.isSimilar(FILLER))) throw new IllegalStateException("Slot occupied");
+        if (stack != null && !(stack.getType().isAir() || stack.isSimilar(FILLER)))
+            throw new IllegalStateException("Slot occupied");
         inventory.setItem(slot, item);
         slotActions.put(slot, action);
         return true;
@@ -252,7 +309,11 @@ public abstract class Menu implements InventoryHolder {
     }
 
     public boolean tryRegisterButton(int slot, ItemStack item, MenuAction action, Set<Integer> forbidden) {
-        try { return registerButton(slot, item, action, forbidden); } catch (Exception e) { return false; }
+        try {
+            return registerButton(slot, item, action, forbidden);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public void clearRegisteredButtons() {
@@ -271,5 +332,9 @@ public abstract class Menu implements InventoryHolder {
     public void setForbiddenSlots(Set<Integer> slots) {
         forbiddenSlots.clear();
         if (slots != null) forbiddenSlots.addAll(slots);
+    }
+
+    public void setSavedMenu(Menu savedMenu) {
+        this.savedMenu = savedMenu;
     }
 }

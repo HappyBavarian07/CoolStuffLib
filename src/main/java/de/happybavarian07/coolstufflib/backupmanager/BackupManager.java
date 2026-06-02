@@ -1,7 +1,4 @@
-package de.happybavarian07.coolstufflib.backupmanager;/*
- * @Author HappyBavarian07
- * @Date 28.01.2023 | 16:11
- */
+package de.happybavarian07.coolstufflib.backupmanager;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -9,13 +6,34 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BackupManager {
+import de.happybavarian07.coolstufflib.service.api.Service;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
+public class BackupManager implements Service {
+    private final UUID serviceId = UUID.randomUUID();
+
+    @Override
+    public UUID id() { return serviceId; }
+    @Override
+    public String serviceName() { return "backup-manager"; }
+    @Override
+    public CompletableFuture<Void> init() { return CompletableFuture.completedFuture(null); }
+    @Override
+    public CompletableFuture<Void> shutdown() { return CompletableFuture.completedFuture(null); }
+
     private Map<String, FileBackup> fileBackupList;
     private int numberOfBackUpsBeforeDeleting;
     private volatile boolean backupSchedulerEnabled = true;
     private final long backupRepeatTimeInSeconds;
     private Thread backupSchedulerThread;
 
+    /**
+     * Constructs a BackupManager instance.
+     *
+     * @param numberOfBackUpsBeforeDeleting The maximum number of backups to retain.
+     * @param backupRepeatTimeInSeconds The interval for automatic backups.
+     */
     public BackupManager(int numberOfBackUpsBeforeDeleting, long backupRepeatTimeInSeconds) {
         this.fileBackupList = new HashMap<>();
         this.numberOfBackUpsBeforeDeleting = numberOfBackUpsBeforeDeleting;
@@ -71,10 +89,10 @@ public class BackupManager {
     }
 
     /**
-     * Starts a backup
+     * Executes a manual backup.
      *
-     * @param identifier The Name of the Backup
-     * @return Error Code (if Backup from identifier is null then -100)
+     * @param identifier The unique identifier for the backup.
+     * @return 0 on success, or -100 if the backup identifier is invalid.
      */
     public int startBackup(String identifier) {
         FileBackup backup = fileBackupList.get(identifier);
@@ -85,11 +103,11 @@ public class BackupManager {
     }
 
     /**
-     * Loads a file backup
+     * Restores a backup.
      *
-     * @param identifier   name of the backup
-     * @param backupNumber number of the backup (-1 = newest)
-     * @return Error Code (if Backup from identifier is null then -100)
+     * @param identifier The unique identifier for the backup.
+     * @param backupNumber The backup index, or -1 for the latest.
+     * @return 0 on success, or -100 if the backup is not found.
      */
     public int loadBackup(String identifier, int backupNumber) {
         FileBackup backup = fileBackupList.get(identifier);
@@ -122,11 +140,11 @@ public class BackupManager {
     }
 
     /**
-     * Loads a file backup
+     * Deletes a specific backup file.
      *
-     * @param identifier name of the backup
-     * @param backupFile number or name of the backup (-1 = newest)
-     * @return Error Code (if Backup from identifier is null then -100)
+     * @param identifier The unique identifier for the backup.
+     * @param backupFile The file identifier or index.
+     * @return 0 on success, or -100 if the backup identifier is invalid.
      */
     public int deleteBackupFile(String identifier, String backupFile) {
         FileBackup backup = fileBackupList.get(identifier);

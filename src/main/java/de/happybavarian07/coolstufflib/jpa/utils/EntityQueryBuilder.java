@@ -40,14 +40,17 @@ public class EntityQueryBuilder<T> {
     }
 
     public EntityQueryBuilder<T> where(String fieldName, String op, Object value) {
+        SqlSafe.validateOperator(op);
         return addCondition("AND", fieldName, op + " ?", value);
     }
 
     public EntityQueryBuilder<T> and(String fieldName, String op, Object value) {
+        SqlSafe.validateOperator(op);
         return addCondition("AND", fieldName, op + " ?", value);
     }
 
     public EntityQueryBuilder<T> or(String fieldName, String op, Object value) {
+        SqlSafe.validateOperator(op);
         return addCondition("OR", fieldName, op + " ?", value);
     }
 
@@ -184,15 +187,19 @@ public class EntityQueryBuilder<T> {
     }
 
     private String getColumnName(String fieldName) {
+        String result;
         try {
             Field field = entityClass.getDeclaredField(fieldName);
             if (field.isAnnotationPresent(Column.class)) {
-                return field.getAnnotation(Column.class).name();
+                result = field.getAnnotation(Column.class).name();
+            } else {
+                result = fieldName;
             }
         } catch (NoSuchFieldException e) {
-            // Fallback to fieldName if not found, allows for raw column names
+            result = fieldName;
         }
-        return fieldName;
+        SqlSafe.validateIdentifier(result);
+        return result;
     }
 
     private T mapResultSetToEntity(ResultSet rs) {

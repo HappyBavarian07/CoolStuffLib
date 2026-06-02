@@ -1,0 +1,120 @@
+# The Default Language File for CoolStuffLib
+# %prefix% = The Prefix of the Plugin (works in every Message)
+LanguageFullName: 'English'
+LanguageVersion: '3.0.0'
+LanguageUUID: 'd6ef09c8-8cb9-4335-85be-1e95d81d6e93'
+LanguageDescription: 'The Default English Language File for CoolStuffLib'
+Messages:
+  Console:
+    ExecutesPlayerCommand: '%prefix% &9> &cYou have to be a Player!'
+  Player:
+    Commands:
+      TooFewArguments: '%prefix% &9> &cToo few Arguments!'
+      TooManyArguments: '%prefix% &9> &cToo many Arguments!'
+      InvalidSubCommand: '%prefix% &9> &cThat''s not a valid Command!'
+      ErrorPerformingSubCommand: '%prefix% &9> &cAn Error occurred!'
+      UsageMessage: '%prefix% &9> &c%usage%'
+      NotANumber: '%prefix% &9> &cThat''s not a Number!'
+      CommandContainsInvalidArgs: '%prefix% &9> &cThe Command contains invalid Arguments! (%invalidArgs%)'
+      HelpPageDoesNotExist: '%prefix% &9> &cThis Help Page does not exist!'
+      NoPermission: '%prefix% &9> &cYou do not have access to this command!'
+      HelpMessages:
+        Header: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+        Format: '  &b%usage% &7- &b%description%'
+        Footer: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+    General:
+      Error: '%prefix% &9> &cAn unexpected Error happened! (%error%)'
+      AlreadyOnFirstPage: '%prefix% &9> &cYou''re already on the first page!'
+      AlreadyOnLastPage: '%prefix% &9> &cYou''re already on the last page!'
+      NoPermissions: '%prefix% &9> &cYou do not have access to this command!'
+    ConfigUI:
+      PromptInput: '%prefix% &9> &aPlease type the new value in chat:'
+      PromptCancel: '%prefix% &9> &7Type ''cancel'' or ''exit'' to abort.'
+      InputCancelled: '%prefix% &9> &cInput cancelled.'
+      InvalidNumber: '%prefix% &9> &cInvalid number format. Input cancelled.'
+      ValueUpdated: '%prefix% &9> &aValue updated successfully!'
+      BooleanToggled: '%prefix% &9> &aBoolean value toggled!'
+MenuTitles:
+  Misc:
+    ConfirmationMenu: '&4Are you sure?'
+  ConfigUI:
+    MenuTitle: '&8Config &7> &8%path%'
+Items:
+  General:
+    ConfirmationMenu:
+      Confirm:
+        material: LIME_STAINED_GLASS_PANE
+        displayName: '&aConfirm'
+        lore:
+          - '&aConfirm this Action!'
+      Cancel:
+        material: RED_STAINED_GLASS_PANE
+        displayName: '&cCancel'
+        lore:
+          - '&cCancel this Action!'
+      ReasonItem:
+        material: PAPER
+        displayName: '&aDo you really want to do this?'
+        lore:
+          - '&aAction: %reason%'
+          - '&aGreen &f= &6Yes &f| &cRed &f= &6No'
+    FillerItem:
+      material: BLACK_STAINED_GLASS_PANE
+      displayName: ' '
+      lore:
+        - ''
+    Close:
+      material: BARRIER
+      displayName: '&cClose'
+      lore:
+        - '&cClose this Page!'
+    Back:
+      material: ARROW
+      displayName: '&cBack'
+      lore:
+        - '&cGo back to the previous Page!'
+    Left:
+      material: DARK_OAK_BUTTON
+      displayName: '&cLeft'
+      lore:
+        - '&cGo to the last page!'
+    Right:
+      material: DARK_OAK_BUTTON
+      displayName: '&cRight'
+      lore:
+        - '&cGo to the next Page!'
+    Refresh:
+      material: LEVER
+      displayName: '&aRefresh'
+      lore:
+        - '&aRefresh this Page!'
+  ConfigUI:
+    Folder:
+      material: BOOK
+      displayName: '&e%key%'
+      lore:
+        - '&7Click to open section.'
+    Boolean_True:
+      material: LIME_DYE
+      displayName: '&a%key%'
+      lore:
+        - '&7Current Value: &aTrue'
+        - '&8Click to toggle.'
+    Boolean_False:
+      material: GRAY_DYE
+      displayName: '&c%key%'
+      lore:
+        - '&7Current Value: &cFalse'
+        - '&8Click to toggle.'
+    StringValue:
+      material: NAME_TAG
+      displayName: '&f%key%'
+      lore:
+        - '&7Current Value: &f%value%'
+        - '&8Click to edit.'
+    NumberValue:
+      material: GOLD_NUGGET
+      displayName: '&6%key%'
+      lore:
+        - '&7Current Value: &6%value%'
+        - '&8Click to edit.'

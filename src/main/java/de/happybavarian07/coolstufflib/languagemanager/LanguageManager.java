@@ -19,6 +19,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
+import de.happybavarian07.coolstufflib.service.api.Service;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +34,8 @@ import java.util.regex.Matcher;
 /**
  * LanguageManager class.
  */
-public class LanguageManager {
+public class LanguageManager implements Service {
+    private final UUID serviceId = UUID.randomUUID();
     private static Logger logger;
     private final JavaPlugin plugin;
     private final File langFolder;
@@ -1322,6 +1327,50 @@ public class LanguageManager {
         }
         matcher.appendTail(sb);
         return sb.toString();
+    }
+
+    @Override
+    public UUID id() {
+        return serviceId;
+    }
+
+    @Override
+    public String serviceName() {
+        return "language-manager";
+    }
+
+    /**
+     * <p>Initializes the language manager and loads all registered language files.</p>
+     * <pre><code>languageManager.init().join();</code></pre>
+     *
+     * @return a future that completes when initialization is done.
+     */
+    @Override
+    public CompletableFuture<Void> init() {
+        return CompletableFuture.runAsync(() -> {
+            addLanguagesToList(true);
+            if (registeredLanguages.isEmpty()) {
+                getLogger().log(Level.SEVERE, "No language files found! Using default fallback.");
+            } else {
+                LanguageFile defaultLang = registeredLanguages.values().iterator().next();
+                setCurrentLang(defaultLang, true);
+            }
+        });
+    }
+
+    /**
+     * <p>Clears all language resources, caches, and placeholders.</p>
+     * <pre><code>languageManager.shutdown().join();</code></pre>
+     *
+     * @return a future that completes when shutdown is done.
+     */
+    @Override
+    public CompletableFuture<Void> shutdown() {
+        return CompletableFuture.runAsync(() -> {
+            registeredLanguages.clear();
+            languageCaches.clear();
+            placeholders.clear();
+        });
     }
 
     public LanguageFileMigrator createMigratorForLanguage(String langName) {

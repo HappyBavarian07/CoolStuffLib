@@ -26,6 +26,10 @@ public class RepositoryProxy implements InvocationHandler {
     private final ElementCollectionHandler elementCollectionHandler;
     private String databasePrefix;
 
+    public TransactionManager getTransactionManager() {
+        return transactionManager;
+    }
+
     private RepositoryProxy(Class<?> repositoryInterface, String databasePrefix, SQLExecutor sqlExecutor, JavaPlugin plugin) {
         this.repositoryInterface = repositoryInterface;
         this.databasePrefix = databasePrefix;
