@@ -35,25 +35,7 @@ public class ConfirmationMenu extends Menu {
 
     @Override
     public void handleMenu(InventoryClickEvent e) {
-        Player player = playerMenuUtility.getOwner();
-        ItemStack item = e.getCurrentItem();
-
-        ItemStack confirmItem = lgm.getItem("General.ConfirmationMenu.Confirm", player, false);
-        ItemStack cancelItem = lgm.getItem("General.ConfirmationMenu.Cancel", player, false);
-
-        // Handle Confirm button click
-        assert item != null;
-        if (item.isSimilar(confirmItem)) {
-            // Execute the confirmation action
-            MenuAction action = (MenuAction) playerMenuUtility.getData("ConfirmationMenu_Action");
-            if (action != null) {
-                action.execute(player, e);
-            }
-
-            closeAndReturnOrClose();
-        } else if (item.isSimilar(cancelItem)) {
-            closeAndReturnOrClose();
-        }
+        // Actions are handled directly via setItemWithAction
     }
 
     @Override
@@ -73,6 +55,17 @@ public class ConfirmationMenu extends Menu {
         ItemStack confirmItem = lgm.getItem("General.ConfirmationMenu.Confirm", player, false);
         ItemStack cancelItem = lgm.getItem("General.ConfirmationMenu.Cancel", player, false);
 
+        // Define Actions
+        MenuAction confirmAction = (p, event) -> {
+            MenuAction storedAction = (MenuAction) playerMenuUtility.getData("ConfirmationMenu_Action");
+            if (storedAction != null) {
+                storedAction.execute(p, event);
+            }
+            closeAndReturnOrClose();
+        };
+        
+        MenuAction cancelAction = (p, event) -> closeAndReturnOrClose();
+
         // Calculate the middle row based on the number of slots in the menu
         int middleRow = getSlots() / 9 / 2;
 
@@ -83,14 +76,14 @@ public class ConfirmationMenu extends Menu {
         // Fill the left side with Confirm buttons
         for (int i = 0; i < leftSideSlots; i++) {
             if (i % 9 != 4) { // Skip the middle column
-                inventory.setItem(i, confirmItem); // Place Confirm button in the left side
+                setItemWithAction(i, confirmItem, confirmAction);
             }
         }
 
         // Fill the right side with Cancel buttons
         for (int i = getSlots() - 1; i >= getSlots() - rightSideSlots; i--) {
             if (i % 9 != 4) { // Skip the middle column
-                inventory.setItem(i, cancelItem); // Place Cancel button in the right side
+                setItemWithAction(i, cancelItem, cancelAction);
             }
         }
 

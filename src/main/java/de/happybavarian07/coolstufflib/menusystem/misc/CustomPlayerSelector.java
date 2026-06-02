@@ -7,6 +7,11 @@ import de.happybavarian07.coolstufflib.languagemanager.PlaceholderType;
 import de.happybavarian07.coolstufflib.menusystem.Menu;
 import de.happybavarian07.coolstufflib.menusystem.PaginatedMenu;
 import de.happybavarian07.coolstufflib.menusystem.PlayerMenuUtility;
+import de.happybavarian07.coolstufflib.menusystem.actions.MenuAction;
+import de.happybavarian07.coolstufflib.menusystem.pagination.PaginationZone;
+import de.happybavarian07.coolstufflib.menusystem.pagination.NavigationDirection;
+import de.happybavarian07.coolstufflib.menusystem.pagination.PageDirection;
+import de.happybavarian07.coolstufflib.menusystem.pagination.transitions.InstantPageTransition;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
@@ -68,29 +73,17 @@ public class CustomPlayerSelector<T, R> extends PaginatedMenu<Player> {
         super(playerMenuUtility, oldMenu);
         this.oldMenu = oldMenu;
         this.players = players;
-        setPlayers(players, player -> {
-            lgm.addPlaceholder(PlaceholderType.ITEM, "%player_name%", player.getName(), false);
-            lgm.addPlaceholder(PlaceholderType.ITEM, "%player_uuid%", player.getUniqueId().toString(), false);
-            ItemStack item = lgm.getItem("CustomPlayerSelector.PlayerItem", player, false);
-            ItemMeta meta = item.getItemMeta();
-            if (meta != null) {
-                if (functionForDecidingItemColor != null) {
-                    ChatColor color = functionForDecidingItemColor.apply(new AbstractMap.SimpleEntry<>(player.getUniqueId(), InventoryAction.PICKUP_ALL));
-                    meta.setDisplayName(color + ChatColor.stripColor(meta.getDisplayName()));
-                }
-                if(meta instanceof SkullMeta skullMeta) {
-                    skullMeta.setOwningPlayer(player);
-                }
-                item.setItemMeta(meta);
-            }
-            item.getItemMeta().getPersistentDataContainer().set(new NamespacedKey(lib.getJavaPluginUsingLib(), "player_head"), PersistentDataType.STRING, player.getUniqueId().toString());
-            return item;
-        });
         this.functionToExecute = functionToExecute;
         this.action = action;
         this.infoItemExtraInfos = infoItemExtraInfos;
         this.multiSelect = multiSelect;
         this.functionForDecidingItemColor = functionForDecidingItemColor;
+        
+        // Use full Pagination API
+        setPaginationZone(new PaginationZone(9, 44)); // Example zone
+        setNavigationDirection(NavigationDirection.HORIZONTAL);
+        setPageDirection(PageDirection.LEFT_TO_RIGHT);
+        setPageTransition(new InstantPageTransition());
     }
 
     public CompletableFuture<R> getFuture() {
@@ -125,19 +118,52 @@ public class CustomPlayerSelector<T, R> extends PaginatedMenu<Player> {
 
     @Override
     public void preSetMenuItems() {
-
+        setPaginatedData(players, player -> {
+            lgm.addPlaceholder(PlaceholderType.ITEM, "%player_name%", player.getName(), false);
+            lgm.addPlaceholder(PlaceholderType.ITEM, "%player_uuid%", player.getUniqueId().toString(), false);
+            ItemStack item = lgm.getItem("CustomPlayerSelector.PlayerItem", player, false);
+            ItemMeta meta = item.getItemMeta();
+            if (meta != null) {
+                if (functionForDecidingItemColor != null) {
+                    ChatColor color = functionForDecidingItemColor.apply(new AbstractMap.SimpleEntry<>(player.getUniqueId(), InventoryAction.PICKUP_ALL));
+                    meta.setDisplayName(color + ChatColor.stripColor(meta.getDisplayName()));
+                }
+                if(meta instanceof SkullMeta skullMeta) {
+                    skullMeta.setOwningPlayer(player);
+                }
+                item.setItemMeta(meta);
+            }
+            // Temporarily storing UUID in a tag to retrieve it on click
+            if (item.getItemMeta() != null) {
+                item.getItemMeta().getPersistentDataContainer().set(new NamespacedKey(lib.getJavaPluginUsingLib(), "player_head"), PersistentDataType.STRING, player.getUniqueId().toString());
+            }
+            return item;
+        });
     }
 
     @Override
     public void postSetMenuItems() {
+        addMenuBorder();
         lgm.addPlaceholder(PlaceholderType.ITEM, "%action%", action, false);
         ItemStack infoItem = lgm.getItem("CustomPlayerSelector.InfoItem", playerMenuUtility.getOwner(), false);
-        inventory.setItem(4, infoItem);
+        setItemWithAction(4, infoItem, (p, e) -> {}); // No action on info item
+        
         if (multiSelect) {
-            ItemStack confirmItem = lgm.getItem("CustomPlayerSelector.Confirm", null, false);
-            inventory.setItem(getSlots() - 6, confirmItem);
-            ItemStack deselectItem = lgm.getItem("CustomPlayerSelector.DeSelect", null, false);
-            inventory.setItem(getSlots() - 7, deselectItem);
+            MenuAction confirmAction = (p, e) -> {
+                future = CompletableFuture.supplyAsync(() -> functionToExecute.apply((T) clickedPlayers));
+                future.thenAccept(result -> Bukkit.getScheduler().runTask(lib.getJavaPluginUsingLib(), () -> {
+                    if (oldMenu != null) oldMenu.open();
+                    else p.closeInventory();
+                })).exceptionally(throwable -> null);
+            };
+            
+            MenuAction deselectAction = (p, e) -> {
+                clickedPlayers.clear();
+                super.open();
+            };
+
+            setItemWithAction(getSlots() - 6, lgm.getItem("CustomPlayerSelector.Confirm", null, false), confirmAction);
+            setItemWithAction(getSlots() - 7, lgm.getItem("CustomPlayerSelector.DeSelect", null, false), deselectAction);
         }
     }
 
@@ -145,7 +171,7 @@ public class CustomPlayerSelector<T, R> extends PaginatedMenu<Player> {
     protected void handlePageItemClick(int slot, ItemStack item, InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
         if (item == null || item.getItemMeta() == null) return;
-        String uuidStr = item.getItemMeta().getPersistentDataContainer().get(new org.bukkit.NamespacedKey(lib.getJavaPluginUsingLib(), "player_head"), PersistentDataType.STRING);
+        String uuidStr = item.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(lib.getJavaPluginUsingLib(), "player_head"), PersistentDataType.STRING);
         if (uuidStr == null) return;
         UUID target;
         try {
@@ -180,26 +206,6 @@ public class CustomPlayerSelector<T, R> extends PaginatedMenu<Player> {
 
     @Override
     protected void handleCustomItemClick(int slot, ItemStack item, InventoryClickEvent event) {
-        Player player = (Player) event.getWhoClicked();
-        if (item == null) return;
-        if (multiSelect && item.equals(lgm.getItem("CustomPlayerSelector.Confirm", null, false))) {
-            future = CompletableFuture.supplyAsync(() -> functionToExecute.apply((T) clickedPlayers));
-            future.thenAccept(result -> Bukkit.getScheduler().runTask(lib.getJavaPluginUsingLib(), () -> {
-                if (oldMenu != null) {
-                    oldMenu.open();
-                } else {
-                    player.closeInventory();
-                }
-            })).exceptionally(throwable -> {
-                lgm.addPlaceholder(PlaceholderType.MESSAGE, "%error%", throwable + ": " + throwable.getMessage(), false);
-                lgm.addPlaceholder(PlaceholderType.MESSAGE, "%stacktrace%", Arrays.toString(throwable.getStackTrace()), false);
-                player.sendMessage(lgm.getMessage("Player.General.Error", player, true));
-                return null;
-            });
-        }
-    }
-
-    public void setPlayers(List<Player> players, Function<Player, ItemStack> renderer) {
-        setPaginatedData(players, renderer);
+        // Actions handled by setItemWithAction
     }
 }
