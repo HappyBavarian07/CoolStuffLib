@@ -1,5 +1,6 @@
 package de.happybavarian07.coolstufflib.configstuff.advanced.interfaces;
 
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.internal.SectionKind;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.value.SectionValueStore;
 
 import java.io.Serializable;
@@ -66,7 +67,7 @@ public interface ConfigSection extends Cloneable, Serializable {
      * @param path The path to the section, using dot notation for nesting
      * @return The section at the specified path, or null if not found
      */
-    ConfigSection getSection(String path);
+    <T extends ConfigSection> T getSection(String path);
 
     /**
      * <p>Creates a section at the specified path, creating parent sections as needed.</p>
@@ -80,27 +81,55 @@ public interface ConfigSection extends Cloneable, Serializable {
      * @param path The path where the section should be created
      * @return The newly created or existing section
      */
-    ConfigSection createSection(String path);
+    <T extends ConfigSection> T createSection(String path);
 
     /**
-     * <p>Creates a custom section of the specified class at the given path, creating parent sections as needed.</p>
+     * <p>Creates a section at the specified path with an explicit type.</p>
      *
      * <pre><code>
-     * ConfigSection config = ...;
-     * ConfigSection customSection = config.createCustomSection("myCustomSection", MyCustomSectionClass.class);
+     * // Create a MapSection for key-value pairs
+     * config.createSection("database.settings", SectionKind.MAP);
+     * 
+     * // Create a ListSection for ordered items
+     * config.createSection("inventory.items", SectionKind.LIST);
      * </code></pre>
      *
-     * @param name The name of the custom section
-     * @param clazz The class of the custom section, must extend ConfigSection
-     * @return The newly created custom section
+     * @param path The path where the section should be created
+     * @param kind The type of section to create (DEFAULT, MAP, LIST, SET)
+     * @return The newly created or existing section
      */
-    <T extends ConfigSection> T createCustomSection(String name, Class<T> clazz);
+    <T extends ConfigSection> T createSection(String path, SectionKind kind);
+
+    /**
+     * <p>Creates a section at the specified path with an explicit type and optional replacement.</p>
+     *
+     * <pre><code>
+     * // Create or replace a ListSection
+     * config.createSection("inventory.items", SectionKind.LIST, true);
+     * 
+     * // Create only if doesn't exist (replace=false)
+     * ConfigSection section = config.createSection("settings", SectionKind.MAP, false);
+     * </code></pre>
+     *
+     * @param path The path where the section should be created
+     * @param kind The type of section to create (DEFAULT, MAP, LIST, SET)
+     * @param replace If true and a section exists at the path, it will be replaced with the new kind
+     * @return The newly created or existing section
+     */
+    <T extends ConfigSection> T createSection(String path, SectionKind kind, boolean replace);
 
     /**
      * <p>Checks if a section exists at the specified path.</p>
      *
-     * @param path The path to check
-     * @return True if a section exists at the path, false otherwise
+     * <pre><code>
+     * if (config.hasSection("database")) {
+     *     ConfigSection db = config.getSection("database");
+     *     // Safe to access - section is guaranteed to exist
+     * }
+     * </code></pre>
+     *
+     * @param path The dot-separated path to check for a subsection
+     * @return true if a section exists at the specified path, false otherwise
      */
     boolean hasSection(String path);
 
@@ -344,6 +373,20 @@ public interface ConfigSection extends Cloneable, Serializable {
     Map<String, Object> toSerializableMap();
 
     /**
+     * <p>Converts this section to a List structure.</p>
+     *
+     * @return A List representation of this section
+     */
+    List<Object> toList();
+
+    /**
+     * <p>Converts this section to a Set structure.</p>
+     *
+     * @return A Set representation of this section
+     */
+    Set<Object> toSet();
+
+    /**
      * <p>Clears all values and subsections from this section.</p>
      */
     void clear();
@@ -357,6 +400,29 @@ public interface ConfigSection extends Cloneable, Serializable {
      * @param other The section to merge into this one
      */
     void merge(ConfigSection other);
+
+    /**
+     * <p>Validates the content of this section.</p>
+     *
+     * <p>This method can be implemented by specific section types to ensure
+     * the data contained is valid according to certain rules.</p>
+     */
+    void validate();
+
+    /**
+     * <p>Copies values from another ConfigSection into this one.</p>
+     *
+     * <p>This method will overwrite existing values with the same path.
+     * Subsections will be copied recursively.</p>
+     *
+     * @param rootSection The section to copy values from
+     */
+    void copyFrom(ConfigSection rootSection);
+
+    int size();
+    SectionValueStore getValueStore();
+    void fromMap(Map<String, Object> values);
+    void setParent(ConfigSection owner);
 
     /**
      * <p>Adds metadata to this section.</p>
@@ -454,44 +520,4 @@ public interface ConfigSection extends Cloneable, Serializable {
      * <p>Clears all comments from this section and subsections.</p>
      */
     void clearComments();
-
-    /**
-     * <p>Validates the content of this section.</p>
-     *
-     * <p>This method can be implemented by specific section types to ensure
-     * the data contained is valid according to certain rules.</p>
-     */
-    void validate();
-
-    /**
-     * <p>Copies values from another ConfigSection into this one.</p>
-     *
-     * <p>This method will overwrite existing values with the same path.
-     * Subsections will be copied recursively.</p>
-     *
-     * @param rootSection The section to copy values from
-     */
-    void copyFrom(ConfigSection rootSection);
-
-    /**
-     * <p>Converts this section to a List structure.</p>
-     *
-     * @return A List representation of this section
-     */
-    List<Object> toList();
-
-    /**
-     * <p>Converts this section to a Set structure.</p>
-     *
-     * @return A Set representation of this section
-     */
-    Set<Object> toSet();
-
-    int size();
-
-    SectionValueStore getValueStore();
-
-    void fromMap(Map<String, Object> values);
-
-    void setParent(ConfigSection owner);
 }
