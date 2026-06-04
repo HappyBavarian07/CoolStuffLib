@@ -11,9 +11,6 @@ public class SetSection extends BaseConfigSection {
 
     public SetSection(String name, ConfigSection parent) {
         super(name, parent);
-        if (parent instanceof BaseConfigSection) {
-            ((BaseConfigSection) parent).getMutableSubSections().put(name, this);
-        }
     }
 
     public void add(Object value) {
@@ -91,7 +88,7 @@ public class SetSection extends BaseConfigSection {
     public Map<String, Object> toMap() {
         Map<String, Object> map = super.toMap();
         map.put("__type__", "SetSection");
-        map.put("__items", new ArrayList<>(getItems()));
+        map.put("__values__", new ArrayList<>(getItems()));
         return map;
     }
 
@@ -99,7 +96,7 @@ public class SetSection extends BaseConfigSection {
     public Map<String, Object> toSerializableMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("__type__", "SetSection");
-        map.put("__items", new ArrayList<>(getItems()));
+        map.put("__values__", new ArrayList<>(getItems()));
         return map;
     }
 

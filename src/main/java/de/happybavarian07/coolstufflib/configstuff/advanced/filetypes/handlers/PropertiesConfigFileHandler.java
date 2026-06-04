@@ -68,7 +68,7 @@ public class PropertiesConfigFileHandler extends AbstractConfigFileHandler {
             map.put("__type__", "ListSection");
             List<?> values = ((ListSection) obj).toList();
             for (int i = 0; i < values.size(); i++) {
-                map.put("items." + i, addSectionTypeFields(values.get(i)));
+                map.put("__values__." + i, addSectionTypeFields(values.get(i)));
             }
             return map;
         }
@@ -77,7 +77,7 @@ public class PropertiesConfigFileHandler extends AbstractConfigFileHandler {
             map.put("__type__", "SetSection");
             int i = 0;
             for (Object v : ((SetSection) obj).toSet()) {
-                map.put("items." + (i++), addSectionTypeFields(v));
+                map.put("__values__." + (i++), addSectionTypeFields(v));
             }
             return map;
         }
@@ -114,14 +114,14 @@ public class PropertiesConfigFileHandler extends AbstractConfigFileHandler {
                     }
                     if ("ListSection".equals(type)) {
                         ListSection section = new ListSection("");
-                        Object values = subMap.get("values");
+                        Object values = subMap.containsKey("__values__") ? subMap.get("__values__") : subMap.get("values");
                         if (values instanceof List<?>) for (Object v : (List<?>) values) section.add(v);
                         result.put(entry.getKey(), section);
                         continue;
                     }
                     if ("SetSection".equals(type)) {
                         SetSection section = new SetSection("");
-                        Object values = subMap.get("values");
+                        Object values = subMap.containsKey("__values__") ? subMap.get("__values__") : subMap.get("values");
                         if (values instanceof List<?>) for (Object v : (List<?>) values) section.add(v);
                         result.put(entry.getKey(), section);
                         continue;
@@ -153,8 +153,8 @@ public class PropertiesConfigFileHandler extends AbstractConfigFileHandler {
                     TreeMap<Integer, Object> ordered = new TreeMap<>();
                     for (Map.Entry<?, ?> entry : map.entrySet()) {
                         String k = String.valueOf(entry.getKey());
-                        if (k.startsWith("__items.")) {
-                            String idxStr = k.substring("__items.".length());
+                        if (k.startsWith("__values__.") || k.startsWith("__items.")) {
+                            String idxStr = k.startsWith("__values__.") ? k.substring("__values__.".length()) : k.substring("__items.".length());
                             try {
                                 int idx = Integer.parseInt(idxStr);
                                 ordered.put(idx, ensureSectionType(entry.getValue()));
@@ -166,7 +166,7 @@ public class PropertiesConfigFileHandler extends AbstractConfigFileHandler {
                 }
                 if ("SetSection".equals(type)) {
                     SetSection section = new SetSection("");
-                    Object values = map.get("values");
+                    Object values = map.containsKey("__values__") ? map.get("__values__") : map.get("values");
                     if (values instanceof List<?>) {
                         for (Object v : (List<?>) values) section.add(ensureSectionType(v));
                     }

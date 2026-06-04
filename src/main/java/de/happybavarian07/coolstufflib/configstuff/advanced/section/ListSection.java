@@ -11,9 +11,6 @@ public class ListSection extends BaseConfigSection {
 
     public ListSection(String name, ConfigSection parent) {
         super(name, parent);
-        if (parent instanceof BaseConfigSection) {
-            ((BaseConfigSection) parent).getMutableSubSections().put(name, this);
-        }
     }
 
     public void add(Object value) {
@@ -124,7 +121,7 @@ public class ListSection extends BaseConfigSection {
     public Map<String, Object> toMap() {
         Map<String, Object> map = super.toMap();
         map.put("__type__", "ListSection");
-        map.put("__items", new ArrayList<>(getItems()));
+        map.put("__values__", new ArrayList<>(getItems()));
         return map;
     }
 
@@ -142,7 +139,7 @@ public class ListSection extends BaseConfigSection {
     public Map<String, Object> toSerializableMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("__type__", "ListSection");
-        map.put("__items", new ArrayList<>(getItems()));
+        map.put("__values__", new ArrayList<>(getItems()));
         return map;
     }
 
@@ -176,7 +173,7 @@ public class ListSection extends BaseConfigSection {
 
     @Override
     public List<?> getList(String path) {
-        if (path == null || path.isEmpty() || "__items".equals(path)) {
+        if (path == null || path.isEmpty() || "__items".equals(path) || "__values__".equals(path)) {
             return getItems();
         }
         return super.getList(path);

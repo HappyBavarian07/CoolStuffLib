@@ -58,13 +58,13 @@ public class Json5ConfigFileHandler extends AbstractConfigFileHandler {
         if (obj instanceof ListSection) {
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("__type__", "ListSection");
-            map.put("values", new ArrayList<>(((ListSection) obj).toList()));
+            map.put("__values__", new ArrayList<>(((ListSection) obj).toList()));
             return map;
         }
         if (obj instanceof SetSection) {
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("__type__", "SetSection");
-            map.put("values", new ArrayList<>(((SetSection) obj).toSet()));
+            map.put("__values__", new ArrayList<>(((SetSection) obj).toSet()));
             return map;
         }
         if (obj instanceof Map<?, ?> m) {
@@ -100,7 +100,7 @@ public class Json5ConfigFileHandler extends AbstractConfigFileHandler {
             }
             if ("ListSection".equals(type)) {
                 ListSection section = new ListSection("");
-                Object values = map.get("values");
+                Object values = map.containsKey("__values__") ? map.get("__values__") : map.get("values");
                 if (values instanceof List<?>) {
                     for (Object v : (List<?>) values) section.add(v);
                 }
@@ -110,7 +110,7 @@ public class Json5ConfigFileHandler extends AbstractConfigFileHandler {
             }
             if ("SetSection".equals(type)) {
                 SetSection section = new SetSection("");
-                Object values = map.get("values");
+                Object values = map.containsKey("__values__") ? map.get("__values__") : map.get("values");
                 if (values instanceof List<?>) for (Object v : (List<?>) values) section.add(v);
                 Map<String, Object> result = new LinkedHashMap<>();
                 result.put("", section);
@@ -161,7 +161,7 @@ public class Json5ConfigFileHandler extends AbstractConfigFileHandler {
                 }
                 if ("ListSection".equals(type)) {
                     ListSection section = new ListSection("");
-                    Object values = map.get("values");
+                    Object values = map.containsKey("__values__") ? map.get("__values__") : map.get("values");
                     if (values instanceof List<?>) {
                         for (Object v : (List<?>) values) section.add(ensureSectionType(v));
                     }
@@ -169,7 +169,7 @@ public class Json5ConfigFileHandler extends AbstractConfigFileHandler {
                 }
                 if ("SetSection".equals(type)) {
                     SetSection section = new SetSection("");
-                    Object values = map.get("values");
+                    Object values = map.containsKey("__values__") ? map.get("__values__") : map.get("values");
                     if (values instanceof List<?>) {
                         for (Object v : (List<?>) values) section.add(ensureSectionType(v));
                     }

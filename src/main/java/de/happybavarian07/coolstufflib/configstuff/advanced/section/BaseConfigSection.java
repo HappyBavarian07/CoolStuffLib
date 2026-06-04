@@ -3,6 +3,8 @@ package de.happybavarian07.coolstufflib.configstuff.advanced.section;
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.ConfigSection;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.internal.SectionFactory;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.internal.SectionHierarchyManager;
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.internal.SectionKind;
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.internal.SectionPathResolver;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.internal.SectionSerializationHelper;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.meta.SectionCommentManager;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.meta.SectionMetadataManager;
@@ -27,11 +29,6 @@ public class BaseConfigSection implements ConfigSection {
     public BaseConfigSection(String name, ConfigSection parent) {
         this.name = name;
         this.parent = parent;
-        if (parent != null) {
-            if (parent instanceof BaseConfigSection baseParent) {
-                baseParent.getSectionHierarchyManager().getMutableSubSections().put(name, this);
-            }
-        }
         this.sectionHierarchyManager = new SectionHierarchyManager(this);
         this.valueStore = new SectionValueStore();
         this.metadataManager = new SectionMetadataManager();
@@ -113,13 +110,80 @@ public class BaseConfigSection implements ConfigSection {
     }
 
     @Override
-    public ConfigSection getSection(String path) {
+    public <T extends ConfigSection> T getSection(String path) {
         return sectionHierarchyManager.getSection(path);
     }
 
     @Override
-    public ConfigSection createSection(String path) {
-        return sectionHierarchyManager.createSection(path);
+    public <T extends ConfigSection> T createSection(String path) {
+        return createSection(path, SectionKind.DEFAULT, false);
+    }
+
+    @Override
+    public <T extends ConfigSection> T createSection(String path, SectionKind kind) {
+        return createSection(path, kind, false);
+    }
+
+    @Override
+    public <T extends ConfigSection> T createSection(String path, SectionKind kind, boolean replace) {
+        if (path == null || path.isEmpty())
+            throw new IllegalArgumentException("Path must not be null or empty");
+
+        String[] parsed = SectionPathResolver.parsePath(path);
+        String parentPath = parsed[0];
+        String sectionName = parsed[1];
+
+        ConfigSection parent;
+        if (parentPath.isEmpty()) {
+            parent = this;
+        } else {
+            parent = SectionPathResolver.resolveParent(this, path);
+        }
+
+        // check for existing section in the PARENT (not this)
+        // If parent != this, we must check under parent's sub-sections
+        T existing;
+        if (parent instanceof BaseConfigSection baseParent) {
+            existing = (T) baseParent.getMutableSubSections().get(sectionName);
+        } else {
+            // Fallback for non-BaseConfigSection implementations
+            existing = parent.getSection(sectionName);
+        }
+        
+        if (existing != null) {
+            return replace ? recreateWithKind(parent, sectionName, kind) : existing;
+        }
+
+        T newSection = createSectionOfType(sectionName, kind);
+        SectionPathResolver.attachSection(parent, sectionName, newSection);
+        return newSection;
+    }
+
+    private <T extends ConfigSection> T createSectionOfType(String name, SectionKind kind) {
+        return (T) switch (kind) {
+            case MAP -> new MapSection(name);
+            case LIST -> new ListSection(name);
+            case SET -> new SetSection(name);
+            default -> new BaseConfigSection(name);
+        };
+    }
+
+    private <T extends ConfigSection> T recreateWithKind(ConfigSection parent, String name, SectionKind kind) {
+        removeSectionInternal(parent, name);
+        T newSection = createSectionOfType(name, kind);
+        SectionPathResolver.attachSection(parent, name, newSection);
+        return newSection;
+    }
+
+    private void removeSectionInternal(ConfigSection parent, String name) {
+        if (parent instanceof BaseConfigSection baseParent) {
+            ConfigSection removed = baseParent.getMutableSubSections().remove(name);
+            if (removed instanceof BaseConfigSection) {
+                ((BaseConfigSection) removed).setParent(null);
+            }
+        } else {
+            parent.removeSection(name);
+        }
     }
 
     @Override
@@ -132,19 +196,35 @@ public class BaseConfigSection implements ConfigSection {
         sectionHierarchyManager.removeSection(path);
     }
 
+
     @Override
     public <T> T getValue(String path, Class<T> type) {
-        return valueStore.getValue(path, type);
+        if (path == null || path.isEmpty()) return null;
+        int idx = path.indexOf('.');
+        if (idx < 0) {
+            Object value = valueStore.get(path);
+            return value != null && type.isInstance(value) ? type.cast(value) : null;
+        }
+        String first = path.substring(0, idx);
+        String rest = path.substring(idx + 1);
+        if (valueStore.contains(first)) {
+            Object val = valueStore.get(first);
+            if (val instanceof BaseConfigSection baseVal) {
+                return baseVal.getValue(rest, type);
+            }
+        }
+        return null;
     }
 
     @Override
     public <T> T getValue(String path, T defaultValue, Class<T> type) {
-        return valueStore.getValue(path, defaultValue, type);
+        T value = getValue(path, type);
+        return value != null ? value : defaultValue;
     }
 
     @Override
     public <T> Optional<T> getOptionalValue(String path, Class<T> type) {
-        return valueStore.getOptionalValue(path, type);
+        return Optional.ofNullable(getValue(path, type));
     }
 
     @Override
@@ -173,40 +253,20 @@ public class BaseConfigSection implements ConfigSection {
         if (path == null || path.isEmpty()) return;
         int idx = path.indexOf('.');
         if (idx < 0) {
-            if (value instanceof Map<?, ?> mapValue) {
-                Map<?, ?> clonedMap = deepCloneMap(mapValue);
-                MapSection mapSection = createCustomSection(path, MapSection.class);
-                mapSection.clear();
-                mapSection.fromMap((Map<String, Object>) clonedMap);
-            } else if (value instanceof ConfigSection sectionValue) {
-                createCustomSection(path, sectionValue.getClass());
-                ConfigSection createdSection = getSection(path);
-                if (createdSection instanceof MapSection mapSection) {
-                    mapSection.clear();
-                    mapSection.fromMap(sectionValue.toMap());
-                } else if (createdSection instanceof ListSection listSection) {
-                    listSection.clear();
-                    listSection.fromList(sectionValue.toList());
-                } else if (createdSection instanceof SetSection setSection) {
-                    setSection.clear();
-                    setSection.fromSet(new HashSet<>(sectionValue.toSet()));
+            SectionKind kind = determineSectionKind(value);
+            if (kind != null) {
+                ConfigSection section = createSection(path, kind, true);
+                populateSectionFromValue(section, value);
+            } else if (value instanceof ConfigSection cs) {
+                SectionKind inferredKind = inferKindFromClass(cs.getClass());
+                if (inferredKind != null) {
+                    createSection(path, inferredKind, true);
+                    populateSectionFromValue(getSection(path), value);
                 }
             } else if (value instanceof SectionValueStore store) {
                 for (Map.Entry<String, Object> entry : store.entrySet()) {
                     set(path + "." + entry.getKey(), entry.getValue());
                 }
-            } else if (value instanceof List<?> listValue) {
-                List<Object> clonedList = deepCloneList(listValue);
-                createCustomSection(path, ListSection.class);
-                ListSection listSection = (ListSection) getSection(path);
-                listSection.clear();
-                listSection.fromList(clonedList);
-            } else if (value instanceof Set<?> setValue) {
-                Set<Object> clonedSet = new HashSet<>(setValue);
-                createCustomSection(path, SetSection.class);
-                SetSection setSection = (SetSection) getSection(path);
-                setSection.clear();
-                setSection.fromSet(clonedSet);
             } else {
                 valueStore.set(path, value);
             }
@@ -219,6 +279,33 @@ public class BaseConfigSection implements ConfigSection {
         section.set(rest, value);
     }
 
+    private SectionKind determineSectionKind(Object value) {
+        if (value instanceof Map<?, ?>) return SectionKind.MAP;
+        if (value instanceof List<?>) return SectionKind.LIST;
+        if (value instanceof Set<?>) return SectionKind.SET;
+        return null;
+    }
+
+    private SectionKind inferKindFromClass(Class<?> clazz) {
+        String name = clazz.getSimpleName();
+        if (name.equals("MapSection")) return SectionKind.MAP;
+        if (name.equals("ListSection")) return SectionKind.LIST;
+        if (name.equals("SetSection")) return SectionKind.SET;
+        return SectionKind.DEFAULT;
+    }
+
+    private void populateSectionFromValue(ConfigSection section, Object value) {
+        if (section instanceof MapSection && value instanceof Map<?, ?>) {
+            ((MapSection) section).fromMap((Map<String, Object>) ((Map<?, ?>) value));
+        } else if (section instanceof ListSection && value instanceof List<?>) {
+            ((ListSection) section).fromList((List<?>) value);
+        } else if (section instanceof SetSection && value instanceof Set<?>) {
+            ((SetSection) section).fromSet(new HashSet<>(((Set<?>) value)));
+        } else if (value instanceof ConfigSection cs) {
+            section.copyFrom(cs);
+        }
+    }
+
     @Override
     public void fromMap(Map<String, Object> values) {
         if (values == null) {
@@ -229,13 +316,14 @@ public class BaseConfigSection implements ConfigSection {
             String key = entry.getKey();
             Object value = entry.getValue();
             if (value instanceof Map<?, ?> mapValue) {
-                getOrCreateNestedSection(key).fromMap((Map<String, Object>) mapValue);
+                ConfigSection section = createSection(key, SectionKind.MAP, true);
+                ((MapSection) section).fromMap((Map<String, Object>) mapValue);
             } else if (value instanceof List<?> listValue) {
-                ListSection section = createCustomSection(key, ListSection.class);
-                section.fromList(listValue);
+                ConfigSection section = createSection(key, SectionKind.LIST, true);
+                ((ListSection) section).fromList(listValue);
             } else if (value instanceof Set<?> setValue) {
-                SetSection section = createCustomSection(key, SetSection.class);
-                section.fromSet(new HashSet<>(setValue));
+                ConfigSection section = createSection(key, SectionKind.SET, true);
+                ((SetSection) section).fromSet(new HashSet<>(setValue));
             } else {
                 set(key, value);
             }
@@ -247,7 +335,7 @@ public class BaseConfigSection implements ConfigSection {
         if (section instanceof BaseConfigSection baseSection) {
             return baseSection;
         }
-        return createCustomSection(path, MapSection.class);
+        return createSection(path, SectionKind.MAP, true) instanceof BaseConfigSection b ? b : null;
     }
 
     @Override
@@ -485,8 +573,8 @@ public class BaseConfigSection implements ConfigSection {
         Map<String, Object> result = new HashMap<>();
         for (Map.Entry<String, Object> entry : valueStore.entrySet()) {
             Object value = entry.getValue();
-            if (value instanceof ConfigSection) {
-                result.put(entry.getKey(), ((ConfigSection) value).toSerializableMap());
+            if (value instanceof BaseConfigSection) {
+                result.put(entry.getKey(), ((BaseConfigSection) value).toSerializableMap());
             } else if (value instanceof SectionValueStore) {
                 result.put(entry.getKey(), ((SectionValueStore) value).getValues());
             } else {
@@ -564,18 +652,7 @@ public class BaseConfigSection implements ConfigSection {
         return cloned;
     }
 
-    @Override
-    public <T extends ConfigSection> T createCustomSection(String name, Class<T> clazz) {
-        ConfigSection section = sectionFactory.createCustomSection(name, clazz);
-        if (section == null) {
-            throw new IllegalArgumentException("Could not create section of type " + clazz.getName() + " with name " + name);
-        }
-        if (section instanceof BaseConfigSection baseSection) {
-            baseSection.parent = this;
-        }
-        sectionHierarchyManager.getMutableSubSections().put(name, section);
-        return clazz.cast(section);
-    }
+
 
     @Override
     public void addMetadata(String key, Object value) {

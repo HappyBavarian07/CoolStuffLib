@@ -133,17 +133,25 @@ public final class ConfigUtils {
 
     @SuppressWarnings("unchecked")
     public static Map<String, Object> unflattenObjectMap(ConfigTypeConverterRegistry registry, Map<String, Object> map) {
-        boolean isFlat = map.keySet().stream().noneMatch(k -> k.contains("."));
-        Map<String, Object> nested = isFlat ? (Map<String, Object>) unflatten(registry, toStringMapIfNeeded(map)) : map;
+        Map<String, Object> nested = new LinkedHashMap<>();
+        if (map != null) {
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                Object value = recursiveConvertForSerialization(entry.getValue(), registry);
+                if (value instanceof String stringValue) {
+                    value = convertValue(registry, stringValue);
+                }
+                insertObjectUnflattened(nested, entry.getKey().split("\\."), 0, value);
+            }
+        }
         processSectionsRecursive(nested);
         return nested;
     }
 
     @SuppressWarnings("unchecked")
     public static List<Object> unflattenObjectList(ConfigTypeConverterRegistry registry, Map<String, Object> map) {
-        Object converted = convertMapsToLists(unflatten(registry, toStringMapIfNeeded(map)));
+        Object converted = convertMapsToLists(unflattenObjectMap(registry, map));
         if (converted instanceof List) return (List<Object>) converted;
-        
+
         List<Object> fallback = new ArrayList<>();
         fallback.add(converted);
         return fallback;
@@ -170,7 +178,7 @@ public final class ConfigUtils {
                 String type = String.valueOf(m.get("__type__"));
                 if ("ListSection".equals(type)) {
                     ListSection section = new ListSection("");
-                    Object items = m.get("__items");
+                    Object items = m.containsKey("__values__") ? m.get("__values__") : m.get("__items");
                     if (items instanceof List<?>) {
                         section.fromList((List<?>) items);
                     } else if (items instanceof Map<?, ?> itemMap) {
@@ -184,9 +192,10 @@ public final class ConfigUtils {
                         TreeMap<Integer, Object> ordered = new TreeMap<>();
                         for (Map.Entry<?, ?> e : m.entrySet()) {
                             String k = String.valueOf(e.getKey());
-                            if (k.startsWith("__items.")) {
+                            if (k.startsWith("__items.") || k.startsWith("__values__.")) {
                                 try {
-                                    ordered.put(Integer.parseInt(k.substring(8)), e.getValue());
+                                    String idxPart = k.startsWith("__items.") ? k.substring(8) : k.substring(11);
+                                    ordered.put(Integer.parseInt(idxPart), e.getValue());
                                 } catch (NumberFormatException ignored) {}
                             }
                         }
@@ -205,7 +214,7 @@ public final class ConfigUtils {
                     entry.setValue(section);
                 } else if ("SetSection".equals(type)) {
                     SetSection section = new SetSection("");
-                    Object items = m.get("__items");
+                    Object items = m.containsKey("__values__") ? m.get("__values__") : m.get("__items");
                     if (items instanceof List<?>) section.fromSet(new HashSet<>((List<?>) items));
                     entry.setValue(section);
                 }
@@ -215,13 +224,20 @@ public final class ConfigUtils {
         }
     }
 
-    private static Map<String, String> toStringMapIfNeeded(Map<String, Object> map) {
-        Map<String, String> result = new HashMap<>();
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            Object v = entry.getValue();
-            result.put(entry.getKey(), v == null ? null : v instanceof String ? (String) v : v.toString());
+    @SuppressWarnings("unchecked")
+    private static void insertObjectUnflattened(Map<String, Object> current, String[] parts, int index, Object value) {
+        String part = parts[index];
+        if (index == parts.length - 1) {
+            current.put(part, value);
+            return;
         }
-        return result;
+
+        Object next = current.get(part);
+        if (!(next instanceof Map<?, ?>)) {
+            next = new LinkedHashMap<String, Object>();
+            current.put(part, next);
+        }
+        insertObjectUnflattened((Map<String, Object>) next, parts, index + 1, value);
     }
 
     @SuppressWarnings("unchecked")

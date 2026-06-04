@@ -3,6 +3,8 @@ package de.happybavarian07.coolstufflib.configstuff.advanced.filetypes;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.interfaces.BaseConfigTypeConverter;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.interfaces.converter.MapConfigTypeConverter;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.interfaces.converter.StringConfigTypeConverter;
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.ListSection;
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.SetSection;
 
 import java.io.File;
 import java.time.LocalDate;

@@ -48,20 +48,36 @@ public class TomlConfigFileHandler extends AbstractConfigFileHandler {
         }
     }
 
-    private void flattenTomlMap(Map<String, Object> flat, String prefix, Map<String, Object> map) {
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            String key = prefix.isEmpty() ? entry.getKey() : prefix + "." + entry.getKey();
-            Object value = entry.getValue();
-            if (value instanceof Map<?, ?> m) {
-                flattenTomlMap(flat, key, (Map<String, Object>) m);
-            } else if (value instanceof BaseConfigSection section) {
-                flat.put(key, section.toSerializableMap());
-            } else if (value instanceof List<?> l) {
-                flat.put(key, l);
-            } else {
-                flat.put(key, value);
-            }
+    private void flattenTomlMap(Map<String, Object> flat, String prefix, Object value) {
+        if (value instanceof ListSection listSection) {
+            flat.put(prefix, new ArrayList<>(listSection.toList()));
+            return;
         }
+        if (value instanceof SetSection setSection) {
+            flat.put(prefix, new ArrayList<>(setSection.toSet()));
+            return;
+        }
+        if (value instanceof MapSection mapSection) {
+            flattenTomlMap(flat, prefix, mapSection.getValues(false));
+            return;
+        }
+        if (value instanceof BaseConfigSection section) {
+            flattenTomlMap(flat, prefix, section.getValues(false));
+            return;
+        }
+        if (value instanceof Map<?, ?> map) {
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                String key = String.valueOf(entry.getKey());
+                String childPrefix = prefix.isEmpty() ? key : prefix + "." + key;
+                flattenTomlMap(flat, childPrefix, entry.getValue());
+            }
+            return;
+        }
+        if (value instanceof Collection<?> collection) {
+            flat.put(prefix, new ArrayList<>(collection));
+            return;
+        }
+        flat.put(prefix, value);
     }
 
     private void writeTomlFromFlat(Writer writer, Map<String, Object> flatMap, Map<String, String> comments) throws IOException {
@@ -123,13 +139,13 @@ public class TomlConfigFileHandler extends AbstractConfigFileHandler {
         if (obj instanceof ListSection) {
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("__type__", "ListSection");
-            map.put("values", new ArrayList<>(((ListSection) obj).toList()));
+            map.put("__values__", new ArrayList<>(((ListSection) obj).toList()));
             return map;
         }
         if (obj instanceof SetSection) {
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("__type__", "SetSection");
-            map.put("values", new ArrayList<>(((SetSection) obj).toSet()));
+            map.put("__values__", new ArrayList<>(((SetSection) obj).toSet()));
             return map;
         }
         if (obj instanceof Map<?, ?> m) {
@@ -163,19 +179,19 @@ public class TomlConfigFileHandler extends AbstractConfigFileHandler {
                         result.put(entry.getKey(), section);
                         continue;
                     }
-                    if ("ListSection".equals(type)) {
-                        ListSection section = new ListSection("");
-                        Object values = subMap.get("values");
-                        if (values instanceof List<?>) for (Object v : (List<?>) values) section.add(v);
-                        result.put(entry.getKey(), section);
-                        continue;
-                    }
-                    if ("SetSection".equals(type)) {
-                        SetSection section = new SetSection("");
-                        Object values = subMap.get("values");
-                        if (values instanceof List<?>) for (Object v : (List<?>) values) section.add(v);
-                        result.put(entry.getKey(), section);
-                        continue;
+                if ("ListSection".equals(type)) {
+                    ListSection section = new ListSection("");
+                    Object values = subMap.containsKey("__values__") ? subMap.get("__values__") : subMap.get("values");
+                    if (values instanceof List<?>) for (Object v : (List<?>) values) section.add(v);
+                    result.put(entry.getKey(), section);
+                    continue;
+                }
+                if ("SetSection".equals(type)) {
+                    SetSection section = new SetSection("");
+                    Object values = subMap.containsKey("__values__") ? subMap.get("__values__") : subMap.get("values");
+                    if (values instanceof List<?>) for (Object v : (List<?>) values) section.add(v);
+                    result.put(entry.getKey(), section);
+                    continue;
                     }
                 }
                 result.put(entry.getKey(), convertSectionTypes(subMap));
@@ -202,7 +218,7 @@ public class TomlConfigFileHandler extends AbstractConfigFileHandler {
                 }
                 if ("ListSection".equals(type)) {
                     ListSection section = new ListSection("");
-                    Object values = map.get("values");
+                    Object values = map.containsKey("__values__") ? map.get("__values__") : map.get("values");
                     if (values instanceof List<?>) {
                         for (Object v : (List<?>) values) section.add(ensureSectionType(v));
                     }
@@ -210,7 +226,7 @@ public class TomlConfigFileHandler extends AbstractConfigFileHandler {
                 }
                 if ("SetSection".equals(type)) {
                     SetSection section = new SetSection("");
-                    Object values = map.get("values");
+                    Object values = map.containsKey("__values__") ? map.get("__values__") : map.get("values");
                     if (values instanceof List<?>) {
                         for (Object v : (List<?>) values) section.add(ensureSectionType(v));
                     }

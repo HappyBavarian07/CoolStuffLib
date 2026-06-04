@@ -14,6 +14,8 @@ import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.ConfigSec
 import de.happybavarian07.coolstufflib.configstuff.advanced.modules.ModuleManager;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.BaseConfigSection;
 import de.happybavarian07.coolstufflib.configstuff.advanced.migration.MigrationContext;
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.internal.SectionKind;
+
 import java.io.File;
 import java.util.*;
 import java.util.function.Supplier;
@@ -277,7 +279,7 @@ public abstract class BaseAdvancedConfig implements AdvancedConfig {
      * </code></pre>
      *
      * @param operation the operation to execute under lock
-     * @param <T> the return type of the operation
+     * @param <T>       the return type of the operation
      * @return the result of the operation
      */
     @Override
@@ -300,7 +302,7 @@ public abstract class BaseAdvancedConfig implements AdvancedConfig {
      * </code></pre>
      *
      * @param operation the operation to execute under lock
-     * @param <T> the return type of the operation
+     * @param <T>       the return type of the operation
      * @return the result of the operation
      */
     @Override
@@ -322,7 +324,7 @@ public abstract class BaseAdvancedConfig implements AdvancedConfig {
      * </code></pre>
      *
      * @param operation the operation to execute under lock
-     * @param <T> the return type of the operation
+     * @param <T>       the return type of the operation
      * @return the result of the operation
      */
     @Override
@@ -345,7 +347,7 @@ public abstract class BaseAdvancedConfig implements AdvancedConfig {
      * </code></pre>
      *
      * @param operation the operation to execute under lock
-     * @param <T> the return type of the operation
+     * @param <T>       the return type of the operation
      * @return the result of the operation
      */
     @Override
@@ -608,8 +610,8 @@ public abstract class BaseAdvancedConfig implements AdvancedConfig {
     }
 
     @Override
-    public <T extends ConfigSection> T createCustomSection(String path, Class<T> sectionType) {
-        return sectionManager.createCustomSection(path, sectionType, this);
+    public <T extends ConfigSection> T createSection(String path, SectionKind kind) {
+        return (T) sectionManager.createSection(path, kind, this);
     }
 
     @Override

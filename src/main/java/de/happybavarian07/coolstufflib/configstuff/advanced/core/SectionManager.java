@@ -5,6 +5,7 @@ import de.happybavarian07.coolstufflib.configstuff.advanced.event.ConfigSectionE
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.AdvancedConfig;
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.ConfigSection;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.BaseConfigSection;
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.internal.SectionKind;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,23 +55,6 @@ public class SectionManager {
      */
     public ConfigSection getSection(String path) {
         return rootSection.getSection(path);
-    }
-
-    /**
-     * <p>Creates a new configuration section at the specified path and publishes
-     * a section creation event with the associated configuration context.</p>
-     *
-     * <pre><code>
-     * ConfigSection newSection = manager.createSection("cache.settings", config);
-     * </code></pre>
-     *
-     * @param path the path where the new section should be created
-     * @param config the configuration context for the section creation event
-     * @return the newly created configuration section
-     */
-    public ConfigSection createSection(String path, AdvancedConfig config) {
-        ConfigSection section = rootSection.createSection(path);
-        return publishEventAndReturnT(path, config, section);
     }
 
     /**
@@ -127,28 +111,36 @@ public class SectionManager {
     }
 
     /**
-     * <p>Creates a custom configuration section with a specific type implementation
-     * at the given path, allowing for specialized section behavior with type safety.</p>
+     * Creates a configuration section at the given path with DEFAULT kind.
      *
-     * <pre><code>
-     * SpecializedSection section = manager.createCustomSection("special",
-     *     SpecializedSection.class, config);
-     * </code></pre>
-     *
-     * @param path the path where the custom section should be created
-     * @param sectionType the specific section class type to instantiate
-     * @param config the configuration context for the section creation event
-     * @param <T> the section type parameter extending ConfigSection
-     * @return the created custom configuration section of the specified type
+     * @param path  the dot-separated path where the section should be created
+     * @return the created or existing section
      */
-    public <T extends ConfigSection> T createCustomSection(String path, Class<T> sectionType, AdvancedConfig config) {
-        T section = (T) rootSection.createCustomSection(path, sectionType);
-        return publishEventAndReturnT(path, config, section);
+    public ConfigSection createSection(String path, AdvancedConfig config) {
+        return createSection(path, SectionKind.DEFAULT, config);
     }
 
-    private <T extends ConfigSection> T publishEventAndReturnT(String path, AdvancedConfig config, T section) {
-        ConfigSection parentSection = path.contains(".") ? rootSection.getSection(path.substring(0, path.lastIndexOf('.'))) : rootSection;
-        String sectionName = path.contains(".") ? path.substring(path.lastIndexOf('.') + 1) : path;
+    /**
+     * Creates a configuration section with explicit type at the given path.
+     *
+     * <pre><code>
+     * manager.createSection("inventory.items", SectionKind.LIST, config);
+     * </code></pre>
+     *
+     * @param path  the dot-separated path for the new section
+     * @param kind  the type of section to create (DEFAULT, MAP, LIST, SET)
+     * @param config the configuration context for events
+     * @return the created or existing section
+     */
+    public <T extends ConfigSection> T createSection(String path, SectionKind kind, AdvancedConfig config) {
+        T section = rootSection.createSection(path, kind, true);
+        return publishEventAndReturnT(section, path, config);
+    }
+
+    private <T extends ConfigSection> T publishEventAndReturnT(T section, String path, AdvancedConfig config) {
+        String[] parts = path.split("\\.");
+        String sectionName = parts[parts.length - 1];
+        ConfigSection parentSection = parts.length > 1 ? rootSection.getSection(String.join(".", java.util.Arrays.copyOf(parts, parts.length - 1))) : rootSection;
         eventBus.publish(ConfigSectionEvent.sectionCreated(config, parentSection, sectionName, section));
         return section;
     }

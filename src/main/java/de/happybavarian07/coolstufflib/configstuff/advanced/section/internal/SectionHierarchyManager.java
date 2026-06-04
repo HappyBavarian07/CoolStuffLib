@@ -24,13 +24,13 @@ public class SectionHierarchyManager {
         return sections;
     }
 
-    public ConfigSection getSection(String path) {
+    public <T extends ConfigSection> T getSection(String path) {
         if (path == null || path.isEmpty()) {
-            return owner;
+            return (T) owner;
         }
         String[] parts = path.split("\\.", 2);
         String current = parts[0];
-        ConfigSection section = sections.get(current);
+        T section = (T) sections.get(current);
         if (section == null) {
             return null;
         }
@@ -42,6 +42,10 @@ public class SectionHierarchyManager {
     }
 
     public ConfigSection createSection(String path) {
+        return createSection(path, null);
+    }
+
+    public ConfigSection createSection(String path, ConfigSection sectionToPutIn) {
         if (path == null || path.isEmpty()) {
             return owner;
         }
@@ -49,12 +53,17 @@ public class SectionHierarchyManager {
         String current = parts[0];
         ConfigSection section = sections.get(current);
         if (section == null) {
-            section = owner.createCustomSection(current, owner.getClass());
-            if (section == null) {
-                throw new IllegalStateException("Could not create section: " + current);
+            if (sectionToPutIn != null) {
+                section = sectionToPutIn;
+                if (section instanceof BaseConfigSection baseSection) {
+                    baseSection.setParent(owner);
+                }
+            } else {
+                SectionKind kind = SectionKind.fromClass(owner.getClass());
+                section = owner.createSection(current, kind != null ? kind : SectionKind.DEFAULT, true);
             }
-            sections.put(current, section);
         }
+        sections.put(current, section);
         if (parts.length == 1) {
             return section;
         } else {
