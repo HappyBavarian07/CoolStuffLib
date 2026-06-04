@@ -54,7 +54,7 @@ class MenuTestDisable {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        playerMenuUtility = new PlayerMenuUtility(mockPlayer.getUniqueId());
+        playerMenuUtility = new PlayerMenuUtility(mockCoolStuffLib, mockPlayer.getUniqueId());
 
         ItemStack fillerItem = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         // Ensure meta matches what Menu expects

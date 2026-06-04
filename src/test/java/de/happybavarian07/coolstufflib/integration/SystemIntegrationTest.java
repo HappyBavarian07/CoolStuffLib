@@ -83,7 +83,7 @@ class SystemIntegrationTest {
             when(mockCoolStuffLib.getLanguageManager()).thenReturn(languageManager);
 
             commandManager = new TestIntegratedCommandManager();
-            PlayerMenuUtility utility = new PlayerMenuUtility(mockPlayer.getUniqueId());
+            PlayerMenuUtility utility = new PlayerMenuUtility(mockCoolStuffLib, mockPlayer.getUniqueId());
             menu = new TestIntegratedMenu(utility);
         }
     }
