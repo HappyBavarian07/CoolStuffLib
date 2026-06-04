@@ -31,7 +31,7 @@ class UtilsTest {
             "list", List.of("item1", "item2")
         );
 
-        Map<String, Object> flattened = Utils.flatten(ConfigTypeConverterRegistry.defaultRegistry(), "", nested);
+        Map<String, Object> flattened = ConfigUtils.flatten(ConfigTypeConverterRegistry.defaultRegistry(), "", nested);
         System.out.println(flattened);
 
         assertEquals("value", flattened.get("simple"));
@@ -51,7 +51,7 @@ class UtilsTest {
             "config.database.port", "5432"
         );
 
-        Map<String, Object> unflattened = (Map<String, Object>) Utils.unflatten(ConfigTypeConverterRegistry.defaultRegistry(), flat);
+        Map<String, Object> unflattened = (Map<String, Object>) ConfigUtils.unflatten(ConfigTypeConverterRegistry.defaultRegistry(), flat);
 
         assertEquals("value", unflattened.get("simple"));
 
@@ -66,14 +66,14 @@ class UtilsTest {
 
     @Test
     void testIsValidPath() {
-        assertTrue(Utils.isValidPath("simple.key"));
-        assertTrue(Utils.isValidPath("nested.section.value"));
-        assertTrue(Utils.isValidPath("a.b.c.d.e"));
+        assertTrue(FileUtils.isValidPath("simple.key"));
+        assertTrue(FileUtils.isValidPath("nested.section.value"));
+        assertTrue(FileUtils.isValidPath("a.b.c.d.e"));
 
-        assertFalse(Utils.isValidPath(""));
-        assertFalse(Utils.isValidPath(".invalid"));
-        assertFalse(Utils.isValidPath("invalid."));
-        assertFalse(Utils.isValidPath("double..dot"));
+        assertFalse(FileUtils.isValidPath(""));
+        assertFalse(FileUtils.isValidPath(".invalid"));
+        assertFalse(FileUtils.isValidPath("invalid."));
+        assertFalse(FileUtils.isValidPath("double..dot"));
     }
 
     @Test
@@ -86,27 +86,27 @@ class UtilsTest {
 
     @Test
     void testParseBoolean() {
-        assertTrue(Utils.parseBoolean("true"));
-        assertTrue(Utils.parseBoolean("TRUE"));
-        assertTrue(Utils.parseBoolean("yes"));
-        assertTrue(Utils.parseBoolean("1"));
+        assertTrue(ConfigUtils.parseBoolean("true"));
+        assertTrue(ConfigUtils.parseBoolean("TRUE"));
+        assertTrue(ConfigUtils.parseBoolean("yes"));
+        assertTrue(ConfigUtils.parseBoolean("1"));
 
-        assertFalse(Utils.parseBoolean("false"));
-        assertFalse(Utils.parseBoolean("FALSE"));
-        assertFalse(Utils.parseBoolean("no"));
-        assertFalse(Utils.parseBoolean("0"));
-        assertFalse(Utils.parseBoolean("invalid"));
+        assertFalse(ConfigUtils.parseBoolean("false"));
+        assertFalse(ConfigUtils.parseBoolean("FALSE"));
+        assertFalse(ConfigUtils.parseBoolean("no"));
+        assertFalse(ConfigUtils.parseBoolean("0"));
+        assertFalse(ConfigUtils.parseBoolean("invalid"));
     }
 
     @Test
     void testParseNumber() {
-        assertEquals(123, Utils.parseNumber("123"));
-        assertEquals(123.45, Utils.parseNumber("123.45"));
-        assertEquals(-456, Utils.parseNumber("-456"));
-        assertEquals(0, Utils.parseNumber("0"));
+        assertEquals(123, ConfigUtils.parseNumber("123"));
+        assertEquals(123.45, ConfigUtils.parseNumber("123.45"));
+        assertEquals(-456, ConfigUtils.parseNumber("-456"));
+        assertEquals(0, ConfigUtils.parseNumber("0"));
 
-        assertNull(Utils.parseNumber("not_a_number"));
-        assertNull(Utils.parseNumber(""));
+        assertNull(ConfigUtils.parseNumber("not_a_number"));
+        assertNull(ConfigUtils.parseNumber(""));
     }
 
     //@Test
@@ -114,7 +114,7 @@ class UtilsTest {
         Path testPath = tempDir.resolve("nested").resolve("directory").resolve("structure");
 
         assertFalse(Files.exists(testPath));
-        Utils.createDirectories(testPath.toFile());
+        FileUtils.createDirectories(testPath.toFile());
         assertTrue(Files.exists(testPath));
         assertTrue(Files.isDirectory(testPath));
     }
@@ -126,7 +126,7 @@ class UtilsTest {
 
         Files.writeString(source, "Test content for copying");
 
-        Utils.copyFile(source.toFile(), target.toFile());
+        FileUtils.copyFile(source.toFile(), target.toFile());
 
         assertTrue(Files.exists(target));
         assertEquals("Test content for copying", Files.readString(target));
@@ -142,31 +142,31 @@ class UtilsTest {
         Files.writeString(file, "content");
 
         assertTrue(Files.exists(testDir));
-        Utils.deleteDirectory(testDir.toFile());
+        FileUtils.deleteDirectory(testDir.toFile());
         assertFalse(Files.exists(testDir));
     }
 
     @Test
     void testGetFileExtension() {
-        assertEquals("txt", Utils.getFileExtension(new File("test.txt")));
-        assertEquals("yaml", Utils.getFileExtension(new File("config.yaml")));
-        assertEquals("", Utils.getFileExtension(new File("noextension")));
-        assertEquals("json", Utils.getFileExtension(new File("path/to/file.json")));
+        assertEquals("txt", FileUtils.getFileExtension(new File("test.txt")));
+        assertEquals("yaml", FileUtils.getFileExtension(new File("config.yaml")));
+        assertEquals("", FileUtils.getFileExtension(new File("noextension")));
+        assertEquals("json", FileUtils.getFileExtension(new File("path/to/file.json")));
     }
 
     @Test
     void testJoinPath() {
-        assertEquals("a.b.c", Utils.joinPath(".", "a", "b", "c"));
-        assertEquals("single", Utils.joinPath(".", "single"));
-        assertEquals("", Utils.joinPath("."));
-        assertEquals("a.b", Utils.joinPath(".", "a", "", "b"));
+        assertEquals("a.b.c", FileUtils.joinPath(".", "a", "b", "c"));
+        assertEquals("single", FileUtils.joinPath(".", "single"));
+        assertEquals("", FileUtils.joinPath("."));
+        assertEquals("a.b", FileUtils.joinPath(".", "a", "", "b"));
     }
 
     @Test
     void testSplitPath() {
-        assertArrayEquals(new String[]{"a", "b", "c"}, Utils.splitPath(".", "a.b.c"));
-        assertArrayEquals(new String[]{"single"}, Utils.splitPath(".", "single"));
-        assertArrayEquals(new String[]{}, Utils.splitPath(".", ""));
+        assertArrayEquals(new String[]{"a", "b", "c"}, FileUtils.splitPath(".", "a.b.c"));
+        assertArrayEquals(new String[]{"single"}, FileUtils.splitPath(".", "single"));
+        assertArrayEquals(new String[]{}, FileUtils.splitPath(".", ""));
     }
 
     @Test

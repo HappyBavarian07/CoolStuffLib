@@ -1,5 +1,6 @@
 package de.happybavarian07.coolstufflib.menusystem;
 
+import de.happybavarian07.coolstufflib.CoolStuffLib;
 import de.happybavarian07.coolstufflib.menusystem.PlayerMenuUtility;
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +26,7 @@ class PlayerMenuUtilityTest {
         when(mockPlayer.getName()).thenReturn("TestPlayer");
         when(mockPlayer.getUniqueId()).thenReturn(java.util.UUID.randomUUID());
 
-        playerMenuUtility = new PlayerMenuUtility(mockPlayer.getUniqueId());
+        playerMenuUtility = new PlayerMenuUtility(CoolStuffLib.getLib(), mockPlayer.getUniqueId());
     }
 
     @Test
