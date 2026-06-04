@@ -63,8 +63,29 @@ public interface AdvancedConfigGroup {
      */
     void addConfig(AdvancedConfig config);
 
+    /**
+     * <p>Removes a specific configuration from this group by reference.</p>
+     *
+     * <pre><code>
+     * AdvancedConfig webConfig = group.getConfig("web");
+     * if (webConfig != null) {
+     *     group.removeConfig(webConfig);
+     * }
+     * </code></pre>
+     *
+     * @param config the configuration instance to remove
+     */
     void removeConfig(AdvancedConfig config);
 
+    /**
+     * <p>Removes a specific configuration from this group by name.</p>
+     *
+     * <pre><code>
+     * group.removeConfig("database");
+     * </code></pre>
+     *
+     * @param configName the name of the configuration to remove
+     */
     void removeConfig(String configName);
 
     /**
@@ -82,8 +103,32 @@ public interface AdvancedConfigGroup {
      */
     AdvancedConfig getConfig(String name);
 
+    /**
+     * <p>Checks if this group contains a configuration with the specified name.</p>
+     *
+     * <pre><code>
+     * if (group.containsConfig("database")) {
+     *     AdvancedConfig db = group.getConfig("database");
+     * }
+     * </code></pre>
+     *
+     * @param name the configuration name to check
+     * @return true if a configuration with this name exists in the group, false otherwise
+     */
     boolean containsConfig(String name);
 
+    /**
+     * <p>Checks if this group contains the specified configuration instance.</p>
+     *
+     * <pre><code>
+     * AdvancedConfig db = new AdvancedPersistentConfig(...);
+     * group.addConfig(db);
+     * boolean exists = group.containsConfig(db); // true
+     * </code></pre>
+     *
+     * @param config the configuration instance to check for
+     * @return true if this configuration is managed by the group, false otherwise
+     */
     boolean containsConfig(AdvancedConfig config);
 
     /**
@@ -101,6 +146,20 @@ public interface AdvancedConfigGroup {
      */
     <T> T getConfigValue(String configName, String path, Class<T> type);
 
+    /**
+     * <p>Gets a typed value from a specific configuration within the group with a default fallback.</p>
+     *
+     * <pre><code>
+     * Integer port = group.getConfigValue("web", "server.port", 80, Integer.class);
+     * </code></pre>
+     *
+     * @param configName the name of the configuration
+     * @param path the path to the value
+     * @param defaultValue the default value if not found
+     * @param type the expected value type
+     * @param <T> the value type
+     * @return the typed value, or the default value if not found
+     */
     <T> T getConfigValue(String configName, String path, T defaultValue, Class<T> type);
 
     /**
@@ -116,6 +175,19 @@ public interface AdvancedConfigGroup {
      */
     Map<String, Object> getValuesFromAll(String path);
 
+    /**
+     * <p>Retrieves typed values at the same path from all configurations in the group.</p>
+     *
+     * <pre><code>
+     * Map&lt;String, Integer&gt; allPorts = group.getValuesFromAll("server.port", Integer.class);
+     * // Returns {"web": 8080, "api": 8081}
+     * </code></pre>
+     *
+     * @param path the configuration path to query
+     * @param type the expected value type for conversion
+     * @param <T> the value type
+     * @return map of configuration names to their typed values at the specified path
+     */
     <T> Map<String, T> getValuesFromAll(String path, Class<T> type);
 
     /**
@@ -132,10 +204,45 @@ public interface AdvancedConfigGroup {
      */
     <T> T getFirstValue(String path, Class<T> type);
 
+    /**
+     * <p>Gets the first non-null value at the specified path across all configurations with a default fallback.</p>
+     *
+     * <pre><code>
+     * String logLevel = group.getFirstValue("logging.level", "INFO", String.class);
+     * </code></pre>
+     *
+     * @param path the configuration path to search
+     * @param defaultValue the default value if no value is found in any config
+     * @param type the expected value type
+     * @param <T> the value type
+     * @return the first non-null value found, or the default value if none exist
+     */
     <T> T getFirstValue(String path, T defaultValue, Class<T> type);
 
+    /**
+     * <p>Checks if any configuration in this group contains a key at the specified path.</p>
+     *
+     * <pre><code>
+     * if (group.containsKeyInAny("server.port")) {
+     *     // At least one config has this setting
+     * }
+     * </code></pre>
+     *
+     * @param path the configuration path to check
+     * @return true if any configuration in the group contains a value at this path, false otherwise
+     */
     boolean containsKeyInAny(String path);
 
+    /**
+     * <p>Gets all keys from all configurations in this group.</p>
+     *
+     * <pre><code>
+     * Set&lt;String&gt; allKeys = group.getAllKeys();
+     * // Returns unique keys across all configs
+     * </code></pre>
+     *
+     * @return a set of all configuration keys from all managed configurations
+     */
     Set<String> getAllKeys();
 
     /**
@@ -151,6 +258,18 @@ public interface AdvancedConfigGroup {
      */
     void setValueInAll(String path, Object value);
 
+    /**
+     * <p>Gets all group-level modules registered with this configuration group.</p>
+     *
+     * <pre><code>
+     * Map&lt;String, GroupConfigModule&gt; modules = group.getGroupModules();
+     * for (GroupConfigModule module : modules.values()) {
+     *     module.onEvent(event);
+     * }
+     * </code></pre>
+     *
+     * @return map of module names to module instances
+     */
     Map<String, GroupConfigModule> getGroupModules();
 
     /**
@@ -166,13 +285,65 @@ public interface AdvancedConfigGroup {
      */
     void registerGroupModule(String name, GroupConfigModule module);
 
+    /**
+     * <p>Unregisters a group-level module by name, removing it from this configuration group.</p>
+     *
+     * <pre><code>
+     * group.unregisterGroupModule("sync");
+     * </code></pre>
+     *
+     * @param name the name of the module to unregister
+     */
     void unregisterGroupModule(String name);
 
+    /**
+     * <p>Gets a specific group-level module by its registered name.</p>
+     *
+     * <pre><code>
+     * GroupConfigModule validator = group.getGroupModule("validation");
+     * if (validator != null) {
+     *     // Use the module
+     * }
+     * </code></pre>
+     *
+     * @param name the name of the module to retrieve
+     * @return the module instance, or null if not found
+     */
     GroupConfigModule getGroupModule(String name);
 
+    /**
+     * <p>Checks if a group-level module with the specified name is registered.</p>
+     *
+     * <pre><code>
+     * if (group.hasGroupModule("validation")) {
+     *     // Module is registered
+     * }
+     * </code></pre>
+     *
+     * @param name the module name to check
+     * @return true if a module with this name exists, false otherwise
+     */
     boolean hasGroupModule(String name);
 
+    /**
+     * <p>Enables a group-level module by name, allowing it to process configuration events.</p>
+     *
+     * <pre><code>
+     * group.enableGroupModule("sync");
+     * </code></pre>
+     *
+     * @param name the name of the module to enable
+     */
     void enableGroupModule(String name);
 
+    /**
+     * <p>Disables a group-level module by name, preventing it from processing configuration events.</p>
+     *
+     * <pre><code>
+     * group.disableGroupModule("sync");
+     * </code></pre>
+     *
+     * @param name the name of the module to disable
+     */
     void disableGroupModule(String name);
 }

@@ -3,6 +3,7 @@ package de.happybavarian07.coolstufflib.configstuff.advanced.interfaces;
 import de.happybavarian07.coolstufflib.configstuff.advanced.event.ConfigEventBus;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.interfaces.ConfigFileHandler;
 import de.happybavarian07.coolstufflib.configstuff.advanced.migration.MigrationContext;
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.internal.SectionKind;
 
 import java.io.File;
 import java.util.List;
@@ -789,20 +790,18 @@ public interface AdvancedConfig {
     List<String> getKeys(boolean deep);
 
     /**
-     * <p>Creates a specialized configuration section with custom behavior.</p>
+     * Creates a section at the specified path with explicit kind.
      *
      * <pre><code>
-     * ListSection items = config.createCustomSection("inventory.items", ListSection.class);
-     * items.add("sword");
-     * items.add("shield");
+     * // Create a ListSection for ordered items
+     * config.createSection("inventory.items", SectionKind.LIST);
      * </code></pre>
      *
-     * @param path        the path for the new section
-     * @param sectionType the specialized section type
-     * @param <T>         the section type
-     * @return the created specialized section
+     * @param path        the dot-separated path for the new section
+     * @param kind        the type of section to create (DEFAULT, MAP, LIST, SET)
+     * @return the created or existing section
      */
-    <T extends ConfigSection> T createCustomSection(String path, Class<T> sectionType);
+    <T extends ConfigSection> T createSection(String path, SectionKind kind);
 
     /**
      * <p>Copies all configuration data from another configuration instance.</p>

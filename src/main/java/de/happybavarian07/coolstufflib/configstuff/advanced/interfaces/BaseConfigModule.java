@@ -132,6 +132,17 @@ public interface BaseConfigModule {
 
     boolean isInitialized();
 
+    /**
+     * <p>Gets the set of module names this module depends on to function correctly.</p>
+     *
+     * <pre><code>
+     * for (String dependency : module.getDependencies()) {
+     *     // Ensure dependencies are loaded first
+     * }
+     * </code></pre>
+     *
+     * @return a set of dependency module names, or empty set if none
+     */
     Set<String> getDependencies();
 
     /**
@@ -146,12 +157,43 @@ public interface BaseConfigModule {
      */
     Map<String, Object> getModuleState();
 
+    /**
+     * <p>Checks if the module has been configured with its required settings.</p>
+     *
+     * <pre><code>
+     * if (!module.isConfigured()) {
+     *     module.configure(Map.of("threshold", 100));
+     * }
+     * </code></pre>
+     *
+     * @return true if the module has been configured, false otherwise
+     */
     boolean isConfigured();
 
+    /**
+     * <p>Applies configuration settings to this module.</p>
+     *
+     * <pre><code>
+     * module.configure(Map.of(
+     *     "threshold", 100,
+     *     "enabled", true
+     * ));
+     * </code></pre>
+     *
+     * @param configuration a map of setting names to values
+     */
     void configure(Map<String, Object> configuration);
 
     /**
-     * <p>Registers an event listener for specific configuration events.</p>
+     * <p>Copies state and configuration from another module instance.</p>
+     *
+     * <pre><code>
+     * module.copyFrom(otherModule);
+     * </code></pre>
+     *
+     * @param module the source module to copy from
+     */
+    void copyFrom(BaseConfigModule module);
      *
      * <pre><code>
      * module.registerEventListener(config.getEventBus(),
