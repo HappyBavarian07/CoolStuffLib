@@ -1,42 +1,103 @@
 package de.happybavarian07.coolstufflib.cache;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import org.checkerframework.checker.units.qual.K;
+
 import java.io.*;
 import java.lang.reflect.Type;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 
 /**
  * <p>Implements a thread-safe, persistent cache with automatic JSON migration.</p>
  */
+
 public class FilePersistentCache<K, V> implements PersistentCache<K, V> {
     private final ConcurrentMap<K, V> memoryCache = new ConcurrentHashMap<>();
     private final String cacheFile;
     private final int maxSize;
     private final Object fileLock = new Object();
     private final ScheduledExecutorService scheduler;
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    private final Type mapType;
+    private final Gson gson;
+    private final Class<V> valueClass;
+    private final Type loadType;
     private volatile boolean closed = false;
 
     public FilePersistentCache(String filename) {
-        this(filename, Integer.MAX_VALUE, true, 30, new TypeToken<ConcurrentMap<K, V>>() {}.getType());
+        this(filename, Integer.MAX_VALUE, true, 30, (Class<V>) Object.class);
     }
 
     public FilePersistentCache(File file) {
-        this(file.getAbsolutePath(), Integer.MAX_VALUE, true, 30, new TypeToken<ConcurrentMap<K, V>>() {}.getType());
+        this(file.getAbsolutePath(), Integer.MAX_VALUE, true, 30, (Class<V>) Object.class);
     }
 
-    public FilePersistentCache(String filename, int maxSize, boolean autoSave, int autoSaveIntervalSeconds, Type mapType) {
+    public FilePersistentCache(String filename, int maxSize, boolean autoSave, int autoSaveIntervalSeconds, Class<V> valueClass) {
         this.cacheFile = filename;
         this.maxSize = maxSize;
-        this.mapType = mapType;
+        this.valueClass = valueClass;
+        this.loadType = TypeToken.getParameterized(ConcurrentMap.class, String.class, valueClass).getType();
+        this.gson = createGson();//valueClass == Object.class);
         this.scheduler = createScheduler(autoSave, autoSaveIntervalSeconds);
         load();
+    }
+
+    private Gson createGson(/*boolean objectValues*/) {
+        GsonBuilder builder = new GsonBuilder().setPrettyPrinting();
+        //if (objectValues) {
+        //    builder.registerTypeAdapter(Object.class, new ObjectTypeAdapter());
+        //}
+        return builder.create();
+    }
+
+    private static final class ObjectTypeAdapter implements JsonDeserializer<Object> {
+        @Override
+        public Object deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
+            return read(json);
+        }
+
+        private Object read(JsonElement json) {
+            if (json == null || json.isJsonNull()) return null;
+
+            if (json.isJsonPrimitive()) {
+                JsonPrimitive p = json.getAsJsonPrimitive();
+                if (p.isBoolean()) return p.getAsBoolean();
+                if (p.isString()) return p.getAsString();
+
+                String s = p.getAsString();
+                if (s.matches("[-+]?\\d+")) {
+                    try { return Integer.parseInt(s); } catch (NumberFormatException ignored) {}
+                    try { return Long.parseLong(s); } catch (NumberFormatException ignored) {}
+                    return new BigInteger(s);
+                }
+                return p.getAsDouble();
+            }
+
+            if (json.isJsonArray()) {
+                List<Object> list = new ArrayList<>();
+                for (JsonElement element : json.getAsJsonArray()) {
+                    list.add(read(element));
+                }
+                return list;
+            }
+
+            if (json.isJsonObject()) {
+                Map<String, Object> map = new LinkedHashMap<>();
+                for (Map.Entry<String, JsonElement> entry : json.getAsJsonObject().entrySet()) {
+                    map.put(entry.getKey(), read(entry.getValue()));
+                }
+                return map;
+            }
+
+            return null;
+        }
     }
 
     private ScheduledExecutorService createScheduler(boolean autoSave, int interval) {
@@ -130,7 +191,7 @@ public class FilePersistentCache<K, V> implements PersistentCache<K, V> {
 
     private void loadJson(Path path) {
         try (Reader reader = Files.newBufferedReader(path)) {
-            ConcurrentMap<K, V> loaded = gson.fromJson(reader, mapType);
+            ConcurrentMap<K, V> loaded = gson.fromJson(reader, loadType);
             if (loaded != null) {
                 memoryCache.clear();
                 memoryCache.putAll(loaded);

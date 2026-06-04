@@ -1,6 +1,7 @@
 package de.happybavarian07.coolstufflib.cache;
 
 import de.happybavarian07.coolstufflib.service.api.Service;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -40,6 +41,8 @@ public class CacheManager implements Service {
      * @param cache Cache instance
      */
     public <K, V> void registerCache(String name, Cache<K, V> cache) {
+        if(name == null || name.isBlank()) throw new IllegalArgumentException("Cache name cannot be null or blank");
+        if (cache == null) throw new IllegalArgumentException("Cache instance cannot be null");
         caches.put(name, cache);
     }
 

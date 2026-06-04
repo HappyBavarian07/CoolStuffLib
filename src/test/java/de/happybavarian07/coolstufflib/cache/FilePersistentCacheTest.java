@@ -1,11 +1,13 @@
 package de.happybavarian07.coolstufflib.cache;
 
+import com.google.gson.reflect.TypeToken;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Timeout;
 
 import java.io.File;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.*;
@@ -17,11 +19,12 @@ public class FilePersistentCacheTest {
 
     private FilePersistentCache<String, String> cache;
     private String testCacheFile;
+    Type mapType = new TypeToken<Object>() {}.getType();
 
     @BeforeEach
     void setUp() {
-        testCacheFile = "test_cache_" + System.currentTimeMillis() + ".dat";
-        cache = new FilePersistentCache<>(testCacheFile, 2000, false, 0);
+        testCacheFile = "test_cache_" + System.currentTimeMillis() + ".json";
+        cache = new FilePersistentCache<>(testCacheFile, 2000, false, 0, String.class);
     }
 
     @AfterEach
@@ -52,14 +55,14 @@ public class FilePersistentCacheTest {
         cache.put("persistent_key", "persistent_value");
         cache.save();
 
-        FilePersistentCache<String, String> newCache = new FilePersistentCache<>(testCacheFile, 20, false, 0);
+        FilePersistentCache<String, String> newCache = new FilePersistentCache<>(testCacheFile, 20, false, 0, String.class);
         assertEquals("persistent_value", newCache.get("persistent_key"));
     }
 
     @Test
     void testLoadNonExistentFile() {
-        String nonExistentFile = "non_existent_cache.dat";
-        FilePersistentCache<String, String> newCache = new FilePersistentCache<>(nonExistentFile, 20, false, 0);
+        String nonExistentFile = "non_existent_cache.json";
+        FilePersistentCache<String, String> newCache = new FilePersistentCache<>(nonExistentFile, 20, false, 0, String.class);
         assertEquals(0, newCache.size());
     }
 
@@ -90,10 +93,10 @@ public class FilePersistentCacheTest {
 
     @Test
     void testDefaultConstructor() {
-        FilePersistentCache<String, String> defaultCache = new FilePersistentCache<>("default_cache.dat", 20, false, 0);
+        FilePersistentCache<String, String> defaultCache = new FilePersistentCache<>("default_cache.json", 20, false, 0, String.class);
         assertNotNull(defaultCache.getCacheFile());
         assertTrue(defaultCache.getCacheFile().startsWith("default_"));
-        assertTrue(defaultCache.getCacheFile().endsWith(".dat"));
+        assertTrue(defaultCache.getCacheFile().endsWith(".json"));
     }
 
     @Test
@@ -149,7 +152,7 @@ public class FilePersistentCacheTest {
 
         cache.save();
 
-        FilePersistentCache<String, String> loadedCache = new FilePersistentCache<>(testCacheFile, 20, false, 0);
+        FilePersistentCache<String, String> loadedCache = new FilePersistentCache<>(testCacheFile, 20, false, 0, String.class);
 
         assertEquals("value1", loadedCache.get("key1"));
         assertEquals("value2", loadedCache.get("key2"));
@@ -164,13 +167,13 @@ public class FilePersistentCacheTest {
         assertEquals("new_value", cache.get("key1"));
 
         cache.save();
-        FilePersistentCache<String, String> loadedCache = new FilePersistentCache<>(testCacheFile, 20, false, 0);
+        FilePersistentCache<String, String> loadedCache = new FilePersistentCache<>(testCacheFile, 20, false, 0, String.class);
         assertEquals("new_value", loadedCache.get("key1"));
     }
 
     @Test
     void testComplexObjectTypes() {
-        FilePersistentCache<String, Object> complexCache = new FilePersistentCache<>("complex_test.dat", 20, false, 0);
+        FilePersistentCache<String, Object> complexCache = new FilePersistentCache<>("complex_test.dat", 20, false, 0, Object.class);
 
         try {
             complexCache.put("string", "test_string");
@@ -185,9 +188,9 @@ public class FilePersistentCacheTest {
 
             complexCache.save();
 
-            FilePersistentCache<String, Object> loadedCache = new FilePersistentCache<>("complex_test.dat", 20, false, 0);
+            FilePersistentCache<String, Object> loadedCache = new FilePersistentCache<>("complex_test.dat", 20, false, 0, Object.class);
             assertEquals("test_string", loadedCache.get("string"));
-            assertEquals(42, loadedCache.get("integer"));
+            assertEquals(42.0, loadedCache.get("integer"));
             assertEquals(3.14, loadedCache.get("double"));
             assertEquals(true, loadedCache.get("boolean"));
         } finally {
