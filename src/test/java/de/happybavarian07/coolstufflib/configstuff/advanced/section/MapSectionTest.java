@@ -1,6 +1,7 @@
 package de.happybavarian07.coolstufflib.configstuff.advanced.section;
 
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.ConfigSection;
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.internal.SectionKind;
 import de.happybavarian07.coolstufflib.logging.ConfigLogger;
 import org.junit.jupiter.api.Test;
 
@@ -126,7 +127,7 @@ class MapSectionTest {
         section.set("sectionKey1", "sectionValue1");
 
         // Create a nested section
-        ConfigSection nested = section.createSection("nested");
+        ConfigSection nested = section.createSection("nested", SectionKind.DEFAULT, true);
         nested.set("nestedKey", "nestedValue");
 
         // Convert to map
@@ -195,7 +196,7 @@ class MapSectionTest {
         assertTrue(retrievedMap instanceof MapSection);
 
         // Add the map section to the parent's sections map
-        parent.createSection("map");
+        parent.createSection("map", SectionKind.DEFAULT, true);
 
         // Access map entries via parent
         assertEquals("mapValue", ((MapSection)parent.getSection("map")).getValue("mapKey"));
@@ -208,12 +209,12 @@ class MapSectionTest {
         BaseConfigSection root = new BaseConfigSection("root");
 
         // Create a complex nested structure using maps
-        MapSection user = root.createCustomSection("userInfo", MapSection.class);
+        MapSection user = (MapSection) root.createSection("userInfo", SectionKind.MAP, true);
 
         user.put("name", "John Doe");
         user.put("age", 30);
 
-        MapSection address = user.createCustomSection("location", MapSection.class);
+        MapSection address = (MapSection) user.createSection("location", SectionKind.MAP, true);
 
         address.put("street", "123 Main St");
         address.put("city", "Anytown");

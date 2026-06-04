@@ -1,2 +1,1 @@
-test:
-  value: "delete_test"
+test: "{value=delete_test}"

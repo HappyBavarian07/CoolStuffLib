@@ -1,9 +1,5 @@
 {
-  "zero": {
-    "number": 0
-  },
-  "null": {},
-  "empty": {
-    "string": ""
-  }
+  "zero": "{number\u003d0}",
+  "null": "{}",
+  "empty": "{string\u003d}"
 }

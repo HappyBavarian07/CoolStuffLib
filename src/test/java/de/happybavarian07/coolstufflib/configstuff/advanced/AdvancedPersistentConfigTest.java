@@ -2,8 +2,11 @@ package de.happybavarian07.coolstufflib.configstuff.advanced;
 
 import de.happybavarian07.coolstufflib.configstuff.advanced.event.ConfigLifecycleEvent;
 import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.ConfigFileType;
+import de.happybavarian07.coolstufflib.configstuff.advanced.filetypes.ConfigTypeConverterRegistry;
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.AdvancedConfig;
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.ConfigSection;
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.internal.SectionKind;
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.BaseConfigSection;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.ListSection;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.MapSection;
 import de.happybavarian07.coolstufflib.logging.ConfigLogger;
@@ -23,10 +26,25 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.junit.jupiter.api.Assertions.*;
 
 class AdvancedPersistentConfigTest {
+    static Path tempDir = Path.of("TestOutputs/AdvancedPersistentConfigTest");
     @BeforeAll
     static void setupLogger() {
         if (!isLoggerInitialized()) {
             ConfigLogger.initialize(new java.io.File("target"));
+        }
+        // Clear files
+        try {
+            Files.walk(tempDir)
+                    .filter(Files::isRegularFile)
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                        } catch (IOException e) {
+                            System.err.println("Failed to delete file: " + path);
+                        }
+                    });
+        } catch (IOException e) {
+            System.err.println("Failed to clean target directory: " + e.getMessage());
         }
     }
     private static boolean isLoggerInitialized() {
@@ -37,7 +55,6 @@ class AdvancedPersistentConfigTest {
             return false;
         }
     }
-    Path tempDir = Path.of("TestOutputs/AdvancedPersistentConfigTest");
 
     @Test
     void testBasicCrudOperations() {
@@ -119,7 +136,7 @@ class AdvancedPersistentConfigTest {
         ConfigLogger.info("Running testSpecializedSections", "AdvancedPersistentConfigTest", true);
         File file = tempDir.resolve("testSpecializedSections.properties").toFile();
         AdvancedConfig config = new AdvancedPersistentConfig("test", file, ConfigFileType.PROPERTIES);
-        ListSection listSection = config.createCustomSection("permissions", ListSection.class);
+        ListSection listSection = (ListSection) config.createSection("permissions", SectionKind.LIST);
         listSection.add("READ");
         listSection.add("WRITE");
         listSection.add("EXECUTE");
@@ -128,13 +145,13 @@ class AdvancedPersistentConfigTest {
         AdvancedConfig reloaded = new AdvancedPersistentConfig("test", file, ConfigFileType.PROPERTIES);
         ConfigSection reloadedSection = reloaded.getSection("permissions");
         ConfigLogger.info("After load: permissions section type = " + (reloadedSection != null ? reloadedSection.getClass().getSimpleName() : "null"), "AdvancedPersistentConfigTest", true);
-        assertInstanceOf(ListSection.class, reloadedSection);
+        assertInstanceOf(BaseConfigSection.class, reloadedSection);
         ListSection reloadedListSection = (ListSection) reloadedSection;
         assertEquals(3, reloadedListSection.size());
         assertEquals("READ", reloadedListSection.get(0));
         assertEquals("WRITE", reloadedListSection.get(1));
         assertEquals("EXECUTE", reloadedListSection.get(2));
-        MapSection mapSection = config.createCustomSection("metadata", MapSection.class);
+        MapSection mapSection = (MapSection) config.createSection("metadata", SectionKind.MAP);
         mapSection.put("created", "today");
         mapSection.put("version", 1);
         mapSection.put("valid", true);
@@ -188,19 +205,19 @@ class AdvancedPersistentConfigTest {
         ConfigSection users = config.createSection("users");
 
         ConfigLogger.info("Creating user1 (alice)", "AdvancedPersistentConfigTest", true);
-        ConfigSection user1 = users.createSection("alice");
+        ConfigSection user1 = users.createSection("alice", SectionKind.DEFAULT, true);
         user1.set("name", "Alice");
         user1.set("age", 30);
         user1.set("active", true);
 
         ConfigLogger.info("Creating user2 (bob)", "AdvancedPersistentConfigTest", true);
-        ConfigSection user2 = users.createSection("bob");
+        ConfigSection user2 = users.createSection("bob", SectionKind.DEFAULT, true);
         user2.set("name", "Bob");
         user2.set("age", 25);
         user2.set("active", false);
 
         ConfigLogger.info("Creating roles list section for alice", "AdvancedPersistentConfigTest", true);
-        ListSection aliceRoles = config.createCustomSection("users.alice.roles", ListSection.class);
+        ListSection aliceRoles = (ListSection) config.createSection("users.alice.roles", SectionKind.LIST);
         aliceRoles.add("admin");
         aliceRoles.add("user");
 
@@ -340,13 +357,13 @@ class AdvancedPersistentConfigTest {
         root.set("name", "TestApp");
         root.set("version", "1.0.0");
 
-        ConfigSection database = root.createSection("database");
+        ConfigSection database = root.createSection("database", SectionKind.DEFAULT, true);
         database.set("host", "localhost");
         database.set("port", 3306);
         database.set("credentials", Map.of("user", "admin", "password", "secret"));
 
-        ConfigSection features = root.createSection("features");
-        ListSection enabledFeatures = config.createCustomSection("app.features.enabled", ListSection.class);
+        ConfigSection features = root.createSection("features", SectionKind.DEFAULT, true);
+        ListSection enabledFeatures = config.createSection("app.features.enabled", SectionKind.LIST);
         enabledFeatures.addAll(Arrays.asList("search", "notifications", "sharing"));
 
         // Save config
@@ -373,6 +390,45 @@ class AdvancedPersistentConfigTest {
         ConfigSection loadedFeatures = loaded.getSection("app.features");
         assertTrue(loadedFeatures.hasSection("enabled"));
         ListSection loadedEnabledFeatures = (ListSection) loadedFeatures.getSection("enabled");
+        assertEquals(3, loadedEnabledFeatures.size());
+        assertEquals("search", loadedEnabledFeatures.get(0));
+        assertEquals("notifications", loadedEnabledFeatures.get(1));
+        assertEquals("sharing", loadedEnabledFeatures.get(2));
+
+        assertNull(loaded.getSection("enabled"));
+    }
+
+    @Test
+    void testTomlNestedStructurePersistence() {
+        ConfigLogger.info("Running testTomlNestedStructurePersistence", "AdvancedPersistentConfigTest", true);
+        File file = tempDir.resolve("nested.toml").toFile();
+        AdvancedConfig config = new AdvancedPersistentConfig("test", file, ConfigFileType.TOML);
+
+        ConfigSection app = config.createSection("app");
+        app.set("name", "TestApp");
+        app.set("version", "1.0.0");
+
+        ConfigSection database = app.createSection("database", SectionKind.DEFAULT, true);
+        database.set("host", "localhost");
+        database.set("port", 3306);
+        database.set("credentials", Map.of("user", "admin", "password", "secret"));
+
+        ListSection enabledFeatures = (ListSection) config.createSection("app.features.enabled", SectionKind.LIST);
+        enabledFeatures.addAll(Arrays.asList("search", "notifications", "sharing"));
+
+        config.save();
+
+        AdvancedConfig loaded = new AdvancedPersistentConfig("test", file, ConfigFileType.TOML);
+        assertEquals("TestApp", loaded.getString("app.name"));
+        assertEquals("1.0.0", loaded.getString("app.version"));
+        assertEquals("localhost", loaded.getString("app.database.host"));
+        assertEquals(3306, loaded.getInt("app.database.port"));
+        assertEquals("admin", loaded.getString("app.database.credentials.user"));
+        assertEquals("secret", loaded.getString("app.database.credentials.password"));
+
+        ConfigSection loadedFeatures = loaded.getSection("app.features.enabled");
+        assertInstanceOf(ListSection.class, loadedFeatures);
+        ListSection loadedEnabledFeatures = (ListSection) loadedFeatures;
         assertEquals(3, loadedEnabledFeatures.size());
         assertEquals("search", loadedEnabledFeatures.get(0));
         assertEquals("notifications", loadedEnabledFeatures.get(1));

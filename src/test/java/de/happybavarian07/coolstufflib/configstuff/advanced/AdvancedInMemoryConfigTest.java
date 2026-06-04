@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeAll;
 import de.happybavarian07.coolstufflib.configstuff.advanced.event.ConfigValueEvent;
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.AdvancedConfig;
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.ConfigSection;
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.internal.SectionKind;
 import de.happybavarian07.coolstufflib.configstuff.advanced.modules.AbstractBaseConfigModule;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.ListSection;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.MapSection;
@@ -82,7 +83,7 @@ class AdvancedInMemoryConfigTest {
         assertEquals(3600, config.getInt("auth.timeout"));
 
         // Test nested section
-        ConfigSection nested = section.createSection("providers");
+        ConfigSection nested = section.createSection("providers", SectionKind.DEFAULT, true);
         nested.set("local", true);
         nested.set("oauth", false);
 
@@ -109,7 +110,7 @@ class AdvancedInMemoryConfigTest {
         AdvancedConfig config = new AdvancedInMemoryConfig("test");
 
         // Test ListSection
-        ListSection listSection = config.createCustomSection("tags", ListSection.class);
+        ListSection listSection = (ListSection) config.createSection("tags", SectionKind.LIST);
         listSection.add("important");
         listSection.add("urgent");
         listSection.add("review");
@@ -124,7 +125,7 @@ class AdvancedInMemoryConfigTest {
         assertEquals("review", listSection.get(1));
 
         // Test MapSection
-        MapSection mapSection = config.createCustomSection("metadata", MapSection.class);
+        MapSection mapSection = (MapSection) config.createSection("metadata", SectionKind.MAP);
         mapSection.put("creator", "system");
         mapSection.put("version", 2);
         mapSection.put("timestamp", System.currentTimeMillis());
@@ -177,16 +178,16 @@ class AdvancedInMemoryConfigTest {
         app.set("name", "TestApp");
         app.set("version", "1.0.0");
 
-        ConfigSection features = app.createSection("features");
+        ConfigSection features = app.createSection("features", SectionKind.DEFAULT, true);
         features.set("analytics", true);
         features.set("darkMode", true);
 
-        ConfigSection users = app.createSection("users");
-        ConfigSection admin = users.createSection("admin");
+        ConfigSection users = app.createSection("users", SectionKind.DEFAULT, true);
+        ConfigSection admin = users.createSection("admin", SectionKind.DEFAULT, true);
         admin.set("username", "admin");
         admin.set("fullAccess", true);
 
-        ListSection adminPermissions = config.createCustomSection("app.users.admin.permissions", ListSection.class);
+        ListSection adminPermissions = (ListSection) config.createSection("app.users.admin.permissions", SectionKind.LIST);
         adminPermissions.add("READ");
         adminPermissions.add("WRITE");
         adminPermissions.add("DELETE");

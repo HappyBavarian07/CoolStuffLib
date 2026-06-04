@@ -8,7 +8,7 @@
   "list": {
     "items": {
       "__type__": "ListSection",
-      "values": [
+      "__values__": [
         "item1",
         "item2",
         "item3"

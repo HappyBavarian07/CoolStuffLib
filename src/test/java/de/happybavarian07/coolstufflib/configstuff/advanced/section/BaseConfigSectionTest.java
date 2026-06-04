@@ -1,6 +1,7 @@
 package de.happybavarian07.coolstufflib.configstuff.advanced.section;
 
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.ConfigSection;
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.internal.SectionKind;
 import de.happybavarian07.coolstufflib.logging.ConfigLogger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,11 +51,11 @@ class BaseConfigSectionTest {
         BaseConfigSection root = new BaseConfigSection("root");
 
         // Create nested sections
-        ConfigSection user = root.createSection("user");
+        ConfigSection user = root.createSection("user", SectionKind.DEFAULT, true);
         user.set("name", "John");
         user.set("age", 30);
 
-        ConfigSection address = user.createSection("address");
+        ConfigSection address = user.createSection("address", SectionKind.DEFAULT, true);
         address.set("city", "New York");
         address.set("zipcode", "10001");
 
@@ -161,13 +162,13 @@ class BaseConfigSectionTest {
         // Create a deep structure
         root.set("a", 1);
 
-        ConfigSection b = root.createSection("b");
+        ConfigSection b = root.createSection("b", SectionKind.DEFAULT, true);
         b.set("c", 2);
 
-        ConfigSection d = b.createSection("d");
+        ConfigSection d = b.createSection("d", SectionKind.DEFAULT, true);
         d.set("e", 3);
 
-        ConfigSection f = root.createSection("f");
+        ConfigSection f = root.createSection("f", SectionKind.DEFAULT, true);
         f.set("g", 4);
 
         // Test non-recursive keys
@@ -232,7 +233,7 @@ class BaseConfigSectionTest {
         section.set("key1", "value1");
 
         section.setComment("section1", "This is a section");
-        ConfigSection subSection = section.createSection("section1");
+        ConfigSection subSection = section.createSection("section1", SectionKind.DEFAULT, true);
         subSection.set("subkey", "subvalue");
 
         // Get comments
@@ -257,13 +258,13 @@ class BaseConfigSectionTest {
         BaseConfigSection section1 = new BaseConfigSection("section1");
         section1.set("key1", "value1");
         section1.set("key2", "value2");
-        ConfigSection sub1 = section1.createSection("sub");
+        ConfigSection sub1 = section1.createSection("sub", SectionKind.DEFAULT, true);
         sub1.set("subkey1", "subvalue1");
 
         BaseConfigSection section2 = new BaseConfigSection("section2");
         section2.set("key2", "newvalue2");  // Should override
         section2.set("key3", "value3");     // Should be added
-        ConfigSection sub2 = section2.createSection("sub");
+        ConfigSection sub2 = section2.createSection("sub", SectionKind.DEFAULT, true);
         sub2.set("subkey1", "newsubvalue1"); // Should override
         sub2.set("subkey2", "subvalue2");    // Should be added
 
@@ -288,7 +289,7 @@ class BaseConfigSectionTest {
         original.set("key1", "value1");
         original.set("key2", 42);
 
-        ConfigSection sub = original.createSection("sub");
+        ConfigSection sub = original.createSection("sub", SectionKind.DEFAULT, true);
         sub.set("subkey", "subvalue");
 
         original.setComment("key1", "A comment");
@@ -326,7 +327,7 @@ class BaseConfigSectionTest {
         section.set("key1", "value1");
         section.set("key2", 42);
 
-        ConfigSection sub = section.createSection("sub");
+        ConfigSection sub = section.createSection("sub", SectionKind.DEFAULT, true);
         sub.set("subkey1", "subvalue1");
         sub.set("subkey2", "subvalue2");
 

@@ -1,6 +1,7 @@
 package de.happybavarian07.coolstufflib.configstuff.advanced.section;
 
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.ConfigSection;
+import de.happybavarian07.coolstufflib.configstuff.advanced.section.internal.SectionKind;
 import de.happybavarian07.coolstufflib.logging.ConfigLogger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -215,7 +216,7 @@ class ListSectionTest {
         assertTrue(retrievedList instanceof ListSection);
 
         // Add the list section to the parent's sections map
-        parent.createSection("list");
+        parent.createSection("list", SectionKind.DEFAULT, true);
 
         // Access list items via parent
         assertEquals(2, ((ListSection)parent.getSection("list")).size());
