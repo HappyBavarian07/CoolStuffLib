@@ -1,3 +1,16 @@
 {
-  "players": "{cc64463f-b456-4453-94e2-57cc5a8d3447\u003d{displayName\u003djsonDisp, name\u003dJsonPlayer, health\u003d18, position\u003d{world\u003doverworld, x\u003d10.0, y\u003d64.0, z\u003d10.0}, uuid\u003dcc64463f-b456-4453-94e2-57cc5a8d3447}}"
+  "players": {
+    "1dd744a0-5dd3-479a-b76c-8a1b93b64bbd": {
+      "displayName": "jsonDisp",
+      "name": "JsonPlayer",
+      "health": 18,
+      "position": {
+        "world": "overworld",
+        "x": 10.0,
+        "y": 64.0,
+        "z": 10.0
+      },
+      "uuid": "1dd744a0-5dd3-479a-b76c-8a1b93b64bbd"
+    }
+  }
 }

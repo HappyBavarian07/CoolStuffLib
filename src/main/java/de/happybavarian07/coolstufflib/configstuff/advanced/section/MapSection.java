@@ -96,7 +96,7 @@ public class MapSection extends BaseConfigSection {
 
     @Override
     public Map<String, Object> toSerializableMap() {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = super.toSerializableMap();
         map.put("__type__", "MapSection");
         map.putAll(getMapValues());
         return map;

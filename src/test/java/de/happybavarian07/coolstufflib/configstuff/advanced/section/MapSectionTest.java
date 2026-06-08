@@ -3,6 +3,7 @@ package de.happybavarian07.coolstufflib.configstuff.advanced.section;
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.ConfigSection;
 import de.happybavarian07.coolstufflib.configstuff.advanced.section.internal.SectionKind;
 import de.happybavarian07.coolstufflib.logging.ConfigLogger;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -12,6 +13,11 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MapSectionTest {
+
+    @BeforeAll
+    static void init() {
+        ConfigLogger.initialize(new File("target"));
+    }
 
     @Test
     void testBasicOperations() {
@@ -181,7 +187,7 @@ class MapSectionTest {
         BaseConfigSection parent = new BaseConfigSection("parent");
 
         // Create a MapSection with the parent
-        MapSection mapSection = new MapSection("map", parent);
+        MapSection mapSection = parent.createSection("map", SectionKind.MAP, true);
 
         // Verify parent relationship
         assertEquals("parent", mapSection.getParent().getName());
@@ -194,9 +200,6 @@ class MapSectionTest {
         assertTrue(parent.hasSection("map"));
         ConfigSection retrievedMap = parent.getSection("map");
         assertTrue(retrievedMap instanceof MapSection);
-
-        // Add the map section to the parent's sections map
-        parent.createSection("map", SectionKind.DEFAULT, true);
 
         // Access map entries via parent
         assertEquals("mapValue", ((MapSection)parent.getSection("map")).getValue("mapKey"));

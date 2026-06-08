@@ -340,7 +340,7 @@ class BaseConfigSectionTest {
         // Verify root values
         assertEquals("value1", map.get("key1"));
         assertEquals(42, map.get("key2"));
-        assertEquals(list, ((Map<?, ?>) map.get("list")).get("__items"));
+        assertEquals(list, ((Map<?, ?>) map.get("list")).get("__values__"));
         // Todo split tomap normal and tomap for serialization and file saving
 
         // Verify subsection was converted to nested map

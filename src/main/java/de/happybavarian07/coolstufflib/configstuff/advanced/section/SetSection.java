@@ -94,7 +94,7 @@ public class SetSection extends BaseConfigSection {
 
     @Override
     public Map<String, Object> toSerializableMap() {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = super.toSerializableMap();
         map.put("__type__", "SetSection");
         map.put("__values__", new ArrayList<>(getItems()));
         return map;

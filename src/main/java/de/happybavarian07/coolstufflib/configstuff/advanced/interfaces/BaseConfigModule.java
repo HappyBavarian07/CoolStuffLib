@@ -3,6 +3,7 @@ package de.happybavarian07.coolstufflib.configstuff.advanced.interfaces;
 import de.happybavarian07.coolstufflib.configstuff.advanced.event.ConfigEvent;
 import de.happybavarian07.coolstufflib.configstuff.advanced.event.ConfigEventBus;
 import de.happybavarian07.coolstufflib.configstuff.advanced.event.ConfigEventListener;
+import de.happybavarian07.coolstufflib.configstuff.advanced.event.ConfigValueEvent;
 
 import java.util.Map;
 import java.util.Set;
@@ -194,10 +195,12 @@ public interface BaseConfigModule {
      * @param module the source module to copy from
      */
     void copyFrom(BaseConfigModule module);
+
+    /**
      *
      * <pre><code>
      * module.registerEventListener(config.getEventBus(),
-     *     ConfigValueEvent.class, this::onValueChange);
+     *     ConfigValueEvent .class, this::onValueChange);
      * </code></pre>
      *
      * @param eventBus  the event bus to register with
@@ -206,8 +209,6 @@ public interface BaseConfigModule {
      * @param <T>       the event type
      */
     <T extends ConfigEvent> void registerEventListener(ConfigEventBus eventBus, Class<T> eventType, ConfigEventListener<T> listener);
-
-    void copyFrom(BaseConfigModule module);
 
     <T extends ConfigEvent> void unregisterEventListener(ConfigEventBus eventBus, Class<T> eventType, ConfigEventListener<T> listener);
 

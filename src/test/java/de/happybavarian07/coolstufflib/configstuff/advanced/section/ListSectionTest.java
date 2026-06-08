@@ -151,8 +151,8 @@ class ListSectionTest {
         assertEquals("value2", map.get("key2"));
 
         // Check list items are stored under the special key
-        assertTrue(map.containsKey("__items"));
-        Object itemsObj = map.get("__items");
+        assertTrue(map.containsKey("__values__"));
+        Object itemsObj = map.get("__values__");
         assertTrue(itemsObj instanceof List);
 
         List<?> items = (List<?>) itemsObj;
@@ -200,7 +200,7 @@ class ListSectionTest {
         BaseConfigSection parent = new BaseConfigSection("parent");
 
         // Create a ListSection with the parent
-        ListSection listSection = new ListSection("list", parent);
+        ListSection listSection = parent.createSection("list", SectionKind.LIST, true);
 
         // Verify parent relationship
         assertEquals("parent", listSection.getParent().getName());
@@ -214,9 +214,6 @@ class ListSectionTest {
         assertTrue(parent.hasSection("list"));
         ConfigSection retrievedList = parent.getSection("list");
         assertTrue(retrievedList instanceof ListSection);
-
-        // Add the list section to the parent's sections map
-        parent.createSection("list", SectionKind.DEFAULT, true);
 
         // Access list items via parent
         assertEquals(2, ((ListSection)parent.getSection("list")).size());
