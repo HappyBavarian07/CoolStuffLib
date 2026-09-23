@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -178,7 +179,8 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      */
     public int minArgs() {
         CommandData data = this.getClass().getAnnotation(CommandData.class);
-        return data == null ? 0 : data.minArgs();
+        if (data != null) return data.minArgs();
+        return (int) arguments().stream().filter(Argument::required).count();
     }
 
 
@@ -190,7 +192,18 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      */
     public int maxArgs() {
         CommandData data = this.getClass().getAnnotation(CommandData.class);
-        return data == null ? Integer.MAX_VALUE : data.maxArgs();
+        if (data != null) return data.maxArgs();
+        List<Argument> arguments = arguments();
+        if (arguments.isEmpty() || arguments.stream().anyMatch(Argument::greedy)) return Integer.MAX_VALUE;
+        return arguments.size();
+    }
+
+    /**
+     * <p>Declares the positional arguments. Used for tab completion, the generated syntax, the argument
+     * count limits (unless {@link CommandData} sets them) and {@link CommandArgs} error messages.</p>
+     */
+    public List<Argument> arguments() {
+        return List.of();
     }
 
 
@@ -299,7 +312,13 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      * @return A map containing the sub-arguments for this command.
      */
     public Map<Integer, String[]> subArgs(CommandSender sender, int isPlayer, String[] args) {
-        return new HashMap<>();
+        Map<Integer, String[]> completions = new HashMap<>();
+        List<Argument> arguments = arguments();
+        for (int i = 0; i < arguments.size(); i++) {
+            List<String> options = arguments.get(i).complete(sender);
+            if (!options.isEmpty()) completions.put(i + 1, options.toArray(new String[0]));
+        }
+        return completions;
     }
 
     /**
@@ -325,7 +344,9 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      * <p>Syntax used when neither the annotation nor the language file provides one.</p>
      */
     protected String defaultSyntax() {
-        return "/" + mainCommandName + " " + name();
+        StringBuilder syntax = new StringBuilder("/").append(mainCommandName).append(' ').append(name());
+        for (Argument argument : arguments()) syntax.append(' ').append(argument.usage());
+        return syntax.toString();
     }
 
     /**
