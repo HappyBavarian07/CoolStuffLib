@@ -33,7 +33,6 @@ public abstract class Menu implements InventoryHolder {
     protected String openingPermission = "";
     protected PlayerMenuUtility playerMenuUtility;
     protected Inventory inventory;
-    protected List<Inventory> inventories = new ArrayList<>();
     protected final Map<Integer, MenuAction> slotActions = new HashMap<>();
     protected final Set<Integer> forbiddenSlots = new HashSet<>();
     protected boolean forceHybridMode = false;
@@ -80,7 +79,10 @@ public abstract class Menu implements InventoryHolder {
     public abstract int getSlots();
 
     //let each menu decide how the items in the menu will be handled when clicked
-    public abstract void handleMenu(InventoryClickEvent e);
+    @Deprecated(since = "3.0.0", forRemoval = false)
+    public void handleMenu(InventoryClickEvent e) {
+        // Should now all be handled via the registerButton and the action supplier
+    };
 
     // Inventory Open Event
     public abstract void handleOpenMenu(InventoryOpenEvent e);
@@ -142,7 +144,7 @@ public abstract class Menu implements InventoryHolder {
         }
 
         inventory = Bukkit.createInventory(this, getSlots(), getMenuName());
-        inventories.add(inventory);
+        slotActions.clear();
         Map<String, MenuAddon> addonList = new HashMap<>();
         if (lib.getMenuAddonManager() != null) {
             addonList = lib.getMenuAddonManager().getMenuAddons(this.getConfigMenuAddonFeatureName());

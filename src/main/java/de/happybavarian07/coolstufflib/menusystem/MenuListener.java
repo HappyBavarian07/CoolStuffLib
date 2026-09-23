@@ -35,9 +35,9 @@ public class MenuListener implements Listener {
                 return;
             }
             menu.handleMenu(e);
-            if(CoolStuffLib.getLib().getMenuAddonManager() == null) return;
-            for (String menuAddonName : CoolStuffLib.getLib().getMenuAddonManager().getMenuAddons(menu.getConfigMenuAddonFeatureName()).keySet()) {
-                MenuAddon addon = CoolStuffLib.getLib().getMenuAddonManager().getMenuAddons(menu.getConfigMenuAddonFeatureName()).get(menuAddonName);
+            MenuAddonManager addonManager = CoolStuffLib.getLib().getMenuAddonManager();
+            if (addonManager == null) return;
+            for (MenuAddon addon : addonManager.getMenuAddons(menu.getConfigMenuAddonFeatureName()).values()) {
                 addon.handleMenu(e);
             }
         }
@@ -53,11 +53,11 @@ public class MenuListener implements Listener {
         if (event.getInventory().getHolder() instanceof Menu holder) {
             holder.handleCloseMenu(event);
 
-            if (holder.getClass().isAssignableFrom(Listener.class)) HandlerList.unregisterAll((Listener) holder);
+            if (holder instanceof Listener listener) HandlerList.unregisterAll(listener);
 
-            if(CoolStuffLib.getLib().getMenuAddonManager() == null) return;
-            for (String menuAddonName : CoolStuffLib.getLib().getMenuAddonManager().getMenuAddons(holder.getConfigMenuAddonFeatureName()).keySet()) {
-                MenuAddon addon = CoolStuffLib.getLib().getMenuAddonManager().getMenuAddons(holder.getConfigMenuAddonFeatureName()).get(menuAddonName);
+            MenuAddonManager addonManager = CoolStuffLib.getLib().getMenuAddonManager();
+            if (addonManager == null) return;
+            for (MenuAddon addon : addonManager.getMenuAddons(holder.getConfigMenuAddonFeatureName()).values()) {
                 addon.onCloseEvent();
             }
         }

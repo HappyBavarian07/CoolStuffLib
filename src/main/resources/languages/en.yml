@@ -83,6 +83,16 @@ Items:
       displayName: '&cRight'
       lore:
         - '&cGo to the next Page!'
+    Up:
+      material: DARK_OAK_BUTTON
+      displayName: '&cUp'
+      lore:
+        - '&cGo to the first page!'
+    Down:
+      material: DARK_OAK_BUTTON
+      displayName: '&cDown'
+      lore:
+        - '&cGo to the last page!'
     Refresh:
       material: LEVER
       displayName: '&aRefresh'

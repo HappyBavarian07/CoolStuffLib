@@ -34,11 +34,6 @@ public class ConfirmationMenu extends Menu {
     }
 
     @Override
-    public void handleMenu(InventoryClickEvent e) {
-        // Actions are handled directly via setItemWithAction
-    }
-
-    @Override
     public void handleOpenMenu(InventoryOpenEvent e) {
 
     }

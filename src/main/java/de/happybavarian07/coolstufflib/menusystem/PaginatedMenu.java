@@ -256,12 +256,12 @@ public abstract class PaginatedMenu<T> extends Menu {
         int refreshSlot = controlLayout == null ? getSlot("General.Refresh", bottomRowStart + 6) : controlLayout.getRefreshSlot();
         String prevKey = navigationDirection == NavigationDirection.VERTICAL ? "General.Up" : "General.Left";
         String nextKey = navigationDirection == NavigationDirection.VERTICAL ? "General.Down" : "General.Right";
-        ItemStack prevItem = lgm.getItem(prevKey, null, false);
-        ItemStack nextItem = lgm.getItem(nextKey, null, false);
-        if (prevItem == null) prevItem = lgm.getItem("General.Left", null, false);
-        if (nextItem == null) nextItem = lgm.getItem("General.Right", null, false);
+        ItemStack prevItem = lgm.getItem(prevKey, player, false);
+        ItemStack nextItem = lgm.getItem(nextKey, player, false);
+        if (prevItem == null) prevItem = lgm.getItem("General.Left", player, false);
+        if (nextItem == null) nextItem = lgm.getItem("General.Right", player, false);
 
-        if (slot == closeSlot || item.isSimilar(lgm.getItem("General.Close", null, false))) {
+        if (slot == closeSlot || item.isSimilar(lgm.getItem("General.Close", player, false))) {
             closeAndReturnOrClose();
             return true;
         } else if (slot == prevSlot || item.isSimilar(prevItem)) {
@@ -270,7 +270,7 @@ public abstract class PaginatedMenu<T> extends Menu {
         } else if (slot == nextSlot || item.isSimilar(nextItem)) {
             if (pageDirection == PageDirection.REVERSED) return goBackward(player);
             return goForward(player);
-        } else if (slot == refreshSlot || item.isSimilar(lgm.getItem("General.Refresh", null, false))) {
+        } else if (slot == refreshSlot || item.isSimilar(lgm.getItem("General.Refresh", player, false))) {
             super.open();
             return true;
         }
@@ -280,7 +280,7 @@ public abstract class PaginatedMenu<T> extends Menu {
     private boolean goBackward(Player player) {
         if (page == 0) {
             player.sendMessage(lgm.getMessage("Player.General.AlreadyOnFirstPage", player, true));
-            return true;
+            return false;
         }
         page--;
         super.open();
@@ -294,7 +294,7 @@ public abstract class PaginatedMenu<T> extends Menu {
             return true;
         }
         player.sendMessage(lgm.getMessage("Player.General.AlreadyOnLastPage", player, true));
-        return true;
+        return false;
     }
 
     protected abstract void handlePageItemClick(int slot, ItemStack item, InventoryClickEvent event);
