@@ -24,9 +24,9 @@ class PlayerMenuUtilityTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         when(mockPlayer.getName()).thenReturn("TestPlayer");
-        when(mockPlayer.getUniqueId()).thenReturn(java.util.UUID.randomUUID());
+        when(mockPlayer.getUniqueId()).thenReturn(UUID.randomUUID());
 
-        playerMenuUtility = new PlayerMenuUtility(CoolStuffLib.getLib(), mockPlayer.getUniqueId());
+        playerMenuUtility = new PlayerMenuUtility(null, mockPlayer.getUniqueId());
     }
 
     @Test

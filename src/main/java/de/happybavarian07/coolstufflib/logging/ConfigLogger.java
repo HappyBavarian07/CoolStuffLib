@@ -28,9 +28,9 @@ public final class ConfigLogger {
             return;
         }
 
-        if (CoolStuffLib.getLib() != null) {
+        try {
             logger = new PluginFileLogger(CoolStuffLib.getLib().getJavaPluginUsingLib(), LOG_FILE);
-        } else {
+        } catch (RuntimeException e) {
             logger = new PluginFileLogger(rootDirectory, LOG_FILE);
         }
 
@@ -85,10 +85,10 @@ public final class ConfigLogger {
         checkInitialized();
         StringBuilder fullMessage = new StringBuilder();
         fullMessage.append(message)
-            .append(" - ")
-            .append(throwable.getClass().getName())
-            .append(": ")
-            .append(throwable.getMessage());
+                .append(" - ")
+                .append(throwable.getClass().getName())
+                .append(": ")
+                .append(throwable.getMessage());
         for (StackTraceElement element : throwable.getStackTrace()) {
             fullMessage.append(System.lineSeparator()).append("    at ").append(element.toString());
         }
