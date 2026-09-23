@@ -30,6 +30,7 @@ public abstract class PaginatedMenu<T> extends Menu {
     protected int index = 0;
     protected List<T> paginatedData;
     protected Function<T, ItemStack> itemRenderer;
+    protected EntryClickHandler<T> entryClickHandler;
     protected PaginationZone paginationZone;
     protected final Map<Integer, Integer> paginatedSlotToDataIndex = new HashMap<>();
     protected NavigationDirection navigationDirection = NavigationDirection.HORIZONTAL;
@@ -54,6 +55,17 @@ public abstract class PaginatedMenu<T> extends Menu {
         this.itemRenderer = renderer;
         int slots = getSlots();
         this.maxItemsPerPage = slots % 9 == 0 ? slots : 0;
+    }
+
+    /**
+     * <p>Sets the entries, how each entry is rendered and what happens when an entry is clicked.
+     * Page item clicks then go to {@code onClick} instead of {@link #handlePageItemClick}.</p>
+     *
+     * <pre><code>setPaginatedData(players, this::head, (player, target, event) -&gt; openProfile(target));</code></pre>
+     */
+    public void setPaginatedData(List<T> data, Function<T, ItemStack> renderer, EntryClickHandler<T> onClick) {
+        setPaginatedData(data, renderer);
+        this.entryClickHandler = onClick;
     }
 
     public void setPaginationZone(PaginationZone paginationZone) {
@@ -218,11 +230,14 @@ public abstract class PaginatedMenu<T> extends Menu {
         postSetMenuItems();
     }
 
-    public abstract void preSetMenuItems();
+    public void preSetMenuItems() {
+    }
 
-    public abstract void postSetMenuItems();
+    public void postSetMenuItems() {
+    }
 
     protected MenuItemType getMenuItemType(int slot, ItemStack item) {
+        if (paginatedSlotToDataIndex.containsKey(slot)) return MenuItemType.PAGE;
         if (item != null && item.hasItemMeta()) {
             ItemMeta meta = item.getItemMeta();
             if (meta != null && meta.getPersistentDataContainer().has(itemKey, PersistentDataType.STRING)) {
@@ -297,9 +312,11 @@ public abstract class PaginatedMenu<T> extends Menu {
         return false;
     }
 
-    protected abstract void handlePageItemClick(int slot, ItemStack item, InventoryClickEvent event);
+    protected void handlePageItemClick(int slot, ItemStack item, InventoryClickEvent event) {
+    }
 
-    protected abstract void handleCustomItemClick(int slot, ItemStack item, InventoryClickEvent event);
+    protected void handleCustomItemClick(int slot, ItemStack item, InventoryClickEvent event) {
+    }
 
     @Override
     public void handleMenu(InventoryClickEvent event) {
@@ -312,10 +329,20 @@ public abstract class PaginatedMenu<T> extends Menu {
                 handleCustomItemClick(slot, item, event);
             }
         } else if (type == MenuItemType.PAGE) {
-            handlePageItemClick(slot, item, event);
+            T entry = entryClickHandler == null ? null : getPaginatedDataForSlot(slot, item);
+            if (entry != null) {
+                entryClickHandler.onClick((Player) event.getWhoClicked(), entry, event);
+            } else {
+                handlePageItemClick(slot, item, event);
+            }
         } else if (type == MenuItemType.CUSTOM) {
             handleCustomItemClick(slot, item, event);
         }
+    }
+
+    @FunctionalInterface
+    public interface EntryClickHandler<T> {
+        void onClick(Player player, T entry, InventoryClickEvent event);
     }
 
     public enum MenuItemType {
