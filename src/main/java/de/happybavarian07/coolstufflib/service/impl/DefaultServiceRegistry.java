@@ -15,12 +15,15 @@ import de.happybavarian07.coolstufflib.service.util.ServiceComponentScanner;
 import de.happybavarian07.coolstufflib.service.util.Tuples;
 import org.bukkit.Bukkit;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DefaultServiceRegistry implements ServiceRegistry, ServiceMetrics, ServiceManagementAPI {
+    private static final Logger LOGGER = Logger.getLogger("CoolStuffLib-ServiceRegistry");
     private final Map<UUID, ServiceDescriptor> descriptors = new ConcurrentHashMap<>();
     private final Map<UUID, Service> services = new ConcurrentHashMap<>();
     private final Map<String, UUID> nameToId = new ConcurrentHashMap<>();
@@ -52,35 +55,28 @@ public class DefaultServiceRegistry implements ServiceRegistry, ServiceMetrics, 
     }
 
     private void injectIdAndNameFields(Service service, UUID uuid, String name) {
-        boolean idInjected = false;
-        try {
-            var idField = service.getClass().getDeclaredField("id");
-            idField.setAccessible(true);
-            Object currentId = idField.get(service);
-            if (currentId == null) {
-                idField.set(service, uuid);
-            }
-            idInjected = true;
-        } catch (Exception e) {
+        injectIfNull(service, "id", uuid);
+        injectIfNull(service, "name", name);
+        if (service.id() == null) {
+            throw new ServiceIdInjectionException("Service " + service.getClass().getName()
+                    + " has no id: id() returned null and no injectable 'id' field was found");
+        }
+    }
+
+    private void injectIfNull(Service service, String fieldName, Object value) {
+        for (Class<?> type = service.getClass(); type != null && type != Object.class; type = type.getSuperclass()) {
             try {
-                var idField = service.getClass().getDeclaredField("id");
-                idField.setAccessible(true);
-                Object currentId = idField.get(service);
-                if (currentId == null) {
-                    throw new ServiceIdInjectionException("Failed to inject id into service: " + service.getClass().getName(), e);
-                }
-            } catch (Exception inner) {
-                throw new ServiceIdInjectionException("Service is missing a valid id field: " + service.getClass().getName(), e);
+                Field field = type.getDeclaredField(fieldName);
+                field.setAccessible(true);
+                if (field.get(service) == null) field.set(service, value);
+                return;
+            } catch (NoSuchFieldException e) {
+                // keep walking up the hierarchy
+            } catch (ReflectiveOperationException | RuntimeException e) {
+                LOGGER.log(Level.WARNING, "Failed to inject '" + fieldName + "' into service: " + service.getClass().getName(), e);
+                return;
             }
         }
-        try {
-            var nameField = service.getClass().getDeclaredField("name");
-            nameField.setAccessible(true);
-            Object currentName = nameField.get(service);
-            if (currentName == null) {
-                nameField.set(service, name);
-            }
-        } catch (Exception ignored) { }
     }
 
     /**
@@ -93,7 +89,7 @@ public class DefaultServiceRegistry implements ServiceRegistry, ServiceMetrics, 
      */
     @Override
     public Tuples.Tuple2<Service, UUID> register(ServiceDescriptor descriptor, Service impl, UUID uuid) {
-        uuid = uuid == null ? UUID.randomUUID() : uuid;
+        uuid = uuid == null ? descriptor.id() : uuid;
         injectIdAndNameFields(impl, uuid, descriptor.serviceName());
         registerInternal(descriptor, impl, uuid);
         return Tuples.of(impl, uuid);
@@ -113,14 +109,6 @@ public class DefaultServiceRegistry implements ServiceRegistry, ServiceMetrics, 
         autoDetectCyclicDependencies();
     }
 
-    private void setServiceUuidIfPossible(Service service, UUID uuid) {
-        try {
-            Method setter = service.getClass().getMethod("setUuid", UUID.class);
-            setter.invoke(service, uuid);
-        } catch (Exception ignored) {
-        }
-    }
-
     /**
      * <p>Registers a factory for lazy service instantiation.</p>
      *
@@ -132,7 +120,7 @@ public class DefaultServiceRegistry implements ServiceRegistry, ServiceMetrics, 
      */
     @Override
     public <T extends Service> Tuples.Tuple2<T, UUID> registerFactory(ServiceDescriptor descriptor, ServiceFactory<T> factory, UUID uuid) {
-        uuid = uuid == null ? UUID.randomUUID() : uuid;
+        uuid = uuid == null ? descriptor.id() : uuid;
         T instance = factory.create(this).join();
         injectIdAndNameFields(instance, uuid, descriptor.serviceName());
         registerInternal(descriptor, instance, uuid);
