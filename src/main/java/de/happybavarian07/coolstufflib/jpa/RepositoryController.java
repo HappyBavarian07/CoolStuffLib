@@ -212,7 +212,8 @@ public class RepositoryController {
     }
 
     /**
-     * <p>Executes a SQL query directly via the SQLExecutor.</p>
+     * <p>Executes a SQL query directly via the SQLExecutor. The connection is only returned to the pool
+     * when the ResultSet is closed; prefer {@link #query(String, SQLExecutor.ResultSetMapper, Object...)}.</p>
      *
      * @param sql    SQL query
      * @param params Query parameters
@@ -221,6 +222,15 @@ public class RepositoryController {
      */
     public java.sql.ResultSet executeQuery(String sql, Object... params) throws SQLException {
         return sqlExecutor.executeQuery(sql, params);
+    }
+
+    /**
+     * <p>Executes a SQL query and maps the result; all resources are released afterwards.</p>
+     *
+     * <pre><code>List&lt;String&gt; names = controller.query("SELECT name FROM t", rs -&gt; { ... });</code></pre>
+     */
+    public <T> T query(String sql, SQLExecutor.ResultSetMapper<T> mapper, Object... params) throws SQLException {
+        return sqlExecutor.query(sql, mapper, params);
     }
 
     /**

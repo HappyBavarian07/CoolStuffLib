@@ -25,8 +25,7 @@ public class TransactionManager {
             return operation.execute();
         }
 
-        TransactionContext existingContext = currentTransaction.get();
-        if (existingContext != null) {
+        if (currentTransaction.get() != null || sqlExecutor.getTransactionConnection() != null) {
             return executeNestedTransaction(annotation, operation);
         }
 
@@ -34,13 +33,15 @@ public class TransactionManager {
     }
 
     private <T> T executeNewTransaction(Transactional annotation, TransactionalOperation<T> operation) throws Throwable {
-        Connection connection = sqlExecutor.getConnection(sqlExecutor.getDefaultConnection());
+        String pool = sqlExecutor.getDefaultConnection();
+        Connection connection = sqlExecutor.getConnection(pool);
         if (connection == null) {
             throw new SQLException("No database connection available");
         }
 
         TransactionContext context = new TransactionContext(connection, annotation.readOnly());
         currentTransaction.set(context);
+        sqlExecutor.bindTransactionConnection(connection);
 
         try {
             connection.setAutoCommit(false);
@@ -58,10 +59,14 @@ public class TransactionManager {
 
             return result;
         } catch (Throwable e) {
-            if (shouldRollback(annotation, e)) {
-                connection.rollback();
-            } else {
-                connection.commit();
+            try {
+                if (shouldRollback(annotation, e)) {
+                    connection.rollback();
+                } else {
+                    connection.commit();
+                }
+            } catch (SQLException completionFailure) {
+                e.addSuppressed(completionFailure);
             }
             throw e;
         } finally {
@@ -70,25 +75,28 @@ public class TransactionManager {
                 connection.setReadOnly(false);
             } catch (SQLException ignored) {}
             currentTransaction.remove();
+            sqlExecutor.bindTransactionConnection(null);
+            sqlExecutor.releaseConnection(pool, connection);
         }
     }
 
     private <T> T executeNestedTransaction(Transactional annotation, TransactionalOperation<T> operation) throws Throwable {
         TransactionContext context = currentTransaction.get();
+        Connection connection = context != null ? context.getConnection() : sqlExecutor.getTransactionConnection();
         Savepoint savepoint = null;
 
         try {
-            savepoint = context.getConnection().setSavepoint();
+            savepoint = connection.setSavepoint();
             T result = operation.execute();
 
-            if (context.isRollbackOnly()) {
-                context.getConnection().rollback(savepoint);
+            if (context != null && context.isRollbackOnly()) {
+                connection.rollback(savepoint);
             }
 
             return result;
         } catch (Throwable e) {
             if (savepoint != null && shouldRollback(annotation, e)) {
-                context.getConnection().rollback(savepoint);
+                connection.rollback(savepoint);
             }
             throw e;
         }
@@ -131,7 +139,13 @@ public class TransactionManager {
     }
 
     public void setTransactionContext(TransactionContext context) {
-        currentTransaction.set(context);
+        if (context == null) {
+            currentTransaction.remove();
+            sqlExecutor.bindTransactionConnection(null);
+        } else {
+            currentTransaction.set(context);
+            sqlExecutor.bindTransactionConnection(context.getConnection());
+        }
     }
 
     @FunctionalInterface

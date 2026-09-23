@@ -16,6 +16,7 @@ import java.util.Date;
 public class SQLExecutor {
     private final RepositoryController controller;
     private final DatabaseProperties dbProperties;
+    private final ThreadLocal<Connection> transactionConnection = new ThreadLocal<>();
     private String defaultConnection;
 
     public SQLExecutor(RepositoryController controller, DatabaseProperties dbProperties) {
@@ -23,12 +24,53 @@ public class SQLExecutor {
         this.dbProperties = dbProperties;
     }
 
+    /**
+     * <p>Returns a connection from the named pool, or the connection of the transaction bound to the
+     * current thread when asking for the default pool.</p>
+     */
     public Connection getConnection(String name) throws SQLException {
+        Connection bound = transactionConnection.get();
+        if (bound != null && Objects.equals(name, defaultConnection)) return bound;
         return controller.getConnection(name);
     }
 
+    /**
+     * <p>Returns a connection to its pool. A no-op for the current thread's transaction connection,
+     * which is released by the transaction owner.</p>
+     */
     public void releaseConnection(String poolName, Connection connection) {
+        if (connection != null && connection == transactionConnection.get()) return;
         controller.releaseConnection(poolName, connection);
+    }
+
+    /**
+     * <p>Binds a transaction connection to the current thread so every statement executed through this
+     * executor on this thread joins the transaction. Pass {@code null} to unbind.</p>
+     */
+    public void bindTransactionConnection(Connection connection) {
+        if (connection == null) transactionConnection.remove();
+        else transactionConnection.set(connection);
+    }
+
+    public Connection getTransactionConnection() {
+        return transactionConnection.get();
+    }
+
+    /**
+     * <p>Runs a query and hands the result set to {@code mapper}. The result set, statement and
+     * connection are always closed/released, even if the mapper throws.</p>
+     *
+     * <pre><code>int count = executor.query("SELECT COUNT(*) FROM t", rs -> rs.next() ? rs.getInt(1) : 0);</code></pre>
+     */
+    public <T> T query(String sql, ResultSetMapper<T> mapper, Object... params) throws SQLException {
+        try (ResultSet rs = executeQuery(sql, params)) {
+            return mapper.map(rs);
+        }
+    }
+
+    @FunctionalInterface
+    public interface ResultSetMapper<T> {
+        T map(ResultSet resultSet) throws SQLException;
     }
 
     public int executeUpdate(String sql, Object... params) throws SQLException {
@@ -52,9 +94,11 @@ public class SQLExecutor {
     }
 
     /**
-     * <p>Executes an SQL query and returns the ResultSet.</p>
+     * <p>Executes an SQL query and returns the ResultSet. The pooled connection is only released when the
+     * returned ResultSet is closed, so always use try-with-resources, or prefer
+     * {@link #query(String, ResultSetMapper, Object...)}.</p>
      *
-     * <pre><code>ResultSet rs = sqlExecutor.executeQuery("SELECT...", params);</code></pre>
+     * <pre><code>try (ResultSet rs = sqlExecutor.executeQuery("SELECT...", params)) { ... }</code></pre>
      *
      * @param sql    The SQL query
      * @param params Query parameters
@@ -400,6 +444,10 @@ public class SQLExecutor {
     }
 
     public void executeTransaction(List<String> sqlStatements) throws SQLException {
+        if (transactionConnection.get() != null) {
+            for (String sql : sqlStatements) executeUpdate(sql);
+            return;
+        }
         Connection connection = getConnection(defaultConnection);
         try {
             connection.setAutoCommit(false);

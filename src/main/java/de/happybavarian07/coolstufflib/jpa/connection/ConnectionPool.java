@@ -3,75 +3,75 @@ package de.happybavarian07.coolstufflib.jpa.connection;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
+import java.sql.Statement;
+import java.time.Duration;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 public class ConnectionPool {
-    private final String url;
-    private final String user;
-    private final String password;
+    private static final int SQLITE_BUSY_TIMEOUT_MILLIS = 5000;
+
+    private final ConnectionFactory factory;
     private final int maxPoolSize;
-    private final BlockingQueue<Connection> connectionQueue;
-    private final List<Connection> usedConnections = new ArrayList<>();
+    private final long acquireTimeoutMillis;
+    private final Semaphore permits;
+    private final LinkedBlockingQueue<Connection> idleConnections = new LinkedBlockingQueue<>();
+    private final Set<Connection> usedConnections = ConcurrentHashMap.newKeySet();
 
     public ConnectionPool(String url, String user, String password, int initialPoolSize, int maxPoolSize) throws SQLException {
-        this.url = url;
-        this.user = user;
-        this.password = password;
-        this.maxPoolSize = maxPoolSize;
-        this.connectionQueue = new LinkedBlockingQueue<>(maxPoolSize);
+        this(() -> openConnection(url, user, password), initialPoolSize, maxPoolSize, Duration.ofSeconds(5));
+    }
 
-        for (int i = 0; i < initialPoolSize; i++) {
-            connectionQueue.offer(createConnection());
+    public ConnectionPool(ConnectionFactory factory, int initialPoolSize, int maxPoolSize, Duration acquireTimeout) throws SQLException {
+        this.factory = factory;
+        this.maxPoolSize = maxPoolSize;
+        this.acquireTimeoutMillis = acquireTimeout.toMillis();
+        this.permits = new Semaphore(maxPoolSize, true);
+        for (int i = 0; i < Math.min(initialPoolSize, maxPoolSize); i++) {
+            idleConnections.offer(factory.create());
         }
     }
 
     public Connection getConnection() throws SQLException {
         try {
-            if (usedConnections.size() < maxPoolSize) {
-                if (connectionQueue.isEmpty()) {
-                    Connection newConnection = createConnection();
-                    usedConnections.add(newConnection);
-                    return newConnection;
-                }
-                Connection connection = connectionQueue.poll(1, TimeUnit.SECONDS);
-                if (connection == null) {
-                    throw new SQLException("Timeout waiting for connection from pool.");
-                }
-                usedConnections.add(connection);
-                return connection;
-            }
-            Connection connection = connectionQueue.poll(5, TimeUnit.SECONDS);
-            if (connection == null) {
+            if (!permits.tryAcquire(acquireTimeoutMillis, TimeUnit.MILLISECONDS)) {
                 throw new SQLException("Connection pool exhausted. Used: " + usedConnections.size() + ", Max: " + maxPoolSize);
             }
-            return connection;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new SQLException("Interrupted while waiting for a connection.", e);
         }
+        try {
+            Connection connection = idleConnections.poll();
+            while (connection != null && connection.isClosed()) {
+                connection = idleConnections.poll();
+            }
+            if (connection == null) connection = factory.create();
+            usedConnections.add(connection);
+            return connection;
+        } catch (SQLException | RuntimeException e) {
+            permits.release();
+            throw e;
+        }
     }
 
     public void releaseConnection(Connection connection) {
-        if (connection != null) {
-            usedConnections.remove(connection);
-            connectionQueue.offer(connection);
+        if (connection != null && usedConnections.remove(connection)) {
+            idleConnections.offer(connection);
+            permits.release();
         }
-    }
-
-    private Connection createConnection() throws SQLException {
-        return DriverManager.getConnection(url, user, password);
     }
 
     public void closeAllConnections() throws SQLException {
-        usedConnections.forEach(this::releaseConnection);
-        for (Connection connection : connectionQueue) {
-            connection.close();
-        }
-        connectionQueue.clear();
+        SQLException failure = null;
+        for (Connection connection : usedConnections) failure = close(connection, failure);
+        for (Connection connection : idleConnections) failure = close(connection, failure);
+        usedConnections.clear();
+        idleConnections.clear();
+        if (failure != null) throw failure;
     }
 
     public int getUsedConnectionsCount() {
@@ -79,6 +79,31 @@ public class ConnectionPool {
     }
 
     public int getFreeConnectionsCount() {
-        return connectionQueue.size();
+        return idleConnections.size();
+    }
+
+    private static SQLException close(Connection connection, SQLException failure) {
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            if (failure == null) return e;
+            failure.addSuppressed(e);
+        }
+        return failure;
+    }
+
+    private static Connection openConnection(String url, String user, String password) throws SQLException {
+        Connection connection = DriverManager.getConnection(url, user, password);
+        if (url.startsWith("jdbc:sqlite:")) {
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("PRAGMA busy_timeout = " + SQLITE_BUSY_TIMEOUT_MILLIS);
+            }
+        }
+        return connection;
+    }
+
+    @FunctionalInterface
+    public interface ConnectionFactory {
+        Connection create() throws SQLException;
     }
 }
