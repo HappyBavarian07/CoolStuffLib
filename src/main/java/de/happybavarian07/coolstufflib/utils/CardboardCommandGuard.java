@@ -2,6 +2,8 @@ package de.happybavarian07.coolstufflib.utils;
 
 import org.bukkit.Bukkit;
 
+import java.util.function.Supplier;
+
 /**
  * <p>Thread-safe guard to detect and prevent command recursion.</p>
  */
@@ -62,6 +64,23 @@ public class CardboardCommandGuard {
             }
         }
         return false;
+    }
+
+    /**
+     * <p>Runs a deliberately nested command dispatch (e.g. a command alias) in a fresh guard scope, so it
+     * is not mistaken for Brigadier recursion. The caller must limit its own nesting.</p>
+     */
+    public static <T> T isolated(Supplier<T> action) {
+        boolean executing = EXECUTING.get();
+        int depth = DEPTH.get();
+        EXECUTING.set(false);
+        DEPTH.set(0);
+        try {
+            return action.get();
+        } finally {
+            EXECUTING.set(executing);
+            DEPTH.set(depth);
+        }
     }
 
     /**
