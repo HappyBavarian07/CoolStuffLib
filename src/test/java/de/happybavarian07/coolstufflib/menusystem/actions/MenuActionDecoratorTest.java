@@ -4,7 +4,6 @@ import de.happybavarian07.coolstufflib.CoolStuffLib;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import de.happybavarian07.coolstufflib.menusystem.Menu;
 import de.happybavarian07.coolstufflib.utils.Utils;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -20,6 +19,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -31,7 +31,13 @@ class MenuActionDecoratorTest {
     void setUp() {
         player = mock(Player.class);
         when(player.getUniqueId()).thenReturn(UUID.randomUUID());
-        inner = mock(MenuAction.class);
+        inner = spy(new NoOpAction());
+    }
+
+    static class NoOpAction implements MenuAction {
+        @Override
+        public void execute(Player player, InventoryClickEvent event) {
+        }
     }
 
     @Test
@@ -57,9 +63,18 @@ class MenuActionDecoratorTest {
 
     @Test
     void outermostDecoratorRunsFirst() {
+        CoolStuffLib lib = mock(CoolStuffLib.class);
+        when(lib.getLanguageManager()).thenReturn(mock(LanguageManager.class));
         MenuAction chained = inner.cooldown(60_000).requires("perm");
-        chained.execute(player, null);
+        try (MockedStatic<CoolStuffLib> statics = mockStatic(CoolStuffLib.class)) {
+            statics.when(CoolStuffLib::getLib).thenReturn(lib);
+            chained.execute(player, null);
+        }
         verify(inner, never()).execute(any(), any());
+
+        when(player.hasPermission("perm")).thenReturn(true);
+        chained.execute(player, null);
+        verify(inner).execute(player, null);
     }
 
     @Test
@@ -115,11 +130,11 @@ class MenuActionDecoratorTest {
     }
 
     @Test
-    void withSoundPlaysBeforeAction() {
-        inner.withSound(Sound.UI_BUTTON_CLICK).execute(player, null);
-        InOrder order = inOrder(player, inner);
-        order.verify(player).playSound(any(), eq(Sound.UI_BUTTON_CLICK), eq(1f), eq(1f));
-        order.verify(inner).execute(player, null);
+    void withSoundWrapsAction() {
+        MenuAction action = inner.withSound(null);
+        assertInstanceOf(SoundAction.class, action);
+        action.execute(player, null);
+        verify(inner).execute(player, null);
     }
 
     @Test

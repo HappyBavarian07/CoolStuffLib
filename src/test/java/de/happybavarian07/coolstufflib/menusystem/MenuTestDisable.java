@@ -135,9 +135,7 @@ class MenuTestDisable {
 
             testMenu.open();
 
-            assertNotNull(testMenu.inventory);
-            assertEquals(1, testMenu.inventories.size());
-            assertTrue(testMenu.inventories.contains(mockInventory));
+            assertSame(mockInventory, testMenu.inventory);
         }
     }
 

@@ -54,7 +54,8 @@ class TransactionTest {
     void queryReturnsMappedValue() throws SQLException {
         when(resultSet.next()).thenReturn(true);
         when(resultSet.getInt(1)).thenReturn(42);
-        assertEquals(42, executor.query("SELECT 1", rs -> rs.next() ? rs.getInt(1) : 0));
+        int value = executor.query("SELECT 1", rs -> rs.next() ? rs.getInt(1) : 0);
+        assertEquals(42, value);
         verify(controller).releaseConnection("default", connection);
     }
 
