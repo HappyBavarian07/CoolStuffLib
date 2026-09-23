@@ -35,10 +35,17 @@ A comprehensive Java library for plugin and application developers, providing ad
 
 ## 📈 Planned Updates
 
-- **MySQL Interface**: Direct MySQL database interaction.
-- **File Manager**: Advanced file and directory management.
+Full list: [docs/ROADMAP.md](docs/ROADMAP.md).
+
 - **Language Translator**: Translate language files using custom APIs or Google Translate.
-- **Data Backup/Restore**: Automated backup and restore for plugin data.
+- **File Manager**: Advanced file and directory management.
+- **Internal Event Bus & Dependency Injection**: Decouple subsystems and simplify testing.
+- **Menu Templates & Animations**: Reusable menu presets and transitions.
+
+> Already shipped (previously listed as planned): MySQL/MariaDB access via the custom JPA
+> persistence layer, a multi-format advanced configuration framework
+> (`configstuff/advanced`, incl. validation, migration, versioning, history, encryption),
+> and data backup/restore via `backupmanager`.
 
 ---
 
