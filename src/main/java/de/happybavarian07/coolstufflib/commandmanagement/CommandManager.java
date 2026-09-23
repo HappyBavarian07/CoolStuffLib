@@ -7,7 +7,6 @@ import de.happybavarian07.coolstufflib.CoolStuffLib;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import de.happybavarian07.coolstufflib.languagemanager.Placeholder;
 import de.happybavarian07.coolstufflib.languagemanager.PlaceholderType;
-import de.happybavarian07.coolstufflib.utils.CardboardCommandGuard;
 import de.happybavarian07.coolstufflib.utils.CooldownTracker;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -108,66 +107,58 @@ public abstract class CommandManager {
      * @return {@code true} if handled, {@code false} otherwise
      */
     public boolean onCommand(CommandSender sender, String[] args) {
-        if (!CardboardCommandGuard.enterCommand()) {
+        SubCommand target = args.length == 0 ? null : this.getSubCommand(args[0]);
+        String[] updatedArgs;
+        if (target != null) {
+            updatedArgs = removeFirstArgument(args);
+            while (updatedArgs.length > 0 && target.getChild(updatedArgs[0]) != null) {
+                target = target.getChild(updatedArgs[0]);
+                updatedArgs = removeFirstArgument(updatedArgs);
+            }
+        } else if (rootCommand != null) {
+            target = rootCommand;
+            updatedArgs = args;
+        } else {
+            sender.sendMessage(lgm.getMessage("Player.Commands.InvalidSubCommand", getPlayerForSender(sender), true));
             return true;
         }
 
-        try {
-            SubCommand target = args.length == 0 ? null : this.getSubCommand(args[0]);
-            String[] updatedArgs;
-            if (target != null) {
-                updatedArgs = removeFirstArgument(args);
-                while (updatedArgs.length > 0 && target.getChild(updatedArgs[0]) != null) {
-                    target = target.getChild(updatedArgs[0]);
-                    updatedArgs = removeFirstArgument(updatedArgs);
-                }
-            } else if (rootCommand != null) {
-                target = rootCommand;
-                updatedArgs = args;
-            } else {
-                sender.sendMessage(lgm.getMessage("Player.Commands.InvalidSubCommand", getPlayerForSender(sender), true));
-                return true;
-            }
-
-            if (!hasPermission(sender, target)) {
-                sender.sendMessage(format(lgm.getMessage("Player.General.NoPermissions", getPlayerForSender(sender), true), target));
-                return true;
-            }
-
-            if (target.isPlayerRequired() && !(sender instanceof Player)) {
-                sender.sendMessage(lgm.getMessage("Console.ExecutesPlayerCommand", null, true));
-                return true;
-            }
-            if (updatedArgs.length < target.minArgs() || updatedArgs.length > target.maxArgs()) {
-                String key = updatedArgs.length < target.minArgs() ? "Player.Commands.TooFewArguments" : "Player.Commands.TooManyArguments";
-                sender.sendMessage(lgm.getMessage(key, getPlayerForSender(sender), true));
-                sender.sendMessage(format(lgm.getMessage("Player.Commands.UsageMessage", getPlayerForSender(sender), true), target));
-                return true;
-            }
-            if (target.allowOnlySubCommandArgsThatFitToSubArgs()) {
-                Map<Integer, String> invalidArgs = findInvalidArgs(updatedArgs, target, (sender instanceof Player) ? 1 : 0);
-                if (!invalidArgs.isEmpty()) {
-                    lgm.addPlaceholder(PlaceholderType.MESSAGE, "%invalidArgs%", invalidArgs.toString(), false);
-                    sender.sendMessage(format(lgm.getMessage("Player.Commands.CommandContainsInvalidArgs", getPlayerForSender(sender), true), target));
-                    return false;
-                }
-            }
-
-            if (!passesConfirmationAndCooldown(sender, target, updatedArgs)) {
-                return true;
-            }
-
-            if (target.isAsync()) {
-                SubCommand asyncTarget = target;
-                String[] asyncArgs = updatedArgs;
-                Bukkit.getScheduler().runTaskAsynchronously(getJavaPlugin(), () -> runSubCommand(sender, asyncTarget, asyncArgs));
-            } else {
-                runSubCommand(sender, target, updatedArgs);
-            }
+        if (!hasPermission(sender, target)) {
+            sender.sendMessage(format(lgm.getMessage("Player.General.NoPermissions", getPlayerForSender(sender), true), target));
             return true;
-        } finally {
-            CardboardCommandGuard.exitCommand();
         }
+
+        if (target.isPlayerRequired() && !(sender instanceof Player)) {
+            sender.sendMessage(lgm.getMessage("Console.ExecutesPlayerCommand", null, true));
+            return true;
+        }
+        if (updatedArgs.length < target.minArgs() || updatedArgs.length > target.maxArgs()) {
+            String key = updatedArgs.length < target.minArgs() ? "Player.Commands.TooFewArguments" : "Player.Commands.TooManyArguments";
+            sender.sendMessage(lgm.getMessage(key, getPlayerForSender(sender), true));
+            sender.sendMessage(format(lgm.getMessage("Player.Commands.UsageMessage", getPlayerForSender(sender), true), target));
+            return true;
+        }
+        if (target.allowOnlySubCommandArgsThatFitToSubArgs()) {
+            Map<Integer, String> invalidArgs = findInvalidArgs(updatedArgs, target, (sender instanceof Player) ? 1 : 0);
+            if (!invalidArgs.isEmpty()) {
+                lgm.addPlaceholder(PlaceholderType.MESSAGE, "%invalidArgs%", invalidArgs.toString(), false);
+                sender.sendMessage(format(lgm.getMessage("Player.Commands.CommandContainsInvalidArgs", getPlayerForSender(sender), true), target));
+                return false;
+            }
+        }
+
+        if (!passesConfirmationAndCooldown(sender, target, updatedArgs)) {
+            return true;
+        }
+
+        if (target.isAsync()) {
+            SubCommand asyncTarget = target;
+            String[] asyncArgs = updatedArgs;
+            Bukkit.getScheduler().runTaskAsynchronously(getJavaPlugin(), () -> runSubCommand(sender, asyncTarget, asyncArgs));
+        } else {
+            runSubCommand(sender, target, updatedArgs);
+        }
+        return true;
     }
 
     private void runSubCommand(CommandSender sender, SubCommand target, String[] args) {

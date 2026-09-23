@@ -1,7 +1,6 @@
 package de.happybavarian07.coolstufflib.commandmanagement;
 
 import de.happybavarian07.coolstufflib.CoolStuffLib;
-import de.happybavarian07.coolstufflib.utils.CardboardCommandGuard;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
@@ -116,7 +115,7 @@ public final class CommandTemplate {
         }
         DEPTH.set(depth + 1);
         try {
-            return CardboardCommandGuard.isolated(() -> Bukkit.dispatchCommand(sender, commandLine));
+            return Bukkit.dispatchCommand(sender, commandLine);
         } finally {
             if (depth == 0) DEPTH.remove();
             else DEPTH.set(depth);
