@@ -56,6 +56,7 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter, Se
     private final UUID serviceId = UUID.randomUUID();
     private final JavaPlugin plugin;
     private final Map<CommandManager, CommandData> commandManagers;
+    private final Map<CommandManager, Command> serverCommands = new HashMap<>();
     private LanguageManager lgm;
     private boolean commandManagerRegistryReady = false;
 
@@ -129,22 +130,16 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter, Se
      */
     public static void unregisterCommand(Command cmd) {
         try {
-            Object result = getPrivateField(Bukkit.getServer().getPluginManager(), "commandMap");
-            SimpleCommandMap commandMap = (SimpleCommandMap) result;
-            assert commandMap != null;
-            /*Object map = getPrivateField(commandMap, "knownCommands");
+            SimpleCommandMap commandMap = (SimpleCommandMap) getPrivateField(Bukkit.getServer().getPluginManager(), "commandMap");
+            Field knownCommandsField = SimpleCommandMap.class.getDeclaredField("knownCommands");
+            knownCommandsField.setAccessible(true);
             @SuppressWarnings("unchecked")
-            HashMap<String, Command> knownCommands = (HashMap<String, Command>) map;
-            assert knownCommands != null;
-            knownCommands.remove(cmd.getName());
-            for (String alias : cmd.getAliases()) {
-                if (knownCommands.containsKey(alias) && knownCommands.get(alias).toString().contains(javaPlugin.getName())) {
-                    knownCommands.remove(alias);
-                }
-            }*/
+            Map<String, Command> knownCommands = (Map<String, Command>) knownCommandsField.get(commandMap);
+            knownCommands.values().removeIf(registered -> registered == cmd);
             cmd.unregister(commandMap);
-        } catch (Exception e) {
-            CoolStuffLib.logError("Failed to unregister command", e);
+            for (Player player : Bukkit.getOnlinePlayers()) player.updateCommands();
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            CoolStuffLib.logError("Failed to unregister command " + cmd.getName(), e);
         }
     }
 
@@ -196,8 +191,10 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter, Se
         JavaPlugin javaPlugin = cm.getJavaPlugin();
         // Registering the Command on the Server
         if (javaPlugin.getCommand(cm.getCommandName()) != null) {
-            Objects.requireNonNull(javaPlugin.getCommand(cm.getCommandName())).setExecutor(this);
-            Objects.requireNonNull(javaPlugin.getCommand(cm.getCommandName())).setTabCompleter(this);
+            PluginCommand pluginYmlCommand = Objects.requireNonNull(javaPlugin.getCommand(cm.getCommandName()));
+            pluginYmlCommand.setExecutor(this);
+            pluginYmlCommand.setTabCompleter(this);
+            serverCommands.put(cm, pluginYmlCommand);
         } else {
             DCommand pluginCommand = new DCommand(cm.getCommandName(), javaPlugin);
             pluginCommand.setProperty("label", javaPlugin.getName().toLowerCase());
@@ -208,6 +205,7 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter, Se
             pluginCommand.setExecutor(this);
             pluginCommand.setTabCompleter(this);
             pluginCommand.register();
+            serverCommands.put(cm, pluginCommand);
         }
         if (cm.autoRegisterPermission()) {
             if (!permissionExistsAlready(cm.getCommandPermissionAsPermission())) {
@@ -282,27 +280,16 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter, Se
         if (!commandManagerRegistryReady)
             throw new RuntimeException("CommandManagerRegistry (CMR) not ready to use yet. The Start Method has not been called yet.");
 
-        JavaPlugin javaPlugin = cm.getJavaPlugin();
-
         // Unregistering the Command on the Server
-        if (javaPlugin.getCommand(cm.getCommandName()) != null) {
-            unregisterCommand(javaPlugin.getCommand(cm.getCommandName()));
-        } else {
-            DCommand pluginCommand = new DCommand(cm.getCommandName(), javaPlugin);
-            pluginCommand.setProperty("label", javaPlugin.getName().toLowerCase());
-            pluginCommand.setProperty("aliases", cm.getCommandAliases());
-            pluginCommand.setProperty("usage", cm.getCommandUsage());
-            pluginCommand.setProperty("description", cm.getCommandInfo());
-            pluginCommand.setProperty("permission", cm.getCommandPermissionAsString());
-            unregisterCommand(pluginCommand);
-        }
+        Command registered = serverCommands.remove(cm);
+        if (registered != null) unregisterCommand(registered);
         if (cm.autoRegisterPermission()) {
             if (permissionExistsAlready(cm.getCommandPermissionAsPermission())) {
                 Bukkit.getPluginManager().removePermission(cm.getCommandPermissionAsPermission());
             }
         }
 
-        for (SubCommand subCommand : cm.getSubCommands()) {
+        for (SubCommand subCommand : cm.getAllSubCommands()) {
             if (subCommand.autoRegisterPermission()) {
                 if (permissionExistsAlready(subCommand.permissionAsPermission())) {
                     Bukkit.getPluginManager().removePermission(subCommand.permissionAsPermission());
