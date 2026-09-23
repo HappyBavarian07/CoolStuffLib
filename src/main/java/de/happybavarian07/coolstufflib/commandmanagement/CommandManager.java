@@ -9,7 +9,7 @@ import de.happybavarian07.coolstufflib.languagemanager.Placeholder;
 import de.happybavarian07.coolstufflib.languagemanager.PlaceholderType;
 import de.happybavarian07.coolstufflib.utils.CardboardCommandGuard;
 import de.happybavarian07.coolstufflib.utils.CooldownTracker;
-import de.happybavarian07.coolstufflib.utils.LogPrefix;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -18,7 +18,6 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
-import java.util.logging.Level;
 
 /**
  * The base class for creating command managers with subcommands.
@@ -118,6 +117,10 @@ public abstract class CommandManager {
             String[] updatedArgs;
             if (target != null) {
                 updatedArgs = removeFirstArgument(args);
+                while (updatedArgs.length > 0 && target.getChild(updatedArgs[0]) != null) {
+                    target = target.getChild(updatedArgs[0]);
+                    updatedArgs = removeFirstArgument(updatedArgs);
+                }
             } else if (rootCommand != null) {
                 target = rootCommand;
                 updatedArgs = args;
@@ -154,27 +157,31 @@ public abstract class CommandManager {
                 return true;
             }
 
-            try {
-                boolean callResult = handleSubCommand(sender, target, updatedArgs);
-                if (!callResult) {
-                    sender.sendMessage(format(lgm.getMessage("Player.Commands.UsageMessage", getPlayerForSender(sender), true), target));
-                }
-            } catch (CommandArgumentException e) {
-                sender.sendMessage(e.render(lgm, getPlayerForSender(sender)));
-            } catch (Exception e) {
-                lgm.addPlaceholder(PlaceholderType.MESSAGE, "%error%", e + ": " + e.getMessage(), false);
-                lgm.addPlaceholder(PlaceholderType.MESSAGE, "%stacktrace%", Arrays.toString(e.getStackTrace()), false);
-                sender.sendMessage(format(lgm.getMessage("Player.Commands.ErrorPerformingSubCommand", getPlayerForSender(sender), true), target));
-                String stacktraceWithLineBreaks = Arrays.toString(e.getStackTrace()).replace(", ", "\n");
-                coolStuffLib.getPluginFileLogger().writeToLog(Level.SEVERE,
-                        "Error performing subcommand: " + target.name() +
-                                "(Error: " + e + ": " + e.getLocalizedMessage() + ", Stacktrace: " + stacktraceWithLineBreaks + ")",
-                        LogPrefix.COOLSTUFFLIB_COMMANDS,
-                        true);
+            if (target.isAsync()) {
+                SubCommand asyncTarget = target;
+                String[] asyncArgs = updatedArgs;
+                Bukkit.getScheduler().runTaskAsynchronously(getJavaPlugin(), () -> runSubCommand(sender, asyncTarget, asyncArgs));
+            } else {
+                runSubCommand(sender, target, updatedArgs);
             }
             return true;
         } finally {
             CardboardCommandGuard.exitCommand();
+        }
+    }
+
+    private void runSubCommand(CommandSender sender, SubCommand target, String[] args) {
+        try {
+            if (!handleSubCommand(sender, target, args)) {
+                sender.sendMessage(format(lgm.getMessage("Player.Commands.UsageMessage", getPlayerForSender(sender), true), target));
+            }
+        } catch (CommandArgumentException e) {
+            sender.sendMessage(e.render(lgm, getPlayerForSender(sender)));
+        } catch (Exception e) {
+            lgm.addPlaceholder(PlaceholderType.MESSAGE, "%error%", e + ": " + e.getMessage(), false);
+            lgm.addPlaceholder(PlaceholderType.MESSAGE, "%stacktrace%", Arrays.toString(e.getStackTrace()), false);
+            sender.sendMessage(format(lgm.getMessage("Player.Commands.ErrorPerformingSubCommand", getPlayerForSender(sender), true), target));
+            CoolStuffLib.logError("Error performing sub command '" + target.path() + "'", e);
         }
     }
 
@@ -293,6 +300,17 @@ public abstract class CommandManager {
         String[] targetArgs;
         if (target != null) {
             targetArgs = removeFirstArgument(args);
+            while (targetArgs.length > 1 && target.getChild(targetArgs[0]) != null) {
+                target = target.getChild(targetArgs[0]);
+                targetArgs = removeFirstArgument(targetArgs);
+            }
+            if (targetArgs.length == 1) {
+                for (SubCommand child : target.getChildren()) {
+                    if (!hasPermission(sender, child)) continue;
+                    options.add(child.name());
+                    options.addAll(Arrays.asList(child.aliases()));
+                }
+            }
         } else {
             target = rootCommand;
             targetArgs = args;
@@ -333,9 +351,15 @@ public abstract class CommandManager {
      * <p>All sub commands including the root command, for registration and help output.</p>
      */
     public List<SubCommand> getAllSubCommands() {
-        List<SubCommand> all = new ArrayList<>(commands);
+        List<SubCommand> all = new ArrayList<>();
+        for (SubCommand command : commands) collectWithChildren(command, all);
         if (rootCommand != null) all.add(rootCommand);
         return all;
+    }
+
+    private static void collectWithChildren(SubCommand command, List<SubCommand> into) {
+        into.add(command);
+        for (SubCommand child : command.getChildren()) collectWithChildren(child, into);
     }
 
     /**

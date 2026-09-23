@@ -43,4 +43,7 @@ public @interface SubCommandInfo {
 
     /** Require running the same command again within {@link SubCommand#CONFIRMATION_WINDOW_MILLIS} to execute it. */
     boolean confirm() default false;
+
+    /** Run the command off the main thread; only use Bukkit API that is safe asynchronously. */
+    boolean async() default false;
 }

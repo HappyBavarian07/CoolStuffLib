@@ -3,6 +3,7 @@ package de.happybavarian07.coolstufflib.commandmanagement;
 import org.bukkit.command.CommandSender;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,6 +35,8 @@ public final class SubCommandBuilder {
     Integer maxArgs;
     long cooldownMillis;
     boolean confirm;
+    boolean async;
+    final List<SubCommand> children = new ArrayList<>();
     List<Argument> arguments = List.of();
     CommandHandler handler;
 
@@ -113,6 +116,18 @@ public final class SubCommandBuilder {
         return this;
     }
 
+    /** Run off the main thread. */
+    public SubCommandBuilder async() {
+        this.async = true;
+        return this;
+    }
+
+    /** Nested sub commands: {@code /main this child ...}. */
+    public SubCommandBuilder sub(SubCommand... children) {
+        this.children.addAll(List.of(children));
+        return this;
+    }
+
     public SubCommandBuilder arguments(Argument... arguments) {
         this.arguments = List.of(arguments);
         return this;
@@ -134,8 +149,12 @@ public final class SubCommandBuilder {
     }
 
     public SubCommand build() {
-        if (handler == null) throw new IllegalStateException("Sub command '" + name + "' needs executes(...) or player(...)");
-        return new BuiltSubCommand(this);
+        if (handler == null && children.isEmpty()) {
+            throw new IllegalStateException("Sub command '" + name + "' needs executes(...), player(...) or sub(...)");
+        }
+        BuiltSubCommand built = new BuiltSubCommand(this);
+        for (SubCommand child : children) built.addChild(child);
+        return built;
     }
 
     private static final class BuiltSubCommand extends SubCommand {
@@ -217,13 +236,18 @@ public final class SubCommandBuilder {
         }
 
         @Override
+        public boolean isAsync() {
+            return spec.async;
+        }
+
+        @Override
         public List<Argument> arguments() {
             return spec.arguments;
         }
 
         @Override
         public boolean execute(CommandSender sender, CommandArgs args) {
-            return spec.handler.handle(sender, args);
+            return spec.handler != null && spec.handler.handle(sender, args);
         }
     }
 }

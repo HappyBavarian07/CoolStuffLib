@@ -16,11 +16,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>Abstract base class for implementing sub-commands within the CoolStuffLib command management system.
@@ -65,6 +68,8 @@ public abstract class SubCommand implements Comparable<SubCommand> {
     public static final long CONFIRMATION_WINDOW_MILLIS = 10_000;
     private final ConfirmationTracker confirmations = new ConfirmationTracker(CONFIRMATION_WINDOW_MILLIS);
     private CooldownTracker cooldowns;
+    private final List<SubCommand> children = new ArrayList<>();
+    private SubCommand parent;
 
     /**
      * Injects the necessary dependencies into the SubCommand.
@@ -358,9 +363,55 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      * <p>Syntax used when neither the annotation nor the language file provides one.</p>
      */
     protected String defaultSyntax() {
-        StringBuilder syntax = new StringBuilder("/").append(mainCommandName).append(' ').append(name());
+        StringBuilder syntax = new StringBuilder("/").append(mainCommandName).append(' ').append(path());
         for (Argument argument : arguments()) syntax.append(' ').append(argument.usage());
+        if (!children.isEmpty()) {
+            String label = children.size() <= Argument.MAX_INLINE_OPTIONS
+                    ? children.stream().map(SubCommand::name).collect(Collectors.joining("|"))
+                    : "sub command";
+            syntax.append(' ').append(Argument.bracket(label, true));
+        }
         return syntax.toString();
+    }
+
+    /**
+     * <p>Adds a nested sub command: {@code /main this child ...}. Children get their dependencies,
+     * permissions and help entries like top-level sub commands.</p>
+     */
+    public SubCommand addChild(SubCommand child) {
+        child.parent = this;
+        children.add(child);
+        return this;
+    }
+
+    public List<SubCommand> getChildren() {
+        return Collections.unmodifiableList(children);
+    }
+
+    public SubCommand getParent() {
+        return parent;
+    }
+
+    /** Child by name or alias, ignoring case, or {@code null}. */
+    public SubCommand getChild(String name) {
+        for (SubCommand child : children) {
+            if (child.name().equalsIgnoreCase(name)) return child;
+            for (String alias : child.aliases()) {
+                if (alias.equalsIgnoreCase(name)) return child;
+            }
+        }
+        return null;
+    }
+
+    /** Names from the top-level sub command down to this one, separated by spaces. */
+    public String path() {
+        return parent == null ? name() : parent.path() + " " + name();
+    }
+
+    /** Whether the command runs off the main thread. */
+    public boolean isAsync() {
+        SubCommandInfo meta = meta();
+        return meta != null && meta.async();
     }
 
     /**
@@ -393,7 +444,7 @@ public abstract class SubCommand implements Comparable<SubCommand> {
     public String permissionAsString() {
         SubCommandInfo meta = meta();
         if (meta != null && !meta.permission().isEmpty()) return meta.permission();
-        return (mainCommandName + "." + name()).toLowerCase(Locale.ROOT);
+        return (mainCommandName + "." + path().replace(' ', '.')).toLowerCase(Locale.ROOT);
     }
 
     /**
@@ -445,7 +496,7 @@ public abstract class SubCommand implements Comparable<SubCommand> {
 
     private String languageText(String key, String fallback) {
         if (lgm == null) return fallback;
-        String text = lgm.getMessageOrDefault("Commands." + mainCommandName + "." + name() + "." + key, null, fallback, false);
+        String text = lgm.getMessageOrDefault("Commands." + mainCommandName + "." + path().replace(' ', '.') + "." + key, null, fallback, false);
         return text == null ? fallback : text;
     }
 

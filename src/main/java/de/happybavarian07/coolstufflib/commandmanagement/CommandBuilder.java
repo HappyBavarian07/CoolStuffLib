@@ -99,6 +99,11 @@ public final class CommandBuilder {
         return this;
     }
 
+    public CommandBuilder async() {
+        root.async();
+        return this;
+    }
+
     public CommandBuilder arguments(Argument... arguments) {
         root.arguments(arguments);
         return this;
