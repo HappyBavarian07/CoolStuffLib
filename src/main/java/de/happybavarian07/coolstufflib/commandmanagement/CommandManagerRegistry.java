@@ -187,12 +187,6 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter, Se
         CoolStuffLib lib = CoolStuffLib.getLib();
         cm.setDependencies(lib, lgm);
 
-        // Pre Init SubCommands
-        for (SubCommand subCommand : cm.getSubCommands()) {
-            subCommand.setDependencies(lib, lgm, this);
-            subCommand.preInit();
-        }
-
         // Checking if the Command Manager has CommandData
 
         CommandData data = cm.getClass().getAnnotation(CommandData.class);
@@ -220,6 +214,12 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter, Se
         }
         // Calling setup() for Adding Sub Commands
         cm.setup();
+
+        // Sub commands are added in setup(), so inject and pre-init them afterwards
+        for (SubCommand subCommand : cm.getSubCommands()) {
+            subCommand.setDependencies(lib, lgm, this);
+            subCommand.preInit();
+        }
 
         for (SubCommand subCommand : cm.getSubCommands()) {
             if (subCommand.autoRegisterPermission()) {

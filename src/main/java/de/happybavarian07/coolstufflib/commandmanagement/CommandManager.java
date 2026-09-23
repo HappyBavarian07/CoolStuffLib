@@ -112,7 +112,7 @@ public abstract class CommandManager {
         }
 
         try {
-            SubCommand target = this.getSubCommand(args[0]);
+            SubCommand target = args.length == 0 ? null : this.getSubCommand(args[0]);
 
             if (target == null) {
                 sender.sendMessage(lgm.getMessage("Player.Commands.InvalidSubCommand", getPlayerForSender(sender), true));
@@ -128,6 +128,12 @@ public abstract class CommandManager {
 
             if (target.isPlayerRequired() && !(sender instanceof Player)) {
                 sender.sendMessage(lgm.getMessage("Console.ExecutesPlayerCommand", null, true));
+                return true;
+            }
+            if (updatedArgs.length < target.minArgs() || updatedArgs.length > target.maxArgs()) {
+                String key = updatedArgs.length < target.minArgs() ? "Player.Commands.TooFewArguments" : "Player.Commands.TooManyArguments";
+                sender.sendMessage(lgm.getMessage(key, getPlayerForSender(sender), true));
+                sender.sendMessage(format(lgm.getMessage("Player.Commands.UsageMessage", getPlayerForSender(sender), true), target));
                 return true;
             }
             if (target.allowOnlySubCommandArgsThatFitToSubArgs()) {
@@ -172,10 +178,10 @@ public abstract class CommandManager {
         Map<Integer, String> invalidArgs = new HashMap<>();
         Map<Integer, String[]> subArgs = target.subArgs(null, isPlayer, args);
         if (subArgs == null || subArgs.isEmpty()) return invalidArgs;
-        for (int i = 1; i < args.length; i++) {
-            String arg = args[i];
-            if (!Arrays.asList(subArgs.get(i)).contains(arg)) {
-                invalidArgs.put(i, arg);
+        for (int i = 0; i < args.length; i++) {
+            String[] allowed = subArgs.get(i + 1);
+            if (allowed != null && !Arrays.asList(allowed).contains(args[i])) {
+                invalidArgs.put(i + 1, args[i]);
             }
         }
         return invalidArgs;
@@ -221,10 +227,13 @@ public abstract class CommandManager {
      * @return Whether the command was successfully handled.
      */
     public boolean handleSubCommand(CommandSender sender, SubCommand target, String[] args) {
-        if (sender instanceof Player) {
-            return target.onPlayerCommand((Player) sender, args);
+        if (sender instanceof Player player) {
+            return target.onPlayerCommand(player, args);
         }
-        return target.onConsoleCommand((ConsoleCommandSender) sender, args);
+        if (sender instanceof ConsoleCommandSender console) {
+            return target.onConsoleCommand(console, args);
+        }
+        return target.handleCommand(sender, null, args);
     }
 
     /**
@@ -256,7 +265,7 @@ public abstract class CommandManager {
                     }
                 }
             } else if (args.length > 1) {
-                if (sub.name().equals(args[0]) || Arrays.asList(sub.aliases()).contains(args[0])) {
+                if (matches(sub, args[0])) {
                     Map<Integer, String[]> subArgs = sub.subArgs(sender, (sender instanceof Player) ? 1 : 0, Arrays.copyOfRange(args, 1, args.length));
                     if (subArgs != null && subArgs.containsKey(args.length - 1)) {
                         subCommandArgOptions.addAll(Arrays.asList(subArgs.get(args.length - 1)));
@@ -301,11 +310,19 @@ public abstract class CommandManager {
      */
     public SubCommand getSubCommand(String name) {
         for (SubCommand subCommand : getSubCommands()) {
-            if (subCommand.name().equalsIgnoreCase(name) || Arrays.asList(subCommand.aliases()).contains(name)) {
+            if (matches(subCommand, name)) {
                 return subCommand;
             }
         }
         return null;
+    }
+
+    private static boolean matches(SubCommand subCommand, String name) {
+        if (subCommand.name().equalsIgnoreCase(name)) return true;
+        for (String alias : subCommand.aliases()) {
+            if (alias.equalsIgnoreCase(name)) return true;
+        }
+        return false;
     }
 
     /**

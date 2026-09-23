@@ -176,10 +176,8 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      * @return The minimum number of arguments for this command
      */
     public int minArgs() {
-        if (!this.getClass().isAnnotationPresent(CommandData.class)) {
-            return registry.minArgs(registry.getCommandManager(mainCommandName));
-        }
-        return this.getClass().getAnnotation(CommandData.class).minArgs();
+        CommandData data = this.getClass().getAnnotation(CommandData.class);
+        return data == null ? 0 : data.minArgs();
     }
 
 
@@ -190,10 +188,8 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      * @return The maximum number of arguments for this command.
      */
     public int maxArgs() {
-        if (!this.getClass().isAnnotationPresent(CommandData.class)) {
-            return registry.maxArgs(registry.getCommandManager(mainCommandName));
-        }
-        return this.getClass().getAnnotation(CommandData.class).maxArgs();
+        CommandData data = this.getClass().getAnnotation(CommandData.class);
+        return data == null ? Integer.MAX_VALUE : data.maxArgs();
     }
 
 
