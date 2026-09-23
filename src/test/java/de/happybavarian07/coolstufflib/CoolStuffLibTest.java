@@ -100,6 +100,36 @@ class CoolStuffLibTest {
     }
 
     @Test
+    void writeToLogWithoutFileLoggerOnlyUsesConsoleWhenAsked() {
+        List<LogRecord> records = new ArrayList<>();
+        Handler handler = new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                records.add(record);
+            }
+
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+        Logger logger = Logger.getLogger("CoolStuffLib");
+        logger.addHandler(handler);
+        try {
+            CoolStuffLib lib = newLib(null);
+            lib.writeToLog(Level.INFO, "quiet", LogPrefix.INFO, false);
+            lib.writeToLog(Level.INFO, "loud", LogPrefix.INFO, true);
+            lib.writeToLog(Level.WARNING, "warn", LogPrefix.WARNING, false);
+            assertEquals(List.of("loud", "warn"), records.stream().map(LogRecord::getMessage).toList());
+        } finally {
+            logger.removeHandler(handler);
+        }
+    }
+
+    @Test
     void logErrorIsSafeBeforeInitialization() {
         assertDoesNotThrow(() -> CoolStuffLib.logError("early", new RuntimeException()));
     }

@@ -361,7 +361,9 @@ public class CoolStuffLib {
             pluginFileLogger.writeToLog(info, logMessage, logPrefix, sendToConsole);
             return;
         }
-        LOGGER.log(info, "[PluginFileLogger disabled] " + logMessage);
+        if (sendToConsole || info.intValue() >= Level.WARNING.intValue()) {
+            LOGGER.log(info, logMessage);
+        }
     }
 
     /**
