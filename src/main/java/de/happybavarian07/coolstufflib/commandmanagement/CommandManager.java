@@ -25,6 +25,7 @@ import java.util.logging.Level;
 @CommandData
 public abstract class CommandManager {
     private final ArrayList<SubCommand> commands = new ArrayList<>();
+    private SubCommand rootCommand;
     protected CoolStuffLib coolStuffLib;
     protected LanguageManager lgm;
     protected List<String> commandArgs = new ArrayList<>();
@@ -113,8 +114,13 @@ public abstract class CommandManager {
 
         try {
             SubCommand target = args.length == 0 ? null : this.getSubCommand(args[0]);
-
-            if (target == null) {
+            String[] updatedArgs;
+            if (target != null) {
+                updatedArgs = removeFirstArgument(args);
+            } else if (rootCommand != null) {
+                target = rootCommand;
+                updatedArgs = args;
+            } else {
                 sender.sendMessage(lgm.getMessage("Player.Commands.InvalidSubCommand", getPlayerForSender(sender), true));
                 return true;
             }
@@ -123,8 +129,6 @@ public abstract class CommandManager {
                 sender.sendMessage(format(lgm.getMessage("Player.General.NoPermissions", getPlayerForSender(sender), true), target));
                 return true;
             }
-
-            String[] updatedArgs = removeFirstArgument(args);
 
             if (target.isPlayerRequired() && !(sender instanceof Player)) {
                 sender.sendMessage(lgm.getMessage("Console.ExecutesPlayerCommand", null, true));
@@ -248,43 +252,37 @@ public abstract class CommandManager {
      * @return A list of possible tab completions.
      */
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
-        Set<String> result = new HashSet<>();
-        List<String> subCommandOptions = new ArrayList<>();
-        List<String> subCommandArgOptions = new ArrayList<>();
-
-        for (SubCommand sub : this.getSubCommands()) {
-            if (!sender.hasPermission(sub.permissionAsPermission()) && !(sub.isOpRequired() && sender.isOp())) {
-                continue;
-            }
-
-            subCommandOptions.add(sub.name());
-            subCommandOptions.addAll(Arrays.asList(sub.aliases()));
-
-            if (args.length == 1) {
-                for (String option : subCommandOptions) {
-                    if (option.toLowerCase().startsWith(args[0].toLowerCase())) {
-                        result.add(option);
-                    }
-                }
-            } else if (args.length > 1) {
-                if (matches(sub, args[0])) {
-                    Map<Integer, String[]> subArgs = sub.subArgs(sender, (sender instanceof Player) ? 1 : 0, Arrays.copyOfRange(args, 1, args.length));
-                    if (subArgs != null && subArgs.containsKey(args.length - 1)) {
-                        subCommandArgOptions.addAll(Arrays.asList(subArgs.get(args.length - 1)));
-                    }
-
-                    for (String option : subCommandArgOptions) {
-                        if (option.toLowerCase().startsWith(args[args.length - 1].toLowerCase())) {
-                            result.add(option);
-                        }
-                    }
-
-                    return new ArrayList<>(result);
-                }
+        if (args.length == 0) return new ArrayList<>();
+        Set<String> options = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        if (args.length == 1) {
+            for (SubCommand sub : getSubCommands()) {
+                if (!hasPermission(sender, sub)) continue;
+                options.add(sub.name());
+                options.addAll(Arrays.asList(sub.aliases()));
             }
         }
 
-        return new ArrayList<>(result);
+        SubCommand target = getSubCommand(args[0]);
+        String[] targetArgs;
+        if (target != null) {
+            targetArgs = removeFirstArgument(args);
+        } else {
+            target = rootCommand;
+            targetArgs = args;
+        }
+        if (target != null && targetArgs.length > 0 && hasPermission(sender, target)) {
+            Map<Integer, String[]> subArgs = target.subArgs(sender, (sender instanceof Player) ? 1 : 0, targetArgs);
+            if (subArgs != null && subArgs.containsKey(targetArgs.length)) {
+                options.addAll(Arrays.asList(subArgs.get(targetArgs.length)));
+            }
+        }
+
+        String current = args[args.length - 1].toLowerCase(Locale.ROOT);
+        List<String> result = new ArrayList<>();
+        for (String option : options) {
+            if (option.toLowerCase(Locale.ROOT).startsWith(current)) result.add(option);
+        }
+        return result;
     }
 
     /**
@@ -302,6 +300,34 @@ public abstract class CommandManager {
      */
     public List<SubCommand> getSubCommands() {
         return commands;
+    }
+
+    /**
+     * <p>All sub commands including the root command, for registration and help output.</p>
+     */
+    public List<SubCommand> getAllSubCommands() {
+        List<SubCommand> all = new ArrayList<>(commands);
+        if (rootCommand != null) all.add(rootCommand);
+        return all;
+    }
+
+    /**
+     * <p>Sets the command that runs for {@code /<command>} without arguments and for first arguments that
+     * are not a sub command.</p>
+     */
+    protected void setRootCommand(SubCommand rootCommand) {
+        this.rootCommand = rootCommand;
+    }
+
+    public SubCommand getRootCommand() {
+        return rootCommand;
+    }
+
+    /**
+     * <p>Starts a {@link SubCommandBuilder} for this command; register the result in {@link #setup()}.</p>
+     */
+    protected SubCommandBuilder subCommand(String name) {
+        return new SubCommandBuilder(getCommandName(), name);
     }
 
     /**

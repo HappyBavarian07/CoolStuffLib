@@ -216,12 +216,12 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter, Se
         cm.setup();
 
         // Sub commands are added in setup(), so inject and pre-init them afterwards
-        for (SubCommand subCommand : cm.getSubCommands()) {
+        for (SubCommand subCommand : cm.getAllSubCommands()) {
             subCommand.setDependencies(lib, lgm, this);
             subCommand.preInit();
         }
 
-        for (SubCommand subCommand : cm.getSubCommands()) {
+        for (SubCommand subCommand : cm.getAllSubCommands()) {
             if (subCommand.autoRegisterPermission()) {
                 if (!permissionExistsAlready(subCommand.permissionAsPermission())) {
                     Bukkit.getPluginManager().addPermission(subCommand.permissionAsPermission());
@@ -232,7 +232,7 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter, Se
         commandManagers.put(cm, data);
 
         // Post Init SubCommands
-        for (SubCommand subCommand : cm.getSubCommands()) {
+        for (SubCommand subCommand : cm.getAllSubCommands()) {
             subCommand.postInit();
         }
         return true;
@@ -543,7 +543,7 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter, Se
             for (CommandManager cm : commandManagers.keySet()) {
                 try {
                     if (cm.getCommandName().equalsIgnoreCase(cmd.getName())) {
-                        if (args.length == 0) {
+                        if (args.length == 0 && cm.getRootCommand() == null) {
                             if (CoolStuffLib.getLib().isSendSyntaxOnArgsZero()) {
                                 Player playerTemp = null;
                                 if (sender instanceof Player) {
@@ -751,5 +751,12 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter, Se
      */
     public JavaPlugin getPlugin() {
         return plugin;
+    }
+
+    /**
+     * <p>Starts building a command that is registered with {@link CommandBuilder#register()}.</p>
+     */
+    public CommandBuilder command(String name) {
+        return new CommandBuilder(this, name);
     }
 }
