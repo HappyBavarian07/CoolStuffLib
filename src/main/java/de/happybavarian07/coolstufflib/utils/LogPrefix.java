@@ -23,7 +23,7 @@ public enum LogPrefix {
     DATABASE("Database", "Plugin.LogActions.IndividualActions.DATABASE"),
     DEBUG("Debug", "Plugin.LogActions.IndividualActions.DEBUG"),
     ERROR("Error", "Plugin.LogActions.IndividualActions.ERROR"),
-    WARNING("Error", "Plugin.LogActions.IndividualActions.WARNING"),
+    WARNING("Warning","Plugin.LogActions.IndividualActions.WARNING"),
     FILE("File", "Plugin.LogActions.IndividualActions.FILE"),
     INFO("Info", "Plugin.LogActions.IndividualActions.INFO"),
     INITIALIZER("Initializer", "Plugin.LogActions.IndividualActions.INITIALIZER"),

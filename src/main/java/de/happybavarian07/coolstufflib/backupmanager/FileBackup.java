@@ -144,7 +144,7 @@ public class FileBackup implements Comparable<FileBackup> {
             backupsDone.add(zipFile);
             return 0;
         } catch (IOException e) {
-            e.printStackTrace();
+            CoolStuffLib.logError("Failed to create backup zip", e);
             return -2;
         }
     }
@@ -200,7 +200,7 @@ public class FileBackup implements Comparable<FileBackup> {
             File zipFileTemp = getCurrentSettingsBackupZipName();
             Utils.zipFiles(filesToBackup, zipFileTemp.getAbsolutePath(), rootDirectory);
         } catch (IOException e) {
-            e.printStackTrace();
+            CoolStuffLib.logError("Failed to create settings backup zip", e);
             return -2;
         }
 

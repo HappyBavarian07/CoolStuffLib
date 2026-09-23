@@ -4,6 +4,7 @@ package de.happybavarian07.coolstufflib.commandmanagement;
  * @Date 05.10.2021 | 17:53
  */
 
+import de.happybavarian07.coolstufflib.CoolStuffLib;
 import de.happybavarian07.coolstufflib.languagemanager.PlaceholderType;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -52,7 +53,7 @@ public class HelpCommand extends SubCommand {
             player.sendMessage(lgm.getMessage("Player.Commands.NotANumber", player, true));
             return true;
         } catch (PaginatedList.ListNotSortedException e2) {
-            e2.printStackTrace();
+            CoolStuffLib.logError("Help message list is not sorted", e2);
             return true;
         }
         return true;
@@ -82,7 +83,7 @@ public class HelpCommand extends SubCommand {
             sender.sendMessage(lgm.getMessage("Player.Commands.NotANumber", null, true));
             return true;
         } catch (PaginatedList.ListNotSortedException e2) {
-            e2.printStackTrace();
+            CoolStuffLib.logError("Help message list is not sorted", e2);
             return true;
         }
         return true;
@@ -113,7 +114,7 @@ public class HelpCommand extends SubCommand {
                 pages.add(String.valueOf(i));
             }
         } catch (PaginatedList.ListNotSortedException e) {
-            e.printStackTrace();
+            CoolStuffLib.logError("Help message list is not sorted", e);
             return map;
         }
         map.put(1, pages.toArray(new String[0]));

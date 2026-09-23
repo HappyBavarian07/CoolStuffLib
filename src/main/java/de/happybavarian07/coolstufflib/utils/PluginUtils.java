@@ -59,14 +59,14 @@ public class PluginUtils {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    CoolStuffLib.logError("Failed to close input stream", e);
                 }
             }
             if (outputStream != null) {
                 try {
                     outputStream.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    CoolStuffLib.logError("Failed to close output stream", e);
                 }
             }
             if (connection != null) {
@@ -110,7 +110,7 @@ public class PluginUtils {
         try {
             target = Bukkit.getPluginManager().loadPlugin(pluginFile);
         } catch (InvalidDescriptionException | InvalidPluginException e) {
-            e.printStackTrace();
+            CoolStuffLib.logError("Failed to load plugin", e);
             return;
         }
         Bukkit.getPluginManager().enablePlugin(target);
@@ -184,7 +184,7 @@ public class PluginUtils {
             commands = (Map<String, Command>) knownCommandsField.get(commandMap);
 
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
+            CoolStuffLib.logError("Failed to access the Bukkit command map", e);
         }
 
         pluginManager.disablePlugin(plugin);
@@ -231,14 +231,14 @@ public class PluginUtils {
                 pluginInitField.set(cl, null);
 
             } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
-                ex.printStackTrace();
+                CoolStuffLib.logError("Failed to clear plugin class loader fields", ex);
             }
 
             try {
 
                 ((URLClassLoader) cl).close();
             } catch (IOException ex) {
-                ex.printStackTrace();
+                CoolStuffLib.logError("Failed to close plugin class loader", ex);
             }
 
         }

@@ -1,5 +1,6 @@
 package de.happybavarian07.coolstufflib.languagemanager.expressionengine;
 
+import de.happybavarian07.coolstufflib.CoolStuffLib;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -123,7 +124,7 @@ public class Parser {
             }
             return sequence();
         } catch (Exception e) {
-            e.printStackTrace();
+            CoolStuffLib.logError("Failed to parse expression", e);
             return null;
         }
     }

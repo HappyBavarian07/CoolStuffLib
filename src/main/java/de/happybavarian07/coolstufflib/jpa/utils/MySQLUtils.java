@@ -1,5 +1,6 @@
 package de.happybavarian07.coolstufflib.jpa.utils;
 
+import de.happybavarian07.coolstufflib.CoolStuffLib;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -31,7 +32,7 @@ public class MySQLUtils {
             try {
                 connection.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                CoolStuffLib.logError("Failed to close database connection", e);
             }
         }
     }

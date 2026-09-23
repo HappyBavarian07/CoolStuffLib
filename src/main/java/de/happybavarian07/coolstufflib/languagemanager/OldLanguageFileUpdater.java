@@ -1,5 +1,6 @@
 package de.happybavarian07.coolstufflib.languagemanager;
 
+import de.happybavarian07.coolstufflib.CoolStuffLib;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -96,7 +97,7 @@ public class OldLanguageFileUpdater {
         try {
             oldConfig.save(oldFile);
         } catch (IOException e) {
-            e.printStackTrace();
+            CoolStuffLib.logError("Failed to save updated language file", e);
         }
     }
 }

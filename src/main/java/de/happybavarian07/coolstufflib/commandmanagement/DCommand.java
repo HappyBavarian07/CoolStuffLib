@@ -3,6 +3,7 @@ package de.happybavarian07.coolstufflib.commandmanagement;/*
  * @Date 28.04.2022 | 19:41
  */
 
+import de.happybavarian07.coolstufflib.CoolStuffLib;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandMap;
@@ -90,7 +91,7 @@ public class DCommand extends BukkitCommand {
 
             commandMap.register(plugin.getName(), this);
         }catch (IllegalAccessException | NoSuchFieldException e) {
-            e.printStackTrace();
+            CoolStuffLib.logError("Failed to register command in the Bukkit command map", e);
         }
     }
 

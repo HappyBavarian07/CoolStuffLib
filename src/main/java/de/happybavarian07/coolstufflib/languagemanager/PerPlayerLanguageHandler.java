@@ -1,5 +1,6 @@
 package de.happybavarian07.coolstufflib.languagemanager;
 
+import de.happybavarian07.coolstufflib.CoolStuffLib;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.File;
@@ -92,7 +93,7 @@ public class PerPlayerLanguageHandler {
         try {
             dataConfig.save(dataFile);
         } catch (IOException e) {
-            e.printStackTrace();
+            CoolStuffLib.logError("Failed to save per-player language data", e);
         }
     }
 }

@@ -103,7 +103,7 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter, Se
             result = objectField.get(object);
             objectField.setAccessible(false);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
+            CoolStuffLib.logError("Failed to read field via reflection", e);
             return null;
         }
         return result;
@@ -142,7 +142,7 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter, Se
             }*/
             cmd.unregister(commandMap);
         } catch (Exception e) {
-            e.printStackTrace();
+            CoolStuffLib.logError("Failed to unregister command", e);
         }
     }
 

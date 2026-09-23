@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class HybridInventoryUtils {
@@ -66,9 +67,7 @@ public class HybridInventoryUtils {
                 return new InventoryViewWrapper(result);
             }
         } catch (Exception e) {
-            LOGGER.severe("[CoolStuffLib] Failed to open inventory using reflection");
-            LOGGER.severe("[CoolStuffLib] Error: " + e.getClass().getName() + " - " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "[CoolStuffLib] Failed to open inventory using reflection", e);
             return null;
         }
     }

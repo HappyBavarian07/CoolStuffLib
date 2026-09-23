@@ -1,5 +1,6 @@
 package de.happybavarian07.coolstufflib.testing;
 
+import de.happybavarian07.coolstufflib.CoolStuffLib;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -35,8 +36,7 @@ public class TestCommand implements CommandExecutor, TabCompleter {
             registerOriginalTestClass("de.happybavarian07.coolstufflib.backupmanager.BackupManagerTest");
             registerOriginalTestClass("de.happybavarian07.coolstufflib.configstuff.core.ConfigManagerTest");
         } catch (Exception e) {
-            // Log the error but continue
-            e.printStackTrace();
+            CoolStuffLib.logError("Failed to register original test classes", e);
         }
     }
 

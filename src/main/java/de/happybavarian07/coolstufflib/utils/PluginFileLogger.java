@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,45 +46,21 @@ public class PluginFileLogger {
     }
 
     public PluginFileLogger writeToLog(Level record, String stringToLog, LogPrefix logPrefix, boolean sendToConsole) {
-        if (plugin != null && !plugin.getConfig().getBoolean("Plugin.LogActions.enabled", true) || !logPrefix.isEnabled()) return instance;
-        try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(logFile, true));
-            Date d = Calendar.getInstance().getTime();
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-            String prefix = "[" + sdf.format(d) + " " + record + "]: [" + logPrefix.getLogPrefix() + "] ";
-            bw.write(prefix + stringToLog);
-            bw.newLine();
-            bw.close();
-            if (sendToConsole)
-                logger.log(record, "[" + logPrefix + "] " + stringToLog);
-            return instance;
-        } catch (IOException fileNotFoundException) {
-            fileNotFoundException.printStackTrace();
-            if (sendToConsole)
-                logger.log(record, "[" + logPrefix + "] " + stringToLog);
-            return instance;
-        }
+        if (!logPrefix.isEnabled()) return instance;
+        return writeToLog(record, stringToLog, logPrefix.getLogPrefix(), sendToConsole);
     }
 
     public PluginFileLogger writeToLog(Level record, String stringToLog, String logPrefix, boolean sendToConsole) {
         if (plugin != null && !plugin.getConfig().getBoolean("Plugin.LogActions.enabled", true)) return instance;
-        try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(logFile, true));
-            Date d = Calendar.getInstance().getTime();
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-            String prefix = "[" + sdf.format(d) + " " + record + "]: [" + logPrefix + "] ";
-            bw.write(prefix + stringToLog);
+        String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(logFile, true))) {
+            bw.write("[" + time + " " + record + "]: [" + logPrefix + "] " + stringToLog);
             bw.newLine();
-            bw.close();
-            if (sendToConsole)
-                logger.log(record, "[" + logPrefix + "] " + stringToLog);
-            return instance;
-        } catch (IOException fileNotFoundException) {
-            fileNotFoundException.printStackTrace();
-            if (sendToConsole)
-                logger.log(record, "[" + logPrefix + "] " + stringToLog);
-            return instance;
+        } catch (IOException e) {
+            logger.log(Level.WARNING, "Could not write to log file " + logFile, e);
         }
+        if (sendToConsole) logger.log(record, "[" + logPrefix + "] " + stringToLog);
+        return instance;
     }
 
     public File getLogFile() {
@@ -97,7 +72,7 @@ public class PluginFileLogger {
             try {
                 logFile.createNewFile();
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.log(Level.WARNING, "Could not create log file " + logFile, e);
             }
         }
     }
