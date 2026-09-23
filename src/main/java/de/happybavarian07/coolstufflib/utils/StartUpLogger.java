@@ -36,7 +36,7 @@ public class StartUpLogger {
     private final Thread messageQueueThread;
     private final String SPACER_FORMAT;
     private final ConsoleCommandSender sender = Bukkit.getConsoleSender();
-    private boolean enabled;
+    private volatile boolean enabled;
 
     /**
      * <p>Constructs a new StartUpLogger with asynchronous message processing capabilities.
@@ -52,17 +52,16 @@ public class StartUpLogger {
                 "+-------------------------------------------------------------+");
         this.messageQueueThread = new Thread(() -> {
             while (true) {
-                if (!enabled) continue;
                 try {
                     String[] messages = messageQueue.take();
-                    if (messages.length == 0) continue;
                     for (String message : messages) {
                         if (message == null || message.isEmpty()) continue;
 
                         sender.sendMessage(message);
                     }
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Thread.currentThread().interrupt();
+                    return;
                 }
             }
         }, "StartUpLogger Message Queue Thread");
@@ -405,7 +404,7 @@ public class StartUpLogger {
     }
 
     /**
-     * <p>Enables the message processing system and resumes the message queue thread.</p>
+     * <p>Enables the message processing system so queued messages are accepted again.</p>
      *
      * <pre><code>
      * logger.enableMessageSystem();
@@ -413,9 +412,7 @@ public class StartUpLogger {
      * </code></pre>
      */
     public void enableMessageSystem() {
-        if (isMessageSystemEnabled()) return;
         enabled = true;
-        messageQueueThread.resume();
     }
 
     /**
@@ -434,7 +431,7 @@ public class StartUpLogger {
     }
 
     /**
-     * <p>Disables the message processing system and suspends the message queue thread.</p>
+     * <p>Disables the message processing system; new messages are dropped until re-enabled.</p>
      *
      * <pre><code>
      * logger.disableMessageSystem();
@@ -442,8 +439,6 @@ public class StartUpLogger {
      * </code></pre>
      */
     public void disableMessageSystem() {
-        if (!isMessageSystemEnabled()) return;
         enabled = false;
-        messageQueueThread.suspend();
     }
 }
