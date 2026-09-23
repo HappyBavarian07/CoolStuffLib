@@ -1234,11 +1234,6 @@ public class LanguageManager implements Service {
                 (obj instanceof List && ((List<?>) obj).isEmpty()) ||
                 (obj instanceof Map && ((Map<?, ?>) obj).isEmpty()))
             return defaultValue;
-        try {
-            int i = Integer.parseInt(obj.toString());
-            if (i == 0) return defaultValue;
-        } catch (NumberFormatException ignored) {
-        }
 
         if (obj instanceof String) {
             obj = (T) replacePlaceholders(PlaceholderType.CUSTOM, Utils.format(player, obj.toString(), prefix));

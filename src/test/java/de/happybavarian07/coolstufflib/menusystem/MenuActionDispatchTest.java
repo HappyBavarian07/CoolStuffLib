@@ -113,9 +113,57 @@ class MenuActionDispatchTest {
         return close;
     }
 
+    @Test
+    void buttonUsesItemAndSlotFromLanguageFile() {
+        LanguageManager lgm = lib.getLanguageManager();
+        ItemStack item = mock(ItemStack.class);
+        when(lgm.getItem("Test.Heal", player, false)).thenReturn(item);
+        when(lgm.getCustomObject("Items.Test.Heal.slot", null, -1, false)).thenReturn(5);
+        MenuAction action = mock(MenuAction.class);
+        TestMenu menu = new TestMenu(pmu, null);
+        menu.render = m -> assertTrue(m.button("Test.Heal", action));
+        menu.registerSlot3 = false;
+
+        open(menu);
+
+        verify(inventory).setItem(5, item);
+        assertSame(action, menu.slotActions.get(5));
+    }
+
+    @Test
+    void buttonWithoutConfiguredSlotTakesFirstFreeSlot() {
+        LanguageManager lgm = lib.getLanguageManager();
+        when(lgm.getCustomObject("Items.Test.Info.slot", null, -1, false)).thenReturn(-1);
+        TestMenu menu = new TestMenu(pmu, null);
+        menu.render = m -> assertTrue(m.button("Test.Info", MenuAction.none()));
+        menu.registerSlot3 = false;
+
+        open(menu);
+
+        assertTrue(menu.slotActions.containsKey(0));
+    }
+
+    @Test
+    void registerButtonOverloadsWithoutForbiddenSet() {
+        MenuAction a = mock(MenuAction.class);
+        MenuAction b = mock(MenuAction.class);
+        TestMenu menu = new TestMenu(pmu, null);
+        menu.registerSlot3 = false;
+        menu.render = m -> {
+            assertTrue(m.registerButton(7, mock(ItemStack.class), a));
+            assertTrue(m.registerButton(mock(ItemStack.class), b));
+        };
+
+        open(menu);
+
+        assertSame(a, menu.slotActions.get(7));
+        assertSame(b, menu.slotActions.get(0));
+    }
+
     static class TestMenu extends Menu {
         private final MenuAction action;
         boolean registerSlot3 = true;
+        java.util.function.Consumer<TestMenu> render;
 
         TestMenu(PlayerMenuUtility pmu, MenuAction action) {
             super(pmu);
@@ -152,6 +200,7 @@ class MenuActionDispatchTest {
         @Override
         public void setMenuItems() {
             if (registerSlot3) registerButton(3, mock(ItemStack.class), action, null);
+            if (render != null) render.accept(this);
         }
     }
 

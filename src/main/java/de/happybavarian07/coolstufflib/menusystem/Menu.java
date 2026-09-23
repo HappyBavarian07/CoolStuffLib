@@ -304,6 +304,29 @@ public abstract class Menu implements InventoryHolder {
         return registerButton(slot, item, action, forbidden);
     }
 
+    public boolean registerButton(int slot, ItemStack item, MenuAction action) {
+        return registerButton(slot, item, action, null);
+    }
+
+    public boolean registerButton(ItemStack item, MenuAction action) {
+        return registerButton(item, action, null);
+    }
+
+    /**
+     * <p>Registers a button whose item comes from {@code Items.<itemPath>} in the language file and whose
+     * slot comes from {@code Items.<itemPath>.slot}. Without a configured slot the first free slot is used.</p>
+     *
+     * <pre><code>button("PlayerManager.Heal", MenuAction.of((p, e) -&gt; heal(p)).requires("admin.heal"));</code></pre>
+     *
+     * @return {@code false} if no slot was configured and no free slot is left
+     */
+    public boolean button(String itemPath, MenuAction action) {
+        ensurePrepared();
+        ItemStack item = lgm.getItem(itemPath, playerMenuUtility.getOwner(), false);
+        int slot = getSlot(itemPath, -1);
+        return slot >= 0 ? registerButton(slot, item, action, null) : registerButton(item, action, null);
+    }
+
     public boolean tryRegisterButton(int slot, ItemStack item, MenuAction action, Set<Integer> forbidden) {
         try {
             return registerButton(slot, item, action, forbidden);
