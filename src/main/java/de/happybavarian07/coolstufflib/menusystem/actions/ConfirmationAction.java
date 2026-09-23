@@ -7,6 +7,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 
 /**
  * A decorator for MenuAction that triggers a confirmation menu before executing the action.
+ * Without an explicit return menu, the menu that was clicked is reopened afterwards.
  */
 public class ConfirmationAction implements MenuAction {
     private final String reason;
@@ -25,11 +26,10 @@ public class ConfirmationAction implements MenuAction {
 
     @Override
     public void execute(Player player, InventoryClickEvent event) {
-        Utils.openConfirmationMenu(
-                reason,
-                action,
-                player,
-                savedMenu
-        );
+        Menu returnTo = savedMenu;
+        if (returnTo == null && event != null && event.getInventory().getHolder() instanceof Menu clicked) {
+            returnTo = clicked;
+        }
+        Utils.openConfirmationMenu(reason, action, player, returnTo);
     }
 }
