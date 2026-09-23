@@ -234,6 +234,13 @@ public class RepositoryController {
     }
 
     /**
+     * <p>The executor behind this controller, e.g. for stores that manage their own table.</p>
+     */
+    public SQLExecutor getSqlExecutor() {
+        return sqlExecutor;
+    }
+
+    /**
      * <p>Executes a SQL update directly via the SQLExecutor.</p>
      *
      * @param sql    SQL update statement

@@ -1,5 +1,6 @@
 package de.happybavarian07.coolstufflib.commandmanagement;
 
+import de.happybavarian07.coolstufflib.jpa.RepositoryController;
 import de.happybavarian07.coolstufflib.jpa.SQLExecutor;
 
 import java.sql.SQLException;
@@ -14,6 +15,11 @@ import java.util.List;
 public final class SqlAliasStore implements AliasStore {
     private final SQLExecutor executor;
     private final String table;
+
+    /** Uses the plugin's existing database connection. */
+    public SqlAliasStore(RepositoryController controller, String tablePrefix) {
+        this(controller.getSqlExecutor(), tablePrefix);
+    }
 
     public SqlAliasStore(SQLExecutor executor, String tablePrefix) {
         String prefix = tablePrefix == null ? "" : tablePrefix;

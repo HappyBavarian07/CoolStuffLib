@@ -111,6 +111,23 @@ class AliasStoreTest {
     }
 
     @Test
+    void sqlStoreUsesTheControllersExecutor() throws Exception {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite::memory:")) {
+            RepositoryController controller = mock(RepositoryController.class);
+            when(controller.getConnection("default")).thenReturn(connection);
+            SQLExecutor executor = new SQLExecutor(controller, null);
+            executor.setDefaultConnection("default");
+            when(controller.getSqlExecutor()).thenReturn(executor);
+
+            SqlAliasStore store = new SqlAliasStore(controller, "");
+            store.save(CommandAlias.of("gmc", "gamemode creative"));
+
+            assertEquals("command_aliases", store.table());
+            assertEquals(List.of(CommandAlias.of("gmc", "gamemode creative")), store.loadAll());
+        }
+    }
+
+    @Test
     void sqlStoreRejectsUnsafePrefix() {
         assertThrows(IllegalArgumentException.class, () -> new SqlAliasStore(mock(SQLExecutor.class), "x; DROP TABLE y"));
     }
