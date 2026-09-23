@@ -53,6 +53,11 @@ class ArgumentTest {
         assertEquals("<target>", Argument.player("target").usage());
         assertEquals("[amount]", Argument.integer("amount").optional().usage());
         assertEquals("<message...>", Argument.text("message").usage());
+        assertEquals("<a|b>", Argument.choice("mode", "a", "b").usage());
+        assertEquals("[on|off]", Argument.choice("toggle", "on", "off").optional().usage());
+        String modes = java.util.Arrays.stream(GameMode.values()).map(m -> m.name().toLowerCase()).collect(java.util.stream.Collectors.joining("|"));
+        assertEquals("<" + modes + ">", Argument.enumOf("mode", GameMode.class).usage());
+        assertEquals("<size>", Argument.choice("size", "1", "2", "3", "4", "5", "6").usage());
         assertTrue(Argument.integer("amount").required());
         assertFalse(Argument.integer("amount").optional().required());
     }
@@ -78,7 +83,7 @@ class ArgumentTest {
     @Test
     void syntaxAndLimitsAreDerivedFromArguments() {
         Give give = new Give();
-        assertEquals("/admin give <target> <item> [amount]", give.syntax());
+        assertEquals("/admin give <target> <apple|bread> [amount]", give.syntax());
         assertEquals(2, give.minArgs());
         assertEquals(3, give.maxArgs());
 

@@ -116,7 +116,7 @@ class CommandBuilderTest {
         withServer(() -> manager.onCommand(sender(CommandSender.class), new String[]{"all"}));
 
         assertEquals(List.of("all"), calls);
-        assertEquals("/heal [sub command]", manager.getCommandUsage());
+        assertEquals("/heal [all]", manager.getCommandUsage());
         assertEquals("heal", manager.getCommandPermissionAsString());
     }
 

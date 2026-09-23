@@ -23,16 +23,26 @@ import java.util.function.Function;
  * </code></pre>
  */
 public final class Argument {
+    /** Choice lists up to this size are spelled out in usage lines. */
+    public static final int MAX_INLINE_OPTIONS = 5;
+
     private final String name;
     private final boolean required;
     private final boolean greedy;
     private final Function<CommandSender, Collection<String>> completer;
+    private final List<String> fixedOptions;
 
     private Argument(String name, boolean required, boolean greedy, Function<CommandSender, Collection<String>> completer) {
+        this(name, required, greedy, completer, null);
+    }
+
+    private Argument(String name, boolean required, boolean greedy, Function<CommandSender, Collection<String>> completer,
+                     List<String> fixedOptions) {
         this.name = name;
         this.required = required;
         this.greedy = greedy;
         this.completer = completer;
+        this.fixedOptions = fixedOptions;
     }
 
     /** Online player names. */
@@ -48,13 +58,13 @@ public final class Argument {
     /** One of a fixed set of values. */
     public static Argument choice(String name, String... options) {
         List<String> values = List.of(options);
-        return new Argument(name, true, false, sender -> values);
+        return new Argument(name, true, false, sender -> values, values);
     }
 
     /** Enum constant, completed in lower case. */
     public static <E extends Enum<E>> Argument enumOf(String name, Class<E> type) {
         List<String> values = Arrays.stream(type.getEnumConstants()).map(e -> e.name().toLowerCase(Locale.ROOT)).toList();
-        return new Argument(name, true, false, sender -> values);
+        return new Argument(name, true, false, sender -> values, values);
     }
 
     /** A whole number; no completions. */
@@ -84,7 +94,7 @@ public final class Argument {
 
     /** Returns an optional copy of this argument. */
     public Argument optional() {
-        return new Argument(name, false, greedy, completer);
+        return new Argument(name, false, greedy, completer, fixedOptions);
     }
 
     public String name() {
@@ -104,9 +114,23 @@ public final class Argument {
         return values == null ? List.of() : List.copyOf(values);
     }
 
-    /** {@code <name>}, {@code [name]} or {@code <name...>} for syntax lines. */
+    /**
+     * <p>Usage notation: {@code <name>} required, {@code [name]} optional, {@code <name...>} free text, and
+     * short choice lists spelled out, e.g. {@code <survival|creative>} or {@code [on|off]}.</p>
+     */
     public String usage() {
-        String label = greedy ? name + "..." : name;
+        return bracket(label(), required);
+    }
+
+    private String label() {
+        if (greedy) return name + "...";
+        if (fixedOptions != null && !fixedOptions.isEmpty() && fixedOptions.size() <= MAX_INLINE_OPTIONS) {
+            return String.join("|", fixedOptions);
+        }
+        return name;
+    }
+
+    static String bracket(String label, boolean required) {
         return required ? "<" + label + ">" : "[" + label + "]";
     }
 }

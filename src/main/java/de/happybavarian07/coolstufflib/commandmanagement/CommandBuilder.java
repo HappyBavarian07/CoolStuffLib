@@ -141,7 +141,12 @@ public final class CommandBuilder {
     private String generatedUsage() {
         StringBuilder generated = new StringBuilder("/").append(name);
         for (Argument argument : root.arguments) generated.append(' ').append(argument.usage());
-        if (!subCommands.isEmpty()) generated.append(root.handler == null ? " <sub command>" : " [sub command]");
+        if (!subCommands.isEmpty()) {
+            String label = subCommands.size() <= Argument.MAX_INLINE_OPTIONS
+                    ? subCommands.stream().map(SubCommand::name).collect(java.util.stream.Collectors.joining("|"))
+                    : "sub command";
+            generated.append(' ').append(Argument.bracket(label, root.handler == null));
+        }
         return generated.toString();
     }
 
