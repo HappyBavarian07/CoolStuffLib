@@ -4,6 +4,7 @@ import de.happybavarian07.coolstufflib.CoolStuffLib;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import de.happybavarian07.coolstufflib.languagemanager.Placeholder;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permission;
 import org.junit.jupiter.api.AfterEach;
@@ -109,7 +110,7 @@ class HelpCommandTest {
         run("i");
         String joined = String.join("\n", sent);
         assertTrue(joined.contains("Shows info"), joined);
-        assertTrue(joined.contains("Aliases: §fi"), joined);
+        assertTrue(joined.contains("Aliases: " + ChatColor.WHITE + "i"), joined);
         assertTrue(joined.contains("[target]"), joined);
     }
 
