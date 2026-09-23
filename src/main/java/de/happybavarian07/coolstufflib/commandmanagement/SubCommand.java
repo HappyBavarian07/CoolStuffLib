@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -238,7 +239,13 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      *
      * @return the name of this sub-command
      */
-    public abstract String name();
+    public String name() {
+        SubCommandInfo meta = meta();
+        if (meta == null) {
+            throw new IllegalStateException(getClass().getName() + " must override name() or be annotated with @SubCommandInfo");
+        }
+        return meta.name();
+    }
 
     /**
      * <p>Gets the description/help information for this sub-command.</p>
@@ -251,7 +258,11 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      *
      * @return the description of this sub-command
      */
-    public abstract String info();
+    public String info() {
+        SubCommandInfo meta = meta();
+        if (meta != null && !meta.info().isEmpty()) return meta.info();
+        return languageText("Info", "");
+    }
 
     /**
      * <p>Gets the alternative names (aliases) for this sub-command.</p>
@@ -264,7 +275,10 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      *
      * @return array of aliases for this sub-command
      */
-    public abstract String[] aliases();
+    public String[] aliases() {
+        SubCommandInfo meta = meta();
+        return meta == null ? new String[0] : meta.aliases();
+    }
 
     /**
      * <p>Gets the sub-arguments for this command.</p>
@@ -284,7 +298,9 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      * @param args     The arguments that were passed to the command.
      * @return A map containing the sub-arguments for this command.
      */
-    public abstract Map<Integer, String[]> subArgs(CommandSender sender, int isPlayer, String[] args);
+    public Map<Integer, String[]> subArgs(CommandSender sender, int isPlayer, String[] args) {
+        return new HashMap<>();
+    }
 
     /**
      * <p>Gets the syntax for this sub-command.</p>
@@ -299,7 +315,18 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      *
      * @return the syntax of this sub-command
      */
-    public abstract String syntax();
+    public String syntax() {
+        SubCommandInfo meta = meta();
+        if (meta != null && !meta.syntax().isEmpty()) return meta.syntax();
+        return languageText("Syntax", defaultSyntax());
+    }
+
+    /**
+     * <p>Syntax used when neither the annotation nor the language file provides one.</p>
+     */
+    protected String defaultSyntax() {
+        return "/" + mainCommandName + " " + name();
+    }
 
     /**
      * <p>Converts the permission string to a Permission object for Bukkit integration.</p>
@@ -328,7 +355,11 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      *
      * @return the permission string for this sub-command
      */
-    public abstract String permissionAsString();
+    public String permissionAsString() {
+        SubCommandInfo meta = meta();
+        if (meta != null && !meta.permission().isEmpty()) return meta.permission();
+        return (mainCommandName + "." + name()).toLowerCase(Locale.ROOT);
+    }
 
     /**
      * <p>Determines whether this sub-command's permission should be automatically registered with Bukkit.</p>
@@ -341,7 +372,20 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      *
      * @return true if the permission should be auto-registered, false otherwise
      */
-    public abstract boolean autoRegisterPermission();
+    public boolean autoRegisterPermission() {
+        SubCommandInfo meta = meta();
+        return meta == null || meta.autoRegisterPermission();
+    }
+
+    private SubCommandInfo meta() {
+        return getClass().getAnnotation(SubCommandInfo.class);
+    }
+
+    private String languageText(String key, String fallback) {
+        if (lgm == null) return fallback;
+        String text = lgm.getMessageOrDefault("Commands." + mainCommandName + "." + name() + "." + key, null, fallback, false);
+        return text == null ? fallback : text;
+    }
 
     /**
      * <p>Formats the help message for a subcommand, replacing placeholders with their respective values.</p>

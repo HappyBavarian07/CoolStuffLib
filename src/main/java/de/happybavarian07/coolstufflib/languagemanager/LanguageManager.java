@@ -931,6 +931,16 @@ public class LanguageManager implements Service {
     }
 
     /**
+     * <p>Like {@link #getMessage(String, Player, boolean)}, but returns {@code fallback} (unformatted) when the
+     * path does not exist in the language file instead of a "null path" marker.</p>
+     */
+    public String getMessageOrDefault(String path, Player player, String fallback, boolean resetAfter) {
+        String message = getMessage(path, player, resetAfter);
+        if (message == null || message.startsWith("null path:") || message.equals("null config")) return fallback;
+        return message;
+    }
+
+    /**
      * Gets the permission message for a given permission.
      *
      * @param player     The player to get the message for.
