@@ -3,11 +3,14 @@ package de.happybavarian07.coolstufflib.menusystem.actions;/*
  * @Date 21.07.2024 | 12:33
  */
 
+import de.happybavarian07.coolstufflib.CoolStuffLib;
 import de.happybavarian07.coolstufflib.menusystem.Menu;
+import de.happybavarian07.coolstufflib.service.impl.ChatInputService;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
@@ -101,5 +104,19 @@ public interface MenuAction {
     /** Builds and opens a menu only when clicked. */
     static MenuAction open(Supplier<? extends Menu> menu) {
         return (player, event) -> menu.get().open();
+    }
+
+    /**
+     * Closes the menu, sends {@code message} (if not null) and passes the player's next chat message to
+     * {@code onInput} on the main thread. Reopen a menu from the handler if needed.
+     * <pre><code>MenuAction.prompt("Type the new amount:", (p, text) -&gt; { setAmount(text); open(); })</code></pre>
+     */
+    static MenuAction prompt(String message, BiConsumer<Player, String> onInput) {
+        return (player, event) -> {
+            ChatInputService input = CoolStuffLib.getLib().requireService("chat-input-service", ChatInputService.class);
+            player.closeInventory();
+            if (message != null) player.sendMessage(message);
+            input.requestInput(player, text -> onInput.accept(player, text));
+        };
     }
 }

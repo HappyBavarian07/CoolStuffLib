@@ -10,12 +10,16 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import de.happybavarian07.coolstufflib.service.impl.ChatInputService;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.MockedStatic;
 
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -127,6 +131,27 @@ class MenuActionDecoratorTest {
             utils.verify(() -> Utils.openConfirmationMenu(eq("sure?"), any(MenuAction.class), eq(player), eq(menu)));
         }
         verify(inner, never()).execute(any(), any());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void promptClosesAsksAndForwardsNextChatMessage() {
+        CoolStuffLib lib = mock(CoolStuffLib.class);
+        ChatInputService input = mock(ChatInputService.class);
+        when(lib.requireService("chat-input-service", ChatInputService.class)).thenReturn(input);
+        java.util.List<String> received = new java.util.ArrayList<>();
+
+        try (MockedStatic<CoolStuffLib> statics = mockStatic(CoolStuffLib.class)) {
+            statics.when(CoolStuffLib::getLib).thenReturn(lib);
+            MenuAction.prompt("Type:", (p, text) -> received.add(p == player ? text : "wrong player")).execute(player, null);
+        }
+
+        verify(player).closeInventory();
+        verify(player).sendMessage("Type:");
+        ArgumentCaptor<Consumer<String>> callback = ArgumentCaptor.forClass(Consumer.class);
+        verify(input).requestInput(eq(player), callback.capture());
+        callback.getValue().accept("42");
+        assertEquals(java.util.List.of("42"), received);
     }
 
     @Test
