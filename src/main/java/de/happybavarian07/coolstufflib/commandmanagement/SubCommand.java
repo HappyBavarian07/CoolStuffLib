@@ -238,6 +238,14 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      * @return True if the command was handled successfully, false otherwise.
      */
     public boolean handleCommand(CommandSender sender, Player playerOrNull, String[] args) {
+        return execute(sender, new CommandArgs(sender, args, arguments()));
+    }
+
+    /**
+     * <p>Runs the command with typed arguments. Invalid input from {@link CommandArgs} is reported to the
+     * sender automatically. Return {@code false} to show the usage message.</p>
+     */
+    public boolean execute(CommandSender sender, CommandArgs args) {
         return false;
     }
 

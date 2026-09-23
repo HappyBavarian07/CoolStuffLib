@@ -150,6 +150,8 @@ public abstract class CommandManager {
                 if (!callResult) {
                     sender.sendMessage(format(lgm.getMessage("Player.Commands.UsageMessage", getPlayerForSender(sender), true), target));
                 }
+            } catch (CommandArgumentException e) {
+                sender.sendMessage(e.render(lgm, getPlayerForSender(sender)));
             } catch (Exception e) {
                 lgm.addPlaceholder(PlaceholderType.MESSAGE, "%error%", e + ": " + e.getMessage(), false);
                 lgm.addPlaceholder(PlaceholderType.MESSAGE, "%stacktrace%", Arrays.toString(e.getStackTrace()), false);
