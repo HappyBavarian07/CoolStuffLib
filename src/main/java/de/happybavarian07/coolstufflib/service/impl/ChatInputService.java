@@ -35,9 +35,12 @@ public class ChatInputService implements Service, Listener {
 
     @Override
     public CompletableFuture<Void> init() {
-        return CompletableFuture.runAsync(() -> {
+        try {
             Bukkit.getPluginManager().registerEvents(this, CoolStuffLib.getLib().getJavaPluginUsingLib());
-        });
+            return CompletableFuture.completedFuture(null);
+        } catch (RuntimeException e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     @Override
