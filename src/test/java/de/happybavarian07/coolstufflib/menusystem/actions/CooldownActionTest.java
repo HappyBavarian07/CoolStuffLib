@@ -3,8 +3,9 @@ package de.happybavarian07.coolstufflib.menusystem.actions;
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.Test;
 
+import de.happybavarian07.coolstufflib.utils.CooldownTracker;
+
 import java.lang.reflect.Field;
-import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,7 +46,7 @@ class CooldownActionTest {
         Thread.sleep(50);
         action.execute(player(), null);
 
-        assertEquals(1, entries(action).size());
+        assertEquals(1, tracker(action).size());
     }
 
     @Test
@@ -66,10 +67,9 @@ class CooldownActionTest {
         return player;
     }
 
-    @SuppressWarnings("unchecked")
-    private static Map<UUID, Long> entries(CooldownAction action) throws Exception {
-        Field field = CooldownAction.class.getDeclaredField("lastExecutionByPlayer");
+    private static CooldownTracker tracker(CooldownAction action) throws Exception {
+        Field field = CooldownAction.class.getDeclaredField("tracker");
         field.setAccessible(true);
-        return (Map<UUID, Long>) field.get(action);
+        return (CooldownTracker) field.get(action);
     }
 }

@@ -2,6 +2,7 @@ package de.happybavarian07.coolstufflib.commandmanagement;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -85,6 +86,16 @@ public final class CommandBuilder {
 
     public CommandBuilder maxArgs(int maxArgs) {
         root.maxArgs(maxArgs);
+        return this;
+    }
+
+    public CommandBuilder cooldown(Duration cooldown) {
+        root.cooldown(cooldown);
+        return this;
+    }
+
+    public CommandBuilder confirm() {
+        root.confirm();
         return this;
     }
 

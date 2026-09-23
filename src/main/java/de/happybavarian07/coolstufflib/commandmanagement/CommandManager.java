@@ -8,6 +8,7 @@ import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import de.happybavarian07.coolstufflib.languagemanager.Placeholder;
 import de.happybavarian07.coolstufflib.languagemanager.PlaceholderType;
 import de.happybavarian07.coolstufflib.utils.CardboardCommandGuard;
+import de.happybavarian07.coolstufflib.utils.CooldownTracker;
 import de.happybavarian07.coolstufflib.utils.LogPrefix;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -149,6 +150,10 @@ public abstract class CommandManager {
                 }
             }
 
+            if (!passesConfirmationAndCooldown(sender, target, updatedArgs)) {
+                return true;
+            }
+
             try {
                 boolean callResult = handleSubCommand(sender, target, updatedArgs);
                 if (!callResult) {
@@ -171,6 +176,28 @@ public abstract class CommandManager {
         } finally {
             CardboardCommandGuard.exitCommand();
         }
+    }
+
+    private boolean passesConfirmationAndCooldown(CommandSender sender, SubCommand target, String[] args) {
+        Object key = SubCommand.senderKey(sender);
+        Player player = getPlayerForSender(sender);
+        if (target.requiresConfirmation() && !target.confirmations().confirm(key, String.join(" ", args))) {
+            sender.sendMessage(CommandMessages.render(lgm, player, "Player.Commands.ConfirmCommand",
+                    "%prefix% &9> &eRun the command again within %seconds%s to confirm.",
+                    Map.of("%seconds%", String.valueOf(SubCommand.CONFIRMATION_WINDOW_MILLIS / 1000))));
+            return false;
+        }
+        CooldownTracker cooldown = target.cooldowns();
+        if (cooldown != null) {
+            long remaining = cooldown.remainingMillis(key);
+            if (remaining > 0 || !cooldown.tryUse(key)) {
+                sender.sendMessage(CommandMessages.render(lgm, player, "Player.Commands.OnCooldown",
+                        "%prefix% &9> &cPlease wait %seconds%s before using this again.",
+                        Map.of("%seconds%", String.valueOf((remaining + 999) / 1000))));
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

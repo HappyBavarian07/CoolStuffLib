@@ -1,8 +1,6 @@
 package de.happybavarian07.coolstufflib.commandmanagement;
 
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
-import de.happybavarian07.coolstufflib.languagemanager.PlaceholderType;
-import de.happybavarian07.coolstufflib.utils.Utils;
 import org.bukkit.entity.Player;
 
 import java.util.Map;
@@ -33,17 +31,6 @@ public class CommandArgumentException extends RuntimeException {
     }
 
     public String render(LanguageManager lgm, Player player) {
-        if (lgm != null) {
-            placeholders.forEach((key, value) -> lgm.addPlaceholder(PlaceholderType.MESSAGE, key, value, false));
-            String message = lgm.getMessageOrDefault(messagePath, player, null, true);
-            placeholders.keySet().forEach(key -> lgm.removePlaceholder(PlaceholderType.MESSAGE, key));
-            if (message != null) return message;
-        }
-        String text = fallback;
-        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
-            text = text.replace(entry.getKey(), entry.getValue());
-        }
-        String prefix = lgm == null || lgm.getPrefix() == null ? "" : lgm.getPrefix();
-        return Utils.format(player, text, prefix);
+        return CommandMessages.render(lgm, player, messagePath, fallback, placeholders);
     }
 }

@@ -9,7 +9,9 @@ import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import de.happybavarian07.coolstufflib.languagemanager.Placeholder;
 import de.happybavarian07.coolstufflib.languagemanager.PlaceholderType;
 import org.bukkit.command.CommandSender;
+import de.happybavarian07.coolstufflib.utils.CooldownTracker;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
@@ -59,6 +61,10 @@ public abstract class SubCommand implements Comparable<SubCommand> {
     protected LanguageManager lgm;
     protected CommandManagerRegistry registry;
     protected String mainCommandName = "";
+    /** Time a sender has to repeat a command that {@link #requiresConfirmation() requires confirmation}. */
+    public static final long CONFIRMATION_WINDOW_MILLIS = 10_000;
+    private final ConfirmationTracker confirmations = new ConfirmationTracker(CONFIRMATION_WINDOW_MILLIS);
+    private CooldownTracker cooldowns;
 
     /**
      * Injects the necessary dependencies into the SubCommand.
@@ -404,6 +410,33 @@ public abstract class SubCommand implements Comparable<SubCommand> {
     public boolean autoRegisterPermission() {
         SubCommandInfo meta = meta();
         return meta == null || meta.autoRegisterPermission();
+    }
+
+    /** Per-sender cooldown in milliseconds; 0 (default) disables it. */
+    public long cooldownMillis() {
+        SubCommandInfo meta = meta();
+        return meta == null ? 0 : meta.cooldownMillis();
+    }
+
+    /** Whether the sender must repeat the command within {@link #CONFIRMATION_WINDOW_MILLIS} to run it. */
+    public boolean requiresConfirmation() {
+        SubCommandInfo meta = meta();
+        return meta != null && meta.confirm();
+    }
+
+    ConfirmationTracker confirmations() {
+        return confirmations;
+    }
+
+    CooldownTracker cooldowns() {
+        long millis = cooldownMillis();
+        if (millis <= 0) return null;
+        if (cooldowns == null) cooldowns = new CooldownTracker(millis);
+        return cooldowns;
+    }
+
+    static Object senderKey(CommandSender sender) {
+        return sender instanceof Entity entity ? entity.getUniqueId() : sender.getName();
     }
 
     private SubCommandInfo meta() {

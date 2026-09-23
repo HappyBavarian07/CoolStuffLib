@@ -37,4 +37,10 @@ public @interface SubCommandInfo {
     String permission() default "";
 
     boolean autoRegisterPermission() default true;
+
+    /** Per-sender cooldown in milliseconds; 0 disables it. */
+    long cooldownMillis() default 0;
+
+    /** Require running the same command again within {@link SubCommand#CONFIRMATION_WINDOW_MILLIS} to execute it. */
+    boolean confirm() default false;
 }

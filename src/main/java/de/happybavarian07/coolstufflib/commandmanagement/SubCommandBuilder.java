@@ -2,6 +2,7 @@ package de.happybavarian07.coolstufflib.commandmanagement;
 
 import org.bukkit.command.CommandSender;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,6 +32,8 @@ public final class SubCommandBuilder {
     boolean senderTypeSpecificSubArgs;
     Integer minArgs;
     Integer maxArgs;
+    long cooldownMillis;
+    boolean confirm;
     List<Argument> arguments = List.of();
     CommandHandler handler;
 
@@ -95,6 +98,18 @@ public final class SubCommandBuilder {
     /** Overrides the maximum derived from the arguments. */
     public SubCommandBuilder maxArgs(int maxArgs) {
         this.maxArgs = maxArgs;
+        return this;
+    }
+
+    /** Per-sender cooldown. */
+    public SubCommandBuilder cooldown(Duration cooldown) {
+        this.cooldownMillis = cooldown.toMillis();
+        return this;
+    }
+
+    /** Require running the same command twice within {@link SubCommand#CONFIRMATION_WINDOW_MILLIS}. */
+    public SubCommandBuilder confirm() {
+        this.confirm = true;
         return this;
     }
 
@@ -189,6 +204,16 @@ public final class SubCommandBuilder {
         @Override
         public int maxArgs() {
             return spec.maxArgs != null ? spec.maxArgs : super.maxArgs();
+        }
+
+        @Override
+        public long cooldownMillis() {
+            return spec.cooldownMillis;
+        }
+
+        @Override
+        public boolean requiresConfirmation() {
+            return spec.confirm;
         }
 
         @Override
