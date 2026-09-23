@@ -6,8 +6,9 @@ A comprehensive Java library for plugin and application developers, providing ad
 
 ## 🚀 Features
 
-- **Command Manager**: Flexible command registration and execution.
-- **Menu System**: Intuitive menu creation and management.
+- **Command Manager**: Subcommands (also nested), typed arguments, generated usage and tab completion, help pages, cooldowns, confirmations, async commands and builder-made commands.
+- **Command Aliases**: Command shortcuts, also created at runtime and stored in `data.yml` or a database table.
+- **Menu System**: Buttons with chainable click actions (permission, confirmation, cooldown, sound, commands, chat prompts), list menus, pagination zones and in-place refresh.
 - **Language Manager**: Effortless multi-language support for your projects.
 - **Config Manager**: Streamlined configuration file handling.
 - **Expression Engine**: Dynamic expression evaluation (e.g., math operations).

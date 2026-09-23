@@ -24,6 +24,10 @@ before relying on an item's status.
 
 ## Shipped (formerly on this list)
 
+- Command system overhaul: annotated/builder commands, typed arguments, nested subcommands, cooldowns,
+  confirmations, async commands, help detail view, command aliases (runtime, stored in data.yml or a table).
+- Menu actions: chainable decorators, click-type routing, list menus, chat prompts, command actions, refresh.
+- Working `@Transactional` with a thread-safe connection pool.
 - Button registration API for menus (`registerButton`, `slotActions`, `forbiddenSlots`,
   `MenuListener` routing) – replaces the PDC item-id dispatch idea.
 - Advanced configuration framework (`configstuff/advanced`: multiple file types, validation,
