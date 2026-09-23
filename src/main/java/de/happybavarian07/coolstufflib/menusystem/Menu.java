@@ -145,10 +145,7 @@ public abstract class Menu implements InventoryHolder {
 
         inventory = Bukkit.createInventory(this, getSlots(), getMenuName());
         slotActions.clear();
-        Map<String, MenuAddon> addonList = new HashMap<>();
-        if (lib.getMenuAddonManager() != null) {
-            addonList = lib.getMenuAddonManager().getMenuAddons(this.getConfigMenuAddonFeatureName());
-        }
+        Map<String, MenuAddon> addonList = menuAddons();
 
         this.setMenuItems();
 
@@ -180,6 +177,28 @@ public abstract class Menu implements InventoryHolder {
             MenuAddon addon = menuAddonName.getValue();
             addon.onOpenEvent();
         }
+    }
+
+    /**
+     * <p>Re-renders the menu into the already open inventory (no reopen, so the cursor stays and
+     * nothing flickers). Opens the menu if it was never opened. The title is not updated.</p>
+     */
+    public void refresh() {
+        if (inventory == null) {
+            open();
+            return;
+        }
+        inventory.clear();
+        slotActions.clear();
+        setMenuItems();
+        for (MenuAddon addon : menuAddons().values()) {
+            addon.setMenuAddonItems();
+        }
+    }
+
+    private Map<String, MenuAddon> menuAddons() {
+        MenuAddonManager addonManager = lib.getMenuAddonManager();
+        return addonManager == null ? Map.of() : addonManager.getMenuAddons(getConfigMenuAddonFeatureName());
     }
 
     public void closeAndReturnOrClose() {

@@ -286,7 +286,7 @@ public abstract class PaginatedMenu<T> extends Menu {
             if (pageDirection == PageDirection.REVERSED) return goBackward(player);
             return goForward(player);
         } else if (slot == refreshSlot || item.isSimilar(lgm.getItem("General.Refresh", player, false))) {
-            super.open();
+            refresh();
             return true;
         }
         return false;

@@ -114,6 +114,32 @@ class MenuActionDispatchTest {
     }
 
     @Test
+    void refreshRerendersIntoSameInventoryWithoutReopening() {
+        TestMenu menu = new TestMenu(pmu, (p, e) -> {});
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            bukkit.when(() -> Bukkit.createInventory(any(InventoryHolder.class), anyInt(), anyString())).thenReturn(inventory);
+            menu.open();
+            menu.registerSlot3 = false;
+            menu.refresh();
+            bukkit.verify(() -> Bukkit.createInventory(any(InventoryHolder.class), anyInt(), anyString()), times(1));
+        }
+        verify(inventory).clear();
+        verify(player, times(1)).openInventory(inventory);
+        assertFalse(menu.slotActions.containsKey(3));
+    }
+
+    @Test
+    void refreshBeforeOpenOpens() {
+        TestMenu menu = new TestMenu(pmu, (p, e) -> {});
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            bukkit.when(() -> Bukkit.createInventory(any(InventoryHolder.class), anyInt(), anyString())).thenReturn(inventory);
+            menu.refresh();
+        }
+        verify(player).openInventory(inventory);
+        assertTrue(menu.slotActions.containsKey(3));
+    }
+
+    @Test
     void buttonUsesItemAndSlotFromLanguageFile() {
         LanguageManager lgm = lib.getLanguageManager();
         ItemStack item = mock(ItemStack.class);
