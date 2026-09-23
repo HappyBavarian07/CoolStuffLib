@@ -850,7 +850,7 @@ public class LanguageManager implements Service {
 
     public <T> T getObjectFromLanguageCacheOrConfig(String path, String langName, Class<T> clazz) {
         LanguageCache langCache = getLanguageCache(langName);
-        if (langCache.containsKey(path) && langCache.getData(path).getClass().isInstance(clazz)) {
+        if (langCache.containsKey(path) && clazz.isInstance(langCache.getData(path))) {
             return clazz.cast(langCache.getData(path));
         } else {
             LanguageFile langFile = getLang(langName, true);
@@ -1232,6 +1232,8 @@ public class LanguageManager implements Service {
         LanguageFile langFile = getLangOrPlayerLang(false, langName, player);
         LanguageConfig langConfig = langFile.getLangConfig();
         if (langConfig == null || langConfig.getConfig() == null)
+            return defaultValue;
+        if (!langConfig.getConfig().contains(path) && !getLanguageCache(langName).containsKey(path))
             return defaultValue;
         T obj;
         try {
