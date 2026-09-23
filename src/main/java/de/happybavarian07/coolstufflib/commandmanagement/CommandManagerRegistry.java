@@ -18,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
@@ -745,21 +744,10 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter, Se
     }
 
     /**
-     * <p>Registers command aliases from a config section. Each key is the new command; the value is either
-     * the command line or a section:</p>
-     * <pre><code>
-     * Aliases:
-     *   gmc: "gamemode creative {args}"
-     *   heal:
-     *     command: "effect give {0} instant_health 1 10"
-     *     permission: "myplugin.alias.heal"
-     *     console: true            # needs a permission
-     *     description: "Heals a player"
-     *     aliases: [h]
-     *     player-only: false
-     *     cooldown-seconds: 30
-     *     confirm: false
-     * </code></pre>
+     * <p>Registers read-only aliases defined in a configuration section (it is only read, never written).
+     * Each key is the new command; the value is the command line or a section, see
+     * {@link CommandAlias#fromSection}. For aliases created at runtime use {@link CommandAliasManager},
+     * which stores them in the data file or database instead.</p>
      * <p>Invalid entries are logged and skipped.</p>
      *
      * @return names of the registered aliases
@@ -769,26 +757,10 @@ public class CommandManagerRegistry implements CommandExecutor, TabCompleter, Se
         if (section == null) return registered;
         for (String name : section.getKeys(false)) {
             try {
-                ConfigurationSection entry = section.getConfigurationSection(name);
-                String commandLine = entry == null ? section.getString(name) : entry.getString("command");
-                if (commandLine == null || commandLine.isBlank()) throw new IllegalArgumentException("no command set");
-                CommandBuilder builder = command(name);
-                boolean console = false;
-                if (entry != null) {
-                    if (entry.isString("permission")) builder.permission(entry.getString("permission"));
-                    if (entry.isString("description")) builder.info(entry.getString("description"));
-                    List<String> aliases = entry.getStringList("aliases");
-                    if (!aliases.isEmpty()) builder.aliases(aliases.toArray(new String[0]));
-                    if (entry.getBoolean("player-only")) builder.playerOnly();
-                    long cooldownSeconds = entry.getLong("cooldown-seconds");
-                    if (cooldownSeconds > 0) builder.cooldown(Duration.ofSeconds(cooldownSeconds));
-                    if (entry.getBoolean("confirm")) builder.confirm();
-                    console = entry.getBoolean("console");
-                }
-                (console ? builder.runsAsConsole(commandLine) : builder.runs(commandLine)).register();
+                CommandAlias.fromSection(section, name).applyTo(command(name)).register();
                 registered.add(name);
             } catch (RuntimeException e) {
-                CoolStuffLib.logError("Could not register command alias '" + name + "' from config", e);
+                CoolStuffLib.logError("Could not register command alias '" + name + "'", e);
             }
         }
         return registered;
