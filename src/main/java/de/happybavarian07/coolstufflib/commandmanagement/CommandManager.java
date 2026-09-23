@@ -255,6 +255,8 @@ public abstract class CommandManager {
      * @return {@code true} if the {@link CommandSender} has permission to execute the {@link SubCommand}, {@code false} otherwise.
      */
     public boolean hasPermission(CommandSender sender, SubCommand target) {
+        String permission = target.permissionAsString();
+        if (permission == null || permission.isEmpty()) return true;
         return sender.hasPermission(target.permissionAsPermission()) || (target.isOpRequired() && sender.isOp());
     }
 

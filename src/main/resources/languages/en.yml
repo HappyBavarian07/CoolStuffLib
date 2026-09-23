@@ -29,6 +29,15 @@ Messages:
         Header: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
         Format: '  &b%usage% &7- &b%description%'
         Footer: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+      HelpUnknownCommand: '%prefix% &9> &cNo help found for %command%.'
+      HelpDetails:
+        Header: '&a------------ &b%usage% &a------------'
+        Description: '&7Description: &f%description%'
+        Aliases: '&7Aliases: &f%aliases%'
+        Permission: '&7Permission: &f%permission%'
+        Arguments: '&7Arguments: &f%arguments%'
+        SubCommands: '&7Sub commands: &f%subcommands%'
+        Notes: '&7Notes: &f%notes%'
     General:
       Error: '%prefix% &9> &cAn unexpected Error happened! (%error%)'
       AlreadyOnFirstPage: '%prefix% &9> &cYou''re already on the first page!'
