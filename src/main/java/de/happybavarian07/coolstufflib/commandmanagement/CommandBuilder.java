@@ -1,11 +1,15 @@
 package de.happybavarian07.coolstufflib.commandmanagement;
 
+import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * <p>Builds and registers a whole command without writing a {@link CommandManager} class.
@@ -32,6 +36,8 @@ public final class CommandBuilder {
     private String info = "";
     private String permission;
     private boolean autoRegisterPermission = true;
+    private CommandTemplate template;
+    private boolean templateAsConsole;
 
     CommandBuilder(CommandManagerRegistry registry, String name) {
         this.registry = registry;
@@ -119,6 +125,42 @@ public final class CommandBuilder {
         return this;
     }
 
+    /**
+     * <p>Makes this command an alias for another command line, run as the sender (their permissions
+     * apply). Placeholders: {@code {0}}, {@code {1}}, ... {@code {args}}, {@code {args:1}}, {@code {player}}.
+     * Argument limits and the usage line follow from the template.</p>
+     * <pre><code>registry.command("gmc").runs("gamemode creative {args}").register();</code></pre>
+     */
+    public CommandBuilder runs(String commandLine) {
+        return runsTemplate(commandLine, false);
+    }
+
+    /**
+     * <p>Like {@link #runs(String)} but runs the command line as the console. Requires an explicit
+     * {@link #permission(String)}, because the console bypasses the target command's own permission.</p>
+     */
+    public CommandBuilder runsAsConsole(String commandLine) {
+        return runsTemplate(commandLine, true);
+    }
+
+    private CommandBuilder runsTemplate(String commandLine, boolean asConsole) {
+        CommandTemplate parsed = new CommandTemplate(commandLine);
+        this.template = parsed;
+        this.templateAsConsole = asConsole;
+        root.minArgs(parsed.requiredArgs());
+        root.maxArgs(parsed.acceptsExtraArgs() ? Integer.MAX_VALUE : parsed.requiredArgs());
+        root.executes((sender, args) -> {
+            String line = parsed.resolve(sender, args.raw());
+            CommandSender runner = asConsole ? Bukkit.getConsoleSender() : sender;
+            if (!CommandTemplate.dispatch(runner, line)) {
+                sender.sendMessage(CommandMessages.render(registry.getLanguageManager(), sender instanceof Player player ? player : null,
+                        "Player.Commands.AliasFailed", "%prefix% &9> &cCould not run /%command%.", Map.of("%command%", line)));
+            }
+            return true;
+        });
+        return this;
+    }
+
     public CommandBuilder sub(SubCommand... subCommands) {
         this.subCommands.addAll(List.of(subCommands));
         return this;
@@ -129,8 +171,19 @@ public final class CommandBuilder {
         if (registry.getCommandManager(name) != null) {
             throw new IllegalStateException("Command '" + name + "' is already registered");
         }
+        if (template != null) {
+            String target = template.commandName();
+            if (target.equalsIgnoreCase(name) || aliases.stream().anyMatch(target::equalsIgnoreCase)) {
+                throw new IllegalArgumentException("Alias '" + name + "' would run itself");
+            }
+            if (templateAsConsole && permission == null) {
+                throw new IllegalStateException("Console alias '" + name + "' needs an explicit permission(...)");
+            }
+            if (info.isEmpty()) info = "Runs /" + template.template();
+        }
         String resolvedPermission = permission != null ? permission : name.toLowerCase(Locale.ROOT);
-        String resolvedUsage = usage != null ? usage : generatedUsage();
+        String resolvedUsage = usage != null ? usage
+                : template != null ? ("/" + name + " " + template.usage()).trim() : generatedUsage();
         SubCommand rootCommand = null;
         if (root.handler != null) {
             rootCommand = root.permission(resolvedPermission).syntax(resolvedUsage).info(info)

@@ -22,6 +22,7 @@ Messages:
       InvalidChoice: '%prefix% &9> &c%value% is not valid. Options: %options%'
       OnCooldown: '%prefix% &9> &cPlease wait %seconds%s before using this again.'
       ConfirmCommand: '%prefix% &9> &eRun the command again within %seconds%s to confirm.'
+      AliasFailed: '%prefix% &9> &cCould not run /%command%.'
       CommandContainsInvalidArgs: '%prefix% &9> &cThe Command contains invalid Arguments! (%invalidArgs%)'
       HelpPageDoesNotExist: '%prefix% &9> &cThis Help Page does not exist!'
       NoPermission: '%prefix% &9> &cYou do not have access to this command!'

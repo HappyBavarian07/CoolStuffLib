@@ -4,8 +4,10 @@ package de.happybavarian07.coolstufflib.menusystem.actions;/*
  */
 
 import de.happybavarian07.coolstufflib.CoolStuffLib;
+import de.happybavarian07.coolstufflib.commandmanagement.CommandTemplate;
 import de.happybavarian07.coolstufflib.menusystem.Menu;
 import de.happybavarian07.coolstufflib.service.impl.ChatInputService;
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -104,6 +106,26 @@ public interface MenuAction {
     /** Builds and opens a menu only when clicked. */
     static MenuAction open(Supplier<? extends Menu> menu) {
         return (player, event) -> menu.get().open();
+    }
+
+    /**
+     * Runs a command as the clicking player (their permissions apply). {@code {player}} and {@code {uuid}}
+     * are replaced; a leading slash is optional.
+     * <pre><code>MenuAction.command("spawn").thenClose()</code></pre>
+     */
+    static MenuAction command(String commandLine) {
+        CommandTemplate template = new CommandTemplate(commandLine);
+        return (player, event) -> CommandTemplate.dispatch(player, template.resolve(player, new String[0]));
+    }
+
+    /**
+     * Runs a command as the console. Only use this behind a permission check such as
+     * {@link #requires(String)}, since the console can run anything.
+     * <pre><code>MenuAction.consoleCommand("give {player} diamond 1").requires("shop.buy.diamond")</code></pre>
+     */
+    static MenuAction consoleCommand(String commandLine) {
+        CommandTemplate template = new CommandTemplate(commandLine);
+        return (player, event) -> CommandTemplate.dispatch(Bukkit.getConsoleSender(), template.resolve(player, new String[0]));
     }
 
     /**
