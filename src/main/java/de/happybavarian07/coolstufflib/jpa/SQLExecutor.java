@@ -95,6 +95,38 @@ public class SQLExecutor {
     }
 
     /**
+     * <p>Runs an INSERT and returns the first key the database generated, or {@code null} if it generated none.</p>
+     */
+    public Object executeInsert(String sql, Object... params) throws SQLException {
+        Connection conn = getConnection(defaultConnection);
+        try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            bindParameters(stmt, params);
+            stmt.executeUpdate();
+            try (ResultSet keys = stmt.getGeneratedKeys()) {
+                return keys.next() ? keys.getObject(1) : null;
+            }
+        } catch (SQLException e) {
+            throw new SQLException("Error executing insert. SQL: " + sql + ", Params: " + Arrays.toString(params), e);
+        } finally {
+            releaseConnection(defaultConnection, conn);
+        }
+    }
+
+    /** True for an id the database fills in: {@code @GeneratedValue} or {@code @Column(autoIncrement = true)}. */
+    public static boolean isGenerated(Field field) {
+        Column column = field.getAnnotation(Column.class);
+        return field.isAnnotationPresent(GeneratedValue.class) || (column != null && column.autoIncrement());
+    }
+
+    private String autoIncrementDefinition(String columnName, Field field) {
+        if ("sqlite".equalsIgnoreCase(dbProperties.getDriver())) {
+            // SQLite only auto-increments an INTEGER PRIMARY KEY, and spells it AUTOINCREMENT
+            return columnName + " INTEGER PRIMARY KEY AUTOINCREMENT";
+        }
+        return columnName + " " + getSQLType(field) + " PRIMARY KEY AUTO_INCREMENT";
+    }
+
+    /**
      * <p>Executes an SQL query and returns the ResultSet. The pooled connection is only released when the
      * returned ResultSet is closed, so always use try-with-resources, or prefer
      * {@link #query(String, ResultSetMapper, Object...)}.</p>
@@ -203,9 +235,8 @@ public class SQLExecutor {
         }
         Column column = field.getAnnotation(Column.class);
         String columnName = column.name().isEmpty() ? field.getName() : column.name();
-        if (column.autoIncrement() && "sqlite".equalsIgnoreCase(dbProperties.getDriver())) {
-            // SQLite only auto-increments an INTEGER PRIMARY KEY, and spells it AUTOINCREMENT
-            return columnName + " INTEGER PRIMARY KEY AUTOINCREMENT";
+        if (isGenerated(field)) {
+            return autoIncrementDefinition(columnName, field);
         }
         String sqlType = getSQLType(field);
         StringBuilder definition = new StringBuilder();
@@ -232,7 +263,9 @@ public class SQLExecutor {
                 if (id && !def.contains("PRIMARY KEY")) def += " PRIMARY KEY";
                 columnDefinitions.add(def);
             } else if (id) {
-                columnDefinitions.add(EntityReflectionUtil.getIdColumnName(entityClass) + " " + getSQLType(field) + " PRIMARY KEY");
+                String columnName = EntityReflectionUtil.getIdColumnName(entityClass);
+                columnDefinitions.add(isGenerated(field) ? autoIncrementDefinition(columnName, field)
+                        : columnName + " " + getSQLType(field) + " PRIMARY KEY");
             }
         }
         sql.append(String.join(", ", columnDefinitions));
