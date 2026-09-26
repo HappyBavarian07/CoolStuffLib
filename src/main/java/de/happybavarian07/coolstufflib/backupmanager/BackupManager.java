@@ -3,12 +3,12 @@ package de.happybavarian07.coolstufflib.backupmanager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 
 import de.happybavarian07.coolstufflib.service.api.Service;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BackupManager implements Service {
     private final UUID serviceId = UUID.randomUUID();
@@ -18,9 +18,15 @@ public class BackupManager implements Service {
     @Override
     public String serviceName() { return "backup-manager"; }
     @Override
-    public CompletableFuture<Void> init() { return CompletableFuture.completedFuture(null); }
+    public CompletableFuture<Void> init() {
+        startBackupScheduler();
+        return CompletableFuture.completedFuture(null);
+    }
     @Override
-    public CompletableFuture<Void> shutdown() { return CompletableFuture.completedFuture(null); }
+    public CompletableFuture<Void> shutdown() {
+        stopBackupScheduler();
+        return CompletableFuture.completedFuture(null);
+    }
 
     private Map<String, FileBackup> fileBackupList;
     private int numberOfBackUpsBeforeDeleting;
@@ -29,24 +35,24 @@ public class BackupManager implements Service {
     private Thread backupSchedulerThread;
 
     /**
-     * Constructs a BackupManager instance.
+     * Constructs a BackupManager instance. The automatic backup scheduler starts in {@link #init()}
+     * (called by the service registry) or with {@link #startBackupScheduler()}.
      *
      * @param numberOfBackUpsBeforeDeleting The maximum number of backups to retain.
      * @param backupRepeatTimeInSeconds The interval for automatic backups.
      */
     public BackupManager(int numberOfBackUpsBeforeDeleting, long backupRepeatTimeInSeconds) {
-        this.fileBackupList = new HashMap<>();
+        this.fileBackupList = new ConcurrentHashMap<>();
         this.numberOfBackUpsBeforeDeleting = numberOfBackUpsBeforeDeleting;
         this.backupRepeatTimeInSeconds = backupRepeatTimeInSeconds;
-
-        startBackupScheduler();
     }
 
-    private void startBackupScheduler() {
-        backupSchedulerEnabled = true;
+    public synchronized void startBackupScheduler() {
+        if (backupRepeatTimeInSeconds <= 0) return;
         if (backupSchedulerThread != null && backupSchedulerThread.isAlive()) {
             backupSchedulerThread.interrupt();
         }
+        backupSchedulerEnabled = true;
         backupSchedulerThread = new Thread(() -> {
             while (backupSchedulerEnabled) {
                 try {
@@ -60,12 +66,12 @@ public class BackupManager implements Service {
                     break;
                 }
             }
-        });
+        }, "CoolStuffLib-BackupScheduler");
         backupSchedulerThread.setDaemon(true);
         backupSchedulerThread.start();
     }
 
-    public void stopBackupScheduler() {
+    public synchronized void stopBackupScheduler() {
         backupSchedulerEnabled = false;
         if (backupSchedulerThread != null && backupSchedulerThread.isAlive()) {
             backupSchedulerThread.interrupt();
@@ -98,6 +104,7 @@ public class BackupManager implements Service {
      */
     public int startBackup(String identifier) {
         FileBackup backup = fileBackupList.get(identifier);
+        if (backup == null) return -100;
         if (numberOfBackUpsBeforeDeleting <= backup.getBackupsDone().size()) {
             backup.removeOldestBackup();
         }
