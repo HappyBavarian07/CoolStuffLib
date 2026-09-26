@@ -15,7 +15,8 @@ import java.util.*;
 
 public class CorruptionCheckModule extends AbstractBaseConfigModule {
     private AutoGenModule autoGenModule;
-    private boolean autoRepair = true;
+    private boolean autoRepair = false;
+    private boolean repairing;
     private int backupCount = 0;
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 
@@ -106,6 +107,11 @@ public class CorruptionCheckModule extends AbstractBaseConfigModule {
             return;
         }
 
+        // The reload at the end of a repair fires another check; the repaired file may still look empty
+        if (repairing) {
+            return;
+        }
+        repairing = true;
         try {
             File configFile = config.getFile();
 
@@ -139,6 +145,8 @@ public class CorruptionCheckModule extends AbstractBaseConfigModule {
 
         } catch (IOException e) {
             ConfigLogger.error("Failed to repair corruption: " + e.getMessage(), getName(), true);
+        } finally {
+            repairing = false;
         }
     }
 
