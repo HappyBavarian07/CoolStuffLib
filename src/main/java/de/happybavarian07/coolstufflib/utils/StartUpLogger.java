@@ -1,7 +1,9 @@
 package de.happybavarian07.coolstufflib.utils;
 
 import de.happybavarian07.coolstufflib.CoolStuffLib;
+import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
 
@@ -31,7 +33,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * </code></pre>
  */
 public class StartUpLogger {
-    private final CoolStuffLib lib;
+    private final JavaPlugin plugin;
     private final BlockingQueue<String[]> messageQueue;
     private final Thread messageQueueThread;
     private final String SPACER_FORMAT;
@@ -45,10 +47,20 @@ public class StartUpLogger {
      * @param lib The CoolStuffLib instance.
      */
     public StartUpLogger(CoolStuffLib lib) {
-        this.lib = lib;
+        this(lib.getJavaPluginUsingLib());
+    }
+
+    /**
+     * <p>Constructs a logger for a plugin before CoolStuffLib is set up, e.g. in {@code onLoad}. The language
+     * prefix is used as soon as CoolStuffLib's language manager exists.</p>
+     *
+     * @param plugin the plugin whose config holds the spacer and message formats
+     */
+    public StartUpLogger(JavaPlugin plugin) {
+        this.plugin = plugin;
         this.messageQueue = new LinkedBlockingQueue<>();
         this.enabled = true;
-        this.SPACER_FORMAT = lib.getJavaPluginUsingLib().getConfig().getString("Plugin.StartUpLogger.Spacer_Format",
+        this.SPACER_FORMAT = plugin.getConfig().getString("Plugin.StartUpLogger.Spacer_Format",
                 "+-------------------------------------------------------------+");
         this.messageQueueThread = new Thread(() -> {
             while (true) {
@@ -81,6 +93,21 @@ public class StartUpLogger {
      */
     public static StartUpLogger create() {
         return new StartUpLogger(CoolStuffLib.getLib());
+    }
+
+    /** Like {@link #create()}, but works before CoolStuffLib is set up. */
+    public static StartUpLogger create(JavaPlugin plugin) {
+        return new StartUpLogger(plugin);
+    }
+
+    private String prefix() {
+        try {
+            LanguageManager languageManager = CoolStuffLib.getLib().getLanguageManager();
+            if (languageManager != null && languageManager.getPrefix() != null) return languageManager.getPrefix();
+        } catch (RuntimeException notSetUpYet) {
+            // CoolStuffLib is not set up yet
+        }
+        return "[" + plugin.getName() + "]";
     }
 
     /**
@@ -187,7 +214,7 @@ public class StartUpLogger {
      */
     public StartUpLogger message(String message) {
         addMessageToQueue(Utils.format(null, getMessageWithFormat(message),
-                lib.getLanguageManager().getPrefix() != null ? lib.getLanguageManager().getPrefix() : "[CoolStuffLib]"));
+                prefix()));
         return this;
     }
 
@@ -204,7 +231,7 @@ public class StartUpLogger {
      */
     public String getMessage(String message) {
         return Utils.format(null, getMessageWithFormat(message),
-                lib.getLanguageManager().getPrefix() != null ? lib.getLanguageManager().getPrefix() : "[CoolStuffLib]");
+                prefix());
     }
 
     /**
@@ -338,7 +365,7 @@ public class StartUpLogger {
     public StartUpLogger messages(String... messages) {
         for (String message : messages)
             addMessageToQueue(Utils.format(null, getMessageWithFormat(message),
-                    lib.getLanguageManager().getPrefix() != null ? lib.getLanguageManager().getPrefix() : "[CoolStuffLib]"));
+                    prefix()));
         return this;
     }
 
@@ -358,7 +385,7 @@ public class StartUpLogger {
     }
 
     private String getMessageWithFormat(String message) {
-        String MESSAGE_FORMAT = lib.getJavaPluginUsingLib().getConfig().getString("Plugin.StartUpLogger.Message_Format",
+        String MESSAGE_FORMAT = plugin.getConfig().getString("Plugin.StartUpLogger.Message_Format",
                 "|------------------------------------------------------------------|");
         final int messageSpacerLength = MESSAGE_FORMAT.length();
         final int messageLength = message.replaceAll("§([a-fA-F0-9]|r|l|m|n|o|k)", "").length();
