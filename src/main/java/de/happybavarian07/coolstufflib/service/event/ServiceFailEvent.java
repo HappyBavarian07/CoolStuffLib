@@ -1,5 +1,6 @@
 package de.happybavarian07.coolstufflib.service.event;
 
+import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
@@ -12,6 +13,8 @@ public class ServiceFailEvent extends Event {
     private final Throwable failure;
 
     public ServiceFailEvent(UUID serviceId, String serviceName, Throwable failure) {
+        // Services can start on any thread; Bukkit rejects sync events fired off the main thread
+        super(!Bukkit.isPrimaryThread());
         this.serviceId = serviceId;
         this.serviceName = serviceName;
         this.failure = failure;

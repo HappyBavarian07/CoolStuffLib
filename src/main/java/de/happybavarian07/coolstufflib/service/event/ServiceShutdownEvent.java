@@ -1,5 +1,6 @@
 package de.happybavarian07.coolstufflib.service.event;
 
+import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -13,6 +14,8 @@ public class ServiceShutdownEvent extends Event implements Cancellable {
     private boolean cancelled;
 
     public ServiceShutdownEvent(UUID serviceId, String serviceName) {
+        // Services can start on any thread; Bukkit rejects sync events fired off the main thread
+        super(!Bukkit.isPrimaryThread());
         this.serviceId = serviceId;
         this.serviceName = serviceName;
     }
