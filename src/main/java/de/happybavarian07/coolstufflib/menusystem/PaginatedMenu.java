@@ -298,14 +298,14 @@ public abstract class PaginatedMenu<T> extends Menu {
             return false;
         }
         page--;
-        super.open();
+        refresh();
         return true;
     }
 
     private boolean goForward(Player player) {
         if (paginatedData != null && (page + 1) * maxItemsPerPage < paginatedData.size()) {
             page++;
-            super.open();
+            refresh();
             return true;
         }
         player.sendMessage(lgm.getMessage("Player.General.AlreadyOnLastPage", player, true));

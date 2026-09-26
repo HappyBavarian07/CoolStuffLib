@@ -37,6 +37,7 @@ public abstract class Menu implements InventoryHolder {
     protected final Set<Integer> forbiddenSlots = new HashSet<>();
     protected boolean forceHybridMode = false;
     protected Menu savedMenu;
+    private int renderGeneration;
 
     /**
      * <p>Constructs a new Menu instance.</p>
@@ -144,6 +145,7 @@ public abstract class Menu implements InventoryHolder {
         }
 
         inventory = Bukkit.createInventory(this, getSlots(), getMenuName());
+        renderGeneration++;
         slotActions.clear();
         Map<String, MenuAddon> addonList = menuAddons();
 
@@ -189,6 +191,7 @@ public abstract class Menu implements InventoryHolder {
             return;
         }
         inventory.clear();
+        renderGeneration++;
         slotActions.clear();
         setMenuItems();
         for (MenuAddon addon : menuAddons().values()) {
@@ -370,6 +373,11 @@ public abstract class Menu implements InventoryHolder {
     public void setForbiddenSlots(Set<Integer> slots) {
         forbiddenSlots.clear();
         if (slots != null) forbiddenSlots.addAll(slots);
+    }
+
+    /** Changes every time the menu is opened or refreshed; lets delayed rendering notice that it is outdated. */
+    public int getRenderGeneration() {
+        return renderGeneration;
     }
 
     public Menu getSavedMenu() {

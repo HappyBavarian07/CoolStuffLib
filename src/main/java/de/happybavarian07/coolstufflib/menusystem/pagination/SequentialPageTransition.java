@@ -17,12 +17,14 @@ public class SequentialPageTransition<T> implements PageTransition<T> {
             context.getSlotToDataIndex().remove(slot);
         }
 
+        final int generation = context.getMenu().getRenderGeneration();
         final int[] slotIndex = {0};
         final int[] dataIndex = {context.getStartIndexInclusive()};
         new BukkitRunnable() {
             @Override
             public void run() {
-                    if (slotIndex[0] >= context.getSlots().length || dataIndex[0] >= context.getEndIndexExclusive()) {
+                    if (context.getMenu().getRenderGeneration() != generation
+                            || slotIndex[0] >= context.getSlots().length || dataIndex[0] >= context.getEndIndexExclusive()) {
                         cancel();
                         return;
                     }

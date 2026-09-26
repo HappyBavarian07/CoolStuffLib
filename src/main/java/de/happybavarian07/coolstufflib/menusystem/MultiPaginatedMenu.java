@@ -134,7 +134,7 @@ public abstract class MultiPaginatedMenu extends Menu {
                     return;
                 }
                 if (slot == zone.controls.getRefreshSlot()) {
-                    open();
+                    refresh();
                     return;
                 }
                 if (slot == zone.controls.getPreviousSlot()) {
@@ -219,7 +219,7 @@ public abstract class MultiPaginatedMenu extends Menu {
             int nextStart = (zone.page + 1) * zone.maxItemsPerPage;
             if (zone.data != null && nextStart < zone.data.size()) zone.page++;
         }
-        open();
+        refresh();
     }
 
     protected static class Zone<T> {
