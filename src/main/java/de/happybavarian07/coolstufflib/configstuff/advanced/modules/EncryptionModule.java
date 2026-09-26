@@ -1,31 +1,44 @@
 package de.happybavarian07.coolstufflib.configstuff.advanced.modules;
 
 import de.happybavarian07.coolstufflib.configstuff.advanced.event.ConfigValueEvent;
-import de.happybavarian07.coolstufflib.configstuff.advanced.modules.autogen.AutoGenModule;
-import de.happybavarian07.coolstufflib.configstuff.advanced.modules.autogen.templates.AutoGenTemplate;
+import de.happybavarian07.coolstufflib.logging.ConfigLogger;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.*;
+import java.security.Key;
+import java.security.KeyFactory;
+import java.security.SecureRandom;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+/**
+ * <p>Stores the values of protected keys encrypted. {@code config.get(key)} returns the encrypted text (prefixed with
+ * {@code enc:}); {@link #getDecrypted(String)} returns the plain value.</p>
+ *
+ * <p>With AES every value gets its own random IV and is encrypted with AES/GCM, so equal values look different in the
+ * file and changes to the encrypted text are detected. Values written by older versions (AES/ECB) can still be read.</p>
+ */
 public class EncryptionModule extends AbstractBaseConfigModule {
     private static final String PREFIX = "enc:";
+    private static final String AES_GCM = "AES/GCM/NoPadding";
+    private static final int GCM_IV_BYTES = 12;
+    private static final int GCM_TAG_BITS = 128;
+    private static final SecureRandom RANDOM = new SecureRandom();
+
     private final String algorithm;
     private final Key encryptionKey;
     private final Key decryptionKey;
     private final Set<String> protectedKeys = new CopyOnWriteArraySet<>();
-    private final Set<UUID> protectedTemplates = new HashSet<>();
-    private final Map<String, String> fileEncryptionMap = new HashMap<>();
 
     public EncryptionModule(String algorithm, Key encryptionKey, Key decryptionKey) {
-        super("EncryptionModule", "Provides encryption and decryption for sensitive configuration values", "1.0.0");
+        super("EncryptionModule", "Provides encryption and decryption for sensitive configuration values", "1.1.0");
         this.algorithm = algorithm;
         this.encryptionKey = encryptionKey;
         this.decryptionKey = decryptionKey != null ? decryptionKey : encryptionKey;
@@ -33,66 +46,27 @@ public class EncryptionModule extends AbstractBaseConfigModule {
 
     @Override
     protected void onInitialize() {
-        Object keysObj = config.get("__encryptedKeys");
-        if (keysObj instanceof Set<?> set) {
-            for (Object item : set) {
-                if (item instanceof String key) {
-                    protectedKeys.add(key);
-                }
-            }
-        }
-
-        Object templatesObj = config.get("__encryptedTemplates");
-        if (templatesObj instanceof Set<?> set) {
-            for (Object id : set) {
-                if (id instanceof String) {
-                    try {
-                        protectedTemplates.add(UUID.fromString((String) id));
-                    } catch (IllegalArgumentException ignored) {}
-                }
-            }
-        }
-
-        Object filesObj = config.get("__encryptedFiles");
-        if (filesObj instanceof Map<?, ?> map) {
-            for (Map.Entry<?, ?> entry : map.entrySet()) {
-                if (entry.getKey() instanceof String key && entry.getValue() instanceof String value) {
-                    fileEncryptionMap.put(key, value);
-                }
+        // Saved as a set, but a YAML file loads it back as a list
+        if (config.get("__encryptedKeys") instanceof Collection<?> keys) {
+            for (Object key : keys) {
+                if (key instanceof String name) protectedKeys.add(name);
             }
         }
     }
 
     @Override
     protected void onEnable() {
-        registerEventListener(
-            config.getEventBus(),
-            ConfigValueEvent.class,
-            this::onValueChangeEvent
-        );
+        registerEventListener(config.getEventBus(), ConfigValueEvent.class, this::onValueChangeEvent);
     }
 
     @Override
     protected void onDisable() {
         unregisterEventListeners(config.getEventBus(), ConfigValueEvent.class);
-        saveState();
+        config.set("__encryptedKeys", new ArrayList<>(protectedKeys));
     }
 
     @Override
     protected void onCleanup() {
-
-    }
-
-    private void saveState() {
-        config.set("__encryptedKeys", new HashSet<>(protectedKeys));
-
-        Set<String> templateIds = new HashSet<>();
-        for (UUID id : protectedTemplates) {
-            templateIds.add(id.toString());
-        }
-        config.set("__encryptedTemplates", templateIds);
-
-        config.set("__encryptedFiles", new HashMap<>(fileEncryptionMap));
     }
 
     private void onValueChangeEvent(ConfigValueEvent event) {
@@ -124,6 +98,7 @@ public class EncryptionModule extends AbstractBaseConfigModule {
         }
     }
 
+    /** Encrypts the current value of {@code key} (if it is a string) and every value set later. */
     public void protectKey(String key) {
         protectedKeys.add(key);
         if (config.containsKey(key) && config.get(key) instanceof String value && !isEncrypted(value)) {
@@ -131,128 +106,15 @@ public class EncryptionModule extends AbstractBaseConfigModule {
         }
     }
 
-    public void protectTemplate(UUID templateId) {
-        protectedTemplates.add(templateId);
-
-        AutoGenModule autoGenModule = (AutoGenModule) config.getModuleByName("AutoGenModule");
-        if (autoGenModule != null) {
-            AutoGenTemplate template = autoGenModule.getTemplateById(templateId);
-            if (template != null) {
-                encryptTemplate(template);
-            }
-        }
-    }
-
-    public void protectTemplate(String templateName) {
-        AutoGenModule autoGenModule = (AutoGenModule) config.getModuleByName("AutoGenModule");
-        if (autoGenModule != null) {
-            UUID templateId = autoGenModule.getTemplateNameToIdMap().get(templateName);
-            if (templateId != null) {
-                protectTemplate(templateId);
-            }
-        }
-    }
-
-    public void protectFile(String filePath) {
-        File file = new File(filePath);
-        if (file.exists() && file.isFile()) {
-            try {
-                String content = Files.readString(file.toPath());
-                String encrypted = encrypt(content);
-                Files.writeString(file.toPath(), encrypted);
-                fileEncryptionMap.put(filePath, "encrypted");
-            } catch (Exception e) {
-                logError("Failed to encrypt file: " + filePath, e);
-            }
-        }
-    }
-
+    /** Stops protecting {@code key} and stores its value as plain text again. */
     public void unprotectKey(String key) {
         protectedKeys.remove(key);
-
-        if (config.containsKey(key) && config.get(key) instanceof String value) {
+        if (config.containsKey(key) && config.get(key) instanceof String value && isEncrypted(value)) {
             try {
-                if (isEncrypted(value)) {
-                    String decrypted = decrypt(value);
-                    config.set(key, decrypted);
-                }
+                config.set(key, decrypt(value));
             } catch (Exception e) {
                 logError("Failed to decrypt value for key: " + key, e);
             }
-        }
-    }
-
-    public void unprotectTemplate(UUID templateId) {
-        protectedTemplates.remove(templateId);
-
-        AutoGenModule autoGenModule = (AutoGenModule) config.getModuleByName("AutoGenModule");
-        if (autoGenModule != null) {
-            AutoGenTemplate template = autoGenModule.getTemplateById(templateId);
-            if (template != null) {
-                decryptTemplate(template);
-            }
-        }
-    }
-
-    public void unprotectTemplate(String templateName) {
-        AutoGenModule autoGenModule = (AutoGenModule) config.getModuleByName("AutoGenModule");
-        if (autoGenModule != null) {
-            UUID templateId = autoGenModule.getTemplateNameToIdMap().get(templateName);
-            if (templateId != null) {
-                unprotectTemplate(templateId);
-            }
-        }
-    }
-
-    public void unprotectFile(String filePath) {
-        if (fileEncryptionMap.containsKey(filePath)) {
-            File file = new File(filePath);
-            if (file.exists() && file.isFile()) {
-                try {
-                    String content = Files.readString(file.toPath());
-                    String decrypted = decrypt(content);
-                    Files.writeString(file.toPath(), decrypted);
-                    fileEncryptionMap.remove(filePath);
-                } catch (Exception e) {
-                    logError("Failed to decrypt file: " + filePath, e);
-                }
-            }
-        }
-    }
-
-    private void encryptTemplate(AutoGenTemplate template) {
-        try {
-            File tempFile = File.createTempFile("template", ".json");
-            template.writeToFile(tempFile);
-            String content = Files.readString(tempFile.toPath());
-            String encrypted = encrypt(content);
-
-            File encryptedFile = new File(tempFile.getParentFile(), tempFile.getName() + ".encrypted");
-            Files.writeString(encryptedFile.toPath(), encrypted);
-
-            if (!tempFile.delete()) {
-                logError("Failed to delete temporary file: " + tempFile.getPath(), null);
-            }
-        } catch (Exception e) {
-            logError("Failed to encrypt template", e);
-        }
-    }
-
-    private void decryptTemplate(AutoGenTemplate template) {
-        try {
-            File tempFile = File.createTempFile("template", ".json.encrypted");
-            template.writeToFile(tempFile);
-            String content = Files.readString(tempFile.toPath());
-            String decrypted = decrypt(content);
-
-            File decryptedFile = new File(tempFile.getParentFile(), tempFile.getName().replace(".encrypted", ""));
-            Files.writeString(decryptedFile.toPath(), decrypted);
-
-            if (!tempFile.delete()) {
-                logError("Failed to delete temporary file: " + tempFile.getPath(), null);
-            }
-        } catch (Exception e) {
-            logError("Failed to decrypt template", e);
         }
     }
 
@@ -260,39 +122,44 @@ public class EncryptionModule extends AbstractBaseConfigModule {
         return Collections.unmodifiableSet(protectedKeys);
     }
 
-    public Set<UUID> getProtectedTemplates() {
-        return Collections.unmodifiableSet(protectedTemplates);
-    }
-
-    public Map<String, String> getProtectedFiles() {
-        return Collections.unmodifiableMap(fileEncryptionMap);
-    }
-
     public boolean isKeyProtected(String key) {
         return protectedKeys.contains(key);
     }
 
-    public boolean isTemplateProtected(UUID templateId) {
-        return protectedTemplates.contains(templateId);
-    }
-
-    public boolean isFileProtected(String filePath) {
-        return fileEncryptionMap.containsKey(filePath);
+    private boolean usesAes() {
+        return "AES".equalsIgnoreCase(algorithm);
     }
 
     private String encrypt(String data) throws Exception {
-        Cipher cipher = Cipher.getInstance(algorithm);
-        cipher.init(Cipher.ENCRYPT_MODE, encryptionKey);
-        byte[] encrypted = cipher.doFinal(data.getBytes());
-        return PREFIX + Base64.getEncoder().encodeToString(encrypted);
+        byte[] plain = data.getBytes(StandardCharsets.UTF_8);
+        if (!usesAes()) {
+            Cipher cipher = Cipher.getInstance(algorithm);
+            cipher.init(Cipher.ENCRYPT_MODE, encryptionKey);
+            return PREFIX + Base64.getEncoder().encodeToString(cipher.doFinal(plain));
+        }
+        byte[] iv = new byte[GCM_IV_BYTES];
+        RANDOM.nextBytes(iv);
+        Cipher cipher = Cipher.getInstance(AES_GCM);
+        cipher.init(Cipher.ENCRYPT_MODE, encryptionKey, new GCMParameterSpec(GCM_TAG_BITS, iv));
+        byte[] encrypted = cipher.doFinal(plain);
+        return PREFIX + Base64.getEncoder().encodeToString(ByteBuffer.allocate(iv.length + encrypted.length)
+                .put(iv).put(encrypted).array());
     }
 
     private String decrypt(String data) throws Exception {
         byte[] decoded = Base64.getDecoder().decode(data.startsWith(PREFIX) ? data.substring(PREFIX.length()) : data);
+        if (usesAes() && decoded.length > GCM_IV_BYTES) {
+            try {
+                Cipher cipher = Cipher.getInstance(AES_GCM);
+                cipher.init(Cipher.DECRYPT_MODE, decryptionKey, new GCMParameterSpec(GCM_TAG_BITS, decoded, 0, GCM_IV_BYTES));
+                return new String(cipher.doFinal(decoded, GCM_IV_BYTES, decoded.length - GCM_IV_BYTES), StandardCharsets.UTF_8);
+            } catch (javax.crypto.AEADBadTagException legacyValue) {
+                // Written by an older version with the JCE default mode (AES/ECB)
+            }
+        }
         Cipher cipher = Cipher.getInstance(algorithm);
         cipher.init(Cipher.DECRYPT_MODE, decryptionKey);
-        byte[] decrypted = cipher.doFinal(decoded);
-        return new String(decrypted);
+        return new String(cipher.doFinal(decoded), StandardCharsets.UTF_8);
     }
 
     private boolean isEncrypted(String value) {
@@ -300,14 +167,11 @@ public class EncryptionModule extends AbstractBaseConfigModule {
     }
 
     private void logError(String message, Exception e) {
-        System.err.println("[EncryptionModule] " + message);
-        if (e != null) {
-            System.err.println("[EncryptionModule] Cause: " + e.getMessage());
-        }
+        ConfigLogger.error(message, e, getName(), true);
     }
 
     public static class Builder {
-        private String algorithm = "RSA";
+        private String algorithm = "AES";
         private Key key;
         private Key decryptKey;
 
@@ -316,8 +180,9 @@ public class EncryptionModule extends AbstractBaseConfigModule {
             return this;
         }
 
+        /** For AES the key needs 16, 24 or 32 bytes (UTF-8). */
         public Builder withSymmetricKey(String key) {
-            this.key = new SecretKeySpec(key.getBytes(), algorithm);
+            this.key = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), algorithm);
             return this;
         }
 
@@ -326,14 +191,12 @@ public class EncryptionModule extends AbstractBaseConfigModule {
 
             if (publicKeyPath != null) {
                 byte[] publicKeyBytes = Files.readAllBytes(Path.of(publicKeyPath));
-                X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
-                this.key = keyFactory.generatePublic(publicKeySpec);
+                this.key = keyFactory.generatePublic(new X509EncodedKeySpec(publicKeyBytes));
             }
 
             if (privateKeyPath != null) {
                 byte[] privateKeyBytes = Files.readAllBytes(Path.of(privateKeyPath));
-                PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
-                this.decryptKey = keyFactory.generatePrivate(privateKeySpec);
+                this.decryptKey = keyFactory.generatePrivate(new PKCS8EncodedKeySpec(privateKeyBytes));
             }
 
             return this;
@@ -349,6 +212,6 @@ public class EncryptionModule extends AbstractBaseConfigModule {
 
     @Override
     protected Map<String, Object> getAdditionalModuleState() {
-        return Map.of();
+        return Map.of("protectedKeys", protectedKeys.size());
     }
 }
