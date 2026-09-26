@@ -913,6 +913,7 @@ public class LanguageManager implements Service {
     public String getMessage(String path, Player player, String langName, boolean resetAfter) {
         applyPathExpressionVariables(player, path);
         LanguageFile langFile = getLangOrPlayerLang(true, langName, player);
+        langName = langFile.getLangName();
         LanguageConfig langConfig = langFile.getLangConfig();
         if (langConfig == null || langConfig.getConfig() == null)
             return "null config";
@@ -985,6 +986,7 @@ public class LanguageManager implements Service {
      */
     public ItemStack getItem(String path, Player player, String langName, boolean resetAfter, MaterialCondition condition) {
         LanguageFile langFile = getLangOrPlayerLang(false, langName, player);
+        langName = langFile.getLangName();
         LanguageConfig langConfig = langFile.getLangConfig();
         ItemStack error = new ItemStack(Material.BARRIER);
         ItemMeta errorMeta = error.getItemMeta();
@@ -1190,6 +1192,7 @@ public class LanguageManager implements Service {
     public String getMenuTitle(String path, Player player, String langName) {
         applyPathExpressionVariables(player, path);
         LanguageFile langFile = getLangOrPlayerLang(false, langName, player);
+        langName = langFile.getLangName();
         LanguageConfig langConfig = langFile.getLangConfig();
         if (langConfig == null || langConfig.getConfig() == null)
             return "null config";
@@ -1231,6 +1234,7 @@ public class LanguageManager implements Service {
     @SuppressWarnings("unchecked")
     public <T> T getCustomObject(String path, @Nullable Player player, String langName, T defaultValue, boolean resetAfter) {
         LanguageFile langFile = getLangOrPlayerLang(false, langName, player);
+        langName = langFile.getLangName();
         LanguageConfig langConfig = langFile.getLangConfig();
         if (langConfig == null || langConfig.getConfig() == null)
             return defaultValue;
