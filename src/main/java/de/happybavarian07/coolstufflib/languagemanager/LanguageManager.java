@@ -1056,7 +1056,7 @@ public class LanguageManager implements Service {
         List<String> loreWithPlaceholders = new ArrayList<>();
         List<String> includedKeys = new ArrayList<>();
         ItemMeta meta = item.getItemMeta();
-        for (String s : lore) {
+        for (String s : lore == null ? List.<String>of() : lore) {
             includedKeys.addAll(getPlaceholderKeysInMessage(s, PlaceholderType.ITEM));
             String temp = replacePlaceholders(PlaceholderType.ITEM, s);
             loreWithPlaceholders.add(Utils.format(player, temp, prefix));
