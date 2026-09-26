@@ -29,7 +29,10 @@ public class CacheManager implements Service {
 
     @Override
     public CompletableFuture<Void> shutdown() {
-        return CompletableFuture.runAsync(this::clearAll);
+        return CompletableFuture.runAsync(() -> caches.values().forEach(cache -> {
+            if (cache instanceof FilePersistentCache<?, ?> persistent) persistent.close();
+            else cache.clear();
+        }));
     }
 
     /**

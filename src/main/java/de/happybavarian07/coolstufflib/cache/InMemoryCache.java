@@ -52,9 +52,7 @@ public class InMemoryCache<K, V> implements Cache<K, V> {
     @Override
     public void put(K key, V value) {
         if (key == null || value == null) {
-            if (key != null) {
-                map.remove(key);
-            }
+            if (key != null) remove(key);
             throw new IllegalArgumentException("Key and value must not be null");
         }
         synchronized (lock) {
@@ -67,12 +65,16 @@ public class InMemoryCache<K, V> implements Cache<K, V> {
         if (key == null) {
             throw new IllegalArgumentException("Key must not be null");
         }
-        map.remove(key);
+        synchronized (lock) {
+            map.remove(key);
+        }
     }
 
     @Override
     public void clear() {
-        map.clear();
+        synchronized (lock) {
+            map.clear();
+        }
     }
 
     @Override
@@ -80,6 +82,8 @@ public class InMemoryCache<K, V> implements Cache<K, V> {
         if (key == null) {
             throw new IllegalArgumentException("Key must not be null");
         }
-        return map.containsKey(key);
+        synchronized (lock) {
+            return map.containsKey(key);
+        }
     }
 }

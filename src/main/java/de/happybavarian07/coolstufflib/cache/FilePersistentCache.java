@@ -156,7 +156,10 @@ public class FilePersistentCache<K, V> implements PersistentCache<K, V> {
     @Override
     public void save() {
         if (closed) return;
+        writeToDisk();
+    }
 
+    private void writeToDisk() {
         synchronized (fileLock) {
             Path path = Paths.get(cacheFile);
             ensureParentExists(path);
@@ -240,6 +243,6 @@ public class FilePersistentCache<K, V> implements PersistentCache<K, V> {
         if (scheduler != null && !scheduler.isShutdown()) {
             scheduler.shutdown();
         }
-        save();
+        writeToDisk();
     }
 }
