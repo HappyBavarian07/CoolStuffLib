@@ -68,11 +68,7 @@ public class ValidationModule extends AbstractBaseConfigModule {
 
     @Override
     protected void onDisable() {
-        unregisterEventListener(
-                config.getEventBus(),
-                ConfigValueEvent.class,
-                this::onValueChangeEvent
-        );
+        unregisterEventListeners(config.getEventBus(), ConfigValueEvent.class);
     }
 
     @Override

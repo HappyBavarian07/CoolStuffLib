@@ -46,11 +46,7 @@ public class CorruptionCheckModule extends AbstractBaseConfigModule {
     @Override
     protected void onDisable() {
         // Unregister from config reload events
-        unregisterEventListener(
-            config.getEventBus(),
-            ConfigLifecycleEvent.class,
-            this::onConfigLifecycleEvent
-        );
+        unregisterEventListeners(config.getEventBus(), ConfigLifecycleEvent.class);
     }
 
     @Override

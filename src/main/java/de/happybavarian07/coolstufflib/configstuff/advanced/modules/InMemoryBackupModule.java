@@ -45,11 +45,7 @@ public class InMemoryBackupModule extends AbstractBaseConfigModule {
     @Override
     protected void onDisable() {
         if (autoBackupOnSave) {
-            unregisterEventListener(
-                    config.getEventBus(),
-                    ConfigLifecycleEvent.class,
-                    this::onConfigLifecycleEvent
-            );
+            unregisterEventListeners(config.getEventBus(), ConfigLifecycleEvent.class);
         }
     }
 
@@ -136,14 +132,9 @@ public class InMemoryBackupModule extends AbstractBaseConfigModule {
 
         // Update event listeners if the module is enabled
         if (state == ModuleState.ENABLED) {
+            unregisterEventListeners(config.getEventBus(), ConfigLifecycleEvent.class);
             if (autoBackupOnSave) {
                 registerEventListener(
-                        config.getEventBus(),
-                        ConfigLifecycleEvent.class,
-                        this::onConfigLifecycleEvent
-                );
-            } else {
-                unregisterEventListener(
                         config.getEventBus(),
                         ConfigLifecycleEvent.class,
                         this::onConfigLifecycleEvent

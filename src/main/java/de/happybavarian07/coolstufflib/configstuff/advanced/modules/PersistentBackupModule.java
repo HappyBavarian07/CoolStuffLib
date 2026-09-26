@@ -61,9 +61,7 @@ public class PersistentBackupModule extends AbstractBaseConfigModule {
 
     @Override
     protected void onDisable() {
-        unregisterEventListener(config.getEventBus(),
-                ConfigLifecycleEvent.class,
-                this::onConfigLifecycle);
+        unregisterEventListeners(config.getEventBus(), ConfigLifecycleEvent.class);
 
         ConfigLogger.info("PersistentBackupModule disabled for config: " + config.getName(),
                 "PersistentBackupModule", true);

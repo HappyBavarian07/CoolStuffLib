@@ -38,11 +38,7 @@ public class HistoryModule extends AbstractBaseConfigModule {
     @Override
     protected void onDisable() {
         // Unregister from value change events
-        unregisterEventListener(
-                config.getEventBus(),
-                ConfigValueEvent.class,
-                this::onValueChangeEvent
-        );
+        unregisterEventListeners(config.getEventBus(), ConfigValueEvent.class);
     }
 
     @Override

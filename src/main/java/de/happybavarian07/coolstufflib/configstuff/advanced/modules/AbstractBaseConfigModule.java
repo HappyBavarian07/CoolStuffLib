@@ -278,6 +278,21 @@ public abstract class AbstractBaseConfigModule implements BaseConfigModule {
         }
     }
 
+    /**
+     * <p>Unregisters every listener of the given event type that this module registered on the bus.
+     * Use this instead of {@link #unregisterEventListener} with a method reference, because every
+     * {@code this::onEvent} creates a new object that never equals the registered one.</p>
+     */
+    protected void unregisterEventListeners(ConfigEventBus eventBus, Class<? extends ConfigEvent> eventType) {
+        Map<Class<? extends ConfigEvent>, Set<ConfigEventListener<?>>> busListeners = registeredListeners.get(eventBus);
+        if (busListeners == null) return;
+        Set<ConfigEventListener<?>> typeListeners = busListeners.get(eventType);
+        if (typeListeners == null) return;
+        for (ConfigEventListener<?> listener : new ArrayList<>(typeListeners)) {
+            unregisterTypedListener(eventBus, eventType, listener);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private <T extends ConfigEvent> void unregisterTypedListener(ConfigEventBus eventBus, Class<? extends ConfigEvent> eventType, ConfigEventListener<?> listener) {
         unregisterEventListener(eventBus, (Class<T>) eventType, (ConfigEventListener<T>) listener);

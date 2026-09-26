@@ -49,11 +49,7 @@ public class MigrationModule extends AbstractBaseConfigModule {
     protected void onDisable() {
         // Unregister from config load events
         if (autoMigrateOnLoad) {
-            unregisterEventListener(
-                    config.getEventBus(),
-                    ConfigLifecycleEvent.class,
-                    this::onConfigLifecycleEvent
-            );
+            unregisterEventListeners(config.getEventBus(), ConfigLifecycleEvent.class);
         }
     }
 
@@ -98,14 +94,9 @@ public class MigrationModule extends AbstractBaseConfigModule {
 
         // Update event listeners based on new setting
         if (state == ModuleState.ENABLED) {
+            unregisterEventListeners(config.getEventBus(), ConfigLifecycleEvent.class);
             if (autoMigrateOnLoad) {
                 registerEventListener(
-                        config.getEventBus(),
-                        ConfigLifecycleEvent.class,
-                        this::onConfigLifecycleEvent
-                );
-            } else {
-                unregisterEventListener(
                         config.getEventBus(),
                         ConfigLifecycleEvent.class,
                         this::onConfigLifecycleEvent
