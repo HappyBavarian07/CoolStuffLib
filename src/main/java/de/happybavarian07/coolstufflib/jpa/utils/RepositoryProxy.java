@@ -15,6 +15,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RepositoryProxy implements InvocationHandler {
     private final Class<?> repositoryInterface;
@@ -87,6 +89,10 @@ public class RepositoryProxy implements InvocationHandler {
         if (method.isDefault()) {
             return InvocationHandler.invokeDefault(proxy, method, args);
         }
+        Query query = method.getAnnotation(Query.class);
+        if (query != null) {
+            return handleAnnotatedQuery(method, query, args);
+        }
         String methodName = method.getName();
         if (methodName.endsWith("Async")) {
             return handleAsyncMethod(proxy, method, args);
@@ -118,6 +124,65 @@ public class RepositoryProxy implements InvocationHandler {
         }
         throw new UnsupportedOperationException("Repository method " + repositoryInterface.getSimpleName() + "." + methodName
                 + " matches no supported name pattern (find, count, exists, get, set, update, insert, delete, save, saveAll, query)");
+    }
+
+    private static final Pattern QUERY_PARAMETER = Pattern.compile("\\?(\\d+)?");
+
+    /** Runs the SQL of an {@link Query} method; see that annotation for the supported forms. */
+    private Object handleAnnotatedQuery(Method method, Query query, Object[] args) throws Exception {
+        Class<?> entityClass = getEntityClassFromRepository();
+        Object[] callArgs = args == null ? new Object[0] : args;
+        String template = query.value().replace("{table}", databasePrefix + EntityReflectionUtil.getTableName(entityClass));
+        Matcher matcher = QUERY_PARAMETER.matcher(template);
+        StringBuilder sql = new StringBuilder();
+        List<Object> params = new ArrayList<>();
+        int nextArgument = 0;
+        while (matcher.find()) {
+            int index = matcher.group(1) == null ? nextArgument++ : Integer.parseInt(matcher.group(1)) - 1;
+            if (index < 0 || index >= callArgs.length) {
+                throw new IllegalArgumentException("@Query on " + method.getName() + " uses parameter " + (index + 1)
+                        + " but the method has " + callArgs.length);
+            }
+            params.add(callArgs[index]);
+            matcher.appendReplacement(sql, "?");
+        }
+        matcher.appendTail(sql);
+
+        Class<?> returnType = method.getReturnType();
+        String statement = sql.toString().trim().toLowerCase(Locale.ROOT);
+        if (!statement.startsWith("select") && !statement.startsWith("with")) {
+            int changed = sqlExecutor.executeUpdate(sql.toString(), params.toArray());
+            if (entityCache != null) entityCache.clear();
+            if (returnType == int.class || returnType == Integer.class) return changed;
+            if (returnType == long.class || returnType == Long.class) return (long) changed;
+            if (returnType == boolean.class || returnType == Boolean.class) return changed > 0;
+            return null;
+        }
+
+        boolean many = Iterable.class.isAssignableFrom(returnType);
+        boolean optional = returnType == Optional.class;
+        Class<?> element = returnType;
+        if ((many || optional) && method.getGenericReturnType() instanceof ParameterizedType type
+                && type.getActualTypeArguments()[0] instanceof Class<?> argument) {
+            element = argument;
+        } else if (many || optional) {
+            element = entityClass;
+        }
+        List<Object> rows = new ArrayList<>();
+        try (ResultSet rs = sqlExecutor.executeQuery(sql.toString(), params.toArray())) {
+            while (rs.next()) {
+                rows.add(element == entityClass ? mapResultSetToEntity(rs, entityClass)
+                        : FieldTypeCaster.castToFieldType(element, rs.getObject(1)));
+                if (!many) break;
+            }
+        }
+        if (many) return rows;
+        Object first = rows.isEmpty() ? null : rows.get(0);
+        if (optional) return Optional.ofNullable(first);
+        if (first == null && returnType.isPrimitive()) {
+            throw new IllegalStateException("@Query on " + method.getName() + " returned no row for a primitive result");
+        }
+        return first;
     }
 
     private CompletableFuture<?> handleAsyncMethod(Object proxy, Method method, Object[] args) {
