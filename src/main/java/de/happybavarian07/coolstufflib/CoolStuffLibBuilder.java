@@ -529,6 +529,11 @@ public class CoolStuffLibBuilder {
                 if (destination == null) {
                     throw new IllegalStateException("Destination must be specified");
                 }
+                if (rootDirectory == null) {
+                    rootDirectory = parent.parent.javaPluginUsingLib.getDataFolder();
+                }
+                destination.mkdirs();
+                rootDirectory.mkdirs();
 
                 FileBackup fileBackup;
                 if (useRegexFilters) {
