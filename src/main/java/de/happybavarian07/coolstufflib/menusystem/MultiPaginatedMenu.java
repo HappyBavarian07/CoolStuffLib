@@ -34,7 +34,9 @@ public abstract class MultiPaginatedMenu extends Menu {
     }
 
     /**
-     * Defines or replaces a zone.
+     * Defines or replaces a zone. Redefining an existing zone id replaces its data and renderer but
+     * keeps its current page, controls, direction and transition, so zones can be defined in
+     * {@link #preSetMenuItems()}.
      *
      * @param zoneId unique zone id
      * @param zone slot zone
@@ -43,7 +45,15 @@ public abstract class MultiPaginatedMenu extends Menu {
      * @param <T> zone data type
      */
     public <T> void defineZone(String zoneId, PaginationZone zone, List<T> data, Function<T, ItemStack> renderer) {
-        zones.put(zoneId, new Zone<>(zoneId, zone, data, renderer));
+        Zone<T> newZone = new Zone<>(zoneId, zone, data, renderer);
+        Zone<?> old = zones.get(zoneId);
+        if (old != null) {
+            newZone.page = old.page;
+            newZone.controls = old.controls;
+            newZone.pageDirection = old.pageDirection;
+            newZone.transition = old.transition;
+        }
+        zones.put(zoneId, newZone);
     }
 
     /**
@@ -88,6 +98,7 @@ public abstract class MultiPaginatedMenu extends Menu {
         slotToZoneDataRef.clear();
         for (Zone<?> zone : zones.values()) {
             renderZone(zone);
+            drawControls(zone.controls);
         }
         postSetMenuItems();
     }
@@ -150,6 +161,9 @@ public abstract class MultiPaginatedMenu extends Menu {
         int[] rawSlots = zone.zone.getSlots();
         int[] slots = filterValidSlots(rawSlots);
         if (slots.length == 0 || zone.data == null || zone.renderer == null) return;
+        if (zone.page > 0 && zone.page * slots.length >= zone.data.size()) {
+            zone.page = Math.max(0, (zone.data.size() - 1) / slots.length);
+        }
         int start = zone.page * slots.length;
         int end = Math.min(start + slots.length, zone.data.size());
         zone.maxItemsPerPage = slots.length;
@@ -174,6 +188,18 @@ public abstract class MultiPaginatedMenu extends Menu {
                 animationTickDelay
         );
         ((PageTransition<T>) zone.transition).render(context);
+    }
+
+    private void drawControls(PageControlLayout controls) {
+        if (controls == null) return;
+        setControl(controls.getPreviousSlot(), "General.Left");
+        setControl(controls.getCloseSlot(), "General.Close");
+        setControl(controls.getNextSlot(), "General.Right");
+        setControl(controls.getRefreshSlot(), "General.Refresh");
+    }
+
+    private void setControl(int slot, String itemPath) {
+        if (slot >= 0 && slot < getSlots()) inventory.setItem(slot, lgm.getItem(itemPath, playerMenuUtility.getOwner(), false));
     }
 
     private int[] filterValidSlots(int[] slots) {
