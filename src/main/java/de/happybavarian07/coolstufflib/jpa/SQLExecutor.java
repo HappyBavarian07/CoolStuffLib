@@ -470,25 +470,45 @@ public class SQLExecutor {
         executeTransaction(Arrays.asList(sqlStatements));
     }
 
+    /**
+     * <p>Runs the statements in one transaction on the connection they were prepared on. They must all
+     * share that connection; the caller keeps ownership of it.</p>
+     */
     public void executeTransaction(PreparedStatement... preparedStatements) throws SQLException {
-        Connection connection = getConnection(defaultConnection);
+        if (preparedStatements.length == 0) return;
+        Connection connection = preparedStatements[0].getConnection();
+        for (PreparedStatement stmt : preparedStatements) {
+            if (stmt.getConnection() != connection) {
+                throw new SQLException("All statements of a transaction must be prepared on the same connection");
+            }
+        }
+        if (!connection.getAutoCommit()) {
+            for (PreparedStatement stmt : preparedStatements) stmt.executeUpdate();
+            return;
+        }
         try {
             connection.setAutoCommit(false);
-            for (PreparedStatement stmt : preparedStatements) {
-                stmt.executeUpdate();
-            }
+            for (PreparedStatement stmt : preparedStatements) stmt.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
             connection.rollback();
             throw e;
         } finally {
             connection.setAutoCommit(true);
-            releaseConnection(defaultConnection, connection);
         }
     }
 
+    /**
+     * <p>Runs the operations in one transaction. The connection is bound to the current thread, so every
+     * statement the operations execute through this executor on the default pool joins it.</p>
+     */
     public void executeTransaction(Runnable... operations) throws SQLException {
+        if (transactionConnection.get() != null) {
+            for (Runnable operation : operations) operation.run();
+            return;
+        }
         Connection connection = getConnection(defaultConnection);
+        bindTransactionConnection(connection);
         try {
             connection.setAutoCommit(false);
             for (Runnable operation : operations) {
@@ -499,6 +519,7 @@ public class SQLExecutor {
             connection.rollback();
             throw e;
         } finally {
+            bindTransactionConnection(null);
             connection.setAutoCommit(true);
             releaseConnection(defaultConnection, connection);
         }
