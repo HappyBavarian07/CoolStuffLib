@@ -16,11 +16,13 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class AdvancedConfigManager {
     private final Map<String, AdvancedConfig> configs;
     private final Map<String, BaseConfigModule> globalModules;
+    private final Map<String, Supplier<? extends BaseConfigModule>> globalModuleFactories;
     private final Map<String, AdvancedConfigGroup> groups;
     private final Map<String, GroupConfigModule> globalGroupModules;
     private final ReadWriteLock configsLock;
@@ -31,6 +33,7 @@ public class AdvancedConfigManager {
     public AdvancedConfigManager() {
         this.configs = new ConcurrentHashMap<>();
         this.globalModules = new ConcurrentHashMap<>();
+        this.globalModuleFactories = new ConcurrentHashMap<>();
         this.groups = new ConcurrentHashMap<>();
         this.globalGroupModules = new ConcurrentHashMap<>();
         this.configsLock = new ReentrantReadWriteLock();
@@ -255,23 +258,45 @@ public class AdvancedConfigManager {
         }
     }
 
+    /**
+     * <p>Adds a module to every config of this manager, now and when configs are created later. Each config gets its
+     * own instance from the factory, because a module instance can only belong to one config.</p>
+     *
+     * <pre><code>manager.registerGlobalModule(() -> new HistoryModule(20));</code></pre>
+     *
+     * @param factory creates one module instance per config
+     */
+    public void registerGlobalModule(Supplier<? extends BaseConfigModule> factory) {
+        if (factory == null) {
+            return;
+        }
+        registerGlobal(factory.get(), factory);
+    }
+
+    /**
+     * <p>Adds this module to every config of this manager. The given instance goes to the first config, every other
+     * config gets a new instance made with the module's no-arg constructor, so settings changed on the given instance
+     * are not copied. Use {@link #registerGlobalModule(Supplier)} for modules with constructor arguments.</p>
+     *
+     * @param module the module
+     * @throws IllegalStateException if a second config needs the module and it has no no-arg constructor
+     */
     public void registerGlobalModule(BaseConfigModule module) {
         if (module == null) {
             return;
         }
+        registerGlobal(module, () -> newInstanceOf(module));
+    }
 
+    private void registerGlobal(BaseConfigModule template, Supplier<? extends BaseConfigModule> factory) {
         modulesLock.writeLock().lock();
         try {
-            globalModules.put(module.getName(), module);
+            globalModules.put(template.getName(), template);
+            globalModuleFactories.put(template.getName(), factory);
 
-            // Register to all existing configs
             configsLock.readLock().lock();
             try {
-                configs.values().forEach(config -> {
-                    if (!config.hasModule(module)) {
-                        config.registerModule(module);
-                    }
-                });
+                configs.values().forEach(config -> attachGlobalModule(config, template, factory));
             } finally {
                 configsLock.readLock().unlock();
             }
@@ -280,10 +305,28 @@ public class AdvancedConfigManager {
         }
     }
 
+    private static void attachGlobalModule(AdvancedConfig config, BaseConfigModule template,
+                                           Supplier<? extends BaseConfigModule> factory) {
+        if (config.hasModule(template.getName())) {
+            return;
+        }
+        config.registerModule(template.isInitialized() ? factory.get() : template);
+    }
+
+    private static BaseConfigModule newInstanceOf(BaseConfigModule module) {
+        try {
+            return module.getClass().getDeclaredConstructor().newInstance();
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Global module " + module.getName() + " is needed by a second config but has no"
+                    + " no-arg constructor. Register it with registerGlobalModule(Supplier) instead.", e);
+        }
+    }
+
     public void unregisterGlobalModule(String name) {
         modulesLock.writeLock().lock();
         try {
             globalModules.remove(name);
+            globalModuleFactories.remove(name);
         } finally {
             modulesLock.writeLock().unlock();
         }
@@ -384,11 +427,7 @@ public class AdvancedConfigManager {
 
         modulesLock.readLock().lock();
         try {
-            for (BaseConfigModule module : globalModules.values()) {
-                if (!config.hasModule(module)) {
-                    config.registerModule(module);
-                }
-            }
+            globalModules.forEach((name, template) -> attachGlobalModule(config, template, globalModuleFactories.get(name)));
         } finally {
             modulesLock.readLock().unlock();
         }
@@ -444,6 +483,7 @@ public class AdvancedConfigManager {
         modulesLock.writeLock().lock();
         try {
             globalModules.clear();
+            globalModuleFactories.clear();
         } finally {
             modulesLock.writeLock().unlock();
         }
