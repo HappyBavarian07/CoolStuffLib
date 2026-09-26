@@ -369,7 +369,9 @@ public class ValueAccessor {
         String sectionPath = path.contains(".") ? path.substring(0, path.lastIndexOf('.')) : "";
         String valueName = path.contains(".") ? path.substring(path.lastIndexOf('.') + 1) : path;
         ConfigSection section = sectionPath.isEmpty() ? sectionManager.getRootSection() : sectionManager.getRootSection().getSection(sectionPath);
-        eventBus.publish(ConfigValueEvent.valueSet(config, section, valueName, oldValue, value));
+        ConfigValueEvent event = ConfigValueEvent.valueSet(config, section, valueName, oldValue, value);
+        eventBus.publish(event);
+        if (event.getNewValue() != value) sectionManager.getRootSection().set(path, event.getNewValue());
     }
 
     /**

@@ -16,6 +16,7 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 public class EncryptionModule extends AbstractBaseConfigModule {
+    private static final String PREFIX = "enc:";
     private final String algorithm;
     private final Key encryptionKey;
     private final Key decryptionKey;
@@ -73,6 +74,7 @@ public class EncryptionModule extends AbstractBaseConfigModule {
 
     @Override
     protected void onDisable() {
+        unregisterEventListeners(config.getEventBus(), ConfigValueEvent.class);
         saveState();
     }
 
@@ -95,43 +97,37 @@ public class EncryptionModule extends AbstractBaseConfigModule {
 
     private void onValueChangeEvent(ConfigValueEvent event) {
         String key = event.getFullPath();
+        if (event.getType() != ConfigValueEvent.Type.SET || !protectedKeys.contains(key)) return;
+        if (event.getNewValue() instanceof String value && !isEncrypted(value)) {
+            try {
+                event.setNewValue(encrypt(value));
+            } catch (Exception e) {
+                logError("Failed to encrypt value for key: " + key, e);
+            }
+        }
+    }
 
-        if (event.getType() == ConfigValueEvent.Type.SET && protectedKeys.contains(key)) {
-            if (event.getNewValue() instanceof String) {
-                try {
-                    String encrypted = encrypt((String) event.getNewValue());
-                    event.setNewValue(encrypted);
-                } catch (Exception e) {
-                    logError("Failed to encrypt value for key: " + key, e);
-                }
-            }
-        } else if (event.getType() == ConfigValueEvent.Type.GET && protectedKeys.contains(key)) {
-            if (event.getOldValue() instanceof String value) {
-                try {
-                    if (isEncrypted(value)) {
-                        String decrypted = decrypt(value);
-                        // Store decrypted value back to config directly since event doesn't have setValue
-                        config.set(key, decrypted);
-                    }
-                } catch (Exception e) {
-                    logError("Failed to decrypt value for key: " + key, e);
-                }
-            }
+    /**
+     * <p>Returns the decrypted value of a protected key. {@code config.get(key)} returns the
+     * encrypted text; use this method to read it.</p>
+     *
+     * @return the plain value, the stored value if it is not encrypted, or null if the key is missing
+     */
+    public String getDecrypted(String key) {
+        if (!(config.get(key) instanceof String value)) return null;
+        if (!isEncrypted(value)) return value;
+        try {
+            return decrypt(value);
+        } catch (Exception e) {
+            logError("Failed to decrypt value for key: " + key, e);
+            return null;
         }
     }
 
     public void protectKey(String key) {
         protectedKeys.add(key);
-
-        if (config.containsKey(key) && config.get(key) instanceof String value) {
-            try {
-                if (!isEncrypted(value)) {
-                    String encrypted = encrypt(value);
-                    config.set(key, encrypted);
-                }
-            } catch (Exception e) {
-                logError("Failed to encrypt existing value for key: " + key, e);
-            }
+        if (config.containsKey(key) && config.get(key) instanceof String value && !isEncrypted(value)) {
+            config.set(key, value);
         }
     }
 
@@ -288,11 +284,11 @@ public class EncryptionModule extends AbstractBaseConfigModule {
         Cipher cipher = Cipher.getInstance(algorithm);
         cipher.init(Cipher.ENCRYPT_MODE, encryptionKey);
         byte[] encrypted = cipher.doFinal(data.getBytes());
-        return Base64.getEncoder().encodeToString(encrypted);
+        return PREFIX + Base64.getEncoder().encodeToString(encrypted);
     }
 
     private String decrypt(String data) throws Exception {
-        byte[] decoded = Base64.getDecoder().decode(data);
+        byte[] decoded = Base64.getDecoder().decode(data.startsWith(PREFIX) ? data.substring(PREFIX.length()) : data);
         Cipher cipher = Cipher.getInstance(algorithm);
         cipher.init(Cipher.DECRYPT_MODE, decryptionKey);
         byte[] decrypted = cipher.doFinal(decoded);
@@ -300,12 +296,7 @@ public class EncryptionModule extends AbstractBaseConfigModule {
     }
 
     private boolean isEncrypted(String value) {
-        try {
-            Base64.getDecoder().decode(value);
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
+        return value.startsWith(PREFIX);
     }
 
     private void logError(String message, Exception e) {
