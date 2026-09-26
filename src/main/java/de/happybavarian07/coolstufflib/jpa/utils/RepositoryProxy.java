@@ -160,56 +160,57 @@ public class RepositoryProxy implements InvocationHandler {
                 return findAllById(entityClass, (Iterable<?>) args[0]);
             }
             if (methodName.startsWith("findBy") || methodName.startsWith("findAllBy")) {
-                String fieldsPart = methodName.replaceFirst("find(All)?By", "");
-                String[] fieldNames = fieldsPart.split("And");
-                if (fieldNames.length == args.length) {
-                    StringBuilder whereClause = new StringBuilder();
-                    List<Object> queryArgs = new ArrayList<>();
-                    for (int i = 0; i < fieldNames.length; i++) {
-                        String javaFieldName = Character.toLowerCase(fieldNames[i].charAt(0)) + fieldNames[i].substring(1);
-                        if (javaFieldName.equals("id")) {
-                            javaFieldName = EntityReflectionUtil.getIdColumnName(entityClass);
-                        }
-                        Field field = null;
-                        for (Field f : entityClass.getDeclaredFields()) {
-                            if (f.getName().equalsIgnoreCase(javaFieldName)) {
-                                field = f;
-                                break;
-                            }
-                            Column col = f.getAnnotation(Column.class);
-                            if (col != null && !col.name().isEmpty() && col.name().equalsIgnoreCase(javaFieldName)) {
-                                field = f;
-                                break;
-                            }
-                        }
-                        if (field == null) throw new RuntimeException("Field not found: " + javaFieldName);
-                        List<String> possibleNames = getPossibleColumnNames(field);
-                        String columnName = possibleNames.get(0);
-                        if (i > 0) whereClause.append(" AND ");
-                        whereClause.append(columnName).append(" = ?");
-                        queryArgs.add(args[i]);
-                    }
-                    String sql = "SELECT * FROM " + databasePrefix + tableName + " WHERE " + whereClause;
-                    List<Object> results = new ArrayList<>();
-                    try (ResultSet rs = sqlExecutor.executeQuery(sql, queryArgs.toArray())) {
-                        while (rs.next()) {
-                            Object entity = mapResultSetToEntity(rs, entityClass);
-                            results.add(entity);
-                        }
-                    }
-                    if (method.getReturnType().isAssignableFrom(List.class)) {
-                        return results;
-                    } else if (!results.isEmpty()) {
-                        return results.get(0);
-                    } else {
-                        return null;
-                    }
-                }
+                List<Object> results = findByFields(entityClass, methodName.replaceFirst("find(All)?By", ""), args);
+                if (results == null) return null;
+                if (method.getReturnType().isAssignableFrom(List.class)) return results;
+                return results.isEmpty() ? null : results.get(0);
             }
             return null;
         } catch (Exception e) {
             throw new RuntimeException("Error in find method", e);
         }
+    }
+
+    /** Entities whose fields (e.g. {@code NameAndCoins}) equal the arguments, or null if the argument count differs. */
+    private List<Object> findByFields(Class<?> entityClass, String fieldsPart, Object[] args) throws Exception {
+        String tableName = EntityReflectionUtil.getTableName(entityClass);
+        String[] fieldNames = fieldsPart.split("And");
+        if (fieldNames.length != (args == null ? 0 : args.length)) return null;
+        StringBuilder whereClause = new StringBuilder();
+        List<Object> queryArgs = new ArrayList<>();
+        for (int i = 0; i < fieldNames.length; i++) {
+            String javaFieldName = Character.toLowerCase(fieldNames[i].charAt(0)) + fieldNames[i].substring(1);
+            if (javaFieldName.equals("id")) {
+                javaFieldName = EntityReflectionUtil.getIdColumnName(entityClass);
+            }
+            Field field = null;
+            for (Field f : entityClass.getDeclaredFields()) {
+                if (f.getName().equalsIgnoreCase(javaFieldName)) {
+                    field = f;
+                    break;
+                }
+                Column col = f.getAnnotation(Column.class);
+                if (col != null && !col.name().isEmpty() && col.name().equalsIgnoreCase(javaFieldName)) {
+                    field = f;
+                    break;
+                }
+            }
+            if (field == null) throw new RuntimeException("Field not found: " + javaFieldName);
+            List<String> possibleNames = getPossibleColumnNames(field);
+            String columnName = possibleNames.get(0);
+            if (i > 0) whereClause.append(" AND ");
+            whereClause.append(columnName).append(" = ?");
+            queryArgs.add(args[i]);
+        }
+        String sql = "SELECT * FROM " + databasePrefix + tableName + " WHERE " + whereClause;
+        List<Object> results = new ArrayList<>();
+        try (ResultSet rs = sqlExecutor.executeQuery(sql, queryArgs.toArray())) {
+            while (rs.next()) {
+                Object entity = mapResultSetToEntity(rs, entityClass);
+                results.add(entity);
+            }
+        }
+        return results;
     }
 
     private Object handleCountMethod(Method method, Object[] args) {
@@ -318,10 +319,49 @@ public class RepositoryProxy implements InvocationHandler {
 
     private Object handleDeleteMethod(Method method, Object[] args) {
         Class<?> entityClass = getEntityClassFromRepository();
-        if (args.length == 1) {
-            return persistenceHandler.deleteEntity(entityClass, args[0]);
+        String methodName = method.getName();
+        int argCount = args == null ? 0 : args.length;
+        try {
+            if ("delete".equals(methodName) && argCount == 1) {
+                deleteEntity(entityClass, args[0]);
+            } else if ("deleteById".equals(methodName) && argCount == 1) {
+                findEntityById(entityClass, args[0]).ifPresent(entity -> deleteEntity(entityClass, entity));
+            } else if ("deleteAllById".equals(methodName) && argCount == 1) {
+                for (Object id : (Iterable<?>) args[0]) {
+                    findEntityById(entityClass, id).ifPresent(entity -> deleteEntity(entityClass, entity));
+                }
+            } else if ("deleteAll".equals(methodName) && argCount <= 1) {
+                Iterable<?> entities = argCount == 0 ? findAll(entityClass) : (Iterable<?>) args[0];
+                for (Object entity : entities) deleteEntity(entityClass, entity);
+            } else if (methodName.startsWith("deleteBy") || methodName.startsWith("deleteAllBy")) {
+                List<Object> matches = findByFields(entityClass, methodName.replaceFirst("delete(All)?By", ""), args);
+                if (matches == null) {
+                    throw new UnsupportedOperationException("Repository method " + methodName + " has " + argCount
+                            + " parameters but names a different number of fields");
+                }
+                for (Object entity : matches) deleteEntity(entityClass, entity);
+            } else {
+                throw new UnsupportedOperationException("Repository method " + repositoryInterface.getSimpleName() + "."
+                        + methodName + " is not a supported delete method");
+            }
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Error in delete method " + methodName, e);
         }
         return null;
+    }
+
+    private void deleteEntity(Class<?> entityClass, Object entity) {
+        persistenceHandler.deleteEntity(entityClass, entity);
+        if (entityCache != null) {
+            entityCache.remove(EntityReflectionUtil.getEntityId(entity));
+        }
+    }
+
+    private Optional<?> findEntityById(Class<?> entityClass, Object id) {
+        Object result = findById(entityClass, id);
+        return result instanceof Optional<?> optional ? optional : Optional.ofNullable(result);
     }
 
     private Object handleSaveMethod(Method method, Object[] args) {
