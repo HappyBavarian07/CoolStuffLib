@@ -17,7 +17,10 @@ import de.happybavarian07.coolstufflib.service.api.ServiceState;
 import de.happybavarian07.coolstufflib.service.api.Service;
 import de.happybavarian07.coolstufflib.service.impl.ChatInputService;
 import de.happybavarian07.coolstufflib.service.impl.DefaultServiceRegistry;
+import de.happybavarian07.coolstufflib.menusystem.Menu;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -63,6 +66,7 @@ public class CoolStuffLib {
     private boolean backupManagerEnabled = false;
     private boolean placeholderAPIEnabled = false;
     private LibraryTestInitializer testInitializer;
+    private MenuListener menuListener;
 
     /**
      * Initializes the CoolStuffLib library core.
@@ -191,7 +195,28 @@ public class CoolStuffLib {
         if (pluginFileLogger != null) {
             pluginFileLogger.createLogFile();
         }
-        Bukkit.getPluginManager().registerEvents(new MenuListener(), javaPluginUsingLib);
+        menuListener = new MenuListener();
+        Bukkit.getPluginManager().registerEvents(menuListener, javaPluginUsingLib);
+    }
+
+    /**
+     * Stops all services (persistent caches are saved, the backup scheduler stops), closes open
+     * library menus and unregisters the menu listener. Call it in {@code onDisable}.
+     */
+    public void shutdown() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.getOpenInventory().getTopInventory().getHolder() instanceof Menu) player.closeInventory();
+        }
+        if (menuListener != null) {
+            HandlerList.unregisterAll(menuListener);
+            menuListener = null;
+        }
+        try {
+            serviceRegistry.stopAll().join();
+        } catch (CompletionException e) {
+            logError("CoolStuffLib shutdown: some services failed to stop", e.getCause());
+        }
+        playerMenuUtilityMap.clear();
     }
 
     public ServiceRegistry getServiceRegistry() {
