@@ -25,6 +25,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -57,7 +58,7 @@ public class CoolStuffLib {
     private final Consumer<Object[]> cacheManagerStartingMethod;
     private final Consumer<Object[]> backupManagerStartingMethod;
     private final File dataFile;
-    private final Map<UUID, PlayerMenuUtility> playerMenuUtilityMap = new HashMap<>();
+    private final Map<UUID, PlayerMenuUtility> playerMenuUtilityMap = new ConcurrentHashMap<>();
     private boolean languageManagerEnabled = false;
     private boolean commandManagerRegistryEnabled = false;
     private boolean menuAddonManagerEnabled = false;
@@ -398,14 +399,7 @@ public class CoolStuffLib {
      * @return The PlayerMenuUtility instance.
      */
     public PlayerMenuUtility getPlayerMenuUtility(UUID player) {
-        PlayerMenuUtility playerMenuUtility;
-        if (!(playerMenuUtilityMap.containsKey(player))) {
-            playerMenuUtility = new PlayerMenuUtility(this, player);
-            playerMenuUtilityMap.put(player, playerMenuUtility);
-            return playerMenuUtility;
-        } else {
-            return playerMenuUtilityMap.get(player);
-        }
+        return playerMenuUtilityMap.computeIfAbsent(player, uuid -> new PlayerMenuUtility(this, uuid));
     }
 
     /**
