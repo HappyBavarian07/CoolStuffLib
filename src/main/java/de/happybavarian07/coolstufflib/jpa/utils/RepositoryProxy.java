@@ -56,33 +56,12 @@ public class RepositoryProxy implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         String methodName = method.getName();
         if (methodName.equals("toString") && (args == null || args.length == 0)) {
-            try {
-                Method toStringMethod = proxy.getClass().getMethod("toString");
-                if (!toStringMethod.getDeclaringClass().equals(Object.class)) {
-                    return toStringMethod.invoke(proxy);
-                }
-            } catch (Exception ignored) {
-            }
             return repositoryInterface.getName() + " Proxy for " + databasePrefix;
         }
         if (methodName.equals("hashCode") && (args == null || args.length == 0)) {
-            try {
-                Method hashCodeMethod = proxy.getClass().getMethod("hashCode");
-                if (!hashCodeMethod.getDeclaringClass().equals(Object.class)) {
-                    return hashCodeMethod.invoke(proxy);
-                }
-            } catch (Exception ignored) {
-            }
             return System.identityHashCode(proxy);
         }
         if (methodName.equals("equals") && args != null && args.length == 1) {
-            try {
-                Method equalsMethod = proxy.getClass().getMethod("equals", Object.class);
-                if (!equalsMethod.getDeclaringClass().equals(Object.class)) {
-                    return equalsMethod.invoke(proxy, args[0]);
-                }
-            } catch (Exception ignored) {
-            }
             return proxy == args[0];
         }
         if ("isDatabaseReady".equals(methodName)) {
@@ -99,15 +78,18 @@ public class RepositoryProxy implements InvocationHandler {
             }
         }
         if (method.isAnnotationPresent(Transactional.class)) {
-            return transactionManager.executeInTransaction(method, args, () -> invokeMethod(method, args));
+            return transactionManager.executeInTransaction(method, args, () -> invokeMethod(proxy, method, args));
         }
-        return invokeMethod(method, args);
+        return invokeMethod(proxy, method, args);
     }
 
-    private Object invokeMethod(Method method, Object[] args) throws Throwable {
+    private Object invokeMethod(Object proxy, Method method, Object[] args) throws Throwable {
+        if (method.isDefault()) {
+            return InvocationHandler.invokeDefault(proxy, method, args);
+        }
         String methodName = method.getName();
         if (methodName.endsWith("Async")) {
-            return handleAsyncMethod(method, args);
+            return handleAsyncMethod(proxy, method, args);
         }
         if (methodName.startsWith("find")) {
             return handleFindMethod(method, args);
@@ -134,16 +116,17 @@ public class RepositoryProxy implements InvocationHandler {
         } else if ("query".equals(methodName)) {
             return handleQueryMethod(method, args);
         }
-        return null;
+        throw new UnsupportedOperationException("Repository method " + repositoryInterface.getSimpleName() + "." + methodName
+                + " matches no supported name pattern (find, count, exists, get, set, update, insert, delete, save, saveAll, query)");
     }
 
-    private CompletableFuture<?> handleAsyncMethod(Method method, Object[] args) {
+    private CompletableFuture<?> handleAsyncMethod(Object proxy, Method method, Object[] args) {
         CompletableFuture<Object> future = new CompletableFuture<>();
         String syncMethodName = method.getName().replace("Async", "");
         org.bukkit.Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 Method syncMethod = findSyncMethod(syncMethodName, method.getParameterTypes());
-                Object result = invoke(null, syncMethod, args);
+                Object result = invoke(proxy, syncMethod, args);
                 future.complete(result);
             } catch (Throwable e) {
                 future.completeExceptionally(e);
