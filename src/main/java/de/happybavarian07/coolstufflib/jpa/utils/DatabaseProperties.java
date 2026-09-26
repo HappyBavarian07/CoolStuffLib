@@ -79,7 +79,8 @@ public class DatabaseProperties {
 
         if ("sqlite".equalsIgnoreCase(driver)) {
             return "jdbc:sqlite:" + database;
-        } else if ("mysql".equalsIgnoreCase(driver)) {
+        } else if ("mysql".equalsIgnoreCase(driver) || "mariadb".equalsIgnoreCase(driver)) {
+            // The MySQL driver that Spigot ships also talks to MariaDB
             String portStr = port != null ? ":" + port : ":3306";
             return "jdbc:mysql://" + host + portStr + "/" + database + "?useSSL=false&allowPublicKeyRetrieval=true";
         } else if ("postgresql".equalsIgnoreCase(driver)) {

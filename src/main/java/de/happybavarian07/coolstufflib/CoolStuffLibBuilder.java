@@ -187,6 +187,12 @@ public class CoolStuffLibBuilder {
     }
 
     @Deprecated
+    /** Uses a backup manager that was created earlier, e.g. in {@code onLoad}; CoolStuffLib starts and stops it. */
+    public CoolStuffLibBuilder setBackupManager(BackupManager backupManager) {
+        this.backupManager = backupManager;
+        return this;
+    }
+
     public CoolStuffLibBuilder setUsePlayerLangHandler(boolean usePlayerLangHandler) {
         this.usePlayerLangHandler = usePlayerLangHandler;
         return this;
@@ -350,6 +356,17 @@ public class CoolStuffLibBuilder {
             return this;
         }
 
+        public RepositoryManagerBuilder addMySQLConnection(String name, String host, String port, String database, String username, String password) {
+            DatabaseProperties props = new DatabaseProperties();
+            props.setHost(host);
+            props.setPort(port);
+            props.setDatabase(database);
+            props.setUsername(username);
+            props.setPassword(password);
+            props.setDriver("mysql");
+            return addConnection(name, props);
+        }
+
         public RepositoryManagerBuilder addSQLiteConnection(String name, String filePath) {
             DatabaseProperties props = new DatabaseProperties();
             props.setDatabase(filePath);
@@ -358,10 +375,12 @@ public class CoolStuffLibBuilder {
             return this;
         }
 
-        private void addConnection(String name, DatabaseProperties props) {
+        /** Adds a connection with properties built by the caller; the builder's table prefix is applied. */
+        public RepositoryManagerBuilder addConnection(String name, DatabaseProperties props) {
             props.setDatabasePrefix(databasePrefix);
             connections.add(props);
             repositoryManager.addConnection(name, props);
+            return this;
         }
 
         public RepositoryManagerBuilder setDefaultConnection(String name) {
