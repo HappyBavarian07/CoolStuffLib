@@ -148,10 +148,9 @@ public class DefaultServiceRegistry implements ServiceRegistry, ServiceMetrics, 
             ids.put(clazz, uuid);
             scannedNames.put(meta.serviceName(), uuid);
         }
-        for (Map.Entry<Class<?>, UUID> entry : ids.entrySet()) {
-            Class<?> clazz = entry.getKey();
+        for (Class<?> clazz : inDependencyOrder(ids.keySet())) {
             ServiceComponent meta = clazz.getAnnotation(ServiceComponent.class);
-            UUID uuid = entry.getValue();
+            UUID uuid = ids.get(clazz);
             String name = meta.serviceName();
             List<UUID> dependencies = new ArrayList<>();
             for (String dependency : meta.dependsOn()) {
@@ -169,6 +168,34 @@ public class DefaultServiceRegistry implements ServiceRegistry, ServiceMetrics, 
             result.add(Tuples.of(instance, uuid));
         }
         return result;
+    }
+
+    /** Scanned services ordered so that every service comes after the scanned services it depends on. */
+    private static List<Class<?>> inDependencyOrder(Collection<Class<?>> scanned) {
+        Map<String, Class<?>> byName = new HashMap<>();
+        for (Class<?> clazz : scanned) {
+            byName.put(clazz.getAnnotation(ServiceComponent.class).serviceName(), clazz);
+        }
+        List<Class<?>> ordered = new ArrayList<>();
+        Set<Class<?>> visiting = new HashSet<>();
+        for (Class<?> clazz : scanned) {
+            addInDependencyOrder(clazz, byName, visiting, ordered);
+        }
+        return ordered;
+    }
+
+    private static void addInDependencyOrder(Class<?> clazz, Map<String, Class<?>> byName, Set<Class<?>> visiting,
+                                             List<Class<?>> ordered) {
+        if (ordered.contains(clazz)) return;
+        if (!visiting.add(clazz)) {
+            throw new IllegalStateException("Circular dependsOn involving service class " + clazz.getName());
+        }
+        for (String dependency : clazz.getAnnotation(ServiceComponent.class).dependsOn()) {
+            Class<?> dependencyClass = byName.get(dependency);
+            if (dependencyClass != null) addInDependencyOrder(dependencyClass, byName, visiting, ordered);
+        }
+        visiting.remove(clazz);
+        ordered.add(clazz);
     }
 
     @Override
