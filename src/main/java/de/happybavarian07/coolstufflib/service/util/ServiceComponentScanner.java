@@ -17,14 +17,33 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ServiceComponentScanner {
+    private static final Logger LOGGER = Logger.getLogger(ServiceComponentScanner.class.getName());
+
+    /**
+     * Scans with this library's class loader (inside a plugin that is the plugin's class loader) and the thread's
+     * context class loader.
+     */
     public static List<Class<?>> findAnnotatedServices(String packageName) {
+        Set<ClassLoader> loaders = new LinkedHashSet<>();
+        loaders.add(ServiceComponentScanner.class.getClassLoader());
+        ClassLoader context = Thread.currentThread().getContextClassLoader();
+        if (context != null) loaders.add(context);
         Set<String> seenClassNames = new HashSet<>();
         List<Class<?>> result = new ArrayList<>();
+        for (ClassLoader loader : loaders) {
+            scan(loader, packageName, result, seenClassNames);
+        }
+        return result;
+    }
+
+    private static void scan(ClassLoader loader, String packageName, List<Class<?>> result, Set<String> seenClassNames) {
         String path = packageName.replace('.', '/');
         try {
-            Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources(path);
+            Enumeration<URL> resources = loader.getResources(path);
             while (resources.hasMoreElements()) {
                 URL resource = resources.nextElement();
                 String protocol = resource.getProtocol();
@@ -32,7 +51,7 @@ public class ServiceComponentScanner {
                     String decodedPath = URLDecoder.decode(resource.getFile(), StandardCharsets.UTF_8);
                     File dir = new File(decodedPath);
                     if (dir.exists() && dir.isDirectory()) {
-                        scanDirectoryForClasses(dir, packageName, result, seenClassNames);
+                        scanDirectoryForClasses(loader, dir, packageName, result, seenClassNames);
                     }
                 } else if ("jar".equals(protocol)) {
                     try {
@@ -42,44 +61,44 @@ public class ServiceComponentScanner {
                         while (entries.hasMoreElements()) {
                             JarEntry entry = entries.nextElement();
                             String name = entry.getName();
-                            if (name.startsWith(path) && name.endsWith(".class") && !entry.isDirectory()) {
+                            if (name.startsWith(path + "/") && name.endsWith(".class") && !entry.isDirectory()) {
                                 String className = name.replace('/', '.').substring(0, name.length() - 6);
                                 if (seenClassNames.add(className)) {
-                                    try {
-                                        Class<?> clazz = Class.forName(className);
-                                        if (clazz.isAnnotationPresent(ServiceComponent.class)) {
-                                            result.add(clazz);
-                                        }
-                                    } catch (ClassNotFoundException | NoClassDefFoundError ignored) {
-                                    }
+                                    addIfAnnotated(loader, className, result);
                                 }
                             }
                         }
-                    } catch (IOException ignored) {
+                    } catch (IOException e) {
+                        LOGGER.log(Level.WARNING, "Could not scan " + resource + " for services", e);
                     }
                 }
             }
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Could not scan package " + packageName + " for services", e);
         }
-        return result;
     }
 
-    private static void scanDirectoryForClasses(File dir, String packageName, List<Class<?>> result, Set<String> seenClassNames) {
+    private static void addIfAnnotated(ClassLoader loader, String className, List<Class<?>> result) {
+        try {
+            Class<?> clazz = Class.forName(className, false, loader);
+            if (clazz.isAnnotationPresent(ServiceComponent.class)) {
+                result.add(clazz);
+            }
+        } catch (ClassNotFoundException | LinkageError e) {
+            LOGGER.log(Level.FINE, "Skipping " + className + " while scanning for services", e);
+        }
+    }
+
+    private static void scanDirectoryForClasses(ClassLoader loader, File dir, String packageName, List<Class<?>> result, Set<String> seenClassNames) {
         File[] files = dir.listFiles();
         if (files == null) return;
         for (File file : files) {
             if (file.isDirectory()) {
-                scanDirectoryForClasses(file, packageName + "." + file.getName(), result, seenClassNames);
+                scanDirectoryForClasses(loader, file, packageName + "." + file.getName(), result, seenClassNames);
             } else if (file.getName().endsWith(".class")) {
                 String className = packageName + '.' + file.getName().substring(0, file.getName().length() - 6);
                 if (seenClassNames.add(className)) {
-                    try {
-                        Class<?> clazz = Class.forName(className);
-                        if (clazz.isAnnotationPresent(ServiceComponent.class)) {
-                            result.add(clazz);
-                        }
-                    } catch (ClassNotFoundException | NoClassDefFoundError ignored) {
-                    }
+                    addIfAnnotated(loader, className, result);
                 }
             }
         }
