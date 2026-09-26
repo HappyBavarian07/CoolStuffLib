@@ -85,5 +85,6 @@ public class ConfirmationMenu extends Menu {
         // Place the reason item in the middle row
         lgm.addPlaceholder(PlaceholderType.ITEM, "%reason%", playerMenuUtility.getData("ConfirmationMenu_Reason"), true);
         inventory.setItem(4 + middleRow * 9, lgm.getItem("General.ConfirmationMenu.ReasonItem", player, true));
+        setFillerGlass();
     }
 }
