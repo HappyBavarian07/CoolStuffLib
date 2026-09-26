@@ -288,7 +288,8 @@ public class CoolStuffLibBuilder {
         }
 
         public CoolStuffLibBuilder build() {
-            parent.languageManager = new LanguageManager(parent.javaPluginUsingLib, languageFolder, resourceDirectory, prefix);
+            File folder = languageFolder != null ? languageFolder : new File(parent.javaPluginUsingLib.getDataFolder(), "languages");
+            parent.languageManager = new LanguageManager(parent.javaPluginUsingLib, folder, resourceDirectory, prefix);
             parent.usePlayerLangHandler = this.usePlayerLangHandler;
             return parent;
         }
@@ -330,6 +331,8 @@ public class CoolStuffLibBuilder {
     public static class RepositoryManagerBuilder {
         private final CoolStuffLibBuilder parent;
         private final RepositoryManager repositoryManager;
+        private final List<DatabaseProperties> connections = new ArrayList<>();
+        private String databasePrefix = "";
 
         private RepositoryManagerBuilder(CoolStuffLibBuilder parent) {
             this.parent = parent;
@@ -343,7 +346,7 @@ public class CoolStuffLibBuilder {
             props.setUsername(username);
             props.setPassword(password);
             props.setDriver("mysql");
-            repositoryManager.addConnection(name, props);
+            addConnection(name, props);
             return this;
         }
 
@@ -351,8 +354,14 @@ public class CoolStuffLibBuilder {
             DatabaseProperties props = new DatabaseProperties();
             props.setDatabase(filePath);
             props.setDriver("sqlite");
-            repositoryManager.addConnection(name, props);
+            addConnection(name, props);
             return this;
+        }
+
+        private void addConnection(String name, DatabaseProperties props) {
+            props.setDatabasePrefix(databasePrefix);
+            connections.add(props);
+            repositoryManager.addConnection(name, props);
         }
 
         public RepositoryManagerBuilder setDefaultConnection(String name) {
@@ -360,10 +369,19 @@ public class CoolStuffLibBuilder {
             return this;
         }
 
+        /**
+         * Sets the table name prefix for every connection added with this builder.
+         */
         public RepositoryManagerBuilder setDatabasePrefix(String prefix) {
+            this.databasePrefix = prefix == null ? "" : prefix;
+            connections.forEach(props -> props.setDatabasePrefix(databasePrefix));
             return this;
         }
 
+        /**
+         * @deprecated Tables are always created when a repository is registered; this does nothing.
+         */
+        @Deprecated
         public RepositoryManagerBuilder enableAutoTableCreation() {
             return this;
         }
@@ -545,7 +563,11 @@ public class CoolStuffLibBuilder {
             return this;
         }
 
+        /**
+         * Creates a {@link PluginFileLogger} writing to {@code plugin.log} unless one was set with {@link #create}.
+         */
         public LoggingBuilder enableFileLogging() {
+            if (pluginFileLogger == null) pluginFileLogger = new PluginFileLogger(parent.javaPluginUsingLib);
             return this;
         }
 
