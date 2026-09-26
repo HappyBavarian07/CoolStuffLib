@@ -839,6 +839,7 @@ public class LanguageManager implements Service {
         if (player == null && currentLang) return getCurrentLang();
         if (player == null) return getLang(langName, true);
         if (langName == null && currentLang) return getCurrentLang();
+        if (playerLanguageHandler == null) return currentLang ? getCurrentLang() : getLang(langName, true);
 
         LanguageFile lang = playerLanguageHandler.getPlayerLanguage(player.getUniqueId());
         if (lang == null) {
