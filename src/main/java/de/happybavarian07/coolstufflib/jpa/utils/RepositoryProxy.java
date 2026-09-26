@@ -414,15 +414,27 @@ public class RepositoryProxy implements InvocationHandler {
     }
 
     private Class<?> getEntityClassFromRepository() {
-        Type[] genericInterfaces = repositoryInterface.getGenericInterfaces();
-        for (Type genericInterface : genericInterfaces) {
-            if (genericInterface instanceof ParameterizedType paramType) {
-                if (paramType.getRawType().equals(Repository.class)) {
-                    return (Class<?>) paramType.getActualTypeArguments()[0];
-                }
-            }
+        Class<?> entityClass = findEntityClass(repositoryInterface);
+        if (entityClass == null) {
+            throw new IllegalStateException("Cannot determine entity class from repository interface");
         }
-        throw new IllegalStateException("Cannot determine entity class from repository interface");
+        return entityClass;
+    }
+
+    /** Walks the interface hierarchy, so {@code AsyncRepository<E, ID>} and deeper sub-interfaces work too. */
+    private static Class<?> findEntityClass(Class<?> type) {
+        for (Type genericInterface : type.getGenericInterfaces()) {
+            Class<?> raw = genericInterface instanceof ParameterizedType paramType
+                    ? (Class<?>) paramType.getRawType() : (Class<?>) genericInterface;
+            if (!Repository.class.isAssignableFrom(raw)) continue;
+            if (genericInterface instanceof ParameterizedType paramType
+                    && paramType.getActualTypeArguments()[0] instanceof Class<?> entityClass) {
+                return entityClass;
+            }
+            Class<?> found = findEntityClass(raw);
+            if (found != null) return found;
+        }
+        return null;
     }
 
     private Object handleInsertMethod(Method method, Object[] args) {
