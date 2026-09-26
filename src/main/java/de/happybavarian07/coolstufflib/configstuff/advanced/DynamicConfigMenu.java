@@ -1,7 +1,6 @@
 package de.happybavarian07.coolstufflib.configstuff.advanced;
 
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.ConfigSection;
-import de.happybavarian07.coolstufflib.configstuff.advanced.section.MapSection;
 import de.happybavarian07.coolstufflib.languagemanager.PlaceholderType;
 import de.happybavarian07.coolstufflib.menusystem.Menu;
 import de.happybavarian07.coolstufflib.menusystem.PaginatedMenu;
@@ -75,13 +74,13 @@ public class DynamicConfigMenu extends PaginatedMenu<Map.Entry<String, Object>> 
             lgm.addPlaceholder(PlaceholderType.ITEM, "%value%", value == null ? "null" : value.toString(), false);
 
             if (value instanceof ConfigSection || value instanceof Map) {
-                return lgm.getItem("Items.ConfigUI.Folder", playerMenuUtility.getOwner(), true);
+                return lgm.getItem("ConfigUI.Folder", playerMenuUtility.getOwner(), true);
             } else if (value instanceof Boolean b) {
                 return lgm.getItem(b ? "Items.ConfigUI.Boolean_True" : "Items.ConfigUI.Boolean_False", playerMenuUtility.getOwner(), true);
             } else if (value instanceof Number) {
-                return lgm.getItem("Items.ConfigUI.NumberValue", playerMenuUtility.getOwner(), true);
+                return lgm.getItem("ConfigUI.NumberValue", playerMenuUtility.getOwner(), true);
             } else {
-                return lgm.getItem("Items.ConfigUI.StringValue", playerMenuUtility.getOwner(), true);
+                return lgm.getItem("ConfigUI.StringValue", playerMenuUtility.getOwner(), true);
             }
         });
     }
@@ -102,10 +101,9 @@ public class DynamicConfigMenu extends PaginatedMenu<Map.Entry<String, Object>> 
 
         if (value instanceof ConfigSection section) {
             new DynamicConfigMenu(playerMenuUtility, this, section, currentPath + "." + key).open();
-        } else if (value instanceof Map map) {
-            MapSection mapSection = new MapSection(key);
-            mapSection.fromMap(map);
-            new DynamicConfigMenu(playerMenuUtility, this, mapSection, currentPath + "." + key).open();
+        } else if (value instanceof Map) {
+            ConfigSection child = currentSection.getSection(key);
+            if (child != null) new DynamicConfigMenu(playerMenuUtility, this, child, currentPath + "." + key).open();
         } else if (value instanceof Boolean b) {
             currentSection.set(key, !b);
             super.open();
