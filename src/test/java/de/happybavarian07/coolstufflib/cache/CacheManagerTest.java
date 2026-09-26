@@ -92,4 +92,26 @@ public class CacheManagerTest {
         assertNotNull(manager1.getCache("shared_name"));
         assertNull(manager2.getCache("shared_name"));
     }
+
+    @Test
+    void shutdownSavesPersistentCachesInsteadOfClearingThem() throws Exception {
+        String file = "test_cache_manager_" + System.currentTimeMillis() + ".json";
+        try {
+            FilePersistentCache<String, String> persistent = new FilePersistentCache<>(file, 100, false, 0, String.class);
+            persistent.put("kept", "value");
+            Cache<String, String> memory = new InMemoryCache<>();
+            memory.put("gone", "value");
+            cacheManager.registerCache("persistent", persistent);
+            cacheManager.registerCache("memory", memory);
+
+            cacheManager.shutdown().join();
+
+            assertFalse(memory.containsKey("gone"));
+            FilePersistentCache<String, String> reloaded = new FilePersistentCache<>(file, 100, false, 0, String.class);
+            assertEquals("value", reloaded.get("kept"));
+            reloaded.close();
+        } finally {
+            java.nio.file.Files.deleteIfExists(java.nio.file.Paths.get(file));
+        }
+    }
 }

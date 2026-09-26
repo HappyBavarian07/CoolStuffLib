@@ -145,4 +145,16 @@ public class DebugServiceTest {
         assertNotNull(result.getServiceA());
         assertInstanceOf(DebugServiceA.class, result.getServiceA());
     }
+
+    @Test
+    public void testDependsOnIsApplied() {
+        DefaultServiceRegistry registry = new DefaultServiceRegistry();
+        registry.registerAnnotatedServices("de.happybavarian07.coolstufflib.service.debug", new DebugConfig());
+        registry.startAll().join();
+
+        registry.stop(registry.getIdByName("serviceA")).join();
+
+        assertEquals(de.happybavarian07.coolstufflib.service.api.ServiceState.STOPPED,
+                registry.getState(registry.getIdByName("serviceB")));
+    }
 }

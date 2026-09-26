@@ -134,4 +134,42 @@ class TransactionTest {
     private static Method work() throws NoSuchMethodException {
         return Repo.class.getMethod("work");
     }
+
+    @Test
+    void runnableTransactionBindsItsConnectionAndRollsBack() throws SQLException {
+        Connection[] seen = new Connection[1];
+        assertThrows(IllegalStateException.class, () -> executor.executeTransaction((Runnable) () -> {
+            seen[0] = executor.getTransactionConnection();
+            throw new IllegalStateException("fail");
+        }));
+        assertSame(connection, seen[0]);
+        verify(connection).rollback();
+        verify(connection, never()).commit();
+        verify(controller).releaseConnection("default", connection);
+        assertNull(executor.getTransactionConnection());
+    }
+
+    @Test
+    void preparedStatementTransactionRunsOnTheStatementsConnection() throws SQLException {
+        Connection own = mock(Connection.class);
+        when(own.getAutoCommit()).thenReturn(true);
+        PreparedStatement first = mock(PreparedStatement.class);
+        PreparedStatement second = mock(PreparedStatement.class);
+        when(first.getConnection()).thenReturn(own);
+        when(second.getConnection()).thenReturn(own);
+
+        executor.executeTransaction(first, second);
+
+        verify(own).commit();
+        verify(controller, never()).getConnection(anyString());
+    }
+
+    @Test
+    void preparedStatementsFromDifferentConnectionsAreRejected() throws SQLException {
+        PreparedStatement first = mock(PreparedStatement.class);
+        PreparedStatement second = mock(PreparedStatement.class);
+        when(first.getConnection()).thenReturn(mock(Connection.class));
+        when(second.getConnection()).thenReturn(mock(Connection.class));
+        assertThrows(SQLException.class, () -> executor.executeTransaction(first, second));
+    }
 }

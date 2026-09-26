@@ -221,4 +221,23 @@ class CoolStuffLibTest {
             return CompletableFuture.failedFuture(new IllegalStateException("init failed"));
         }
     }
+
+    @Test
+    void shutdownStopsServices() {
+        CoolStuffLib lib = newLib(null);
+        lib.requireService("stop-me", NoArgService.class);
+        try (org.mockito.MockedStatic<org.bukkit.Bukkit> bukkit = mockStatic(org.bukkit.Bukkit.class)) {
+            bukkit.when(org.bukkit.Bukkit::getOnlinePlayers).thenReturn(List.of());
+            lib.shutdown();
+        }
+        assertEquals(ServiceState.STOPPED, lib.getServiceRegistry().getStateByName("stop-me"));
+    }
+
+    @Test
+    void languageFolderDefaultsToLanguagesInDataFolder() {
+        java.io.File dataFolder = new java.io.File("TestOutputs/BuilderDefaults");
+        when(plugin.getDataFolder()).thenReturn(dataFolder);
+        CoolStuffLib lib = new CoolStuffLibBuilder(plugin).withLanguageManager().build().createCoolStuffLib();
+        assertEquals(new java.io.File(dataFolder, "languages"), lib.getLanguageManager().getLangFolder());
+    }
 }

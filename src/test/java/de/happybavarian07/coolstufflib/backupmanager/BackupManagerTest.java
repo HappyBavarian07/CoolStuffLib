@@ -73,4 +73,29 @@ public class BackupManagerTest {
         int restoreResult = backup.loadBackup(backupFile);
         assertEquals(0, restoreResult);
     }
+
+    @Test
+    void startBackupWithUnknownIdReturnsMinus100() {
+        assertEquals(-100, new BackupManager(3, 10000).startBackup("does-not-exist"));
+    }
+
+    @Test
+    void schedulerRunsOnlyBetweenInitAndShutdown() throws InterruptedException {
+        long before = schedulerThreads();
+        BackupManager manager = new BackupManager(3, 10000);
+        assertEquals(before, schedulerThreads());
+
+        manager.init().join();
+        assertEquals(before + 1, schedulerThreads());
+
+        manager.shutdown().join();
+        for (int i = 0; i < 50 && schedulerThreads() > before; i++) Thread.sleep(20);
+        assertEquals(before, schedulerThreads());
+    }
+
+    private static long schedulerThreads() {
+        return Thread.getAllStackTraces().keySet().stream()
+                .filter(t -> t.isAlive() && "CoolStuffLib-BackupScheduler".equals(t.getName()))
+                .count();
+    }
 }

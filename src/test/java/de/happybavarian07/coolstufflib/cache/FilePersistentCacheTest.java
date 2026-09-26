@@ -201,4 +201,13 @@ public class FilePersistentCacheTest {
             }
         }
     }
+
+    @Test
+    void closeWritesTheCacheToDisk() {
+        cache.put("kept", "value");
+        cache.close();
+        FilePersistentCache<String, String> reloaded = new FilePersistentCache<>(testCacheFile, 2000, false, 0, String.class);
+        assertEquals("value", reloaded.get("kept"));
+        reloaded.close();
+    }
 }

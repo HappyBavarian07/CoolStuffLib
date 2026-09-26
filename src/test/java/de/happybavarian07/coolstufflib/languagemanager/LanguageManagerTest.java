@@ -89,4 +89,10 @@ class LanguageManagerTest {
         ExpressionEngine defaultEngine = languageManager.getExpressionEnginePool().getEngineForLanguage("default");
         assertNotNull(defaultEngine);
     }
+
+    @Test
+    void playerLookupWithoutPerPlayerHandlerFallsBackToCurrentLanguage() {
+        assertSame(languageManager.getCurrentLang(),
+                assertDoesNotThrow(() -> languageManager.getLangOrPlayerLang(true, "en", mockPlayer)));
+    }
 }
