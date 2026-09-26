@@ -548,14 +548,13 @@ public class ExpressionEngine {
      * @param expression The expression to validate.
      * @return Null if valid, otherwise an error message.
      */
+    /** @return null if {@code expression} parses, otherwise the reason it does not */
     public String validate(String expression) {
         try {
             Parser.Expression expr = tokenizeAndParseExpression(expression);
-            if (expr == null) return "Empty or invalid expression.";
-            return null;
-        } catch (Exception e) {
-            if (e instanceof ExpressionEngineException) throw e;
-            throw new ExpressionEngineException("Error parsing expression: " + expression + " - " + e.getMessage(), e);
+            return expr == null ? "Empty expression." : null;
+        } catch (RuntimeException e) {
+            return e.getMessage();
         }
     }
 

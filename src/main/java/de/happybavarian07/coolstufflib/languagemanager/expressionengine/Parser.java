@@ -1,6 +1,5 @@
 package de.happybavarian07.coolstufflib.languagemanager.expressionengine;
 
-import de.happybavarian07.coolstufflib.CoolStuffLib;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -112,7 +111,9 @@ public class Parser {
      * Expression conditionalExpr = parser.parse();
      * </code></pre>
      *
-     * @return the parsed expression tree, or null if parsing fails due to syntax errors
+     * @return the parsed expression tree
+     * @throws de.happybavarian07.coolstufflib.languagemanager.expressionengine.exceptions.ExpressionSyntaxException
+     *         if the tokens are not a valid expression
      */
     public Expression parse() {
         try {
@@ -123,9 +124,11 @@ public class Parser {
                 return assignment();
             }
             return sequence();
-        } catch (Exception e) {
-            CoolStuffLib.logError("Failed to parse expression", e);
-            return null;
+        } catch (de.happybavarian07.coolstufflib.languagemanager.expressionengine.exceptions.ExpressionSyntaxException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new de.happybavarian07.coolstufflib.languagemanager.expressionengine.exceptions.ExpressionSyntaxException(
+                    "Syntax error: " + e.getMessage(), e);
         }
     }
 
