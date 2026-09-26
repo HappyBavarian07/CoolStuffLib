@@ -161,7 +161,7 @@ public class ConfigUpdater {
         writer.write(getListAsString(list, actualKey, prefixSpaces, yaml));
     }
 
-    private static String getListAsString(List list, String actualKey, String prefixSpaces, Yaml yaml) {
+    static String getListAsString(List list, String actualKey, String prefixSpaces, Yaml yaml) {
         StringBuilder builder = new StringBuilder(prefixSpaces).append(actualKey).append(":");
 
         if (list.isEmpty()) {
@@ -175,7 +175,7 @@ public class ConfigUpdater {
             Object o = list.get(i);
 
             if (o instanceof String || o instanceof Character) {
-                builder.append(prefixSpaces).append("- \"").append(o).append("\"");
+                builder.append(prefixSpaces).append("- \"").append(o.toString().replace("\\", "\\\\").replace("\"", "\\\"")).append("\"");
             } else if (o instanceof List) {
                 builder.append(prefixSpaces).append("- ").append(yaml.dump(o));
             } else {
