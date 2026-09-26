@@ -203,6 +203,10 @@ public class SQLExecutor {
         }
         Column column = field.getAnnotation(Column.class);
         String columnName = column.name().isEmpty() ? field.getName() : column.name();
+        if (column.autoIncrement() && "sqlite".equalsIgnoreCase(dbProperties.getDriver())) {
+            // SQLite only auto-increments an INTEGER PRIMARY KEY, and spells it AUTOINCREMENT
+            return columnName + " INTEGER PRIMARY KEY AUTOINCREMENT";
+        }
         String sqlType = getSQLType(field);
         StringBuilder definition = new StringBuilder();
         definition.append(columnName).append(" ").append(sqlType);
@@ -225,7 +229,7 @@ public class SQLExecutor {
             if (field.isAnnotationPresent(Column.class)) {
                 String def = getColumnDefinition(field);
                 if (def == null) continue;
-                if (id && !field.getAnnotation(Column.class).primaryKey()) def += " PRIMARY KEY";
+                if (id && !def.contains("PRIMARY KEY")) def += " PRIMARY KEY";
                 columnDefinitions.add(def);
             } else if (id) {
                 columnDefinitions.add(EntityReflectionUtil.getIdColumnName(entityClass) + " " + getSQLType(field) + " PRIMARY KEY");
