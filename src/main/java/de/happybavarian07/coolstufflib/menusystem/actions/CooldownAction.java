@@ -26,7 +26,10 @@ public class CooldownAction implements MenuAction {
     public void execute(Player player, InventoryClickEvent event) {
         if (action == null) return;
         if (!tracker.tryUse(player.getUniqueId())) {
-            if (cooldownMessage != null && !cooldownMessage.isEmpty()) player.sendMessage(cooldownMessage);
+            if (cooldownMessage != null && !cooldownMessage.isEmpty()) {
+                long seconds = (tracker.remainingMillis(player.getUniqueId()) + 999) / 1000;
+                player.sendMessage(cooldownMessage.replace("%seconds%", String.valueOf(seconds)));
+            }
             return;
         }
         action.execute(player, event);
