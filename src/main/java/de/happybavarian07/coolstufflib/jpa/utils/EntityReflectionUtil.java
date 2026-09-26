@@ -39,6 +39,8 @@ public final class EntityReflectionUtil {
                     Column col = field.getAnnotation(Column.class);
                     String colName = (col != null && col.name() != null && !col.name().isEmpty()) ? col.name() : field.getName();
                     mappings.add(new ColumnMapping(field, colName));
+                } else if (field.isAnnotationPresent(Id.class)) {
+                    mappings.add(new ColumnMapping(field, idColumnName));
                 }
             }
 

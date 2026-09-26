@@ -550,7 +550,7 @@ public class RepositoryProxy implements InvocationHandler {
         try {
             Object entity = entityClass.getDeclaredConstructor().newInstance();
             for (Field field : entityClass.getDeclaredFields()) {
-                if (field.isAnnotationPresent(Column.class)) {
+                if (field.isAnnotationPresent(Column.class) || field.isAnnotationPresent(Id.class)) {
                     field.setAccessible(true);
                     Object value = null;
                     for (String columnName : getPossibleColumnNames(field)) {

@@ -1,6 +1,7 @@
 package de.happybavarian07.coolstufflib.jpa;
 
 import de.happybavarian07.coolstufflib.jpa.annotations.*;
+import de.happybavarian07.coolstufflib.jpa.utils.EntityReflectionUtil;
 import de.happybavarian07.coolstufflib.jpa.exceptions.MySQLSystemExceptions;
 import de.happybavarian07.coolstufflib.jpa.interfaces.ResultSetValueConverter;
 import de.happybavarian07.coolstufflib.jpa.utils.DatabaseProperties;
@@ -219,9 +220,15 @@ public class SQLExecutor {
         Field[] fields = entityClass.getDeclaredFields();
         List<String> columnDefinitions = new ArrayList<>();
         for (Field field : fields) {
-            if (field.isAnnotationPresent(Column.class) && !field.isAnnotationPresent(ElementCollection.class)) {
+            if (field.isAnnotationPresent(ElementCollection.class)) continue;
+            boolean id = field.isAnnotationPresent(Id.class);
+            if (field.isAnnotationPresent(Column.class)) {
                 String def = getColumnDefinition(field);
-                if (def != null) columnDefinitions.add(def);
+                if (def == null) continue;
+                if (id && !field.getAnnotation(Column.class).primaryKey()) def += " PRIMARY KEY";
+                columnDefinitions.add(def);
+            } else if (id) {
+                columnDefinitions.add(EntityReflectionUtil.getIdColumnName(entityClass) + " " + getSQLType(field) + " PRIMARY KEY");
             }
         }
         sql.append(String.join(", ", columnDefinitions));
