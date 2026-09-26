@@ -5,6 +5,7 @@ import de.happybavarian07.coolstufflib.utils.PluginFileLogger;
 
 import java.io.File;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * <p>Centralized logger for configuration-related events.</p>
@@ -12,6 +13,7 @@ import java.util.logging.Level;
 public final class ConfigLogger {
 
     private static final String LOG_FILE = "config.log";
+    private static final Logger FALLBACK = Logger.getLogger("CoolStuffLib-Config");
     private static PluginFileLogger logger;
     private static boolean initialized = false;
 
@@ -23,7 +25,7 @@ public final class ConfigLogger {
      *
      * @param rootDirectory The root directory
      */
-    public static void initialize(File rootDirectory) {
+    public static synchronized void initialize(File rootDirectory) {
         if (initialized) {
             return;
         }
@@ -45,8 +47,7 @@ public final class ConfigLogger {
      * @param console Whether to log to console
      */
     public static void info(String message, String source, boolean console) {
-        checkInitialized();
-        logger.writeToLog(Level.INFO, message, source, console);
+        write(Level.INFO, message, source, console);
     }
 
     /**
@@ -57,8 +58,7 @@ public final class ConfigLogger {
      * @param console Whether to log to console
      */
     public static void warning(String message, String source, boolean console) {
-        checkInitialized();
-        logger.writeToLog(Level.WARNING, message, source, console);
+        write(Level.WARNING, message, source, console);
     }
 
     /**
@@ -69,8 +69,7 @@ public final class ConfigLogger {
      * @param console Whether to log to console
      */
     public static void error(String message, String source, boolean console) {
-        checkInitialized();
-        logger.writeToLog(Level.SEVERE, message, source, console);
+        write(Level.SEVERE, message, source, console);
     }
 
     /**
@@ -82,7 +81,6 @@ public final class ConfigLogger {
      * @param console   Whether to log to console
      */
     public static void error(String message, Throwable throwable, String source, boolean console) {
-        checkInitialized();
         StringBuilder fullMessage = new StringBuilder();
         fullMessage.append(message)
                 .append(" - ")
@@ -92,7 +90,7 @@ public final class ConfigLogger {
         for (StackTraceElement element : throwable.getStackTrace()) {
             fullMessage.append(System.lineSeparator()).append("    at ").append(element.toString());
         }
-        logger.writeToLog(Level.SEVERE, fullMessage.toString(), source, console);
+        write(Level.SEVERE, fullMessage.toString(), source, console);
     }
 
     public static void debug(String message, String source) {
@@ -100,8 +98,7 @@ public final class ConfigLogger {
             return;
         }
 
-        checkInitialized();
-        logger.writeToLog(Level.FINE, "[DEBUG] " + message, source, true);
+        write(Level.FINE, "[DEBUG] " + message, source, true);
     }
 
     public static boolean isDebugEnabled() {
@@ -111,19 +108,41 @@ public final class ConfigLogger {
         return CoolStuffLib.getLib().getJavaPluginUsingLib().getConfig().getBoolean("Config.Debug", false);
     }
 
-    private static void checkInitialized() {
+    /**
+     * Without {@link #initialize(File)} the logger writes to the plugin's {@code config.log} once CoolStuffLib is set
+     * up, and to the console before that.
+     */
+    private static synchronized PluginFileLogger fileLogger() {
         if (!initialized) {
-            throw new IllegalStateException("ConfigLogger is not initialized");
+            try {
+                if (CoolStuffLib.getLib() != null) {
+                    logger = new PluginFileLogger(CoolStuffLib.getLib().getJavaPluginUsingLib(), LOG_FILE);
+                    initialized = true;
+                }
+            } catch (RuntimeException ignored) {
+                // Not set up yet: fall back to the console
+            }
         }
-    }
-
-    public static PluginFileLogger getLogger() {
-        checkInitialized();
         return logger;
     }
 
+    private static void write(Level level, String message, String source, boolean console) {
+        PluginFileLogger file = fileLogger();
+        if (file != null) {
+            file.writeToLog(level, message, source, console);
+        } else {
+            FALLBACK.log(level, "[" + source + "] " + message);
+        }
+    }
+
+    /**
+     * @return the file logger, or {@code null} if neither {@link #initialize(File)} was called nor CoolStuffLib is set up
+     */
+    public static PluginFileLogger getLogger() {
+        return fileLogger();
+    }
+
     public static void warn(String s, String persistentBackupModule, boolean b) {
-        checkInitialized();
-        logger.writeToLog(Level.WARNING, s, persistentBackupModule, b);
+        write(Level.WARNING, s, persistentBackupModule, b);
     }
 }
