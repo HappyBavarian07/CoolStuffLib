@@ -23,6 +23,14 @@ public class OpenMenuAction implements MenuAction {
     @Override
     public void execute(Player player, InventoryClickEvent event) {
         if (beforeOpenAction != null) beforeOpenAction.execute(player, event);
-        if (targetMenu != null) targetMenu.open();
+        if (targetMenu != null) openFrom(targetMenu, event);
+    }
+
+    static void openFrom(Menu target, InventoryClickEvent event) {
+        if (target.getSavedMenu() == null && event != null
+                && event.getInventory().getHolder() instanceof Menu parent && parent != target) {
+            target.setSavedMenu(parent);
+        }
+        target.open();
     }
 }

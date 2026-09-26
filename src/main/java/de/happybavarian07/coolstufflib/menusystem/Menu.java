@@ -372,6 +372,10 @@ public abstract class Menu implements InventoryHolder {
         if (slots != null) forbiddenSlots.addAll(slots);
     }
 
+    public Menu getSavedMenu() {
+        return savedMenu;
+    }
+
     public void setSavedMenu(Menu savedMenu) {
         this.savedMenu = savedMenu;
     }

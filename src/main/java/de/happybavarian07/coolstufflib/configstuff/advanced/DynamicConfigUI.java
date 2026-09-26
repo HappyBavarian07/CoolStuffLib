@@ -3,6 +3,7 @@ package de.happybavarian07.coolstufflib.configstuff.advanced;
 import org.bukkit.entity.Player;
 import de.happybavarian07.coolstufflib.configstuff.advanced.interfaces.ConfigSection;
 import de.happybavarian07.coolstufflib.CoolStuffLib;
+import de.happybavarian07.coolstufflib.menusystem.Menu;
 import de.happybavarian07.coolstufflib.menusystem.PlayerMenuUtility;
 
 /**
@@ -20,10 +21,15 @@ public final class DynamicConfigUI {
      * @param section the configuration section to display and edit
      */
     public static void openFor(Player player, ConfigSection section) {
+        openFor(player, section, null);
+    }
+
+    /** Like {@link #openFor(Player, ConfigSection)}, but the close button of the top level returns to {@code parent}. */
+    public static void openFor(Player player, ConfigSection section, Menu parent) {
         if (player == null || section == null) return;
         CoolStuffLib lib = CoolStuffLib.getLib();
         PlayerMenuUtility utility = lib.getPlayerMenuUtility(player.getUniqueId());
-        
-        new DynamicConfigMenu(utility, null, section, "Root").open();
+
+        new DynamicConfigMenu(utility, parent, section, "Root").open();
     }
 }

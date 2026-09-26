@@ -51,14 +51,22 @@ public interface MenuAction {
         return new CooldownAction(millis, this);
     }
 
-    /** Blocks repeated execution per player for {@code millis} and tells the player why. */
+    /**
+     * Blocks repeated execution per player for {@code millis} and tells the player why. {@code %seconds%} in the
+     * message is replaced with the seconds left.
+     */
     default MenuAction cooldown(long millis, String message) {
         return new CooldownAction(millis, this, message);
     }
 
-    /** Plays {@code sound} before running this action. */
+    /** Plays {@code sound} at half volume before running this action. */
     default MenuAction withSound(Sound sound) {
-        return new SoundAction(sound, 1f, 1f, this);
+        return withSound(sound, 0.5f, 1f);
+    }
+
+    /** Plays {@code sound} with the given volume and pitch before running this action. */
+    default MenuAction withSound(Sound sound, float volume, float pitch) {
+        return new SoundAction(sound, volume, pitch, this);
     }
 
     /** Runs {@code next} after this action. */
@@ -103,9 +111,12 @@ public interface MenuAction {
         };
     }
 
-    /** Builds and opens a menu only when clicked. */
+    /**
+     * Builds and opens a menu only when clicked. A menu without a parent gets the clicked menu as its parent, so
+     * {@link #back()} and its close button return there.
+     */
     static MenuAction open(Supplier<? extends Menu> menu) {
-        return (player, event) -> menu.get().open();
+        return (player, event) -> OpenMenuAction.openFrom(menu.get(), event);
     }
 
     /**
