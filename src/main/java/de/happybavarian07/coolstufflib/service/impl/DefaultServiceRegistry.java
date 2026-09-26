@@ -139,14 +139,31 @@ public class DefaultServiceRegistry implements ServiceRegistry, ServiceMetrics, 
     public List<Tuples.Tuple2<Service, UUID>> registerAnnotatedServices(String packageName, Config config) {
         List<Class<?>> annotated = ServiceComponentScanner.findAnnotatedServices(packageName);
         List<Tuples.Tuple2<Service, UUID>> result = new ArrayList<>();
+        Map<Class<?>, UUID> ids = new LinkedHashMap<>();
+        Map<String, UUID> scannedNames = new HashMap<>();
         for (Class<?> clazz : annotated) {
             ServiceComponent meta = clazz.getAnnotation(ServiceComponent.class);
             if (meta == null) continue;
             UUID uuid = meta.uuid().isEmpty() ? UUID.randomUUID() : UUID.fromString(meta.uuid());
+            ids.put(clazz, uuid);
+            scannedNames.put(meta.serviceName(), uuid);
+        }
+        for (Map.Entry<Class<?>, UUID> entry : ids.entrySet()) {
+            Class<?> clazz = entry.getKey();
+            ServiceComponent meta = clazz.getAnnotation(ServiceComponent.class);
+            UUID uuid = entry.getValue();
             String name = meta.serviceName();
+            List<UUID> dependencies = new ArrayList<>();
+            for (String dependency : meta.dependsOn()) {
+                UUID depId = scannedNames.getOrDefault(dependency, nameToId.get(dependency));
+                if (depId == null) {
+                    throw new IllegalStateException("Service '" + name + "' depends on unknown service '" + dependency + "'");
+                }
+                dependencies.add(depId);
+            }
             Service instance = ServiceComponentScanner.createInstance(clazz, this, config);
             injectIdAndNameFields(instance, uuid, name);
-            ServiceDescriptor descriptor = new ServiceDescriptor(uuid, name, List.of(),
+            ServiceDescriptor descriptor = new ServiceDescriptor(uuid, name, dependencies,
                     Duration.ofMillis(meta.startTimeoutMillis()), Duration.ofMillis(meta.stopTimeoutMillis()));
             registerInternal(descriptor, instance, uuid);
             result.add(Tuples.of(instance, uuid));
