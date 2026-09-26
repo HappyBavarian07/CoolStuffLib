@@ -76,7 +76,7 @@ public class DynamicConfigMenu extends PaginatedMenu<Map.Entry<String, Object>> 
             if (value instanceof ConfigSection || value instanceof Map) {
                 return lgm.getItem("ConfigUI.Folder", playerMenuUtility.getOwner(), true);
             } else if (value instanceof Boolean b) {
-                return lgm.getItem(b ? "Items.ConfigUI.Boolean_True" : "Items.ConfigUI.Boolean_False", playerMenuUtility.getOwner(), true);
+                return lgm.getItem(b ? "ConfigUI.Boolean_True" : "ConfigUI.Boolean_False", playerMenuUtility.getOwner(), true);
             } else if (value instanceof Number) {
                 return lgm.getItem("ConfigUI.NumberValue", playerMenuUtility.getOwner(), true);
             } else {
