@@ -108,19 +108,4 @@ class LanguageManagerTest {
         assertNotNull(result);
         assertEquals("en", result.getLangName());
     }
-
-    @Test
-    void createMigratorForLanguageHandlesCommentPreservation() throws IOException {
-        Files.writeString(langFolder.toPath().resolve("en.yml"), "Messages:\n  Test: 'test_value'\n");
-        languageManager.addLanguagesToList(false);
-        LanguageFile langFile = languageManager.getLang("en", true);
-        assertNotNull(langFile);
-
-        LanguageFileMigrator migrator = assertDoesNotThrow(() -> languageManager.createMigratorForLanguage("en"),
-                "createMigratorForLanguage should handle language file with comment preservation logic");
-        assertNotNull(migrator, "Migrator should be created successfully");
-
-        var entries = migrator.getMigrationEntries();
-        assertFalse(entries.isEmpty(), "Migrator should have entries from the language file");
-    }
 }

@@ -1,13 +1,21 @@
 package de.happybavarian07.coolstufflib.languagemanager;
 
 import de.happybavarian07.coolstufflib.languagemanager.storage.LanguageEntry;
+import de.happybavarian07.coolstufflib.languagemanager.storage.LanguageStorage;
+import de.happybavarian07.coolstufflib.languagemanager.storage.LegacyYamlBackend;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 class LanguageFileMigratorTest {
     @Test
@@ -35,17 +43,21 @@ class LanguageFileMigratorTest {
     }
 
     @Test
-    void selectedMissingKeysAreWrittenToConsumer() {
-        Map<String, Object> written = new HashMap<>();
-        LanguageFileMigrator migrator = new LanguageFileMigrator(
-                Map.of("A", "userValue"),
-                Map.of("A", "jarValue", "Missing", "jarOnly"),
-                written::putAll);
+    void migratedMissingKeysKeepTheJarComment(@TempDir Path folder) throws IOException {
+        LanguageStorage.useBackend(folder.toFile(), LegacyYamlBackend.ID);
+        Path ownerFile = folder.resolve("en.yml");
+        Files.writeString(ownerFile, "Messages:\n  Plain: 'mine'\n");
+        LanguageManager lgm = new LanguageManager(mock(JavaPlugin.class), folder.toFile(), "lang-fixtures/legacy", "[P]");
+        lgm.addLanguagesToList(false);
+        Files.writeString(ownerFile, "Messages:\n  Plain: 'mine'\n");
+        lgm.getLang("en", true).getLangConfig().reloadConfig();
 
-        List<LanguageFileMigrator.MigrationEntry> entries = migrator.getMigrationEntries();
-        assertEquals(LanguageFileMigrator.MigrationStatus.MISSING_IN_USER, status(entries, "Missing"));
-        entries.stream().filter(e -> e.getKey().equals("Missing")).findFirst().orElseThrow().setSelectedForMigration(true);
+        LanguageFileMigrator migrator = lgm.createMigratorForLanguage("en");
+        assertEquals(LanguageFileMigrator.MigrationStatus.MISSING_IN_USER, status(migrator.getMigrationEntries(), "Messages.Player.Greeting"));
         migrator.migrateSelected();
-        assertEquals(Map.of("Missing", "jarOnly"), written);
+
+        LanguageEntry greeting = new LegacyYamlBackend(folder.toFile()).read("en").entries().get("Messages.Player.Greeting");
+        assertEquals("%prefix% Hello", greeting.value());
+        assertEquals("greeting", greeting.comment());
     }
 }
