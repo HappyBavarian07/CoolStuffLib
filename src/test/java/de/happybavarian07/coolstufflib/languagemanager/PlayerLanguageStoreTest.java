@@ -1,6 +1,7 @@
 package de.happybavarian07.coolstufflib.languagemanager;
 
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class PlayerLanguageStoreTest {
     @TempDir
@@ -64,5 +66,12 @@ class PlayerLanguageStoreTest {
         LanguageFile result = handler.getPlayerLanguage(playerUuid);
         assertNotNull(result);
         assertEquals("de", result.getLangName());
+
+        lgm.setPLHandler(handler);
+        Player player = mock(Player.class);
+        when(player.getUniqueId()).thenReturn(playerUuid);
+        LanguageFile lookup = lgm.getLangOrPlayerLang(false, "en", player);
+        assertNotNull(lookup);
+        assertEquals("de", lookup.getLangName());
     }
 }
