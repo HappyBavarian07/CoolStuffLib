@@ -5,6 +5,8 @@ import de.happybavarian07.coolstufflib.languagemanager.expressionengine.Expressi
 import de.happybavarian07.coolstufflib.languagemanager.expressionengine.conditions.HeadMaterialCondition;
 import de.happybavarian07.coolstufflib.languagemanager.expressionengine.interfaces.FunctionCall;
 import de.happybavarian07.coolstufflib.languagemanager.expressionengine.interfaces.MaterialCondition;
+import de.happybavarian07.coolstufflib.languagemanager.storage.LanguageEntry;
+import de.happybavarian07.coolstufflib.languagemanager.storage.LoadResult;
 import de.happybavarian07.coolstufflib.utils.Head;
 import de.happybavarian07.coolstufflib.utils.Utils;
 import org.bukkit.Material;
@@ -1546,13 +1548,15 @@ public class LanguageManager implements Service {
     }
 
     public LanguageFileMigrator createMigratorForLanguage(String langName) {
-        LanguageFile langFile = getLang(langName, true);
-        File langConfigFile = langFile.getLangFile();
-        String resourceName = resourceDirectory + "/" + langFile.getLangFile().getName();
-        InputStream resourceStream = plugin.getResource(resourceName);
-        if (resourceStream == null) {
-            resourceStream = plugin.getResource(resourceDirectory + "/en.yml");
-        }
-        return new LanguageFileMigrator(langConfigFile, resourceStream);
+        LanguageConfig config = getLang(langName, true).getLangConfig();
+        LoadResult loaded = config.getLoaded();
+        return new LanguageFileMigrator(values(loaded.own()), values(loaded.defaults()), changes -> config.write(
+                changes.entrySet().stream().map(e -> new LanguageEntry(e.getKey(), e.getValue(), null, null)).toList()));
+    }
+
+    private static Map<String, Object> values(Map<String, LanguageEntry> entries) {
+        Map<String, Object> values = new LinkedHashMap<>();
+        entries.forEach((key, entry) -> values.put(key, entry.value()));
+        return values;
     }
 }

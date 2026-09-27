@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * <p>Handles migration of language files to synchronize with resource files.</p>
@@ -19,9 +20,10 @@ import java.util.Map;
 public class LanguageFileMigrator {
     private final File userConfigFile;
     private final InputStream resourceStream;
-    private final FileConfiguration userConfig;
-    private final FileConfiguration resourceConfig;
-    private final List<MigrationEntry> migrationEntries;
+    private final Map<String, Object> userValues;
+    private final Map<String, Object> resourceValues;
+    private final Consumer<Map<String, Object>> writer;
+    private final List<MigrationEntry> migrationEntries = new ArrayList<>();
 
     /**
      * <p>Creates a new migrator instance.</p>
@@ -30,11 +32,28 @@ public class LanguageFileMigrator {
      * @param resourceStream The resource input stream
      */
     public LanguageFileMigrator(File userConfigFile, InputStream resourceStream) {
+        FileConfiguration userConfig = YamlConfiguration.loadConfiguration(userConfigFile);
         this.userConfigFile = userConfigFile;
         this.resourceStream = resourceStream;
-        this.userConfig = YamlConfiguration.loadConfiguration(userConfigFile);
-        this.resourceConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(resourceStream));
-        this.migrationEntries = new ArrayList<>();
+        this.userValues = flattenConfig(userConfig);
+        this.resourceValues = flattenConfig(YamlConfiguration.loadConfiguration(new InputStreamReader(resourceStream)));
+        this.writer = changes -> {
+            changes.forEach(userConfig::set);
+            try {
+                userConfig.save(userConfigFile);
+            } catch (Exception ignored) {
+            }
+        };
+        scanForMigrations();
+    }
+
+    /** Compares the owner's values with the jar's; {@code writer} receives the selected keys and values. */
+    public LanguageFileMigrator(Map<String, Object> userValues, Map<String, Object> resourceValues, Consumer<Map<String, Object>> writer) {
+        this.userConfigFile = null;
+        this.resourceStream = null;
+        this.userValues = new LinkedHashMap<>(userValues);
+        this.resourceValues = new LinkedHashMap<>(resourceValues);
+        this.writer = writer;
         scanForMigrations();
     }
 
@@ -44,9 +63,8 @@ public class LanguageFileMigrator {
      * @return {@code true} if files differ
      */
     public boolean filesDifferByHash() {
-        String userHash = getFileHash(userConfigFile);
-        String resourceHash = getStreamHash(resourceStream);
-        return !userHash.equals(resourceHash);
+        if (userConfigFile == null || resourceStream == null) return !userValues.equals(resourceValues);
+        return !getFileHash(userConfigFile).equals(getStreamHash(resourceStream));
     }
 
     private String getFileHash(File file) {
@@ -83,33 +101,30 @@ public class LanguageFileMigrator {
 
     private void scanForMigrations() {
         migrationEntries.clear();
-        Map<String, Object> resourceMap = flattenConfig(resourceConfig, "");
-        Map<String, Object> userMap = flattenConfig(userConfig, "");
-        for (String key : resourceMap.keySet()) {
-            Object resourceValue = resourceMap.get(key);
-            Object userValue = userMap.get(key);
-            if (!userMap.containsKey(key)) {
-                migrationEntries.add(new MigrationEntry(key, null, resourceValue, MigrationStatus.MISSING_IN_USER));
-            } else if (userValue != null && !userValue.equals(resourceValue)) {
-                migrationEntries.add(new MigrationEntry(key, userValue, resourceValue, MigrationStatus.DIFFERENT_VALUE));
+        for (Map.Entry<String, Object> resource : resourceValues.entrySet()) {
+            String key = resource.getKey();
+            Object userValue = userValues.get(key);
+            if (!userValues.containsKey(key)) {
+                migrationEntries.add(new MigrationEntry(key, null, resource.getValue(), MigrationStatus.MISSING_IN_USER));
+            } else if (userValue != null && !userValue.equals(resource.getValue())) {
+                migrationEntries.add(new MigrationEntry(key, userValue, resource.getValue(), MigrationStatus.DIFFERENT_VALUE));
             }
         }
-        for (String key : userMap.keySet()) {
-            if (!resourceMap.containsKey(key)) {
-                migrationEntries.add(new MigrationEntry(key, userMap.get(key), null, MigrationStatus.MISSING_IN_RESOURCE));
-            } else if (resourceMap.get(key).equals(userMap.get(key))) {
-                migrationEntries.add(new MigrationEntry(key, userMap.get(key), resourceMap.get(key), MigrationStatus.UNCHANGED));
+        for (Map.Entry<String, Object> user : userValues.entrySet()) {
+            String key = user.getKey();
+            if (!resourceValues.containsKey(key)) {
+                migrationEntries.add(new MigrationEntry(key, user.getValue(), null, MigrationStatus.MISSING_IN_RESOURCE));
+            } else if (resourceValues.get(key).equals(user.getValue())) {
+                migrationEntries.add(new MigrationEntry(key, user.getValue(), resourceValues.get(key), MigrationStatus.UNCHANGED));
             }
         }
     }
 
-    private Map<String, Object> flattenConfig(FileConfiguration config, String prefix) {
+    private static Map<String, Object> flattenConfig(FileConfiguration config) {
         Map<String, Object> map = new LinkedHashMap<>();
         for (String key : config.getKeys(true)) {
             Object value = config.get(key);
-            if (value != null && !(value instanceof ConfigurationSection)) {
-                map.put(prefix.isEmpty() ? key : prefix + "." + key, value);
-            }
+            if (value != null && !(value instanceof ConfigurationSection)) map.put(key, value);
         }
         return map;
     }
@@ -138,15 +153,13 @@ public class LanguageFileMigrator {
      * <p>Applies the selected migrations to the user configuration.</p>
      */
     public void migrateSelected() {
+        Map<String, Object> changes = new LinkedHashMap<>();
         for (MigrationEntry entry : migrationEntries) {
             if (entry.isSelectedForMigration() && entry.getResourceValue() != null) {
-                userConfig.set(entry.getKey(), entry.getUserValue() != null ? entry.getUserValue() : entry.getResourceValue());
+                changes.put(entry.getKey(), entry.getUserValue() != null ? entry.getUserValue() : entry.getResourceValue());
             }
         }
-        try {
-            userConfig.save(userConfigFile);
-        } catch (Exception ignored) {
-        }
+        if (!changes.isEmpty()) writer.accept(changes);
     }
 
     public enum MigrationStatus {
@@ -168,7 +181,7 @@ public class LanguageFileMigrator {
             this.userValue = userValue;
             this.resourceValue = resourceValue;
             this.status = status;
-            this.selectedForMigration = status == MigrationStatus.MISSING_IN_USER || status == MigrationStatus.DIFFERENT_VALUE;
+            this.selectedForMigration = status == MigrationStatus.MISSING_IN_USER;
         }
 
         public String getKey() {
