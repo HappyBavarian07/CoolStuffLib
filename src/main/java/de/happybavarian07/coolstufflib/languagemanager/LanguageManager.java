@@ -1551,7 +1551,10 @@ public class LanguageManager implements Service {
         LanguageConfig config = getLang(langName, true).getLangConfig();
         LoadResult loaded = config.getLoaded();
         return new LanguageFileMigrator(values(loaded.own()), values(loaded.defaults()), changes -> config.write(
-                changes.entrySet().stream().map(e -> new LanguageEntry(e.getKey(), e.getValue(), null, null)).toList()));
+                changes.entrySet().stream().map(e -> {
+                    LanguageEntry jar = loaded.defaults().get(e.getKey());
+                    return new LanguageEntry(e.getKey(), e.getValue(), jar == null ? null : jar.comment(), null);
+                }).toList()));
     }
 
     private static Map<String, Object> values(Map<String, LanguageEntry> entries) {
