@@ -51,7 +51,7 @@ public final class SplitRule {
     }
 
     /** The full section key a split file itself stands for ({@code messages/Player.yml} -> {@code Messages.Player}), or null when the file has no such section (root and other files). */
-    public static @Nullable String sectionOf(String file) {
+    static @Nullable String sectionOf(String file) {
         String[] path = file.split("/");
         if (path.length != 2 || !path[1].endsWith(".yml")) return null;
         String root = path[0].equals("messages") ? "Messages" : path[0].equals("items") ? "Items" : null;
