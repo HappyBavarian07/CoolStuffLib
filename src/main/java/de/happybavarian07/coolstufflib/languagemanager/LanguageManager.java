@@ -54,6 +54,8 @@ public class LanguageManager implements Service {
     private final Set<UUID> debugPlayers = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private volatile boolean consoleDebug;
     private volatile String commandName;
+    private volatile boolean watchFiles;
+    private LanguageFileWatcher watcher;
 
     public record MissingKeys(List<String> missingInFiles, List<String> unknownToPlugin) {
     }
@@ -1551,6 +1553,7 @@ public class LanguageManager implements Service {
     @Override
     public CompletableFuture<Void> shutdown() {
         return CompletableFuture.runAsync(() -> {
+            stopWatching();
             registeredLanguages.clear();
             languageCaches.clear();
             placeholders.clear();
@@ -1642,9 +1645,43 @@ public class LanguageManager implements Service {
     }
 
     public void watchFiles(boolean watch) {
+        this.watchFiles = watch;
     }
 
     public boolean isWatchingFiles() {
-        return false;
+        return watchFiles;
+    }
+
+    public synchronized void startWatching() {
+        if (watcher != null) return;
+        try {
+            watcher = new LanguageFileWatcher(langFolder.toPath(), 1000, this::reloadChanged);
+            watcher.start();
+        } catch (IOException e) {
+            watcher = null;
+            getLogger().log(Level.WARNING, "Could not watch the language folder", e);
+        }
+    }
+
+    public synchronized void stopWatching() {
+        if (watcher != null) watcher.close();
+        watcher = null;
+    }
+
+    /** Runs on the watcher thread: re-reads the changed languages, then updates variables on the main thread. */
+    void reloadChanged(Set<String> languages) {
+        for (String name : languages) {
+            LanguageFile language = getLang(name, false);
+            if (language != null) language.getLangConfig().reloadConfig();
+        }
+        Runnable afterReload = () -> {
+            if (currentLang != null) handleVariablesSection(currentLang, true);
+            logReports();
+        };
+        try {
+            org.bukkit.Bukkit.getScheduler().runTask(plugin, afterReload);
+        } catch (RuntimeException noServer) {
+            afterReload.run();
+        }
     }
 }

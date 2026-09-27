@@ -181,6 +181,9 @@ public class CoolStuffLib {
         if (languageManager != null && commandManagerRegistry != null && languageManager.getCommandName() != null) {
             commandManagerRegistry.register(new LanguageCommandManager(languageManager, javaPluginUsingLib, languageManager.getCommandName()));
         }
+        if (languageManager != null && languageManager.isWatchingFiles()) {
+            languageManager.startWatching();
+        }
         if (menuAddonManager != null) {
             executeMethod(menuAddonManagerStartingMethod, menuAddonManager);
             menuAddonManagerEnabled = true;
