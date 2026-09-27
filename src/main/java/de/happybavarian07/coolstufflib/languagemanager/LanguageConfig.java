@@ -1,103 +1,128 @@
 package de.happybavarian07.coolstufflib.languagemanager;
 
-import de.happybavarian07.coolstufflib.CoolStuffLib;
-import de.happybavarian07.coolstufflib.utils.Utils;
+import de.happybavarian07.coolstufflib.languagemanager.storage.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.logging.Level;
+import java.util.*;
 
+/**
+ * <p>One language's values. {@link #getConfig()} is built in memory from the owner's files over the jar defaults
+ * and replaced as a whole on every reload, so readers never see half a reload.</p>
+ */
 public class LanguageConfig {
     private final String langName;
-    private File file;
-    private FileConfiguration config;
-    private final String resourceDirectory;
-    private final File langFolder;
+    private final LanguageStorage storage;
+    private volatile String updateLanguage = "en";
+    private volatile LoadResult loaded;
+    private volatile FileConfiguration config;
+    private volatile PrepareResult pendingPrepare;
+    private List<LanguageProblem> reportedLoadProblems = List.of();
 
-    /**
-     * <p>Creates a new LanguageConfig instance and initializes it.</p>
-     *
-     * @param langFile          The language file
-     * @param langFolder        The folder containing language files
-     * @param resourceDirectory The resource directory
-     * @param langName          The language name
-     */
     public LanguageConfig(File langFile, File langFolder, String resourceDirectory, String langName) {
         this.langName = langName;
-        this.file = langFile;
-        this.resourceDirectory = resourceDirectory;
-        this.langFolder = langFolder;
+        this.storage = new LanguageStorage(langFolder, resourceDirectory);
         saveDefaultConfig();
-        this.config = YamlConfiguration.loadConfiguration(file);
+        reloadConfig();
     }
 
-    /**
-     * <p>Reloads the configuration file from disk.</p>
-     */
     public void reloadConfig() {
-        if (this.file == null)
-            this.file = new File(langFolder, this.langName + ".yml");
+        LoadResult result = storage.load(langName, updateLanguage, loaded);
+        YamlConfiguration next = new YamlConfiguration();
+        for (LanguageEntry entry : result.merged().values()) next.set(entry.key(), entry.value());
+        loaded = result;
+        config = next;
+    }
 
-        this.config = YamlConfiguration.loadConfiguration(this.file);
+    public FileConfiguration getConfig() {
+        if (config == null) reloadConfig();
+        return config;
+    }
 
-        if (Utils.getResource(resourceDirectory + "/" + this.langName + ".yml") != null) {
-            InputStream defaultStream = Utils.getResource(resourceDirectory + "/" + this.langName + ".yml");
-            if (defaultStream != null) {
-                YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defaultStream));
-                this.config.setDefaults(defaultConfig);
+    /** Writes values that were changed through {@link #getConfig()} to the owner's files. */
+    public void saveConfig() {
+        FileConfiguration current = config;
+        LoadResult base = loaded;
+        if (current == null || base == null) return;
+        List<LanguageEntry> changed = new ArrayList<>();
+        for (String key : current.getKeys(true)) {
+            if (current.isConfigurationSection(key)) continue;
+            Object value = current.get(key);
+            LanguageEntry known = base.merged().get(key);
+            if (known == null || !Objects.equals(known.value(), value)) {
+                changed.add(new LanguageEntry(key, value, known == null ? null : known.comment(), null));
             }
         }
+        if (!changed.isEmpty()) write(changed);
     }
 
-    /**
-     * <p>Retrieves the configuration.</p>
-     *
-     * @return The {@link FileConfiguration}
-     */
-    public FileConfiguration getConfig() {
-        if (this.config == null)
-            reloadConfig();
-
-        return this.config;
-    }
-
-    /**
-     * <p>Saves the configuration to disk.</p>
-     */
-    public void saveConfig() {
-        if (this.config == null || this.file == null)
-            return;
-
-        try {
-            this.getConfig().save(this.file);
-        } catch (IOException e) {
-            LanguageManager.getLogger().log(Level.SEVERE, "Could not save Config to " + this.file, e);
-        }
-    }
-
-    /**
-     * <p>Saves the default configuration from resources if it doesn't exist.</p>
-     */
+    /** Migrates an old single file and adds keys that are in the jar but not in the owner's files. */
     public void saveDefaultConfig() {
-        if (this.file == null)
-            this.file = new File(langFolder, this.langName + ".yml");
+        pendingPrepare = storage.prepare(langName, updateLanguage);
+    }
 
-        if (!this.file.exists()) {
-            File configDir = CoolStuffLib.getLib() == null ? new File("") : CoolStuffLib.getLib().getWorkingDirectory();
-            Utils.saveResource(configDir, resourceDirectory + "/" + this.langName + ".yml", false);
-        }
+    public void update(String updateLanguage) {
+        this.updateLanguage = updateLanguage == null || updateLanguage.isBlank() ? "en" : updateLanguage;
+        saveDefaultConfig();
+        reloadConfig();
+    }
+
+    public List<LanguageProblem> write(Collection<LanguageEntry> entries) {
+        List<LanguageProblem> problems = storage.write(langName, entries);
+        reloadConfig();
+        return problems;
     }
 
     public String getLangName() {
         return langName;
     }
 
+    /** The language's folder in the split layout, or its single file. */
     public File getFile() {
-        return file;
+        return storage.locationOf(langName);
+    }
+
+    public LoadResult getLoaded() {
+        if (loaded == null) reloadConfig();
+        return loaded;
+    }
+
+    public LanguageStorage getStorage() {
+        return storage;
+    }
+
+    public String originOf(String key) {
+        LoadResult result = loaded;
+        LanguageEntry entry = result == null ? null : result.merged().get(key);
+        return entry == null || entry.origin() == null ? "?" : entry.origin().toString();
+    }
+
+    /** Report lines since the last call: migration, added keys and problems (each problem once). */
+    public synchronized List<String> drainReport() {
+        Set<String> lines = new LinkedHashSet<>();
+        PrepareResult prepare = pendingPrepare;
+        pendingPrepare = null;
+        if (prepare != null) {
+            MigrationReport migration = prepare.migration();
+            if (migration != null && migration.ok()) {
+                lines.add("Moved " + langName + ".yml into the folder " + langName + "/ (" + migration.entries()
+                        + " keys, backup: " + migration.backup() + ")");
+            } else if (migration != null) {
+                lines.add("Could not move " + langName + ".yml into the new layout, still using the old file: " + migration.summary());
+            }
+            if (!prepare.addedKeys().isEmpty()) {
+                List<String> added = prepare.addedKeys();
+                lines.add("Added " + added.size() + " new keys to " + langName + ": "
+                        + String.join(", ", added.subList(0, Math.min(10, added.size()))) + (added.size() > 10 ? ", ..." : ""));
+            }
+            prepare.problems().forEach(problem -> lines.add("Problem in " + problem));
+        }
+        LoadResult result = loaded;
+        if (result != null && !result.problems().equals(reportedLoadProblems)) {
+            result.problems().forEach(problem -> lines.add("Problem in " + problem));
+            reportedLoadProblems = result.problems();
+        }
+        return new ArrayList<>(lines);
     }
 }

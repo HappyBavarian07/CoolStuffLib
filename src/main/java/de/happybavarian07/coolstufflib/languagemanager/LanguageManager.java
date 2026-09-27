@@ -1,6 +1,5 @@
 package de.happybavarian07.coolstufflib.languagemanager;
 
-import de.happybavarian07.coolstufflib.configstuff.ConfigUpdater;
 import de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEngine;
 import de.happybavarian07.coolstufflib.languagemanager.expressionengine.ExpressionEnginePool;
 import de.happybavarian07.coolstufflib.languagemanager.expressionengine.conditions.HeadMaterialCondition;
@@ -49,6 +48,7 @@ public class LanguageManager implements Service {
     private String currentLangName;
     private LanguageFile currentLang;
     private PerPlayerLanguageHandler playerLanguageHandler;
+    private volatile List<String> lastReport = List.of();
 
     // TODO LanguageManager Menu Item Identification Optimization: inside E:\InteliJ Programs\CoolStuffLib\Menu_Item_ID_System.md
 
@@ -481,47 +481,64 @@ public class LanguageManager implements Service {
      * @param log Whether to log the language registration or not.
      */
     public void addLanguagesToList(boolean log) {
-        File[] fileArray = langFolder.listFiles();
-        if (fileArray != null) {
-            for (File file : fileArray) {
-                LanguageFile languageFile = new LanguageFile(langFolder, resourceDirectory, file.getName().replace(".yml", ""));
-                if (!registeredLanguages.containsValue(languageFile) && !languageFile.getLangName().equals("default") && !registeredLanguages.containsKey(languageFile.getLangName())) {
-                    if (log)
-                        getLogger().log(Level.INFO, "Language: " + languageFile.getLangFile() + " successfully registered!");
-                    registeredLanguages.put(languageFile.getLangName(), languageFile);
-                    languageCaches.put(languageFile.getLangName(), new LanguageCache(languageFile.getLangName()));
-                    addEngineForLanguage(languageFile.getLangName(), true, true);
-                }
+        Set<String> names = new TreeSet<>();
+        File[] files = langFolder.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                String name = file.getName();
+                if (name.startsWith("_") || name.startsWith(".")) continue;
+                if (file.isDirectory()) names.add(name);
+                else if (name.endsWith(".yml")) names.add(name.substring(0, name.length() - 4));
             }
         }
+        for (String name : names) {
+            if (name.equals("default") || registeredLanguages.containsKey(name)) continue;
+            LanguageFile languageFile = new LanguageFile(langFolder, resourceDirectory, name);
+            if (log) getLogger().log(Level.INFO, "Language: " + languageFile.getLangFile() + " successfully registered!");
+            registeredLanguages.put(name, languageFile);
+            languageCaches.put(name, new LanguageCache(name));
+            addEngineForLanguage(name, true, true);
+        }
+        logReports();
     }
 
     /**
-     * LanguageManager.updateLangFiles() updates the registered language files. It
-     * looks for the language file in the resource directory and if it is not found,
-     * it looks for the language file specified in the Plugin.languageForUpdates
-     * configuration option. If that is not found, it looks for the en.yml file. If
-     * any of these files are found, it uses ConfigUpdater to update the language file.
+     * LanguageManager.updateLangFiles() updates the registered language files by
+     * merging any keys that are in the jar defaults but missing from the owner's
+     * files, using the language set by Plugin.languageForUpdates (or en).
      */
     public void updateLangFiles() {
-        for (LanguageFile langFiles : getRegisteredLanguages().values()) {
-            try {
-                String resourceName = resourceDirectory + "/" + langFiles.getLangFile().getName();
-                if (Utils.getResource(resourceName) == null) {
-                    if (Utils.getResource(resourceDirectory + "/" + plugin.getConfig().getString("Plugin.languageForUpdates") + ".yml") != null) {
-                        resourceName = resourceDirectory + "/" + plugin.getConfig().getString("Plugin.languageForUpdates") + ".yml";
-                    } else {
-                        resourceName = resourceDirectory + "/en.yml";
-                    }
-                }
-                // "Test.Options", "Items.PlayerManager.TrollMenu.VillagerSounds.true.Options"
-                ConfigUpdater.update(plugin, resourceName, langFiles.getLangFile(), new ArrayList<>());
-            } catch (IOException e) {
-                getLogger().log(Level.SEVERE, "Error updating language file: " + langFiles.getLangFile().getName(), e);
-            } catch (NullPointerException e) {
-                getLogger().log(Level.WARNING, "Language file not found: " + langFiles.getLangFile().getName(), e);
+        String updateLanguage = updateLanguage();
+        for (LanguageFile languageFile : getRegisteredLanguages().values()) {
+            languageFile.getLangConfig().update(updateLanguage);
+        }
+        logReports();
+    }
+
+    private String updateLanguage() {
+        try {
+            String language = plugin.getConfig().getString("Plugin.languageForUpdates");
+            return language == null || language.isBlank() ? "en" : language;
+        } catch (RuntimeException e) {
+            return "en";
+        }
+    }
+
+    /** Logs what changed since the last report (migration, added keys, problems) and returns the lines. */
+    public List<String> logReports() {
+        List<String> lines = new ArrayList<>();
+        for (LanguageFile languageFile : registeredLanguages.values()) {
+            for (String line : languageFile.getLangConfig().drainReport()) {
+                lines.add(line);
+                getLogger().log(line.startsWith("Problem") || line.startsWith("Could not") ? Level.WARNING : Level.INFO, line);
             }
         }
+        lastReport = List.copyOf(lines);
+        return lines;
+    }
+
+    public List<String> getLastReport() {
+        return lastReport;
     }
 
     /**
@@ -534,7 +551,6 @@ public class LanguageManager implements Service {
         addLanguagesToList(log);
         updateLangFiles();
         for (String langFiles : registeredLanguages.keySet()) {
-            getLang(langFiles, true).getLangConfig().reloadConfig();
             if (messageReceiver != null) {
                 addPlaceholder(PlaceholderType.MESSAGE, "%language%", getLang(langFiles, true).getLangFile(), true);
                 messageReceiver.sendMessage(getMessage("Player.General.ReloadedLanguageFile", messageReceiver instanceof Player ? (Player) messageReceiver : null, true));
@@ -555,6 +571,7 @@ public class LanguageManager implements Service {
         registeredLanguages.put(langName, langFile);
         languageCaches.put(langName, new LanguageCache(langName));
         addEngineForLanguage(langName, true, true);
+        logReports();
         getLogger().log(Level.INFO, "Language: " + langFile.getLangFile() + " successfully registered!");
     }
 
@@ -850,23 +867,15 @@ public class LanguageManager implements Service {
     }
 
     public <T> T getObjectFromLanguageCacheOrConfig(String path, String langName, Class<T> clazz) {
-        LanguageCache langCache = getLanguageCache(langName);
-        if (langCache.containsKey(path) && clazz.isInstance(langCache.getData(path))) {
-            return clazz.cast(langCache.getData(path));
-        } else {
-            LanguageFile langFile = getLang(langName, true);
-            LanguageConfig langConfig = langFile.getLangConfig();
-            if (langConfig == null || langConfig.getConfig() == null) return getDefaultInstance(clazz);
-            Object configObject = langConfig.getConfig().get(path);
-            if (configObject == null || !langConfig.getConfig().contains(path))
-                return getDefaultInstance(clazz);
-            try {
-                T obj = clazz.cast(configObject);
-                langCache.addData(path, obj, true);
-                return obj;
-            } catch (ClassCastException e) {
-                return null;
-            }
+        LanguageFile langFile = getLang(langName, true);
+        LanguageConfig langConfig = langFile.getLangConfig();
+        if (langConfig == null || langConfig.getConfig() == null) return getDefaultInstance(clazz);
+        Object configObject = langConfig.getConfig().get(path);
+        if (configObject == null) return getDefaultInstance(clazz);
+        try {
+            return clazz.cast(configObject);
+        } catch (ClassCastException e) {
+            return null;
         }
     }
 
@@ -917,7 +926,7 @@ public class LanguageManager implements Service {
         LanguageConfig langConfig = langFile.getLangConfig();
         if (langConfig == null || langConfig.getConfig() == null)
             return "null config";
-        if ((langConfig.getConfig().getString("Messages." + path) == null || !langConfig.getConfig().contains("Messages." + path)) && !getLanguageCache(langName).containsKey("Messages." + path))
+        if (langConfig.getConfig().getString("Messages." + path) == null || !langConfig.getConfig().contains("Messages." + path))
             return "null path: Messages." + path;
 
         String rawMessage = getObjectFromLanguageCacheOrConfig("Messages." + path, langName, String.class);
@@ -997,7 +1006,7 @@ public class LanguageManager implements Service {
             error.setItemMeta(errorMeta);
             return error;
         }
-        if ((langConfig.getConfig().getString("Items." + path) == null || !langConfig.getConfig().contains("Items." + path)) && !getLanguageCache(langName).containsKey("Items." + path)) {
+        if (langConfig.getConfig().getString("Items." + path) == null || !langConfig.getConfig().contains("Items." + path)) {
             assert errorMeta != null;
             errorMeta.setDisplayName("Config Path not found!");
             errorMeta.setLore(Arrays.asList("If this happens often,", "please report to the Discord", "Path: Items." + path));
@@ -1196,7 +1205,7 @@ public class LanguageManager implements Service {
         LanguageConfig langConfig = langFile.getLangConfig();
         if (langConfig == null || langConfig.getConfig() == null)
             return "null config";
-        if ((langConfig.getConfig().getString("MenuTitles." + path) == null || !langConfig.getConfig().contains("MenuTitles." + path)) && !getLanguageCache(langName).containsKey("MenuTitles." + path))
+        if (langConfig.getConfig().getString("MenuTitles." + path) == null || !langConfig.getConfig().contains("MenuTitles." + path))
             return "null path: MenuTitles." + path;
         String title = getObjectFromLanguageCacheOrConfig("MenuTitles." + path, langName, String.class);
         List<String> includedKeys = new ArrayList<>(getPlaceholderKeysInMessage(title, PlaceholderType.MENUTITLE));
@@ -1238,7 +1247,7 @@ public class LanguageManager implements Service {
         LanguageConfig langConfig = langFile.getLangConfig();
         if (langConfig == null || langConfig.getConfig() == null)
             return defaultValue;
-        if (!langConfig.getConfig().contains(path) && !getLanguageCache(langName).containsKey(path))
+        if (!langConfig.getConfig().contains(path))
             return defaultValue;
         T obj;
         try {

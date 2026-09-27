@@ -5,7 +5,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 
 public class LanguageFile {
-    private final File langFile;
     private final String langName;
     private final LanguageConfig langConfig;
 
@@ -17,13 +16,13 @@ public class LanguageFile {
      * @param langName          The language name
      */
     public LanguageFile(File langFolder, String resourceDirectory, String langName) {
-        this.langFile = new File(langFolder,langName + ".yml");
         this.langName = langName;
-        this.langConfig = new LanguageConfig(this.langFile, langFolder, resourceDirectory, this.langName);
+        this.langConfig = new LanguageConfig(new File(langFolder, langName + ".yml"), langFolder, resourceDirectory, langName);
     }
 
+    /** The language's folder in the split layout, or its single file before migration. */
     public File getLangFile() {
-        return langFile;
+        return langConfig.getFile();
     }
 
     public String getLangName() {
