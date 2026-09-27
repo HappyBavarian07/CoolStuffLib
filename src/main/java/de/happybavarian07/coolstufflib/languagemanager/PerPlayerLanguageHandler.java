@@ -1,18 +1,15 @@
 package de.happybavarian07.coolstufflib.languagemanager;
 
-import de.happybavarian07.coolstufflib.CoolStuffLib;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class PerPlayerLanguageHandler {
     private final LanguageManager lgm;
-    private final File dataFile;
-    private final FileConfiguration dataConfig;
+    private final PlayerLanguageStore store;
 
     /**
      * <p>Creates a new per-player language handler.</p>
@@ -22,9 +19,16 @@ public class PerPlayerLanguageHandler {
      * @param dataConfig The configuration object for the data file
      */
     public PerPlayerLanguageHandler(LanguageManager lgm, File dataFile, FileConfiguration dataConfig) {
+        this(lgm, new YamlPlayerLanguageStore(dataFile, dataConfig));
+    }
+
+    public PerPlayerLanguageHandler(LanguageManager lgm, PlayerLanguageStore store) {
         this.lgm = lgm;
-        this.dataFile = dataFile;
-        this.dataConfig = dataConfig;
+        this.store = store;
+    }
+
+    public PlayerLanguageStore getStore() {
+        return store;
     }
 
     /**
@@ -34,7 +38,8 @@ public class PerPlayerLanguageHandler {
      * @return The language name
      */
     public String getPlayerLanguageName(UUID uuid) {
-        return dataConfig.getString("playerdata." + uuid.toString() + ".language", lgm.getCurrentLangName());
+        String language = store.get(uuid);
+        return language == null ? lgm.getCurrentLangName() : language;
     }
 
     /**
@@ -44,7 +49,8 @@ public class PerPlayerLanguageHandler {
      * @return The {@link LanguageFile}
      */
     public LanguageFile getPlayerLanguage(UUID uuid) {
-        return lgm.getLang(dataConfig.getString("playerdata." + uuid.toString() + ".language", lgm.getCurrentLangName()), true);
+        String language = store.get(uuid);
+        return language == null ? null : lgm.getLang(language, false);
     }
 
     /**
@@ -53,13 +59,12 @@ public class PerPlayerLanguageHandler {
      * @return A map of player UUIDs to language files
      */
     public Map<UUID, LanguageFile> getPlayerLanguages() {
-        Map<UUID, LanguageFile> playerLangs = new HashMap<>();
-        for(String configSec : dataConfig.getConfigurationSection("playerdata").getKeys(false)) {
-            playerLangs.put(UUID.fromString(configSec),
-                    lgm.getLang(dataConfig.getString("playerdata." + UUID.fromString(configSec).toString() + ".language",
-                            lgm.getCurrentLangName()), true));
-        }
-        return playerLangs;
+        Map<UUID, LanguageFile> languages = new HashMap<>();
+        store.all().forEach((uuid, name) -> {
+            LanguageFile language = lgm.getLang(name, false);
+            if (language != null) languages.put(uuid, language);
+        });
+        return languages;
     }
 
     /**
@@ -69,10 +74,8 @@ public class PerPlayerLanguageHandler {
      * @param language The language name
      */
     public void setPlayerLanguage(UUID uuid, String language) {
-        if(lgm.getLang(language, false) == null) language = lgm.getCurrentLangName();
-        dataConfig.set("playerdata." + uuid.toString() + ".language", language);
-
-        saveConfig();
+        if (lgm.getLang(language, false) == null) language = lgm.getCurrentLangName();
+        store.set(uuid, language);
     }
 
     /**
@@ -81,19 +84,13 @@ public class PerPlayerLanguageHandler {
      * @param uuid The player UUID
      */
     public void removePlayerLanguage(UUID uuid) {
-        dataConfig.set("playerdata." + uuid.toString(), null);
-
-        saveConfig();
+        store.remove(uuid);
     }
 
     /**
      * <p>Saves the current configuration to disk.</p>
      */
     public void saveConfig() {
-        try {
-            dataConfig.save(dataFile);
-        } catch (IOException e) {
-            CoolStuffLib.logError("Failed to save per-player language data", e);
-        }
+        if (store instanceof YamlPlayerLanguageStore yaml) yaml.save();
     }
 }
