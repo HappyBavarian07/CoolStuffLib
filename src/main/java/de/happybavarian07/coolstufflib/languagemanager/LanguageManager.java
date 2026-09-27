@@ -10,6 +10,7 @@ import de.happybavarian07.coolstufflib.utils.Utils;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -896,6 +897,70 @@ public class LanguageManager implements Service {
         return null;
     }
 
+    /** The first language along language → LanguageParent → server language that has the key; {@code start} if none. */
+    LanguageFile languageWith(String fullPath, LanguageFile start) {
+        Set<String> seen = new HashSet<>();
+        LanguageFile language = start;
+        while (language != null && seen.add(language.getLangName())) {
+            FileConfiguration config = language.getLangConfig().getConfig();
+            if (config.contains(fullPath)) return language;
+            String parent = config.getString("LanguageParent");
+            language = parent == null ? null : getLang(parent, false);
+        }
+        LanguageFile server = getCurrentLang();
+        if (server != null && seen.add(server.getLangName()) && server.getLangConfig().getConfig().contains(fullPath)) return server;
+        return start;
+    }
+
+    static String stripRoot(String path, String root) {
+        return path.startsWith(root + ".") ? path.substring(root.length() + 1) : path;
+    }
+
+    /** A message's text: a plain value, the plural variant for {@code count}, or the {@code text} of a rich entry. */
+    static @Nullable String textOf(ConfigurationSection config, String fullPath, @Nullable Long count) {
+        Object value = config.get(fullPath);
+        if (value == null || value instanceof List<?>) return null;
+        if (!(value instanceof ConfigurationSection section)) return value.toString();
+        if (count != null) {
+            String variant = count == 0 && section.isString("zero") ? "zero" : count == 1 && section.isString("one") ? "one" : "other";
+            if (section.isString(variant)) return section.getString(variant);
+        }
+        if (section.isString("text")) return section.getString("text");
+        return section.isString("other") ? section.getString("other") : null;
+    }
+
+    String applyLocal(String text, Map<String, ?> local, @Nullable Long count, PlaceholderType type) {
+        if (count != null && !local.containsKey("%count%")) text = new Placeholder("%count%", String.valueOf(count), type).replace(text);
+        for (Map.Entry<String, ?> entry : local.entrySet()) {
+            text = new Placeholder(entry.getKey(), String.valueOf(entry.getValue()), type).replace(text);
+        }
+        return text;
+    }
+
+    String renderMessage(String path, @Nullable Player player, LanguageFile start, Map<String, ?> local, @Nullable Long count, boolean resetAfter) {
+        path = stripRoot(path, "Messages");
+        applyPathExpressionVariables(player, path);
+        String fullPath = "Messages." + path;
+        LanguageFile langFile = languageWith(fullPath, start);
+        LanguageConfig langConfig = langFile.getLangConfig();
+        if (langConfig == null || langConfig.getConfig() == null) return "null config";
+        String raw = textOf(langConfig.getConfig(), fullPath, count);
+        if (raw == null) return "null path: " + fullPath;
+        return renderText(raw, fullPath, player, langFile.getLangName(), local, count, resetAfter);
+    }
+
+    String renderText(String raw, String fullPath, @Nullable Player player, String langName, Map<String, ?> local,
+                      @Nullable Long count, boolean resetAfter) {
+        String message = Utils.format(player, raw, prefix);
+        message = applyLocal(message, local, count, PlaceholderType.MESSAGE);
+        if (!placeholders.isEmpty()) {
+            List<String> includedKeys = new ArrayList<>(getPlaceholderKeysInMessage(message, PlaceholderType.MESSAGE));
+            message = replacePlaceholders(PlaceholderType.MESSAGE, message);
+            if (resetAfter) resetSpecificPlaceholders(PlaceholderType.MESSAGE, includedKeys);
+        }
+        return parseEmbeddedExpressions(message, player, langName);
+    }
+
     /**
      * Gets a message from the specified path in the language file for the specified
      * player.
@@ -920,25 +985,7 @@ public class LanguageManager implements Service {
      * @return The formatted message.
      */
     public String getMessage(String path, Player player, String langName, boolean resetAfter) {
-        applyPathExpressionVariables(player, path);
-        LanguageFile langFile = getLangOrPlayerLang(true, langName, player);
-        langName = langFile.getLangName();
-        LanguageConfig langConfig = langFile.getLangConfig();
-        if (langConfig == null || langConfig.getConfig() == null)
-            return "null config";
-        if (langConfig.getConfig().getString("Messages." + path) == null || !langConfig.getConfig().contains("Messages." + path))
-            return "null path: Messages." + path;
-
-        String rawMessage = getObjectFromLanguageCacheOrConfig("Messages." + path, langName, String.class);
-
-        String message = Utils.format(player, rawMessage, prefix);
-        if (!placeholders.isEmpty()) {
-            List<String> includedKeys = new ArrayList<>(getPlaceholderKeysInMessage(message, PlaceholderType.MESSAGE));
-            message = replacePlaceholders(PlaceholderType.MESSAGE, message);
-            if (resetAfter) resetSpecificPlaceholders(PlaceholderType.MESSAGE, includedKeys);
-        }
-        message = parseEmbeddedExpressions(message, player, langName);
-        return message;
+        return renderMessage(path, player, getLangOrPlayerLang(true, langName, player), Map.of(), null, resetAfter);
     }
 
     /**
@@ -994,7 +1041,8 @@ public class LanguageManager implements Service {
      * @return An ItemStack based on the specified parameters.
      */
     public ItemStack getItem(String path, Player player, String langName, boolean resetAfter, MaterialCondition condition) {
-        LanguageFile langFile = getLangOrPlayerLang(false, langName, player);
+        path = stripRoot(path, "Items");
+        LanguageFile langFile = languageWith("Items." + path, getLangOrPlayerLang(false, langName, player));
         langName = langFile.getLangName();
         LanguageConfig langConfig = langFile.getLangConfig();
         ItemStack error = new ItemStack(Material.BARRIER);
@@ -1199,8 +1247,9 @@ public class LanguageManager implements Service {
      * @return The formatted menu title for the player.
      */
     public String getMenuTitle(String path, Player player, String langName) {
+        path = stripRoot(path, "MenuTitles");
         applyPathExpressionVariables(player, path);
-        LanguageFile langFile = getLangOrPlayerLang(false, langName, player);
+        LanguageFile langFile = languageWith("MenuTitles." + path, getLangOrPlayerLang(false, langName, player));
         langName = langFile.getLangName();
         LanguageConfig langConfig = langFile.getLangConfig();
         if (langConfig == null || langConfig.getConfig() == null)
@@ -1242,7 +1291,15 @@ public class LanguageManager implements Service {
      */
     @SuppressWarnings("unchecked")
     public <T> T getCustomObject(String path, @Nullable Player player, String langName, T defaultValue, boolean resetAfter) {
-        LanguageFile langFile = getLangOrPlayerLang(false, langName, player);
+        LanguageFile start = getLangOrPlayerLang(false, langName, player);
+        LanguageFile langFile = languageWith(path, start);
+        if (!langFile.getLangConfig().getConfig().contains(path) && !path.startsWith("Messages.")) {
+            LanguageFile withRoot = languageWith("Messages." + path, start);
+            if (withRoot.getLangConfig().getConfig().contains("Messages." + path)) {
+                path = "Messages." + path;
+                langFile = withRoot;
+            }
+        }
         langName = langFile.getLangName();
         LanguageConfig langConfig = langFile.getLangConfig();
         if (langConfig == null || langConfig.getConfig() == null)
