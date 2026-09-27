@@ -83,17 +83,11 @@ public final class SplitYamlBackend implements LanguageBackend {
             Path path = folder.toPath().resolve(language).resolve(name);
             String label = language + "/" + name;
             String section = SplitRule.sectionOf(name);
-            if (section != null && !Files.exists(path) && sectionComments.containsKey(section)) {
-                try {
-                    Files.createDirectories(path.getParent());
-                    Files.writeString(path, YamlEntries.header(sectionComments.get(section), "\n"), StandardCharsets.UTF_8);
-                } catch (IOException e) {
-                    problems.add(new LanguageProblem(label, 0, "Could not write: " + e.getMessage()));
-                    continue;
-                }
-            }
+            // the header is only the start text of a not yet existing file, so header and keys land in one atomic write
+            String header = section != null && sectionComments.containsKey(section) && !Files.exists(path)
+                    ? YamlEntries.header(sectionComments.get(section), "\n") : null;
             problems.addAll(YamlEntries.merge(path, label, file.getValue(),
-                    relative -> sectionComments.get(SplitRule.fullKey(name, relative))));
+                    relative -> sectionComments.get(SplitRule.fullKey(name, relative)), header));
         }
         return problems;
     }

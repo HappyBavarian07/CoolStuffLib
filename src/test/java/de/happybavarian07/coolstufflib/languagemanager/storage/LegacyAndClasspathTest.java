@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -35,9 +36,43 @@ class LegacyAndClasspathTest {
     @Test
     void classpathSourcePrefersTheSplitLayout() {
         ClasspathLanguageSource split = new ClasspathLanguageSource(getClass().getClassLoader(), "lang-fixtures/split");
-        assertEquals("Hello from the split layout", split.read("en").entries().get("Messages.Player.Greeting").value());
+        ReadResult read = split.read("en");
+        assertEquals("Hello from the split layout", read.entries().get("Messages.Player.Greeting").value());
+        assertEquals("the player's messages", read.sectionComments().get("Messages.Player"));
         assertEquals(Set.of("en"), split.languages());
         assertFalse(split.isWritable());
+    }
+
+    @Test
+    void aSplitResourceIsFetchedOnlyOnce() {
+        CountingLoader loader = new CountingLoader("lang-fixtures/split/en/messages/Player.yml");
+
+        ReadResult read = new ClasspathLanguageSource(loader, "lang-fixtures/split").read("en");
+
+        assertEquals("Hello from the split layout", read.entries().get("Messages.Player.Greeting").value());
+        assertEquals("the player's messages", read.sectionComments().get("Messages.Player"));
+        assertEquals(1, loader.reads(), "the resource was fetched " + loader.reads() + " times");
+    }
+
+    /** Counts how often one resource is fetched, so a doubled read is visible. */
+    private static final class CountingLoader extends ClassLoader {
+        private final String resource;
+        private int reads;
+
+        private CountingLoader(String resource) {
+            super(LegacyAndClasspathTest.class.getClassLoader());
+            this.resource = resource;
+        }
+
+        @Override
+        public URL getResource(String name) {
+            if (resource.equals(name)) reads++;
+            return super.getResource(name);
+        }
+
+        private int reads() {
+            return reads;
+        }
     }
 
     @Test

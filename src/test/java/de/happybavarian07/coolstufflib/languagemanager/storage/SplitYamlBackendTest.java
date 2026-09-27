@@ -64,6 +64,47 @@ class SplitYamlBackendTest {
     }
 
     @Test
+    void aNewSectionFileGetsItsHeaderAndItsKeys() throws IOException {
+        SplitYamlBackend backend = new SplitYamlBackend(folder.toFile());
+
+        List<LanguageProblem> problems = backend.write("en",
+                List.of(new LanguageEntry("Items.Heal.lore", List.of("a", "b"), null, null)),
+                Map.of("Items.Heal", "the heal item"));
+
+        assertTrue(problems.isEmpty(), problems.toString());
+        assertEquals("# the heal item\n\nlore:\n  - 'a'\n  - 'b'\n", Files.readString(folder.resolve("en/items/Heal.yml")));
+    }
+
+    @Test
+    void anExistingSectionFileNeverGetsAHeader() throws IOException {
+        Path file = folder.resolve("en/messages/Player.yml");
+        Files.createDirectories(file.getParent());
+        Files.writeString(file, "Greeting: 'hi'\n");
+        SplitYamlBackend backend = new SplitYamlBackend(folder.toFile());
+
+        List<LanguageProblem> problems = backend.write("en",
+                List.of(new LanguageEntry("Messages.Player.Bye", "Bye", null, null)),
+                Map.of("Messages.Player", "the player messages"));
+
+        assertTrue(problems.isEmpty(), problems.toString());
+        assertEquals("Greeting: 'hi'\nBye: 'Bye'\n", Files.readString(file));
+    }
+
+    @Test
+    void aFailedWriteLeavesNoHeaderOnlyFile() throws IOException {
+        Files.createDirectories(folder.resolve("en/items/Heal.yml.tmp"));
+        SplitYamlBackend backend = new SplitYamlBackend(folder.toFile());
+
+        List<LanguageProblem> problems = backend.write("en",
+                List.of(new LanguageEntry("Items.Heal.lore", List.of("a", "b"), null, null)),
+                Map.of("Items.Heal", "the heal item"));
+
+        assertEquals(1, problems.size(), problems.toString());
+        assertTrue(problems.get(0).message().startsWith("Could not write"), problems.get(0).toString());
+        assertFalse(Files.exists(folder.resolve("en/items/Heal.yml")));
+    }
+
+    @Test
     void neverWritesAnInvalidFile() throws IOException {
         Path file = folder.resolve("en/messages/Player.yml");
         Files.createDirectories(file.getParent());

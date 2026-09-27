@@ -93,8 +93,9 @@ public final class LanguageStorage {
 
     /** Moves an old single file into the split layout and adds keys that exist in the jar but not in the owner's files. */
     public PrepareResult prepare(String language, @Nullable String updateLanguage) {
-        MigrationReport migration = SplitYamlBackend.ID.equals(backendIdFor(folder))
-                ? LanguageMigration.migrateLegacyFile(folder, language) : null;
+        boolean splitLayout = SplitYamlBackend.ID.equals(backendIdFor(folder));
+        MigrationReport migration = splitLayout ? LanguageMigration.migrateLegacyFile(folder, language) : null;
+        LanguageProblem stray = splitLayout ? LanguageMigration.strayLegacyFile(folder, language) : null;
         LanguageBackend disk = diskFor(language);
         ReadResult current = disk.read(language);
         ReadResult defaults = defaults(language, updateLanguage);
@@ -108,6 +109,7 @@ public final class LanguageStorage {
             missing.add(entry);
         }
         List<LanguageProblem> problems = new ArrayList<>(current.problems());
+        if (stray != null) problems.add(stray);
         if (!missing.isEmpty() && disk.isWritable()) problems.addAll(disk.write(language, missing, defaults.sectionComments()));
         return new PrepareResult(language, migration, missing.stream().map(LanguageEntry::key).toList(), problems);
     }

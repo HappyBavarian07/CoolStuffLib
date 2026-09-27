@@ -62,6 +62,17 @@ public final class LanguageMigration {
         }
     }
 
+    /**
+     * <p>The problem to report when a language has both the split folder and an old single file: the folder is used
+     * and the file is dead weight, but it is the owner's file and therefore never deleted here.</p>
+     */
+    public static @Nullable LanguageProblem strayLegacyFile(File folder, String language) {
+        File legacy = new File(folder, language + ".yml");
+        if (!new File(folder, language).isDirectory() || !legacy.isFile()) return null;
+        return new LanguageProblem(legacy.getName(), 0, "Ignored because the folder " + language
+                + "/ is used instead. Move the keys you still need into it, then delete this file.");
+    }
+
     private static void deleteTree(Path root) {
         if (!Files.exists(root)) return;
         try (Stream<Path> walk = Files.walk(root)) {

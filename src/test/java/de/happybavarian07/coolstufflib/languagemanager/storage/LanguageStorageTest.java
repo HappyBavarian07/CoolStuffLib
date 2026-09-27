@@ -68,6 +68,23 @@ class LanguageStorageTest {
     }
 
     @Test
+    void aStrayLegacyFileNextToTheFolderIsReportedAndKept() throws IOException {
+        Files.createDirectories(folder.resolve("en/messages"));
+        Files.writeString(folder.resolve("en/messages/Player.yml"), "Greeting: 'Servus'\n");
+        Files.writeString(folder.resolve("en.yml"), "LanguageFullName: 'English'\n");
+        LanguageStorage storage = new LanguageStorage(folder.toFile(), "lang-fixtures/legacy");
+
+        PrepareResult prepare = storage.prepare("en", "en");
+
+        assertEquals(SplitYamlBackend.ID, storage.diskFor("en").id());
+        assertEquals(1, prepare.problems().size(), prepare.problems().toString());
+        assertEquals("en.yml", prepare.problems().get(0).file());
+        assertTrue(prepare.problems().get(0).message().contains("en/"), prepare.problems().get(0).message());
+        assertTrue(Files.exists(folder.resolve("en.yml")));
+        assertTrue(Files.exists(folder.resolve("en/messages/Player.yml")));
+    }
+
+    @Test
     void theBackendChoiceIsRemembered() {
         LanguageStorage.useBackend(folder.toFile(), LegacyYamlBackend.ID);
         assertEquals(LegacyYamlBackend.ID, LanguageStorage.backendIdFor(folder.toFile()));

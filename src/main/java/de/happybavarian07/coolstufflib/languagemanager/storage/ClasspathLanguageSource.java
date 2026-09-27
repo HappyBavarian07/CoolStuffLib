@@ -55,14 +55,11 @@ public final class ClasspathLanguageSource implements LanguageBackend {
         if (!splitFiles.isEmpty()) {
             for (String relative : splitFiles) {
                 String resource = directory + "/" + language + "/" + relative;
-                readInto(resource, key -> SplitRule.fullKey(relative, key), entries, sectionComments, problems);
-                String section = SplitRule.sectionOf(relative);
+                String text = readInto(resource, key -> SplitRule.fullKey(relative, key), entries, sectionComments, problems);
+                String section = text == null ? null : SplitRule.sectionOf(relative);
                 if (section != null) {
-                    String text = text(resource);
-                    if (text != null) {
-                        String header = YamlEntries.readHeader(text);
-                        if (header != null) sectionComments.put(section, header);
-                    }
+                    String header = YamlEntries.readHeader(text);
+                    if (header != null) sectionComments.put(section, header);
                 }
             }
         } else {
@@ -71,10 +68,11 @@ public final class ClasspathLanguageSource implements LanguageBackend {
         return new ReadResult(entries, sectionComments, problems);
     }
 
-    private void readInto(String resource, java.util.function.UnaryOperator<String> toFullKey, Map<String, LanguageEntry> entries,
-                          Map<String, String> sectionComments, List<LanguageProblem> problems) {
+    /** Reads one resource and returns its text, or null when it cannot be read. */
+    private String readInto(String resource, java.util.function.UnaryOperator<String> toFullKey, Map<String, LanguageEntry> entries,
+                            Map<String, String> sectionComments, List<LanguageProblem> problems) {
         String text = text(resource);
-        if (text == null) return;
+        if (text == null) return null;
         try {
             YamlEntries.Parsed parsed = YamlEntries.read(text, "jar:" + resource, toFullKey);
             for (LanguageEntry entry : parsed.entries()) entries.put(entry.key(), entry);
@@ -82,6 +80,7 @@ public final class ClasspathLanguageSource implements LanguageBackend {
         } catch (LanguageParseException e) {
             problems.add(e.problem());
         }
+        return text;
     }
 
     @Override

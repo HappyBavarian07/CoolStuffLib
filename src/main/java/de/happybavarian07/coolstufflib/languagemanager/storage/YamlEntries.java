@@ -100,13 +100,26 @@ final class YamlEntries {
 
     static List<LanguageProblem> merge(Path path, String file, List<Map.Entry<String, LanguageEntry>> entries,
                                        Function<String, String> sectionComment) {
+        return merge(path, file, entries, sectionComment, null);
+    }
+
+    /**
+     * <p>Merges the entries into the file as one validated, atomic write. {@code newFileHeader} is the text a
+     * not yet existing file starts with, so a new file never reaches the disk without the keys it was made for.</p>
+     */
+    static List<LanguageProblem> merge(Path path, String file, List<Map.Entry<String, LanguageEntry>> entries,
+                                       Function<String, String> sectionComment, @Nullable String newFileHeader) {
         List<LanguageProblem> problems = new ArrayList<>();
         String before;
-        try {
-            before = Files.exists(path) ? Files.readString(path, StandardCharsets.UTF_8) : "";
-        } catch (IOException e) {
-            problems.add(new LanguageProblem(file, 0, "Could not read: " + e.getMessage()));
-            return problems;
+        if (Files.exists(path)) {
+            try {
+                before = Files.readString(path, StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                problems.add(new LanguageProblem(file, 0, "Could not read: " + e.getMessage()));
+                return problems;
+            }
+        } else {
+            before = newFileHeader == null ? "" : newFileHeader;
         }
         YamlDocument doc = YamlDocument.parse(before);
         for (Map.Entry<String, LanguageEntry> entry : entries) {
