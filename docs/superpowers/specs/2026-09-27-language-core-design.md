@@ -248,8 +248,11 @@ map (L1).
   rendering during a reload.
 - Golden test: for every key in AdminPanel's `en.yml` and `de.yml`, the old implementation's output (captured before
   the change) equals the new implementation's output.
-- CoolStuffLibTest server suite: add checks for migration on start, `/lang debug`, `/lang find`, watcher reload, and a
-  broken file that must not take the language down.
+- CoolStuffLibTest server suite: the split layout on disk, no old single file left, the message builder (per-call
+  placeholder, plural, rich entry through the old API), `/lang debug`, `/lang find`, a broken file that must not take
+  the language down, and `/lang` being registered. The watcher itself is covered by `LanguageFileWatcherTest` against a
+  real `WatchService` instead: `reloadChanged` hands the reload to the Bukkit scheduler, so a check in the synchronous
+  server suite would have to wait across ticks to see it.
 - AdminPanel is the first consumer: start on the test server with its current single files, check the migration,
   the smoke test and the in-game language switch.
 - Wiki: the Languages guide and the "Migrating from 2.x" page get a section on the new layout, the builder options and
