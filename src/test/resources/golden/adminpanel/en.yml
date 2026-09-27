@@ -1,0 +1,1834 @@
+# The Language File for English Language
+# %prefix% = The Prefix of the Plugin (works in every Message)
+LanguageFullName: 'English'
+LanguageVersion: '${project.version}'
+LanguageUUID: 'd6ef09c8-8cb9-4335-85be-1e95d81d6e93'
+LanguageDescription: 'The English Language File for the Admin-Panel Plugin'
+Messages:
+  Plugin:
+    EnablingMessage: '[Admin-Panel] successfully enabled!'
+    DisablingMessage: '[Admin-Panel] successfully disabled!'
+    NullMenu: '%prefix% &9> &cThe Menu you are trying to open seems to not work right now!'
+  DataClient:
+    RequestedUpdateMessage: '%prefix% &9> &aSuccessfully send Client List Request to the Server.'
+    ClientListMessages:
+      PageDoesNotExist: '%prefix% &9> &cThis Page does not exist!'
+      # -------------------------------------------------
+      # Header and Footer Placeholders (Command Manager system):
+      # %page% = Current Page
+      # %max_page% = Max Page
+      # -------------------------------------------------
+      Header: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+      # Format Placeholders:
+      # %dataClientName% = Sub Command Usage
+      Format: '  &bClient-%count% &7- &b%dataClientName%'
+      Footer: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+    PermissionsSync:
+      PermissionsSendForAllPlayers: '%prefix% &9> &aSent the permissions of all players to the server.'
+      # Placeholders:
+      # %target_player% = Target Player
+      PermissionsSendForOnePlayer: '%prefix% &9> &aSent the permissions of ''%target_player%'' to the server.'
+      NoPermissionsStored: '%prefix% &9> &c''%target_player%'' has no permissions stored in Admin-Panel.'
+    TrollsSync:
+      TrollDataSendForAllPlayers: '%prefix% &9> &aSent the data of the troll ''%troll%'' to the server.'
+      TrollDataSendFailed: '%prefix% &9> &cCould not send the data of the troll ''%troll%''.'
+    Menu:
+      AutoCheckConnectionTimingChat: '%prefix% &9> &aEnter the Auto Check Connection Timing in the Chat! (Current: %apdataclient_auto_check_connection_timing%)'
+      AutoCheckConnectingTimingChatSuccess: '%prefix% &9> &aThe Auto Check Connection Timing has been set to %apdataclient_auto_check_connection_timing%!'
+      FileLoggingPrefixChat: '%prefix% &9> &aEnter the File Logging Prefix in the Chat! (Current: %apdataclient_file_logging_prefix%)'
+      FileLoggingPrefixChatSuccess: '%prefix% &9> &aThe File Logging Prefix has been set to %apdataclient_file_logging_prefix%!'
+    NotEnabled: '%prefix% &9> &cThe Data Client is not enabled!'
+  BackupSystem:
+    SubCommands:
+      # Placeholders:
+      # %backupName% = equals the Backup Config Name
+      Start: '%prefix% &9> &aThe Backup Making Process for ''%backupName%'' finished. &r%success%'
+      Load: '%prefix% &9> &aThe Backup Loading Process for ''%backupName%'' finished. You can find the old Configs in a Zip File named ''old_configs.yml''. &r%success%'
+      # GetNewestBackup Placeholders:
+      # %fileName% = File Name
+      # %normalPath% = The Relative Path
+      # %absolutePath% = The Absolute Path
+      # %parentFile% = The Parent Directory / File
+      # %exists% = If the File exists
+      GetNewestBackupFile: '%prefix% &9> &aThe Newest Backup File for ''%backupName%'' is ''%fileName%''!'
+      # DeleteBackup Placeholders:
+      # %backupFileNumberOrName% = The Specified Name or Number for the Backup File to delete
+      DeleteBackup: '%prefix% &9> &aDeleting the Backup ''%backupFileNumberOrName%'' of ''%backupName%''!'
+      ListBackups:
+        PageDoesNotExist: '%prefix% &9> &cThis Page does not exist!'
+        # -------------------------------------------------
+        # Header and Footer Placeholders (Command Manager system):
+        # %page% = Current Page
+        # %max_page% = Max Page
+        # -------------------------------------------------
+        Header: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+        # Format Placeholders:
+        # %filesToBackup% = Files To Backup
+        # %filesToBackupSize% = Files To Backup Size
+        # %backupsDone% = The Backups Done
+        # %backupsDoneSize% = The Backups Done Size
+        # %identifier% = The Identifier of the Backup
+        # %backupDest% = The Destination to backup too
+        # %newestBackupFile% = The Newest Backup File
+        Format: '  &b%identifier% &7- &bFiles To Backup: %filesToBackupSize%, Backups Done: %backupsDoneSize%, Backup Destination: %backupDest%'
+        Footer: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+      ListFilesToBackup:
+        PageDoesNotExist: '%prefix% &9> &cThis Page does not exist!'
+        # -------------------------------------------------
+        # Header and Footer Placeholders (Command Manager system):
+        # %page% = Current Page
+        # %max_page% = Max Page
+        # -------------------------------------------------
+        Header: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+        # Format Placeholders:
+        # %fileName% = File Name
+        # %normalPath% = The Relative Path
+        # %absolutePath% = The Absolute Path
+        # %parentFile% = The Parent Directory / File
+        # %exists% = If the File exists
+        Format: '  &b%fileName% (%exists%) &7- &b%normalPath%'
+        Footer: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+      ListBackupsDone:
+        PageDoesNotExist: '%prefix% &9> &cThis Page does not exist!'
+        # -------------------------------------------------
+        # Header and Footer Placeholders (Command Manager system):
+        # %page% = Current Page
+        # %max_page% = Max Page
+        # -------------------------------------------------
+        Header: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+        # Format Placeholders:
+        # %fileName% = File Name
+        # %normalPath% = The Relative Path
+        # %absolutePath% = The Absolute Path
+        # %parentFile% = The Parent Directory / File
+        # %exists% = If the File exists
+        # %backupsDoneNumber% = The Number of the Backup in the List
+        Format: '  &b%backupsDoneNumber%. %fileName% (%exists%) &7- &b%normalPath%'
+        Footer: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+      BackupNotFound: '%prefix% &9> &cThere is no Backup called ''%backupName%''!'
+      NoBackupFile: '%prefix% &9> &cThere is no Backup File for ''%backupName%'' yet!'
+  Player:
+    Commands:
+      #VanillaItems:
+      #Enable: '%prefix% &9> &c'
+      #Disable: '%prefix% &9> &c'
+      #List:
+      # -------------------------------------------------
+      # Header and Footer Placeholders (Command Manager system):
+      # %page% = Current Page
+      # %max_page% = Max Page
+      # -------------------------------------------------
+      #Header: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+      # Format Placeholders:
+      # %usage% = Sub Command Usage
+      # %description% = Sub Command Description
+      # %name% = Sub Command Name
+      # %aliases% = Sub Command Aliases
+      # %permission% = Sub Command Permission
+      #Format: '  &b%usage% &7- &b%description%'
+      #Footer: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+      TooFewArguments: '%prefix% &9> &cToo few Arguments!'
+      TooManyArguments: '%prefix% &9> &cToo many Arguments!'
+      InvalidSubCommand: '%prefix% &9> &cThat''s not a valid Command!'
+      ErrorPerformingSubCommand: '%prefix% &9> &cAn Error occurred!'
+      UsageMessage: '%prefix% &9> &c%usage%'
+      NotANumber: '%prefix% &9> &cThat''s not a Number!'
+      CommandContainsInvalidArgs: '%prefix% &9>The Command contains invalid Arguments! (%invalidArgs%)'
+      HelpPageDoesNotExist: '%prefix% &9> &cThis Help Page does not exist!'
+      HelpMessages:
+        # -------------------------------------------------
+        # Header and Footer Placeholders (Command Manager system):
+        # %page% = Current Page
+        # %max_page% = Max Page
+        # -------------------------------------------------
+        # Format Placeholders:
+        # %usage% = Sub Command Usage
+        # %description% = Sub Command Description
+        # %name% = Sub Command Name
+        # %aliases% = Sub Command Aliases
+        # %subArgs% = Sub Command Args (in the Format ([])
+        # %permission% = Sub Command Permission
+        Header: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+        Format: '  &b%usage% &7- &b%description%'
+        Footer: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+    General:
+      Error: '%prefix% &9> &cAn unexpected Error happened! (%error%)'
+      ReloadedConfig: '%prefix% &9> &aSuccessfully reloaded the Config!'
+      # %language% = The Language of the Plugin
+      ReloadedLanguageFile: '%prefix% &9> &aSuccessfully reloaded Language: %language%!'
+      SetCurrentLanguage: '%prefix% &9> &aSuccessfully set current Language to %fullname%!'
+      AlreadyOnFirstPage: '%prefix% &9> &cYou''re already on the first page!'
+      AlreadyOnLastPage: '%prefix% &9> &cYou''re already on the last page!'
+      NoPermissions: '%prefix% &9> &cYou do not have access to this command!'
+      OpeningMessageSelf: '%prefix% &9> &cYou opened the Admin-Panel for you!'
+      OpeningMessageOther: '%prefix% &9> &c%player_name% opened the Admin-Panel for you!'
+      # %target% = The Targeted Player
+      OpeningMessageSelfForOther: '%prefix% &9> You opened the Admin-Panel for &c%target%!'
+      TargetedPlayerIsNull: '%prefix% &9> &cThis player is not online or does not exist!'
+      NotAValidUpdateVersion: '%prefix% &9> &cThat''s not a valid Plugin Version to update to!'
+      NotAValidLanguage: '%prefix% &9> &c''%langName%'' is not a valid Language to select!'
+      PerPlayerLangSet: '%prefix% &9> &aSuccessfully selected ''%langName%'' as your Language!'
+      # %target% = The Targeted Player
+      PerPlayerLangSetOther: '%prefix% &9> &aSuccessfully selected ''%langName%'' as %target%''s Language!'
+      NullMenu: '%prefix% &9> &cThe Menu you are trying to open seems to not work right now!'
+    WorldManager:
+      CreateMenu:
+        Name: '%prefix% &9> &aPlease enter a Name in the Chat!'
+    PlayerManager:
+      Bypass: '%prefix% &9> &cThis player cannot be selected because he has the permission to do so!'
+      ChooseYourself: '%prefix% &9> &cYou cannot choose yourself!'
+      AlreadyOp: '&cThis player is already an operator!'
+      NotOp: '&cThis player is not an operator!'
+      OppedMessage: '&aYou made the player an operator!'
+      DeoppedMessage: '&cYou took away the operator''s rights from the player!'
+      Permissions:
+        AddedPermission: '%prefix% &9> &aPermission added!'
+        RemovedPermission: '%prefix% &9> &cPermission removed!'
+        GroupMenu:
+          EnterSort: '%prefix% &9> &aPlease enter your Sorting in the Chat!'
+          SortResult: '%prefix% &9> &aThe Sorting gets applied!'
+          PermissionNotFound: '%prefix% &9> &cThe permission does not exist! (%permission%) (If you want such permissions to be added as well, then check the config.)'
+      KickMenu:
+        # %reason% = The Reason
+        TargetKickMessage: '%prefix% &9> &4You got kicked from the Server! Reason: %reason%'
+        NotKickable: '%prefix% &9> &cThis Player is not kickable!'
+        SuccessfullyKicked: '%prefix% &9> &aYou kicked the Player successfully!'
+        Reason:
+          EnterNewReason: '%prefix% &9> &aPlease enter the new Reason in the Chat!'
+          NewReasonSet: '%prefix% &9> &aThe new Reason got set!'
+      BanMenu:
+        # %reason% = The Reason
+        TargetKickMessage: '%prefix% &9> &4You got banned from this Server! \r\n &4Time: &4Y: %years%, M: %months%, D: %days%, H: %hours%, M: %minutes%, S: %seconds% \r\n &4Reason: &4%reason%'
+        SuccessfullyUnbanned: '%prefix% &9> &aYou unbanned the Player successfully!'
+        SuccessfullyBanned: '%prefix% &9> &aYou banned the Player successfully!'
+        AlreadyBanned: '%prefix% &9> &cThis Player is already banned!'
+        NotBanned: '%prefix% &9> &cThis Player is not banned!'
+        NotBannable: '%prefix% &9> &cThis Player is not bannable!'
+        Reason:
+          EnterNewReason: '%prefix% &9> &aPlease enter the new Reason in the Chat!'
+          NewReasonSet: '%prefix% &9> &aThe new Reason got set!'
+      Money:
+        # %amount% = The Amount of Money
+        PleaseEnterAmount: '%prefix% &9> &aPlease enter the amount you want to work with in the chat!'
+        NotEnoughMoney: '%prefix% &9> &c%player_name% doesn''t have enough money for it! (%vault_eco_balance%)'
+        TransactionError: '%prefix% &9> &c%player_name% There was an Error with the Transaction!'
+        NotANumber: '%prefix% &9> &c%player_name%, that''s not a Number!'
+        GiveMoney: '%prefix% &9> &cYou just gave %amount% to %player_name%!'
+        SetMoney: '%prefix% &9> &cYou just set the Money of %player_name% to %amount%!'
+        TakeMoney: '%prefix% &9> &cYou just took away %amount% from %player_name%!'
+    ServerManager:
+      MaintenanceModeOff: '%prefix% &9> &aThe server is no longer in maintenance mode, all players can rejoin!'
+      MaintenanceModeOn: '%prefix% &9> &cThe server is now in maintenance mode. All players who have no rights have been kicked!'
+      AllPlayersKicked: '%prefix% &9> &aAll players were kicked from the server!'
+      PleaseEnterAMessage: '%prefix% &9> &aPlease enter a message in the chat!'
+      # %message% = The Message
+      BroadcastHeader: '&a+---------------------------------------------------+'
+      BroadcastMessage: '%prefix% &9> %message%'
+      BroadcastFooter: '&a+---------------------------------------------------+'
+      KickAllPlayersReason: '&cKick for Safety'
+      KickAllPlayersSource: '%player_name%'
+      MaintenanceMode: '%prefix% &9> &5%player_name% &cThe server is in &4&lmaintenance mode!'
+      MaintenanceModeMOTD: '%prefix% &9> &cThe server is currently in &4&lmaintenance mode!'
+      MaintenanceMaxPlayerCount: 0
+      WhitelistManager:
+        PleaseEnterName: '%prefix% &9> &aPlease enter the Name of the Player!'
+        AddedPlayer: '%prefix% &9> &aSuccessfully added that Player!'
+        RemovedPlayer: '%prefix% &9> &aSuccessfully removed that Player!'
+    Chat:
+      Header: '&a+---------------------------------------------------+'
+      Message: '    &2The chat was cleared by &3%player_name%'
+      Footer: '&a+---------------------------------------------------+'
+    ChatMute:
+      PlayerMessage: '%prefix% &9> &4The chat is muted! %player_name%!'
+      Header: '&a+---------------------------------------------------+'
+      Message: '       &4The chat was muted by %player_name%!'
+      Footer: '&a+---------------------------------------------------+'
+    ChatUnMute:
+      Header: '&a+---------------------------------------------------+'
+      Message: '       &4The chat was unmuted by%player_name%!'
+      Footer: '&a+---------------------------------------------------+'
+    PluginManager:
+      # %resourceid% = The Resource ID of the Plugin
+      # %filename% = The File Name of the Plugin
+      FileNotFound: '%prefix% &9> &cThe Plugin has not been found!'
+      MissingDependencies: '%prefix% &9> &cThe plugin was downloaded, but the dependencies are missing!'
+      ResourceIDSelected: '%prefix% &9> &aThe ResourceID% resourceid% has been selected!'
+      FileNameSelected: '%prefix% &9> &aThe file name %filename% has been selected!'
+      TypeResourceIDInChat: '%prefix% &9> &aPlease enter the resource ID!'
+      TypeFileNameInChat: '%prefix% &9> &aPlease enter the file name!'
+      TypePluginFileNameToLoadInChat: '%prefix% &9> &aPlease enter the Plugin File Name (name.jar)! To leave, type ''exit'' or ''cancel'''
+      PluginFileNameSelected: '%prefix% &9> &aThe Plugin %filename% has been loaded!'
+      SuccessfullyInstalled: '%prefix% &9> &aThe plugin %resourceid% was successfully downloaded to the file %filename%.jar!'
+      ErrorInInstallProccess: '%prefix% &9> &cAn error occurred during the installation process!'
+      LoadPluginError: '%prefix% &9> &cAn error occurred during the loading process!'
+      FileToLoadDoesNotExist: '%prefix% &9> &cThe Plugin File %filename% does not exist!'
+      ResourceIsNotOnSpigot: '%prefix% &9> &cThis Plugin is not on Spigot! Or the Spigot ID is not correct!'
+      DownloadFileIsExternal: '%prefix% &9> &cThe File of this Plugin is external and cannot be downloaded!'
+      UpdatedPlugin: '%prefix% &9> &aThe Plugin %name% got udpated! Hint: If the Plugin is already in the newest Version it just downloads the File!'
+      AutoPluginUpdater:
+        AddedPlugin: '%prefix% &9> &aThe Plugin %name% was added!'
+        RemovedPlugin: '%prefix% &9> &aThe Plugin %name% was removed!'
+        SelectPlugin: '%prefix% &9> &aPlease enter a valid Plugin in Chat!'
+        SelectPluginToRemove: '%prefix% &9> &aPlease enter a valid Plugin in Chat!'
+        SelectFileName: '%prefix% &9> &aPlease enter a valid File Name with ''.jar'' at the End!'
+        FileNameSelected: '%prefix% &9> &aThe File Name %fileName% was selected!'
+        SelectSpigotID: '%prefix% &9> &aPlease enter a valid Spigot ID!'
+        SpigotIDSelected: '%prefix% &9> &aThe Spigot ID %spigotID% was selected!'
+        PluginSelected: '%prefix% &9> &aThe Plugin %name% was selected!'
+      PluginDescriptionMenu:
+        LoadedFromResourceID: '%prefix% &9> &aThe Plugin Description was loaded from the Resource ID!'
+        SetResourceInChat: '%prefix% &9> &aPlease enter the Resource ID in the Chat!'
+        SetDescriptionInChat: '%prefix% &9> &aPlease enter the Description in the Chat!'
+        SuccessfullySetDescriptionInChat: '%prefix% &9> &aThe Description was successfully set!'
+        SuccessfullySetResourceInChat: '%prefix% &9> &aThe Resource ID was successfully set!'
+        SetResourceInChatError: '%prefix% &9> &cThe Resource ID could not be set!'
+  PotionMenu:
+    NotANumber: '%prefix% &9> &cThat''s not a Number!'
+    EnterDuration: '%prefix% &9> &aPlease enter an Duration!'
+    DurationSet: '%prefix% &9> &aThe new Duration has been set!'
+    EnterAmplifier: '%prefix% &9> &aPlease enter an Amplifier!'
+    AmplifierSet: '%prefix% &9> &aThe new Amplifier has been set!'
+    EffectAdded: '%prefix% &9> &aThe Effect &7%type%&r (&aDuration: &7%duration%&r, &aAmplifier: &7%amplifier%&r)&a got added to &7%target%&a!'
+    EffectRemoved: '%prefix% &9> &cThe Effect &7%type%&c got removed from &7%target%&c!'
+  AddonCommand:
+    # Format Placeholders:
+    # %addon_name% = Addon Name
+    # %addon_version% = Addon Version
+    # %addon_description% = Addon Description
+    # %addon_dependencies% = Addon Dependencies
+    ListMessage:
+      PageDoesNotExist: '%prefix% &9> &cThis Page does not exist!'
+      # -------------------------------------------------
+      # Header and Footer Placeholders (Command Manager system):
+      # %page% = Current Page
+      # %max_page% = Max Page
+      # -------------------------------------------------
+      Header: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+      Format: '  &b%addon_name% &7- &b%addon_version% &7- &b%addon_description%'
+      Footer: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+    Enable:
+      EnabledMessage: '%prefix% &9> &aThe Addon &7%addon_name% &a(&7%addon_version%&a) &ahas been enabled!'
+      AddonNotFound: '%prefix% &9> &cThe Addon could not be found! (%addon_name%)'
+      ErrorEnablingAddon: '%prefix% &9> &cAn Error occurred while enabling the Addon!'
+      DependencyError: '%prefix% &9> &cThe Addon &7%addon_name% &a(&7%addon_version%&a) &crequires the following Dependencies: &7%addon_dependencies%'
+      AddonAlreadyEnabled: '%prefix% &9> &cThe Addon &7%addon_name% &a(&7%addon_version%&a) &cis already enabled!'
+      CircularDependencyError: '%prefix% &9> &cThe Addon &7%addon_name% &a(&7%addon_version%&a) &chas a Circular Dependency!'
+    Disable:
+      DisabledMessage: '%prefix% &9> &aThe Addon &7%addon_name% &a(&7%addon_version%&a) &ahas been disabled!'
+      AddonNotFound: '%prefix% &9> &cThe Addon could not be found! (%addon_name%)'
+      ErrorDisablingAddon: '%prefix% &9> &cAn Error occurred while disabling the Addon!'
+      AddonAlreadyDisabled: '%prefix% &9> &cThe Addon &7%addon_name% &a(&7%addon_version%&a) &cis already disabled!'
+    Reload:
+      ReloadedMessage: '%prefix% &9> &aThe Addon &7%addon_name% &a(&7%addon_version%&a) &ahas been reloaded!'
+      AddonNotFound: '%prefix% &9> &cThe Addon could not be found! (%addon_name%)'
+      ErrorReloadingAddon: '%prefix% &9> &cAn Error occurred while reloading the Addon!'
+      AddonAlreadyEnabled: '%prefix% &9> &cThe Addon &7%addon_name% &a(&7%addon_version%&a) &cis already enabled!'
+    Info:
+      AddonNotFound: '%prefix% &9> &cThe Addon could not be found! (%addon_name%)'
+      AddonInfoMessage:
+        - '+---------------------------------------------------+'
+        - '+ &aAddon Information &7%addon_name% &a(&7%addon_version%&a) &a+'
+        - '&aAddon Name: &7%addon_name%'
+        - '&aAddon Version: &7%addon_version%'
+        - '&aAddon Description: &7%addon_description%'
+        - '&aAddon Dependencies: &7%addon_dependencies%'
+        - '&aAddon Enabled: &7%addon_enabled%'
+        - '+---------------------------------------------------+'
+    SystemDisabled: '%prefix% &9> &cThe Addon System is disabled!'
+  Console:
+    ExecutesPlayerCommand: '%prefix% &9> &cYou have to be a Player!'
+  ConfigReloadMenu:
+    ConfigReloaded: '%prefix% &9> &aConfiguration reloaded successfully!'
+    LanguagesReloaded: '%prefix% &9> &aLanguages reloaded successfully!'
+    DataReloaded: '%prefix% &9> &aData service reloaded successfully!'
+    BackupToggled: '%prefix% &9> &aBackup system is now %backup_state%!'
+    CreatingBackup: '%prefix% &9> &aCreating backups...'
+    BackupCreated: '%prefix% &9> &aBackups created successfully!'
+    ReloadingPlugin: '%prefix% &9> &cReloading plugin...'
+  DangerZoneMenu:
+    StopReason: '&cServer stop requested from Danger Zone menu.'
+    RestartReason: '&6Server restart requested from Danger Zone menu.'
+  LanguageMigration:
+    Error:
+      NoLanguageFileSelected: '%prefix% &9> &cNo language file selected!'
+    Message:
+      NoEntriesSelected: '%prefix% &9> &cNo entries selected for migration!'
+      MigrationFailed: '%prefix% &9> &cMigration failed! Check console for errors.'
+      MigrationApplied: '%prefix% &9> &aMigration applied successfully!'
+  LanguageMigrator:
+    EntryEditMenu:
+      EnterFinalValue: '%prefix% &9> &aEnter the final value in chat.'
+      EnterFinalValueFormat: '&7Formats: &eInteger (123)&7, &eFloat (12.3)&7, &eBoolean (true/false)&7, &eList ([a,b,c])&7, &eString (text)&7. Type &ccancel &7to abort.'
+      FinalValueSet: '%prefix% &9> &aFinal value set to: &f%final_value%'
+      EditCancelled: '%prefix% &9> &cEdit cancelled.'
+      InvalidInput: '%prefix% &9> &cInvalid input! Using as string instead.'
+  ToManyArguments: '&4Too many Arguments!'
+  TooFewArguments: '&4Too few Arguments!'
+  AdminPanelAdmin:
+    # %action% = what is being reloaded or updated (from Actions below), %error% = the error message
+    ActionStarted: '%prefix% &9> &7Starting: %action%'
+    ActionFinished: '%prefix% &9> &a%action%: done!'
+    ActionFailed: '%prefix% &9> &cCould not finish %action%: &6%error% &7(see the console)'
+    Actions:
+      ReloadConfig: 'Reload of the Config'
+      ReloadData: 'Reload of the Data File'
+      ReloadLang: 'Reload of the Language Files'
+      ReloadPlugin: 'Reload of Admin-Panel'
+      ReloadCommandManagers: 'Reload of the Command Managers'
+      UpdateConfig: 'Update of the Config'
+      UpdateLangFiles: 'Update of the Language Files'
+    BugReport:
+      # %seconds% = seconds until the next report is possible
+      Cooldown: '%prefix% &9> &cYou can send the next report in %seconds% seconds.'
+      Error: '%prefix% &9> &cCould not send the report. Please look into the console.'
+      Sent: '%prefix% &9> &aSent the report to the developer. &7You can wait for the fix or join my Discord.'
+    StartUpLogger:
+      Enabled: '%prefix% &9> &aStartUpLogger enabled!'
+      Disabled: '%prefix% &9> &cStartUpLogger disabled!'
+    PermissionMenuHelp:
+      - '&aPermission Menu Help:'
+      - '&eFields for Permission Search:'
+      - '&7 - permissionName'
+      - '&7 - permissionDescription'
+      - '&7 - permissionDefault'
+      - '&7 - permissionChildren'
+      - '&eTF-IDF Search Algorithm for Permissions:'
+      - '&71. Simple Term Query: use a single term, e.g. ''adminpanel'''
+      - '&72. Boolean Query: combine terms with AND, OR and NOT, e.g. ''adminpanel OR vault'''
+      - '&73. Phrase Query: double quotes for exact phrases, e.g. ''"AdminPanel.open"'''
+      - '&74. Wildcard Query: * or ? match a pattern, e.g. ''permissionName:admin*'''
+      - '&75. Fuzzy Query: ~ for a fuzzy search, e.g. ''permissionDescription:chat~'''
+      - '&76. Range Query: [a TO f] searches a range, e.g. ''permissionDefault:[a TO f]'''
+      - '&77. Complex Query: e.g. ''permissionChildren:spigot AND permissionDefault:OP'''
+  DisabledItems:
+    # %material% = the item
+    InvalidMaterial: '%prefix% &9> &c''%material%'' is not an item!'
+    Disabled: '%prefix% &9> &aDisabled the item &e%material%&a.'
+    AlreadyDisabled: '%prefix% &9> &eThe item &6%material% &eis already disabled.'
+    Enabled: '%prefix% &9> &aEnabled the item &e%material% &aagain.'
+    NotDisabled: '%prefix% &9> &eThe item &6%material% &eis not disabled.'
+    List:
+      # %page%, %max_page%, %count% = number of disabled items
+      Empty: '%prefix% &9> &7No items are disabled.'
+      PageDoesNotExist: '%prefix% &9> &cThis Page does not exist! (1-%max_page%)'
+      Header: '&a------------ &bDisabled items: %count% &b(&5%page%&7/&5%max_page%&b) &a------------'
+      Format: '  &7- &e%material%'
+      Footer: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+Items:
+  General:
+    ConfirmationMenu:
+      Confirm:
+        material: LIME_STAINED_GLASS_PANE
+        displayName: '&aConfirm'
+        lore:
+          - '&aConfirm this Action!'
+      Cancel:
+        material: RED_STAINED_GLASS_PANE
+        displayName: '&cCancel'
+        lore:
+          - '&cCancel this Action!'
+      ReasonItem:
+        material: PAPER
+        displayName: '&aDo you really want to do this?'
+        lore:
+          - '&aAction: %reason%'
+          - '&aGreen &f= &6Yes &f| &cRed &f= &6No'
+    FillerItem:
+      material: BLACK_STAINED_GLASS_PANE
+      displayName: ' '
+      lore:
+        - ''
+    DisabledItem:
+      material: BARRIER
+      displayName: '&8This Feature has been disabled!'
+      lore:
+        - '&7This Feature has been disabled in the Config'
+        - '&7of this Plugin!'
+    Close:
+      material: BARRIER
+      displayName: '&cClose'
+      lore:
+        - '&cClose this Page!'
+    Back:
+      material: ARROW
+      displayName: '&cBack'
+      lore:
+        - '&cGo back to the previous Page!'
+    Left:
+      material: DARK_OAK_BUTTON
+      displayName: '&cLeft'
+      lore:
+        - '&cGo to the last page!'
+    Right:
+      material: DARK_OAK_BUTTON
+      displayName: '&cRight'
+      lore:
+        - '&cGo to the next Page!'
+    EmptySlot:
+      material: BARRIER
+      displayName: ' '
+      lore:
+        - ' '
+    Refresh:
+      material: LEVER
+      displayName: '&aRefresh'
+      lore:
+        - '&aRefresh this Page!'
+  PlayerManager:
+    PlayerHead:
+      material: PLAYER_HEAD
+      displayName: '%player_name%'
+      lore:
+        - '&6GameMode: &7%player_gamemode%'
+        - '&6Money: &7%vault_eco_balance%'
+        - '&6Health: &7%player_health%'
+        - '&6Food: &7%player_food_level%'
+        - '&6IP-Address: &7%player_ip%'
+    TrollMenu:
+      VillagerSounds:
+        true:
+          material: VILLAGER_SPAWN_EGG
+          displayName: '&aAnnoying villagers noises'
+          lore:
+            - '&6Annoy the player with villagers noises!'
+        false:
+          material: VILLAGER_SPAWN_EGG
+          displayName: '&cAnnoying villagers noises'
+          lore:
+            - '&6Annoy the player with villagers noises!'
+      BreakPlacePrevent:
+        true:
+          material: DIAMOND_PICKAXE
+          displayName: '&aPrevent building / breaking'
+          lore:
+            - '&6Prevent the player from mining!'
+        false:
+          material: DIAMOND_PICKAXE
+          displayName: '&cPrevent building / breaking'
+          lore:
+            - '&6Prevent the player from mining!'
+      HurtingWater:
+        true:
+          material: WATER_BUCKET
+          displayName: '&aHurting Wasser'
+          lore:
+            - '&6Make the player injure themselves in the water!'
+        false:
+          material: WATER_BUCKET
+          displayName: '&cHurting Wasser'
+          lore:
+            - '&6Make the player injure themselves in the water!'
+      ChatMute:
+        true:
+          material: PAPER
+          displayName: '&aMute Chat'
+          lore:
+            - '&6Mute the player in chat'
+        false:
+          material: PAPER
+          displayName: '&cMute Chat'
+          lore:
+            - '&6Mute the player in chat!'
+      FreezePlayer:
+        true:
+          material: BARRIER
+          displayName: '&aFreeze Player'
+          lore:
+            - '&6The Player can''t move!'
+        false:
+          material: BARRIER
+          displayName: '&cPlayer Freeze'
+          lore:
+            - '&6The Player can''t move!'
+      DupeMobsOnKill:
+        true:
+          material: BLAZE_SPAWN_EGG
+          displayName: '&aMob Dupe'
+          lore:
+            - '&6As soon as the player kills an entity, it is doubled!'
+        false:
+          material: BLAZE_SPAWN_EGG
+          displayName: '&cMob Dupe'
+          lore:
+            - '&6As soon as the player kills an entity, it is doubled!'
+      Kick:
+        ConnectionReset:
+          material: PISTON
+          displayName: '&aKick for ...Connection Reset'
+          lore:
+            - '&aKicks a player with the message:!'
+            - '&aInternal exception: java.net.SocketException: Connection reset.'
+        ServerStoppedError:
+          material: PISTON
+          displayName: '&aKick for Error'
+          lore:
+            - '&aKicks a player with the message:!'
+            - '&aio.netty.channel.AbstractChannel$AnnotatedConnectException: Connection
+            refused: no further informations:'
+        Serverstop:
+          material: PISTON
+          displayName: '&aKick for Serverstop'
+          lore:
+            - '&aKicks a player with the message:!'
+            - '&aServer closed!'
+        Whitelist:
+          material: PISTON
+          displayName: '&aKick for Whitelist'
+          lore:
+            - '&aKicks a player with the message:!'
+            - '&aYou are not whitelisted on this server!'
+      FakeOp:
+        material: PAPER
+        displayName: '&cFake Op'
+        lore:
+          - '&6Fakes a Standard /op message'
+      FakeDeop:
+        material: PAPER
+        displayName: '&cFake Deop'
+        lore:
+          - '&6Fakes a standard / deop message'
+      FakeTNT:
+        material: TNT
+        displayName: '&4Fake Tnt'
+        lore:
+          - '&6Spawn a TNT at the player''s feet!'
+      DropPlayerInv:
+        material: DIAMOND_CHESTPLATE
+        displayName: '&a&lDrop Inventory'
+        lore:
+          - '&6Let the player drop their entire inventory!'
+    ActionsMenu:
+      Kill:
+        material: DIAMOND_SWORD
+        displayName: '&cKill Player!'
+        lore:
+          - '&cKill the Player!'
+      Heal:
+        material: GOLDEN_APPLE
+        displayName: '&cHeal player!'
+        lore:
+          - '&cHeal the Player!'
+      Feed:
+        material: COOKED_BEEF
+        displayName: '&cFeed player!'
+        lore:
+          - '&cRefill the player''s hunger bar!'
+      Burn:
+        material: FLINT_AND_STEEL
+        displayName: '&cSet fire to player!'
+        lore:
+          - '&cSet fire to the player!'
+      Lightning:
+        material: BLAZE_ROD
+        displayName: '&cShoot lightning!'
+        lore:
+          - '&cShoot lightning at the player!'
+      Firework:
+        material: FIREWORK_ROCKET
+        displayName: '&1S&2e&3t &4o&5f&6f &7f&8i&9r&ae&bw&co&dr&ek&fs!'
+        lore:
+          - '&cLight colorful fireworks over the player!'
+      TeleportYouToPlayer:
+        material: ENDER_PEARL
+        displayName: '&2Teleport you to player!'
+        lore:
+          - '&cTeleport you to the player!'
+      TeleportPlayerToYou:
+        material: END_CRYSTAL
+        displayName: '&1Teleport player to you!'
+        lore:
+          - '&cTeleport the player to You!'
+      Op:
+        material: PAPER
+        displayName: '&aOp'
+        lore:
+          - '&aGive the player operator rights!'
+      Deop:
+        material: PAPER
+        displayName: '&cDeop'
+        lore:
+          - '&cTake away the operator''s rights from the player!'
+      Armor:
+        material: DIAMOND_CHESTPLATE
+        displayName: '&2Armor'
+        lore:
+          - '&cShow the Armor of the Player!'
+      Inventory:
+        material: COBBLESTONE
+        displayName: '&2Inventory'
+        lore:
+          - '&aShow the Inventory of the Player!'
+      Potions:
+        material: POTION
+        displayName: '&5Potions!'
+        lore:
+          - '&aGive the Player Potion Effects!'
+      ClearPotions:
+        material: RED_CONCRETE
+        displayName: '&4Clear Effects'
+        lore:
+          - '&aClears all Effects of the Player!'
+      SetDuration:
+        material: PAPER
+        displayName: '&4Set a Duration'
+        lore:
+          - '&aSelected Duration: %duration%!'
+      SetAmplifier:
+        material: PAPER
+        displayName: '&4Set an Amplifier'
+        lore:
+          - '&aSelected Amplifier: %amplifier%!'
+      Spawning:
+        material: SPAWNER
+        displayName: '&aSpawner'
+        lore:
+          - '&cSpawn Entitys!'
+      Troll:
+        material: TNT
+        displayName: '&4&lTroll Menu'
+        lore:
+          - '&cTroll the Player!'
+          - '&cRed &6= &3off | &aGreen &6= &3on'
+      Vanish:
+        true:
+          material: FEATHER
+          displayName: '&aVanish'
+          lore:
+            - '&aTurn the Vanish off for the Player!'
+        false:
+          material: FEATHER
+          displayName: '&cVanish'
+          lore:
+            - '&aTurn the Vanish on for the Player!'
+      PlayerSpawnLocation:
+        material: RED_BED
+        displayName: '&aPlayer Spawn Location'
+        lore:
+          - '&aSet the Bed Spawn Location next to you!'
+      GameMode:
+        Survival:
+          material: DIRT
+          displayName: '&aSurvival'
+          lore:
+            - '&aSwitch the game mode of the player to Adventure! (Click)'
+        Adventure:
+          material: GRASS_BLOCK
+          displayName: '&aAdventure'
+          lore:
+            - '&aSwitch the game mode of the player to Creative! (Click)'
+        Creative:
+          material: BRICK
+          displayName: '&aCreative'
+          lore:
+            - '&aSwitch the game mode of the player to Spectator! (Click)'
+        Spectator:
+          material: SPLASH_POTION
+          displayName: '&aSpectator'
+          lore:
+            - '&aSwitch the game mode of the player to Survival! (Click)'
+      MoneyItem:
+        material: PAPER
+        displayName: '&aMoney'
+        lore:
+          - '&aOpens the Money Inventory!'
+      ActionsItem:
+        material: DIAMOND_SWORD
+        displayName: '&aActions Menu'
+        lore:
+          - '&aOpens the Action Menu!'
+      BannedPlayers:
+        material: RED_CONCRETE
+        displayName: '&cBanned Players'
+        lore:
+          - '&aShow all banned Players!'
+      BanItem:
+        material: BEDROCK
+        displayName: '&cBan the Player'
+        lore:
+          - '&cBan the Player forever!'
+      BanMenu:
+        Reason:
+          material: PAPER
+          displayName: '&cSet the Reason of the Ban'
+          # %reason% = The Reason
+          lore:
+            - '&cSet the Reason of the Ban'
+            - '&c%reason%'
+        Seconds:
+          material: CLOCK
+          displayName: '&aSeconds'
+          lore:
+            - '&7Left-Click: +10 Seconds'
+            - '&7Right-Click: -10 Seconds'
+            - '&a%seconds%'
+        Minutes:
+          material: CLOCK
+          displayName: '&aMinutes'
+          lore:
+            - '&7Left-Click: +5 Minutes'
+            - '&7Right-Click: -5 Minutes'
+            - '&a%minutes%'
+        Hours:
+          material: CLOCK
+          displayName: '&aHours'
+          lore:
+            - '&7Left-Click: +1 Hours'
+            - '&7Right-Click: -1 Hours'
+            - '&a%hours%'
+        Days:
+          material: CLOCK
+          displayName: '&aDays'
+          lore:
+            - '&7Links-Klick: +1 Days'
+            - '&7Rechts-Klick: -1 Days'
+            - '&a%days%'
+        Months:
+          material: CLOCK
+          displayName: '&aMonths'
+          lore:
+            - '&7Links-Klick: +1 Months'
+            - '&7Rechts-Klick: -1 Months'
+            - '&a%months%'
+        Years:
+          material: CLOCK
+          displayName: '&aYears'
+          lore:
+            - '&7Left-Click: +1 Years'
+            - '&7Right-Click: -1 Years'
+            - '&a%years%'
+        Ban:
+          material: BEDROCK
+          displayName: '&cBan the Player'
+          # %reason% = The Reason
+          lore:
+            - '&cBan the Player:'
+            - '&cTime: &6%time%'
+            - '&cReason: &6%reason%'
+      KickMenu:
+        Reason:
+          material: PAPER
+          displayName: '&cSet the Reason of the Kick'
+          # %reason% = The Reason
+          lore:
+            - '&cSet the Reason of the Kick'
+            - '&c%reason%'
+        Kick:
+          material: BEDROCK
+          displayName: '&cKick the Player'
+          # %reason% = The Reason
+          lore:
+            - '&cKick the Player:'
+            - '&cReason: &6%reason%'
+      KickItem:
+        material: PISTON
+        displayName: '&cKick the Player'
+        lore:
+          - '&aKick the Player!'
+      PermissionItem:
+        material: WRITABLE_BOOK
+        displayName: '&cManage the Permissions of the Player'
+        lore:
+          - '&aManage the Permissions of the Player!'
+      PermissionListMenu:
+        InfoItem:
+          material: PAPER
+          displayName: '&eGroup Info'
+          # %group% = The Group Name
+          # %parent_groups% = The Parent Groups
+          # %sub_group_count% = The Sub Group Count
+          # %sub_permission_count% = The Sub Permission Count
+          # %filtered_result_count% = The Filtered Result Count
+          lore:
+            - '&7Group: %group%'
+            - '&7Parent: %parent_groups%'
+            - '&7Subgroups: %sub_group_count%'
+            - '&7Permissions: %sub_permission_count%'
+            - ' '
+            - '&7Filtered Result Count: %filtered_result_count%'
+        ToTheTop:
+          material: OAK_SIGN
+          displayName: '&cBack to root group'
+          lore:
+            - '&aBack to the root group!'
+        PermissionActions:
+          InfoItem:
+            material: BOOK
+            displayName: '&aPermission Info'
+            # %permission% = The Permission Name
+            # %description% = The Permission Description
+            # %default% = The Default Value
+            # %value% = The Current Value
+            # %target% = The Targeted Player
+            lore:
+              - ' '
+              - '- &6Permission&f: &a%permission%'
+              - '- &6Description&f: &a%description%'
+              - '- &6Default&f: &a%default%'
+              - '- &6Current Value&f: &a%value%'
+              - '  (of Target: %target%)'
+          SetTrue:
+            material: EMERALD_BLOCK
+            displayName: '&aSet to &f''&atrue&f'''
+            lore:
+              - '&aSet the value of this permission to &f''&atrue&f'''
+          SetFalse:
+            material: REDSTONE_BLOCK
+            displayName: '&cSet to &f''&4false&f'''
+            lore:
+              - '&cSet the value of this permission to &f''&4false&f'''
+          Remove:
+            material: WRITABLE_BOOK
+            displayName: '&cRemove this permission'
+            lore:
+              - '&aRemove this permission from the player!'
+          Info:
+            material: BOOKSHELF
+            displayName: '&cLearn more about the permission'
+            lore:
+              - '&aLearn more about the permission!'
+              - '&a%permission%'
+        GroupMenu:
+          # %group_name% = The Group Name
+          # %parent_groups% = The Parent Groups
+          # %sub_group_count% = The Sub Group Count
+          # %sub_permission_count% = The Sub Permission Count
+          # %permission_name% = The Permission Name (from the current Group Tree)
+          # %full_permission_name% = The Full Permission Name (from the root Group)
+          GroupItem:
+            material: CHEST
+            displayName: '&a%group_name%'
+            lore:
+              - '&7Click to browse group'
+              - ' '
+              - '&7Parent: %parent_groups%'
+              - '&7Subgroups: %sub_group_count%'
+              - '&7Permissions: %sub_permission_count%'
+          PermissionItem:
+            material: ENCHANTED_BOOK
+            displayName: '&b%permission_name%'
+            lore:
+              - '&7Click for actions'
+          Sort:
+            material: OAK_SIGN
+            displayName: '&cSort'
+            lore:
+              - '&aSort by certain permissions'
+          Mode:
+            Global:
+              material: GRASS_BLOCK
+              displayName: '&cChange mode'
+              lore:
+                - '&aMode: &7Global Permissions'
+            Player:
+              material: PLAYER_HEAD
+              displayName: '&cChange mode'
+              lore:
+                - '&aMode: &7Player Permissions'
+    MoneyMenu:
+      Give:
+        material: GREEN_WOOL
+        displayName: '&aGive Money'
+        lore:
+          - '&aGive the Player Money!'
+      Set:
+        material: YELLOW_WOOL
+        displayName: '&cSet Money'
+        lore:
+          - '&cSet the Players Money to a specific Amount!'
+      Take:
+        material: RED_WOOL
+        displayName: '&cTake Money'
+        lore:
+          - '&cTake the Players Money!'
+    WarningMenuItem:
+      material: PAPER
+      displayName: '&aWarning Menu'
+      lore:
+        - '&cOpens the Warning Menu from that Player'
+    WarningMenu:
+      AddWarning:
+        material: PAPER
+        displayName: '&aGive the Player a Warning'
+        lore:
+          - '&5Give the Player a Warning!'
+      WarningItem:
+        material: PAPER
+        displayName: '&aWarning &6#%count%'
+        lore:
+          - '&5- &6Left-Click: Info'
+          - '&5- &6Right-Click: Remove'
+          - '&5- &6Reason: &7%reason%'
+          - '&5- &6Creationdate: &7%creationDate%'
+          - '&5- &6Expirationdate: &7%expirationDate%'
+          - '&5- &6Warning Number: &7%count%'
+  WorldManager:
+    Settings:
+      PVP:
+        true:
+          material: DIAMOND_SWORD
+          displayName: '&aPVP'
+          lore:
+            - '&cTurn off PVP in the world!'
+        false:
+          material: DIAMOND_SWORD
+          displayName: '&cPVP'
+          lore:
+            - '&cTurn on PVP in the world!'
+      AutoSave:
+        true:
+          material: PAPER
+          displayName: '&aAuto Save'
+          lore:
+            - '&aTurn off Auto Save in the world!'
+        false:
+          material: PAPER
+          displayName: '&cAuto Save'
+          lore:
+            - '&cTurn on Auto Save in the world!'
+      Load:
+        material: BEACON
+        displayName: '&aLoad'
+        lore:
+          - '&aLoad the World!'
+      Unload:
+        material: ANVIL
+        displayName: '&cUnload'
+        lore:
+          - '&aUnload the World!'
+      Save:
+        material: ENDER_CHEST
+        displayName: '&6Save'
+        lore:
+          - '&aSave the World (World Files)!'
+      Delete:
+        material: TNT
+        displayName: '&4Delete'
+        lore:
+          - '&4Delete the World!'
+      GameRule:
+        material: COMMAND_BLOCK
+        displayName: '&aGamerules'
+        lore:
+          - '&aChange all Gamerules listed in this Menu!'
+      TPToSpawn:
+        material: ENDER_PEARL
+        displayName: '&aTeleport to World Spawn'
+        lore:
+          - '&aTeleport you to the World Spawn!'
+      Weather:
+        material: WATER_BUCKET
+        displayName: '&aWeather'
+        lore:
+          - '&aChange the Weather!'
+      Time:
+        material: CLOCK
+        displayName: '&aTime'
+        lore:
+          - '&aChange the Time!'
+    Create:
+      material: CHEST
+      displayName: '&aCreate World'
+      lore:
+        - '&aCreate the new World!'
+    CreateMenu:
+      Name:
+        material: PAPER
+        displayName: '&aName'
+        lore:
+          - '&aSet the Name of the World!'
+          - '&a%name%'
+      Type:
+        NORMAL:
+          material: BEACON
+          displayName: '&aWorld Type'
+          lore:
+            - '&aSet the type of the world!'
+            - '&c%type%'
+        AMPLIFIED:
+          material: BEACON
+          displayName: '&aWorld Type'
+          lore:
+            - '&aSet the type of the world!'
+            - '&c%type%'
+        FLAT:
+          material: BEACON
+          displayName: '&aWorld Type'
+          lore:
+            - '&aSet the type of the world!'
+            - '&c%type%'
+        LARGE_BIOMES:
+          material: BEACON
+          displayName: '&aWorld Type'
+          lore:
+            - '&aSet the type of the world!'
+            - '&c%type%'
+      Environment:
+        NORMAL:
+          material: GRASS_BLOCK
+          displayName: '&aEnvironment'
+          lore:
+            - '&aSet the environment of the world!'
+            - '&c%environment%'
+        NETHER:
+          material: GRASS_BLOCK
+          displayName: '&aEnvironment'
+          lore:
+            - '&aSet the environment of the world!'
+            - '&c%environment%'
+        THE_END:
+          material: GRASS_BLOCK
+          displayName: '&aEnvironment'
+          lore:
+            - '&aSet the environment of the world!'
+            - '&c%environment%'
+      GenerateStructures:
+        true:
+          material: END_PORTAL_FRAME
+          displayName: '&aGenerate Structures'
+          lore:
+            - '&aSet GenerateStructures to false!'
+        false:
+          material: END_PORTAL_FRAME
+          displayName: '&cGenerate Structures'
+          lore:
+            - '&aSet GenerateStructures to true!'
+      CreateWorld:
+        material: CHEST
+        displayName: '&aCreate World'
+        lore:
+          - '&aCreates the World!'
+      Hardcore:
+        true:
+          material: GOLDEN_APPLE
+          displayName: '&aHardcore'
+          lore:
+            - '&aPut the world in hardcore!'
+        false:
+          material: GOLDEN_APPLE
+          displayName: '&cHardcore'
+          lore:
+            - '&cPut the world in hardcore!'
+    Weather:
+      CLEAR:
+        material: BUCKET
+        displayName: '&aClear'
+        lore:
+          - '&cChange to Clear!'
+      RAINING:
+        material: WATER_BUCKET
+        displayName: '&aRain'
+        lore:
+          - '&cChange to Rain!'
+      THUNDERING:
+        material: LAVA_BUCKET
+        displayName: '&aThunder'
+        lore:
+          - '&cChange to Thunder!'
+    Time:
+      SUNRISE:
+        material: MAGENTA_CONCRETE
+        displayName: '&aSunrise'
+        lore:
+          - '&cChange to Sunrise!'
+      DAY:
+        material: LIGHT_BLUE_CONCRETE
+        displayName: '&aDay'
+        lore:
+          - '&cChange to Day!'
+      MORNING:
+        material: LIME_CONCRETE
+        displayName: '&aMorning'
+        lore:
+          - '&cChange to Morning!'
+      NOON:
+        material: GREEN_CONCRETE
+        displayName: '&aNoon'
+        lore:
+          - '&cChange to Noon!'
+      AFTERNOON:
+        material: YELLOW_CONCRETE
+        displayName: '&aAfternoon'
+        lore:
+          - '&cChange to Afternoon!'
+      SUNSET:
+        material: GRAY_CONCRETE
+        displayName: '&aSunset'
+        lore:
+          - '&cChange to Sunset!'
+      NIGHT:
+        material: GRAY_CONCRETE
+        displayName: '&aNight'
+        lore:
+          - '&cChange to Night!'
+      MIDNIGHT:
+        material: BLACK_CONCRETE
+        displayName: '&aMidnight'
+        lore:
+          - '&cChange to Midnight!'
+  StartMenu:
+    SwitchLanguageMenuItem:
+      material: BLUE_WOOL
+      displayName: '&aChange the language temporarily'
+      lore:
+        - '&aWith this you can change the language.'
+        - '&cUnfortunately this is only temporary and'
+        - '&conly as long as the plugin is not reloaded!'
+    SwitchLanguageMenu:
+      # Placeholders:
+      # %fullname% = Language Full Name
+      # %shortname% = Language Short Name (File Name)
+      # %version% = Language Version
+      # %path% = Language File Path
+      LanguageItem:
+        material: PAPER
+        displayName: '&a%fullname%'
+        lore:
+          - '&aShort Name: &6%shortname%'
+          - '&aVersion: &6%version%'
+          - '&aPfad: &6%path%'
+    ReloadConfig:
+      material: GREEN_WOOL
+      displayName: '&aReload Config'
+      lore:
+        - '&aReload the Admin-Panel Config'
+        - '&a(Language Files, Config)'
+    WorldManager:
+      material: GRASS_BLOCK
+      displayName: '&2World Manager'
+      lore:
+        - '&aManages the Worlds from the Server!'
+    PlayerManager:
+      material: PLAYER_HEAD
+      displayName: '&6Player Manager'
+      lore:
+        - '&aManages the Players from the Server!'
+    PluginManager:
+      material: REDSTONE_BLOCK
+      displayName: '&3Plugin Manager'
+      lore:
+        - '&aManages the Plugins from the Server!'
+    ServerManager:
+      material: DIAMOND_BLOCK
+      displayName: '&6Server Manager'
+      lore:
+        - '&aManages the Server!'
+    DangerZone:
+      material: BARRIER
+      displayName: '&cDanger Zone'
+      lore:
+        - '&cContains critical server actions.'
+        - '&eUse with caution!'
+    ServerRestart:
+      material: ACACIA_BOAT
+      displayName: '&6Server restart'
+      lore:
+        - '&aRestarts the Server!'
+    ServerStop:
+      material: DIAMOND
+      displayName: '&4Server Stop'
+      lore:
+        - '&aStops the Server!'
+    HintItem:
+      material: PAPER
+      displayName: '&aAdmin Panel Info'
+      lore:
+        - '&aIn this menu you can click on Items,'
+        - '&awhich then forward you to submenus!'
+  DangerZoneMenu:
+    ServerStop:
+      material: DIAMOND
+      displayName: '&4Server Stop'
+      lore:
+        - '&cStops the server after confirmation.'
+    ServerRestart:
+      material: ACACIA_BOAT
+      displayName: '&6Server Restart'
+      lore:
+        - '&eRestarts the server after confirmation.'
+    BackToMain:
+      material: ARROW
+      displayName: '&aBack'
+      lore:
+        - '&7Return to the start menu.'
+    HintItem:
+      material: PAPER
+      displayName: '&aAdmin Panel Info'
+      lore:
+        - '&aIn this menu you can click on Items,'
+        - '&awhich then forward you to submenus!'
+  ServerManager:
+    WhiteListMenuItem:
+      material: OAK_FENCE_GATE
+      displayName: '&aWhitelist'
+      lore:
+        - '&aManage the Whitelist!'
+    WhitelistMenu:
+      AddPlayer:
+        material: GREEN_CONCRETE
+        displayName: '&aAdd'
+        lore:
+          - '&aAdd a Player to the whitelist!'
+      RemovePlayer:
+        material: RED_CONCRETE
+        displayName: '&cRemove'
+        lore:
+          - '&cRemove a Player from the whitelist!'
+      ListPlayers:
+        material: BLUE_CONCRETE
+        displayName: '&3List Players'
+        lore:
+          - '&3List all Players from the Whitelist!'
+      TurnOn:
+        material: EMERALD_BLOCK
+        displayName: '&aOn'
+        lore:
+          - '&aTurns the Whitelist on!'
+      TurnOff:
+        material: COAL_BLOCK
+        displayName: '&cOff'
+        lore:
+          - '&aTurns the Whitelist off!'
+      Reload:
+        material: BEACON
+        displayName: '&3Reload'
+        lore:
+          - '&3Reloads the Whitelist!'
+    Broadcast:
+      material: WRITABLE_BOOK
+      displayName: '&3Broadcast a Message'
+      lore:
+        - '&aSend a Message to the whole Server!'
+    ChatManagerItem:
+      material: ARMOR_STAND
+      displayName: '&aChat Manager'
+      lore:
+        - '&aOpens the Chat Manager!'
+    KickAllPlayers:
+      material: IRON_SWORD
+      displayName: '&cKicks all Players'
+      lore:
+        - '&aKicks all Players from the Server!'
+    MaintenanceMode:
+      true:
+        material: GLOWSTONE_DUST
+        displayName: '&a&lMaintenance Mode'
+        lore:
+          - '&aTurns the Maintenance Mode off!'
+      false:
+        material: REDSTONE
+        displayName: '&c&lMaintenance Mode'
+        lore:
+          - '&aTurns the Maintenance Mode on!'
+  ChatManager:
+    ClearChat:
+      material: DIAMOND_SWORD
+      displayName: '&2Clear Chat'
+      lore:
+        - '&aClears the CHat!'
+    MuteChat:
+      material: GREEN_DYE
+      displayName: '&2Mute Chat'
+      lore:
+        - '&aMute the Chat!'
+    UnMuteChat:
+      material: RED_DYE
+      displayName: '&2Unmute Chat'
+      lore:
+        - '&aUnmute the Chat!'
+  PluginManager:
+    Install:
+      material: 'HEAD_OBJECT(''WORLD'')'
+      displayName: '&2Install Plugins'
+      lore:
+        - '&2Install other Spigot Plugins!'
+    Load:
+      material: CAULDRON
+      displayName: '&2Load Plugins'
+      lore:
+        - '&2Load Plugins at Server Runtime!'
+        - '&2The only thing you need is the File name!'
+    PluginItem:
+      material: 'if pluginEnabled: HEAD_OBJECT(''BLANK_GREEN'') else: HEAD_OBJECT(''BLANK_RED'')'
+      displayName: '&a%pluginName%'
+      # Available Placeholders:
+      # %name% = The Plugin Name
+      # %pluginDescription% = The Plugin Description
+      # %pluginEnabled% = Is the Plugin enabled?
+      # %pluginVersion% = The Plugin Version
+      # %pluginAuthor% = The Plugin Author
+      # %pluginWebsite% = The Plugin Website
+      # %pluginAPIVersion% = The Plugin API Version
+      # %pluginFullName% = The Plugin Full Name
+      # %pluginFileName% = The Plugin File Name
+      lore:
+        - '&6Description: &a%pluginDescription%'
+        - '&6Enabled: &a%pluginEnabled%'
+        - '&6Version: &a%pluginVersion%'
+        - '&6Author: &a%pluginAuthor%'
+        - '&6Website: &a%pluginWebsite%'
+        - '&6API Version: &a%pluginAPIVersion%'
+    PluginDescription:
+      material: WRITABLE_BOOK
+      displayName: '&2Plugin Description'
+      lore:
+        - '&2Show and edit the Description of the Plugin!'
+    PluginDescriptionMenu:
+      LoadFromResourceID:
+        material: BOOKSHELF
+        displayName: '&2Load from Resource ID'
+        lore:
+          - '&2Load the Description from the Resource ID!'
+      SetWithChat:
+        material: PAPER
+        displayName: '&2Set with Chat'
+        lore:
+          - '&2Set the Description with Chat!'
+    AutoUpdateMenu:
+      OpenMenuItem:
+        material: 'HEAD_OBJECT(BLANK_LIME_GREEN)'
+        displayName: '&aAuto Plugin Updater Menu'
+        lore:
+          - '&aThe Auto Plugin Updater Menu'
+      PluginItem:
+        material: PAPER
+        displayName: '&a%name%'
+        lore:
+          - '&6Description: &a%plugin_description%'
+          - '&6Enabled: &a%plugin_enabled%'
+          - '&6Version: &a%plugin_version%'
+          - '&6Author: &a%plugin_author%'
+          - '&6Website: &a%plugin_website%'
+          - '&6API-Version: &a%plugin_api_version%'
+          - '&6Full-Name: &a%plugin_full_name%'
+      AddPlugin:
+        material: 'ENCHANTED_BOOK'
+        displayName: '&aAdd a Plugin'
+        lore:
+          - '&aAdd Plugins to the Auto Updater'
+      RemovePlugin:
+        material: BOOK
+        displayName: '&aRemove a Plugin'
+        lore:
+          - '&aRemove Plugins to the Auto Updater'
+    InstallMenu:
+      ResourceID:
+        material: BOOKSHELF
+        displayName: '&2Resource ID'
+        # %resourceid% = The Resource ID of the Plugin
+        lore:
+          - '&2The Resource ID From Spigot!'
+          - '&6%resourceid%'
+      Name:
+        material: OAK_SIGN
+        displayName: '&2File Name'
+        # %filename% = The File Name of the Plugin
+        lore:
+          - '&2The Name of the Plugin jar File!'
+          - '&6%filename%'
+      EnableAfterInstall:
+        true:
+          material: BEACON
+          displayName: '&2Enable after Installation'
+          lore:
+            - '&2The enables itself,'
+            - '&2after Installation!'
+        false:
+          material: BEACON
+          displayName: '&cEnable after Installation'
+          lore:
+            - '&2The enables itself,'
+            - '&2after Installation!'
+      InstallButton:
+        material: CAULDRON
+        displayName: '&2Install'
+        lore:
+          - '&2Install the Plugin!'
+          - '&cIf Arguments are missing it won''t work!'
+    Settings:
+      Enable:
+        material: GREEN_WOOL
+        displayName: '&aEnable'
+        lore:
+          - '&aEnable the Plugin!'
+      Disable:
+        material: RED_WOOL
+        displayName: '&cDisable'
+        lore:
+          - '&cDisable the Plugin!'
+      Reload:
+        material: REDSTONE_BLOCK
+        displayName: '&3Reload'
+        lore:
+          - '&3Reload the Plugin!'
+      Restart:
+        material: BEACON
+        displayName: '&3Restart'
+        lore:
+          - '&3Restart the Plugin!'
+      Unload:
+        material: COAL_BLOCK
+        displayName: '&2Unload'
+        lore:
+          - '&2Unload the Plugin!'
+          - '&2After that the Plugin is completely gone!'
+          - '&2If you want to use it again,'
+          - '&2you have to Reload/Restart the Server!'
+      Load:
+        material: EMERALD_BLOCK
+        displayName: '&2Load'
+        lore:
+          - '&2Load the Plugin!'
+      Commands:
+        Item:
+          material: COMMAND_BLOCK
+          displayName: '&2Commands'
+          lore:
+            - '&2List of all Commands!'
+        Settings:
+          Register:
+            material: GREEN_CONCRETE
+            displayName: '&aRegister'
+            lore:
+              - '&2Register the Command!'
+          Unregister:
+            material: RED_CONCRETE
+            displayName: '&aUnregister'
+            lore:
+              - '&2Unregister the Command!'
+          Execute:
+            material: BOOK
+            displayName: '&2Execute'
+            lore:
+              - '&2Executes the Command with 0 Arguments!'
+      Permissions:
+        Item:
+          material: WRITABLE_BOOK
+          displayName: '&2Permissions'
+          lore:
+            - '&2List of all Permissions!'
+  DataClientMenu:
+    MainMenu:
+      Controls:
+        Connect:
+          material: GREEN_WOOL
+          displayName: '&aConnect'
+          lore:
+            - '&aConnect to the Server!'
+        Reconnect:
+          material: ORANGE_WOOL
+          displayName: '&aReconnect'
+          lore:
+            - '&aReconnect to the Server!'
+        Disconnect:
+          material: RED_WOOL
+          displayName: '&cDisconnect'
+          lore:
+            - '&cDisconnect from the Server!'
+        PacketHandling:
+          true:
+            material: GREEN_WOOL
+            displayName: '&aPacket Handling'
+            lore:
+              - '&aTurn off Packet Handling!'
+          false:
+            material: RED_WOOL
+            displayName: '&cPacket Handling'
+            lore:
+              - '&cTurn on Packet Handling!'
+      DataClientName:
+        material: PAPER
+        displayName: '&aData Client: &6Name'
+        lore:
+          - '&aCurrent Data Client Name:'
+          - '&6%name%'
+          - '&aClick to change the Name!'
+      DataClientConnectedClients:
+        material: PAPER
+        displayName: '&aData Client: &6Connected Clients'
+        lore:
+          - '&aCurrent Connected Data Clients:'
+          - '&6%apdataclient_connected_clients%'
+          - '&aClick to change the Connected Clients!'
+      DataClientStats:
+        material: PAPER
+        displayName: '&aData Client: &6Stats'
+        lore:
+          - '&aCurrent Data Client Stats:'
+          - '&f- &aTotal Packets Send: &6%apdataclient_stats_total_packets_send%'
+          - '&f- &aTotal Packets Send (This Session): &6%apdataclient_stats_total_packets_send_this_session%'
+          - '&f- &aTotal Packets Received: &6%apdataclient_stats_total_packets_received%'
+          - '&f- &aTotal Packets Received (This Session): &6%apdataclient_stats_total_packets_received_this_session%'
+          - '&f- &aTotal Errors: &6%apdataclient_stats_total_errors%'
+          - '&f- &aTotal Errors (This Session): &6%apdataclient_stats_total_errors_this_session%'
+          - '&aClick to change the Stats!'
+      DataClientSettings:
+        material: LEVER
+        displayName: '&aData Client: &6Settings'
+        lore:
+          - '&aClick to change the Settings!'
+      Settings:
+        Debug:
+          true:
+            material: GREEN_WOOL
+            displayName: '&aDebug'
+            lore:
+              - '&aTurn off Debug!'
+          false:
+            material: RED_WOOL
+            displayName: '&cDebug'
+            lore:
+              - '&cTurn on Debug!'
+        OverwritePermissions:
+          true:
+            material: GREEN_WOOL
+            displayName: '&aOverwrite Permissions'
+            lore:
+              - '&aTurn off Overwrite Permissions!'
+          false:
+            material: RED_WOOL
+            displayName: '&cOverwrite Permissions'
+            lore:
+              - '&cTurn on Overwrite Permissions!'
+        AutoCheckConnection:
+          true:
+            material: GREEN_WOOL
+            displayName: '&aAuto Check Connection'
+            lore:
+              - '&aTurn off Auto Check Connection!'
+          false:
+            material: RED_WOOL
+            displayName: '&cAuto Check Connection'
+            lore:
+              - '&cTurn on Auto Check Connection!'
+        AutoCheckConnectionTiming:
+          material: CLOCK
+          displayName: '&aAuto Check Connection Timing'
+          lore:
+            - '&aCurrent Auto Check Connection Timing:'
+            - '&6%apdataclient_auto_check_connection_timing%'
+            - '&aClick to change the Auto Check Connection Timing!'
+        FileLogging:
+          true:
+            material: GREEN_WOOL
+            displayName: '&aFile Logging'
+            lore:
+              - '&aTurn off File Logging!'
+          false:
+            material: RED_WOOL
+            displayName: '&cFile Logging'
+            lore:
+              - '&cTurn on File Logging!'
+        FileLoggingPrefix:
+          material: PAPER
+          displayName: '&aFile Logging Prefix'
+          lore:
+            - '&aCurrent File Logging Prefix:'
+            - '&6%apdataclient_file_logging_prefix%'
+            - '&aClick to change the File Logging Prefix!'
+  ConfigReloadMenu:
+    ReloadConfig:
+      material: WRITABLE_BOOK
+      displayName: '&aReload Config'
+      lore:
+        - '&7Reload the plugin configuration'
+        - '&7without restarting the server.'
+        - ''
+        - '&eClick to reload config!'
+    ReloadLanguages:
+      material: BOOK
+      displayName: '&aReload Languages'
+      lore:
+        - '&7Reload all language files'
+        - '&7and translations.'
+        - ''
+        - '&eClick to reload languages!'
+    ReloadData:
+      material: CHEST
+      displayName: '&aReload Data'
+      lore:
+        - '&7Reload the DataService'
+        - '&7and all persistent data.'
+        - ''
+        - '&eClick to reload data!'
+    BackupAll:
+      material: ENDER_CHEST
+      displayName: '&6Create Backups'
+      lore:
+        - '&7Create backups of all'
+        - '&7registered files.'
+        - ''
+        - '&eClick to backup!'
+    ReloadPlugin:
+      material: REDSTONE
+      displayName: '&cReload Plugin'
+      lore:
+        - '&7Completely reload the plugin'
+        - '&7(disable + enable cycle).'
+        - ''
+        - '&c&lWarning: This may cause issues!'
+        - '&eClick to reload plugin!'
+  LanguageMigration:
+    Migration:
+      MigrationItem:
+        material: PAPER
+        displayName: '&6%key%'
+        lore:
+          - '&7Status: &e%migration_status%'
+          - ''
+          - '&7User Value:'
+          - '&f%user_value%'
+          - ''
+          - '&7Resource Value:'
+          - '&f%resource_value%'
+          - ''
+          - '&eClick to edit this entry!'
+      FilterItem:
+        material: HOPPER
+        displayName: '&6Filter Mode'
+        lore:
+          - '&7Current: &e%status_filter_mode%'
+          - ''
+          - '%selected_all_filter%'
+          - '%selected_changed_only_filter%'
+          - '%selected_unchanged_only_filter%'
+          - '%selected_missing_only_filter%'
+          - ''
+          - '&eClick to cycle filter modes!'
+      ApplyChanges:
+        material: EMERALD
+        displayName: '&aApply Changes'
+        lore:
+          - '&7Total entries: &e%total_migration_count%'
+          - '&7Filtered: &e%filtered_migration_count%'
+          - '&7Applied: &a%actually_applied_migration_count%'
+          - ''
+          - '&eClick to apply selected changes!'
+  LanguageMigrator:
+    EntryEditMenu:
+      Name:
+        material: NAME_TAG
+        displayName: '&6Entry: %migration_entry_name%'
+        lore:
+          - '&7Status: &e%migration_entry_status%'
+      KeepUserValue:
+        material: GREEN_WOOL
+        displayName: '&aKeep User Value'
+        lore:
+          - '&7Current user value:'
+          - '&f%migration_entry_user_value%'
+          - ''
+          - '&eClick to preview'
+          - '&eShift-click to apply!'
+      KeepResourceValue:
+        material: BLUE_WOOL
+        displayName: '&9Keep Resource Value'
+        lore:
+          - '&7Resource value:'
+          - '&f%migration_entry_resource_value%'
+          - ''
+          - '&eClick to preview'
+          - '&eShift-click to apply!'
+      DeleteEntryFromFile:
+        material: RED_WOOL
+        displayName: '&cDelete Entry'
+        lore:
+          - '&7Remove this entry from'
+          - '&7the language file.'
+          - ''
+          - '&eClick to preview'
+          - '&eShift-click to apply!'
+      KeepRemovedFromFile:
+        material: BARRIER
+        displayName: '&cKeep Removed'
+        lore:
+          - '&7Keep this entry removed'
+          - '&7from the file.'
+          - ''
+          - '&eClick to preview'
+          - '&eShift-click to apply!'
+      EditFinalValue:
+        material: WRITABLE_BOOK
+        displayName: '&6Edit Custom Value'
+        lore:
+          - '&7Enter a custom value'
+          - '&7in chat.'
+          - ''
+          - '&7Supports:'
+          - '&8• &7Integers (123)'
+          - '&8• &7Floats (123.45)'
+          - '&8• &7Booleans (true/false)'
+          - '&8• &7Lists ([item1, item2])'
+          - '&8• &7Strings (any text)'
+          - ''
+          - '&eClick to edit!'
+      FinalValueDisplay:
+        material: PAPER
+        displayName: '&aFinal Value Preview'
+        lore:
+          - '&7This is what will be saved:'
+          - '&f%migration_entry_final_value%'
+      Close:
+        material: EMERALD_BLOCK
+        displayName: '&aConfirm & Close'
+        lore:
+          - '&7Save the final value and'
+          - '&7return to migration menu.'
+          - ''
+          - '&7Tip: Press ESC to cancel'
+          - '&7without saving changes.'
+          - ''
+          - '&eClick to confirm!'
+MenuTitles:
+  StartMenu: '&4&lAdmin-Panel'
+  DangerZoneMenu: '&4Danger Zone'
+  SwitchLanguageMenu: '&aLanguages'
+  PlayerManager:
+    PlayerSelector: '&aSelect a Player'
+    PlayerActions: '&aActions: %player_name%'
+    SelectPlayerAction: '&aActions: %player_name%'
+    SpawningMenu: '&aEntity spawning'
+    PotionMenu: '&aPotions'
+    TrollMenu: '&1T&2r&3o&4l&5l &6M&7e&8n&9u'
+    ArmorView: '&4Armor'
+    MoneyMenu: '&a&lMoney'
+    BannedPlayers: '&cBanned Players'
+    BanMenu: '&cBan'
+    KickMenu: '&cKick'
+    Permissions:
+      ListMenu: '&aPermission List: %action%'
+      ActionSelectMenu: '&aActions'
+      GroupMenu: '&aPermission Groups'
+  WorldManager:
+    WorldSelector: '&aSelect a World'
+    WorldSettings: '&3Settings'
+    WorldCreateMenu: '&3Create World'
+    GameRuleMenu: '&3Gamerules'
+    TimeMenu: '&3Time'
+    WeatherMenu: '&3Weather'
+  ServerManager:
+    Menu: '&5Server Manager'
+    ChatManagerMenu: '&aChat Manager'
+    WhitelistManager:
+      Menu: '&3Whitelist Manager'
+      PlayerList: '&3Player List'
+  PluginManager:
+    PluginDescriptionMenu: '&3Plugin Description'
+    Selector: '&aSelect a Plugin'
+    Settings: '&3Settings'
+    InstallMenu: '&6Install'
+    AutoUpdateMenu: '&6Auto Update Menu'
+    Commands:
+      Menu: '&6Commmands'
+      Settings: '&3Settings'
+    Permissions:
+      Menu: '&6Permissions'
+      Settings: '&3Settings'
+  DataClientMainMenu: '&aData Client'
+  DataClientSettingsMenu: '&aData Client Settings'
+  ConfigReloadMenu: '&aConfiguration Manager'
+  LanguageMigration:
+    Migration: '&6Language Migration'
+  LanguageMigrator:
+    EntryEditMenu: '&6Edit: %migration_entry_name%'
+  Misc:
+    ConfirmationMenu: '&aConfirmation Menu'

@@ -1,0 +1,1720 @@
+# Der Sprach Datei fuer Deutsche Sprache
+# %prefix% = The Prefix of the Plugin (works in every Message)
+LanguageFullName: 'Deutsch'
+LanguageVersion: '${project.version}'
+LanguageUUID: '34a3eaac-5fd8-4d82-950e-e52153529b53'
+LanguageDescription: 'Die Deutsche Sprach Datei für das Admin-Panel'
+Messages:
+  Plugin:
+    EnablingMessage: '[Admin-Panel] erfolgreich aktiviert!'
+    DisablingMessage: '[Admin-Panel] erfolgreich deaktiviert!'
+    NullMenu: '%prefix% &9> &cDas Menu welches du öffnen wolltest scheint gerade nicht zu funktioniert!'
+  DataClient:
+    RequestedUpdateMessage: '%prefix% &9> &aErfolgreich Client List Anfrage an den Server gesendet.'
+    ClientListMessages:
+      PageDoesNotExist: '%prefix% &9> &cDiese Seite existiert nicht!'
+      # -------------------------------------------------
+      # Header and Footer Placeholders (Command Manager system):
+      # %page% = Current Page
+      # %max_page% = Max Page
+      # -------------------------------------------------
+      Header: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+      # Format Placeholders:
+      # %dataClientName% = Data Client Name
+      # %count% = The Id of that Client
+      Format: '  &bClient-%count% &7- &b%dataClientName%'
+      Footer: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+    PermissionsSync:
+      PermissionsSendForAllPlayers: '%prefix% &9> &aDie Permissions von allen Spielern wurden an den Server geschickt.'
+      # Placeholders:
+      # %target_player% = Target Player
+      PermissionsSendForOnePlayer: '%prefix% &9> &aDie Permissions von ''%target_player%'' wurden an den Server geschickt.'
+      NoPermissionsStored: '%prefix% &9> &cFür ''%target_player%'' sind in Admin-Panel keine Permissions gespeichert.'
+    TrollsSync:
+      TrollDataSendForAllPlayers: '%prefix% &9> &aDie Troll Daten des Trolls ''%troll%'' wurden an den Server geschickt.'
+      TrollDataSendFailed: '%prefix% &9> &cDie Daten des Trolls ''%troll%'' konnten nicht gesendet werden.'
+    NotEnabled: '%prefix% &9> &cDer Data Client ist nicht aktiviert!'
+  BackupSystem:
+    SubCommands:
+      # Placeholders: 
+      # %backupName% = equals the Backup Config Name specified
+      Start: '%prefix% &9> &aDer Backup Erstellungs Prozess für ''%backupName%'' ist fertig. &r%success%'
+      Load: '%prefix% &9> &aDer Backup Lade Prozess für ''%backupName%'' ist fertig. Du kannst die alten Configs in diesem Zip Archive finden ''old_configs.yml''. &r%success%'
+      # GetNewestBackup Placeholders:
+      # %fileName% = File Name
+      # %normalPath% = The Relative Path
+      # %absolutePath% = The Absolute Path
+      # %parentFile% = The Parent Directory / File
+      # %exists% = If the File exists
+      GetNewestBackupFile: '%prefix% &9> &aDie neueste Backup Datei von ''%backupName%'' ist %fileName%!'
+      # DeleteBackup Placeholders:
+      # %backupFileNumberOrName% = The Specified Name or Number for the Backup File to delete
+      DeleteBackup: '%prefix% &9> &aLösche das Backup ''%backupFileNumberOrName%'' von ''%backupName%''!'
+      ListBackups:
+        PageDoesNotExist: '%prefix% &9> &cDiese Seite existiert nicht!'
+        # -------------------------------------------------
+        # Header and Footer Placeholders (Command Manager system):
+        # %page% = Current Page
+        # %max_page% = Max Page
+        # -------------------------------------------------
+        Header: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+        # Format Placeholders:
+        # %filesToBackup% = Files To Backup
+        # %filesToBackupSize% = Files To Backup Size
+        # %backupsDone% = The Backups Done
+        # %backupsDoneSize% = The Backups Done Size
+        # %identifier% = The Identifier of the Backup
+        # %backupDest% = The Destination to backup too
+        # %newestBackupFile% = The Newest Backup File
+        Format: '  &b%identifier% &7- &bFiles To Backup: %filesToBackupSize%, Backups Done: %backupsDoneSize%, Backup Destination: %backupDest%'
+        Footer: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+      ListFilesToBackup:
+        PageDoesNotExist: '%prefix% &9> &cDiese Seite existiert nicht!'
+        # -------------------------------------------------
+        # Header and Footer Placeholders (Command Manager system):
+        # %page% = Current Page
+        # %max_page% = Max Page
+        # -------------------------------------------------
+        Header: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+        # Format Placeholders:
+        # %fileName% = File Name
+        # %normalPath% = The Relative Path
+        # %absolutePath% = The Absolute Path
+        # %parentFile% = The Parent Directory / File
+        # %exists% = If the File exists
+        Format: '  &b%fileName% (%exists%) &7- &b%normalPath%'
+        Footer: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+      ListBackupsDone:
+        PageDoesNotExist: '%prefix% &9> &cDiese Seite existiert nicht!'
+        # -------------------------------------------------
+        # Header and Footer Placeholders (Command Manager system):
+        # %page% = Current Page
+        # %max_page% = Max Page
+        # -------------------------------------------------
+        Header: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+        # Format Placeholders:
+        # %fileName% = File Name
+        # %normalPath% = The Relative Path
+        # %absolutePath% = The Absolute Path
+        # %parentFile% = The Parent Directory / File
+        # %exists% = If the File exists
+        # %backupsDoneNumber% = The Number of the Backup in the List
+        Format: '  &b%backupsDoneNumber%. %fileName% (%exists%) &7- &b%normalPath%'
+        Footer: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+      BackupNotFound: '%prefix% &9> &cEs gibt kein Backup namens ''%backupName%''!'
+      NoBackupFile: '%prefix% &9> &cFür ''%backupName%'' gibt es noch keine Backup-Datei!'
+  Player:
+    StaffChat:
+      ToggleOn: '%prefix% &9> &aDer Staff Chat wurde für Spieler ''%player_name%'' angeschaltet!'
+      ToggleOff: '%prefix% &9> &aDer Staff Chat wurde für Spieler ''%player_name%'' ausgeschaltet!'
+      Disabled: '%prefix% &9> &cDer Staff Chat ist deaktiviert!'
+      Enabled: '%prefix% &9> &aDer Staff Chat ist aktiviert!'
+      # Placeholders for the Message Format:
+      # %sc_prefix% = The Prefix of the Staff Chat
+      # %player_name% = The Name of the Player
+      # %message% = The Message
+      MessageFormat: '%sc_prefix% | &7%player_name%&8: &f%message%'
+    Commands:
+      #VanillaItems:
+      #Enable: '%prefix% &9> &c'
+      #Disable: '%prefix% &9> &c'
+      #List:
+      # -------------------------------------------------
+      # Header and Footer Placeholders (Command Manager system):
+      # %page% = Current Page
+      # %max_page% = Max Page
+      # -------------------------------------------------
+      #Header: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+      # Format Placeholders:
+      # %usage% = Sub Command Usage
+      # %description% = Sub Command Description
+      # %name% = Sub Command Name
+      # %aliases% = Sub Command Aliases
+      # %permission% = Sub Command Permission
+      #Format: '  &b%usage% &7- &b%description%'
+      #Footer: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+      TooFewArguments: '%prefix% &9> &cZu wenig Argumente!'
+      TooManyArguments: '%prefix% &9> &cZu viele Argumente!'
+      InvalidSubCommand: '%prefix% &9> &cDas ist kein gültiger Befehl!'
+      # Placeholders:
+      # %error% = The Error that happened
+      ErrorPerformingSubCommand: '%prefix% &9> &cEin Fehler ist aufgetreten!'
+      UsageMessage: '%prefix% &9> &c%usage%'
+      NotANumber: '%prefix% &9> &cDas ist keine Nummer!'
+      CommandContainsInvalidArgs: '%prefix% &9>Der Command enthält ungültige Argumente! (%invalidArgs%)'
+      HelpPageDoesNotExist: '%prefix% &9> &cDiese Hilfe Seite existiert nicht!'
+      HelpMessages:
+        # -------------------------------------------------
+        # Header and Footer Placeholders (Command Manager system):
+        # %page% = Current Page
+        # %max_page% = Max Page
+        # -------------------------------------------------
+        Header: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+        # Format Placeholders:
+        # %usage% = Sub Command Usage
+        # %description% = Sub Command Description
+        # %name% = Sub Command Name
+        # %aliases% = Sub Command Aliases
+        # %permission% = Sub Command Permission
+        Format: '  &b%usage% &7- &b%description%'
+        Footer: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+    General:
+      Error: '%prefix% &9> &cEin Fehler ist aufgetreten! (%error%)'
+      ReloadedConfig: '%prefix% &9> &aErfolgreich die Config reloaded!'
+      # %language% = The Language of the Plugin
+      ReloadedLanguageFile: '%prefix% &9> &aErfolgreich die Sprache %language% reloaded!'
+      # %fullname% = The Full Name of the Language
+      SetCurrentLanguage: '%prefix% &9> &aErfolgreich die gerade ausgewählte Sprache zu %fullname% geändert!'
+      AlreadyOnFirstPage: '%prefix% &9> &cDu bist schon auf der ersten Seite!'
+      AlreadyOnLastPage: '%prefix% &9> &cDu bist schon auf der letzten Seite!'
+      NoPermissions: '%prefix% &9> &cDu hast keinen Zugriff auf diesen Command!'
+      OpeningMessageSelf: '%prefix% &9> &cDu hast das Admin-Panel für dich geöffnet!'
+      OpeningMessageOther: '%prefix% &9> &c%player_name% hat das Admin-Panel für dich geöffnet!'
+      # %target% = The Targeted Player
+      OpeningMessageSelfForOther: '%prefix% &9> Du hast das Admin-Panel für &c%target% geöffnet!'
+      TargetedPlayerIsNull: '%prefix% &9> &cDieser Spieler ist nicht online oder existiert nicht!'
+      NotAValidUpdateVersion: '%prefix% &9> &cDies ist keine valide Plugin Version auf die man updaten kann!'
+      NotAValidLanguage: '%prefix% &9> &c''%langName%'' ist keine richtige Sprache zum auswählen!'
+      PerPlayerLangSet: '%prefix% &9> &aErfolgreich ''%langname%'' als deine neue Sprache ausgewählt!'
+      # %target% = The Targeted Player
+      PerPlayerLangSetOther: '%prefix% &9> &aErfolgreich ''%langname%'' als %target%''s neue Sprache ausgewählt!'
+      NullMenu: '%prefix% &9> &cDas Menu welches du öffnen wolltest scheint gerade nicht zu funktionieren!'
+    WorldManager:
+      CreateMenu:
+        Name: '%prefix% &9> &aBitte gib einen Namen in den Chat ein!'
+    PlayerManager:
+      Bypass: '%prefix% &9> &cDiesen Spieler kann man nicht auswählen, da er die Permission dazu hat!'
+      ChooseYourself: '%prefix% &9> &cDu kannst dich nicht selber auswählen!'
+      AlreadyOp: '&cDieser Spieler ist bereits Operator!'
+      NotOp: '&cDieser Spieler ist kein Operator!'
+      OppedMessage: '&aDu hast den Spieler zum Operator gemacht!'
+      DeoppedMessage: '&cDu hast dem Spieler die Operatorrechte weggenommen!'
+      Permissions:
+        AddedPermission: '%prefix% &9> &aPermission hinzugefügt mit Wert %value%!'
+        RemovedPermission: '%prefix% &9> &cPermission entfernt!'
+        GroupMenu:
+          EnterSort: '%prefix% &9> &aBitte gib die Sortierung in den Chat ein!'
+          SortResult: '%prefix% &9> &aDie Sortierung wird angegewended!'
+          PermissionNotFound: '%prefix% &9> &cDie Permission existiert nicht! (%permission%) (Wenn du willst, dass solche Permissions auch hinzugefügt werden, dann schau in die Config.)'
+      KickMenu:
+        # %reason% = The Reason
+        TargetKickMessage: '%prefix% &9> &4Du wurdest vom Server geworfen! Grund: %reason%'
+        NotKickable: '%prefix% &9> &cDieser Spieler kann nicht gekickt werden!'
+        SuccessfullyKicked: '%prefix% &9> &aDu hast diesen Spieler erfolgreich getkickt!'
+        Reason:
+          EnterNewReason: '%prefix% &9> &aBitte gibt einen neuen Grund in den Chat ein!'
+          NewReasonSet: '%prefix% &9> &aDer neue Grund wurde gesetzt!'
+      BanMenu:
+        # %reason% = The Reason
+        TargetKickMessage: '%prefix% &9> &4Du wurdest von diesem Server gebannt! \r\n &4Zeit: &4Y: %years%, M: %months%, D: %days%, H: %hours%, M: %minutes%, S: %seconds% \r\n &4Grund: &4%reason%'
+        SuccessfullyUnbanned: '%prefix% &9> &aDu hast den Spieler erfolgreich entbannt!'
+        SuccessfullyBanned: '%prefix% &9> &aDu hast diesen Spieler erfolgreich gebannt!'
+        AlreadyBanned: '%prefix% &9> &cDieser Spieler ist schon gebannt!'
+        NotBanned: '%prefix% &9> &cDieser Spieler ist nicht gebannt!'
+        NotBannable: '%prefix% &9> &cDieser Spieler kann nicht gebannt werden!'
+        Reason:
+          EnterNewReason: '%prefix% &9> &aBitte gibt einen neuen Grund in den Chat ein!'
+          NewReasonSet: '%prefix% &9> &aDer neue Grund wurde gesetzt!'
+      Money:
+        # %amount% = The Amount of Money for the Action
+        PleaseEnterAmount: '%prefix% &9> &aBitte gebe den Betrag in den Chat ein mit dem du arbeiten willst!'
+        NotEnoughMoney: '%prefix% &9> &c%player_name% hat nicht genug Geld dafür! (%vault_eco_balance%)'
+        TransactionError: '%prefix% &9> &c%player_name% Bei der Transaktion is etwas schiefgelaufen!'
+        NotANumber: '%prefix% &9> &c%player_name%, das ist keine Nummer!'
+        GiveMoney: '%prefix% &9> &cDu hast gerade %player_name% %amount% gegeben!'
+        SetMoney: '%prefix% &9> &cDu hast gerade %player_name% auf %amount% gesetzt!'
+        TakeMoney: '%prefix% &9> &cDu hast gerade %player_name% %amount% weggenommen!'
+    ServerManager:
+      MaintenanceModeOff: '%prefix% &9> &aDer Server befindet sich nicht mehr im Wartungsmodus, alle Spieler können wieder beitreten!'
+      MaintenanceModeOn: '%prefix% &9> &cDer Server befindet sich nun im Wartungsmodus alle Spieler die keine Rechte haben wurden gekickt!'
+      AllPlayersKicked: '%prefix% &9> &aAlle Spieler wurden vom Server gekickt!'
+      PleaseEnterAMessage: '%prefix% &9> &aBitte gebe eine Nachricht in den Chat ein!'
+      BroadcastHeader: '&a+---------------------------------------------------+'
+      # %message% = The Message
+      BroadcastMessage: '%prefix% &9> %message%'
+      BroadcastFooter: '&a+---------------------------------------------------+'
+      KickAllPlayersReason: '&cKick zur Sicherheit'
+      KickAllPlayersSource: '%player_name%'
+      MaintenanceMode: '%prefix% &9> &5%player_name% &cDer Server ist im &4&lWartungsmodus!'
+      MaintenanceModeMOTD: '%prefix% &9> &cDer Server ist momentan im &4&lWartungsmodus!'
+      MaintenanceMaxPlayerCount: 0
+      WhitelistManager:
+        PleaseEnterName: '%prefix% &9> &aBitte gib einen Spieler ein (Name oder UUID)!'
+        AddedPlayer: '%prefix% &9> &aErfolgreich Spieler hinzugefügt!'
+        RemovedPlayer: '%prefix% &9> &aErfolgreich Spieler entfernt!'
+    Chat:
+      Header: '&a+---------------------------------------------------+'
+      Message: '    &2Der Chat wurde geleert von &3%player_name%'
+      Footer: '&a+---------------------------------------------------+'
+    ChatMute:
+      PlayerMessage: '%prefix% &9> &4Der Chat ist gemuted! %player_name%!'
+      Header: '&a+---------------------------------------------------+'
+      Message: '       &4Der Chat wurde gemuted von %player_name%!'
+      Footer: '&a+---------------------------------------------------+'
+    ChatUnMute:
+      Header: '&a+---------------------------------------------------+'
+      Message: '       &4Der Chat wurde entmuted von %player_name%!'
+      Footer: '&a+---------------------------------------------------+'
+    PluginManager:
+      # %filename% = The File Name of the Plugin
+      # %resourceid% = The Resource ID of the Plugin
+      FileNotFound: '%prefix% &9> &cDas Plugin wurde nicht gefunden!'
+      MissingDependencies: '%prefix% &9> &cDas Plugin wurde gedownloaded, aber es fehlen die Dependencies!'
+      ResourceIDSelected: '%prefix% &9> &aDie ResourceID %resourceid% wurde ausgewählt!'
+      FileNameSelected: '%prefix% &9> &aDer Datei Name %filename% wurde ausgewählt!'
+      TypeResourceIDInChat: '%prefix% &9> &aBitte gib die Resource ID an!'
+      TypeFileNameInChat: '%prefix% &9> &aBitte gib den Datei Namen an!'
+      TypePluginFileNameToLoadInChat: '%prefix% &9> &aBitte gib den Plugin Datei Namen (name.jar) an! Um zum Menu zu gelangen gib ''cancel'' oder ''exit'' ein!'
+      PluginFileNameSelected: '%prefix% &9> &aDas Plugin %filename% wurde geladen!'
+      SuccessfullyInstalled: '%prefix% &9> &aDas Plugin %resourceid% wurde erfoglreich in die Datei %filename%.jar gedownloaded!'
+      ErrorInInstallProccess: '%prefix% &9> &cWährend des Installationsvorgangs ist ein Fehler aufgetreten!'
+      LoadPluginError: '%prefix% &9> &cWährend des Ladevorgangs ist ein Fehler aufgetreten!'
+      FileToLoadDoesNotExist: '%prefix% &9> &cDie Plugin Datei %filename% existiert nicht!'
+      ResourceIsNotOnSpigot: '%prefix% &9> &cDieses Plugin ist nicht auf Spigot vorhanden! Oder die Spigot ID stimmt nicht!'
+      DownloadFileIsExternal: '%prefix% &9> &cDie Datei des Plugins ist Extern und kann nicht gedownloaded werden!'
+      UpdatedPlugin: '%prefix% &9> &aDas Plugin %name% wurde geupdated! Tip: Wenn das Plugin schon auf der neuesten Version ist wird einfach die Datei gedownloaded!'
+      AutoPluginUpdater:
+        AddedPlugin: '%prefix% &9> &aDas Plugin %name% wurde hinzugefügt!'
+        RemovedPlugin: '%prefix% &9> &aDas Plugin %name% wurde entfernt!'
+        SelectPlugin: '%prefix% &9> &aBitte gib ein Plugin in den Chat ein!'
+        SelectPluginToRemove: '%prefix% &9> &aBitte gib ein Plugin in den Chat ein!'
+        SelectFileName: '%prefix% &9> &aBitte gib einen Datei Namen in den Chat ein mit ''.jar'' am Ende!'
+        FileNameSelected: '%prefix% &9> &aDer Datei Name %fileName% wurde ausgewählt!'
+        SelectSpigotID: '%prefix% &9> &aBitte gebe eine Spigot ID in den Chat ein!'
+        SpigotIDSelected: '%prefix% &9> &aDie Spigot ID %spigotID% wurde ausgewählt!'
+        PluginSelected: '%prefix% &9> &aDas Plugin %name% wurde ausgewählt!'
+      PluginDescriptionMenu:
+        LoadedFromResourceID: '%prefix %9> &aDie Plugin Beschreibung wurde von der Resource ID geladen!'
+        SetResourceInChat: '%prefix% &9> &aBitte gib die Resource ID in den Chat ein!'
+        SetDescriptionInChat: '%prefix% &9> &aBitte gib die Beschreibung in den Chat ein!'
+        SuccessfullySetDescriptionInChat: '%prefix% &9> &aDie Beschreibung wurde erfolgreich gesetzt!'
+        SuccessfullySetResourceInChat: '%prefix% &9> &aDie Resource ID wurde erfolgreich gesetzt!'
+        SetResourceInChatError: '%prefix% &9> &cDie Resource ID konnte nicht gesetzt werden!'
+  PotionMenu:
+    NotANumber: '%prefix% &9> &cDas ist keine Nummer!'
+    EnterDuration: '%prefix% &9> &aBitte gib eine Dauer ein!'
+    DurationSet: '%prefix% &9> &aDie neue Dauer wurde gesetzt!'
+    EnterAmplifier: '%prefix% &9> &aBitte gib einen Amplifier an!'
+    AmplifierSet: '%prefix% &9> &aDer neue Amplifier wurde gesetzt!'
+    EffectAdded: '%prefix% &9> &aDer Effekt &7%type%&r (&aDauer: %duration%&r, &aAmplifier: &7%amplifier%&r)&a wurde dem Spieler %7%target%&a hinzugefügt!'
+    EffectRemoved: '%prefix% &9> &cDer Effekt &7%type%&c wurde dem Spieler %7%target%&c weggenommen!'
+  Console:
+    ExecutesPlayerCommand: '%prefix% &9> &cDu musst ein Spieler sein!'
+  ConfigReloadMenu:
+    ConfigReloaded: '%prefix% &9> &aKonfiguration erfolgreich neu geladen!'
+    LanguagesReloaded: '%prefix% &9> &aSprachen erfolgreich neu geladen!'
+    DataReloaded: '%prefix% &9> &aDatenservice erfolgreich neu geladen!'
+    BackupToggled: '%prefix% &9> &aBackup-System ist jetzt %backup_state%!'
+    CreatingBackup: '%prefix% &9> &aErstelle Backups...'
+    BackupCreated: '%prefix% &9> &aBackups erfolgreich erstellt!'
+    ReloadingPlugin: '%prefix% &9> &cLade Plugin neu...'
+  DangerZoneMenu:
+    StopReason: '&cServer-Stopp aus dem Danger-Zone-Menue angefordert.'
+    RestartReason: '&6Server-Neustart aus dem Danger-Zone-Menue angefordert.'
+  LanguageMigration:
+    Error:
+      NoLanguageFileSelected: '%prefix% &9> &cKeine Sprachdatei ausgewählt!'
+    Message:
+      NoEntriesSelected: '%prefix% &9> &cKeine Einträge für Migration ausgewählt!'
+      MigrationFailed: '%prefix% &9> &cMigration fehlgeschlagen! Prüfe die Konsole für Fehler.'
+      MigrationApplied: '%prefix% &9> &aMigration erfolgreich angewendet!'
+  LanguageMigrator:
+    EntryEditMenu:
+      EnterFinalValue: '%prefix% &9> &aGib den Endwert im Chat ein.'
+      EnterFinalValueFormat: '&7Formate: &eGanzzahl (123)&7, &eDezimalzahl (12.3)&7, &eBoolean (true/false)&7, &eListe ([a,b,c])&7, &eText (beliebig)&7. Tippe &ccancel &7zum Abbrechen.'
+      FinalValueSet: '%prefix% &9> &aEndwert gesetzt auf: &f%final_value%'
+      EditCancelled: '%prefix% &9> &cBearbeitung abgebrochen.'
+      InvalidInput: '%prefix% &9> &cUngültige Eingabe! Wird als Text verwendet.'
+  AddonCommand:
+    # Format Placeholders:
+    # %addon_name% = Addon Name
+    # %addon_version% = Addon Version
+    # %addon_description% = Addon Description
+    # %addon_dependencies% = Addon Dependencies
+    ListMessage:
+      PageDoesNotExist: '%prefix% &9> &cDiese Seite existiert nicht!'
+      # -------------------------------------------------
+      # Header and Footer Placeholders (Command Manager system):
+      # %page% = Current Page
+      # %max_page% = Max Page
+      # -------------------------------------------------
+      Header: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+      Format: '  &b%addon_name% &7- &b%addon_version% &7- &b%addon_description%'
+      Footer: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+    Enable:
+      EnabledMessage: '%prefix% &9> &aDas Addon &7%addon_name% &a(&7%addon_version%&a) &awurde aktiviert!'
+      AddonNotFound: '%prefix% &9> &cDas Addon konnte nicht gefunden werden! (%addon_name%)'
+      ErrorEnablingAddon: '%prefix% &9> &cEin Fehler ist beim Aktivieren des Addons aufgetreten!'
+      DependencyError: '%prefix% &9> &cDas Addon &7%addon_name% &a(&7%addon_version%&a) &cbenötigt die folgenden Abhängigkeiten: &7%addon_dependencies%'
+      AddonAlreadyEnabled: '%prefix% &9> &cDas Addon &7%addon_name% &a(&7%addon_version%&a) &cist bereits aktiviert!'
+      CircularDependencyError: '%prefix% &9> &cDas Addon &7%addon_name% &a(&7%addon_version%&a) &chat eine zirkuläre Abhängigkeit!'
+    Disable:
+      DisabledMessage: '%prefix% &9> &aDas Addon &7%addon_name% &a(&7%addon_version%&a) &awurde deaktiviert!'
+      AddonNotFound: '%prefix% &9> &cDas Addon konnte nicht gefunden werden! (%addon_name%)'
+      ErrorDisablingAddon: '%prefix% &9> &cEin Fehler ist beim Deaktivieren des Addons aufgetreten!'
+      AddonAlreadyDisabled: '%prefix% &9> &cDas Addon &7%addon_name% &a(&7%addon_version%&a) &cist bereits deaktiviert!'
+    Reload:
+      ReloadedMessage: '%prefix% &9> &aDas Addon &7%addon_name% &a(&7%addon_version%&a) &awurde neu geladen!'
+      AddonNotFound: '%prefix% &9> &cDas Addon konnte nicht gefunden werden! (%addon_name%)'
+      ErrorReloadingAddon: '%prefix% &9> &cEin Fehler ist beim Neuladen des Addons aufgetreten!'
+      AddonAlreadyEnabled: '%prefix% &9> &cDas Addon &7%addon_name% &a(&7%addon_version%&a) &cist bereits aktiviert!'
+    Info:
+      AddonNotFound: '%prefix% &9> &cDas Addon konnte nicht gefunden werden! (%addon_name%)'
+      AddonInfoMessage:
+        - '+---------------------------------------------------+'
+        - '+ &aAddon Informationen &7%addon_name% &a(&7%addon_version%&a) &a+'
+        - '&aAddon Name: &7%addon_name%'
+        - '&aAddon Version: &7%addon_version%'
+        - '&aAddon Beschreibung: &7%addon_description%'
+        - '&aAddon Abhängigkeiten: &7%addon_dependencies%'
+        - '&aAddon Aktiviert: &7%addon_enabled%'
+        - '+---------------------------------------------------+'
+    SystemDisabled: '%prefix% &9> &cDas Addon-System ist deaktiviert!'
+  ToManyArguments: '&4Zu viele Argumente!'
+  TooFewArguments: '&4Zu wenig Argumente!'
+  AdminPanelAdmin:
+    # %action% = was neu geladen oder aktualisiert wird (aus Actions unten), %error% = die Fehlermeldung
+    ActionStarted: '%prefix% &9> &7Starte: %action%'
+    ActionFinished: '%prefix% &9> &a%action%: fertig!'
+    ActionFailed: '%prefix% &9> &c%action% ist fehlgeschlagen: &6%error% &7(siehe Konsole)'
+    Actions:
+      ReloadConfig: 'Neuladen der Config'
+      ReloadData: 'Neuladen der Daten-Datei'
+      ReloadLang: 'Neuladen der Sprachdateien'
+      ReloadPlugin: 'Neuladen von Admin-Panel'
+      ReloadCommandManagers: 'Neuladen der Command Manager'
+      UpdateConfig: 'Aktualisieren der Config'
+      UpdateLangFiles: 'Aktualisieren der Sprachdateien'
+    BugReport:
+      # %seconds% = seconds until the next report is possible
+      Cooldown: '%prefix% &9> &cDu kannst den nächsten Bericht in %seconds% Sekunden senden.'
+      Error: '%prefix% &9> &cDer Bericht konnte nicht gesendet werden. Bitte schau in die Konsole.'
+      Sent: '%prefix% &9> &aDer Bericht wurde an den Entwickler gesendet. &7Du kannst auf das Update warten oder meinem Discord beitreten.'
+    StartUpLogger:
+      Enabled: '%prefix% &9> &aStartUpLogger aktiviert!'
+      Disabled: '%prefix% &9> &cStartUpLogger deaktiviert!'
+    PermissionMenuHelp:
+      - '&aHilfe zum Permission Menü:'
+      - '&eFelder für die Permission-Suche:'
+      - '&7 - permissionName'
+      - '&7 - permissionDescription'
+      - '&7 - permissionDefault'
+      - '&7 - permissionChildren'
+      - '&eTF-IDF Suche für Permissions:'
+      - '&71. Einfache Suche: ein einzelner Begriff, z.B. ''adminpanel'''
+      - '&72. Boolesche Suche: Begriffe mit AND, OR und NOT verbinden, z.B. ''adminpanel OR vault'''
+      - '&73. Phrasen-Suche: doppelte Anführungszeichen für genaue Phrasen, z.B. ''"AdminPanel.open"'''
+      - '&74. Platzhalter-Suche: * oder ? für Muster, z.B. ''permissionName:admin*'''
+      - '&75. Unscharfe Suche: ~ für eine ungenaue Suche, z.B. ''permissionDescription:chat~'''
+      - '&76. Bereichs-Suche: [a TO f] sucht in einem Bereich, z.B. ''permissionDefault:[a TO f]'''
+      - '&77. Kombinierte Suche: z.B. ''permissionChildren:spigot AND permissionDefault:OP'''
+  DisabledItems:
+    # %material% = das Item
+    InvalidMaterial: '%prefix% &9> &c''%material%'' ist kein Item!'
+    Disabled: '%prefix% &9> &aDas Item &e%material% &awurde deaktiviert.'
+    AlreadyDisabled: '%prefix% &9> &eDas Item &6%material% &eist schon deaktiviert.'
+    Enabled: '%prefix% &9> &aDas Item &e%material% &aist wieder erlaubt.'
+    NotDisabled: '%prefix% &9> &eDas Item &6%material% &eist nicht deaktiviert.'
+    List:
+      # %page%, %max_page%, %count% = Anzahl der deaktivierten Items
+      Empty: '%prefix% &9> &7Es sind keine Items deaktiviert.'
+      PageDoesNotExist: '%prefix% &9> &cDiese Seite existiert nicht! (1-%max_page%)'
+      Header: '&a------------ &bDeaktivierte Items: %count% &b(&5%page%&7/&5%max_page%&b) &a------------'
+      Format: '  &7- &e%material%'
+      Footer: '&a------------ &b(&5%page%&7/&5%max_page%&b) &a------------'
+Items:
+  General:
+    ConfirmationMenu:
+      Confirm:
+        material: LIME_STAINED_GLASS_PANE
+        displayName: '&aBestätigen'
+        lore:
+          - '&aBestätige deine Auswahl!'
+      Cancel:
+        material: RED_STAINED_GLASS_PANE
+        displayName: '&cAbbrechen'
+        lore:
+          - '&cBreche deine Auswahl ab!'
+      ReasonItem:
+        material: PAPER
+        displayName: '&aWillst du diese Aktion ausführen?'
+        lore:
+          - '&aAktion: %reason%'
+          - '&aGrün &f= &6Ja &f| &cRot &f= &6Nein'
+    FillerItem:
+      material: BLACK_STAINED_GLASS_PANE
+      displayName: ' '
+      lore:
+        - ''
+    DisabledItem:
+      material: BARRIER
+      displayName: '&8Diese Funktion wurde deaktiviert!'
+      lore:
+        - '&7Diese Funktion wurde in der Config deaktiviert!'
+    Close:
+      material: BARRIER
+      displayName: '&cClose'
+      lore:
+        - '&cSchließe diese Seite!'
+    Back:
+      material: ARROW
+      displayName: '&cZurück'
+      lore:
+        - '&cGehe zur vorherigen Seite!'
+    Left:
+      material: DARK_OAK_BUTTON
+      displayName: '&cLeft'
+      lore:
+        - '&cGehe zur vorletzten Seite!'
+    Right:
+      material: DARK_OAK_BUTTON
+      displayName: '&cRight'
+      lore:
+        - '&cGehe zur nächsten Seite!'
+    EmptySlot:
+      material: BARRIER
+      displayName: ' '
+      lore:
+        - ' '
+    Refresh:
+      material: LEVER
+      displayName: '&aAktualisieren'
+      lore:
+        - '&aAktualisiere diese Seite!'
+  PlayerManager:
+    PlayerHead:
+      material: PLAYER_HEAD
+      displayName: '%player_name%'
+      lore:
+        - '&6GameMode: &7%player_gamemode%'
+        - '&6Geld: &7%vault_eco_balance%'
+        - '&6Leben: &7%player_health%'
+        - '&6Essen: &7%player_food_level%'
+        - '&6IP-Addresse: &7%player_ip%'
+    TrollMenu:
+      VillagerSounds:
+        true:
+          material: VILLAGER_SPAWN_EGG
+          displayName: '&aNervige Dorfbewohner Geräusche'
+          lore:
+            - '&6Nerve den Spieler mit Dorfbewohner Geräuschen!'
+        false:
+          material: VILLAGER_SPAWN_EGG
+          displayName: '&cNervige Dorfbewohner Geräusche'
+          lore:
+            - '&6Nerve den Spieler mit Dorfbewohner Geräuschen!'
+      BreakPlacePrevent:
+        true:
+          material: DIAMOND_PICKAXE
+          displayName: '&aBauen/Abbauen verhindern'
+          lore:
+            - '&6Verhindere, dass der Spieler abbauen kann!'
+        false:
+          material: DIAMOND_PICKAXE
+          displayName: '&cBauen/Abbauen verhindern'
+          lore:
+            - '&6Verhindere, dass der Spieler abbauen kann!'
+      HurtingWater:
+        true:
+          material: WATER_BUCKET
+          displayName: '&aVerletzendes Wasser'
+          lore:
+            - '&6Mache, dass der Spieler sich im Wasser verletzt!'
+        false:
+          material: WATER_BUCKET
+          displayName: '&cVerletzendes Wasser'
+          lore:
+            - '&6Mache, dass der Spieler sich im Wasser verletzt!'
+      ChatMute:
+        true:
+          material: PAPER
+          displayName: '&aChat stumm schalten'
+          lore:
+            - '&6Schalte den Spieler im Chat stumm!'
+        false:
+          material: PAPER
+          displayName: '&cChat stumm schalten'
+          lore:
+            - '&6Schalte den Spieler im Chat stumm!'
+      FreezePlayer:
+        true:
+          material: BARRIER
+          displayName: '&aSpieler auf der Stelle fest frieren'
+          lore:
+            - '&6Der Spieler kann sich nicht mehr bewegen!'
+        false:
+          material: BARRIER
+          displayName: '&cSpieler auf der Stelle fest frieren'
+          lore:
+            - '&6Der Spieler kann sich nicht mehr bewegen!'
+      DupeMobsOnKill:
+        true:
+          material: BLAZE_SPAWN_EGG
+          displayName: '&aMob Dupe'
+          lore:
+            - '&6Sobald der Spieler eine Entität tötet wird sie verdoppelt!'
+        false:
+          material: BLAZE_SPAWN_EGG
+          displayName: '&cMob Dupe'
+          lore:
+            - '&6Sobald der Spieler eine Entität tötet wird sie verdoppelt!'
+      Kick:
+        ConnectionReset:
+          material: PISTON
+          displayName: '&aKick für ...Connection Reset'
+          lore:
+            - '&aKickt einen Spieler mit der Nachricht: !'
+            - '&aInternal exception: java.net.SocketException: Connection reset.'
+        ServerStoppedError:
+          material: PISTON
+          displayName: '&aKick für Error'
+          lore:
+            - '&aKickt einen Spieler mit der Nachricht: !'
+            - '&aio.netty.channel.AbstractChannel$AnnotatedConnectException: Connection refused: no further informations:'
+        Serverstop:
+          material: PISTON
+          displayName: '&aKick für Serverstop'
+          lore:
+            - '&aKickt einen Spieler mit der Nachricht: !'
+            - '&aServer closed!'
+        Whitelist:
+          material: PISTON
+          displayName: '&aKick für Whitelist'
+          lore:
+            - '&aKickt einen Spieler mit der Nachricht: !'
+            - '&aYou are not whitelisted on this server!'
+      FakeOp:
+        material: PAPER
+        displayName: '&cFake Op'
+        lore:
+          - '&6Faked eine Standard /op Message'
+      FakeDeop:
+        material: PAPER
+        displayName: '&cFake Deop'
+        lore:
+          - '&6Faked eine Standard /deop Message'
+      FakeTNT:
+        material: TNT
+        displayName: '&4Fake Tnt'
+        lore:
+          - '&6Spawne ein TNT vor den Füßen des Spielers!'
+      DropPlayerInv:
+        material: DIAMOND_CHESTPLATE
+        displayName: '&a&lDrop Inventar'
+        lore:
+          - '&6Lass den Spieler sein komplettes Inventar droppen!'
+    ActionsMenu:
+      Kill:
+        material: DIAMOND_SWORD
+        displayName: '&cSpieler töten!'
+        lore:
+          - '&cTöte den Spieler!'
+      Heal:
+        material: GOLDEN_APPLE
+        displayName: '&cSpieler heilen!'
+        lore:
+          - '&cHeile den Spieler!'
+      Feed:
+        material: COOKED_BEEF
+        displayName: '&cSpieler füttern!'
+        lore:
+          - '&cFülle die Hungersleiste des Spielers wieder auf!'
+      Burn:
+        material: FLINT_AND_STEEL
+        displayName: '&cSpieler anzünden!'
+        lore:
+          - '&cZünde den Spieler an!'
+      Lightning:
+        material: BLAZE_ROD
+        displayName: '&cBlitze schießen!'
+        lore:
+          - '&cSchieße einen Blitz auf den Spieler!'
+      Firework:
+        material: FIREWORK_ROCKET
+        displayName: '&1F&2e&3u&4e&5r&6w&7e&8r&9k &az&bü&cn&dd&ee&fn!'
+        lore:
+          - '&cZünde buntes Feuerwerk über dem Spieler!'
+      TeleportYouToPlayer:
+        material: ENDER_PEARL
+        displayName: '&2Teleportiere dich zum Spieler!'
+        lore:
+          - '&cTeleportiere dich zum Spieler!'
+      TeleportPlayerToYou:
+        material: END_CRYSTAL
+        displayName: '&1Teleportiere den Spieler zu dir!'
+        lore:
+          - '&cTeleportiere den Spieler zu dir!'
+      Op:
+        material: PAPER
+        displayName: '&aOp'
+        lore:
+          - '&aGebe dem Spieler Operatorrechte!'
+      Deop:
+        material: PAPER
+        displayName: '&cDeop'
+        lore:
+          - '&cNehme dem Spieler die Operatorrechte weg!'
+      Armor:
+        material: DIAMOND_CHESTPLATE
+        displayName: '&2Rüstung'
+        lore:
+          - '&cZeige die Rüstung des Spielers!'
+      Inventory:
+        material: COBBLESTONE
+        displayName: '&2Inventar'
+        lore:
+          - '&aZeige das Inventar des Spielers!'
+      Potions:
+        material: POTION
+        displayName: '&5Tränke!'
+        lore:
+          - '&aGebe dem Spieler Effekte!'
+      ClearPotions:
+        material: RED_CONCRETE
+        displayName: '&4Lösche alle Effekte'
+        lore:
+          - '&aLöscht alle Effekte des Spielers!'
+      SetDuration:
+        material: PAPER
+        displayName: '&4Setze eine Dauer'
+        lore:
+          - '&aAusgewählte Dauer: %duration%!'
+      SetAmplifier:
+        material: PAPER
+        displayName: '&4Setze einen Amplifier'
+        lore:
+          - '&aAusgewählter Amplifier: %amplifier%!'
+      Spawning:
+        material: SPAWNER
+        displayName: '&aSpawner'
+        lore:
+          - '&cErschaffe Entitäten in dem Spieler!'
+      Troll:
+        material: TNT
+        displayName: '&4&lTroll Menü'
+        lore:
+          - '&cTrolle den Spieler!'
+          - '&cRot &6= &3aus | &aGrün &6= &3an'
+      Vanish:
+        true:
+          material: FEATHER
+          displayName: '&aVanish'
+          lore:
+            - '&aSchalte Vanish für den Spieler aus!'
+        false:
+          material: FEATHER
+          displayName: '&cVanish'
+          lore:
+            - '&cSchalte Vanish für den Spieler an!'
+      PlayerSpawnLocation:
+        material: RED_BED
+        displayName: '&aPlayer Spawn Location'
+        lore:
+          - '&aSetze die Spawnposition des Spielers!'
+      GameMode:
+        Survival:
+          material: DIRT
+          displayName: '&aSurvival'
+          lore:
+            - '&aWechsle den GameMode des Spielers auf Adventure! (Klick)'
+        Adventure:
+          material: GRASS_BLOCK
+          displayName: '&aAdventure'
+          lore:
+            - '&aWechsle den GameMode des Spielers auf Creative! (Klick)'
+        Creative:
+          material: BRICK
+          displayName: '&aCreative'
+          lore:
+            - '&aWechsle den GameMode des Spielers auf Spectator! (Klick)'
+        Spectator:
+          material: SPLASH_POTION
+          displayName: '&aSpectator'
+          lore:
+            - '&aWechsle den GameMode des Spielers auf Survival! (Klick)'
+      MoneyItem:
+        material: PAPER
+        displayName: '&aGeld Inventar'
+        lore:
+          - '&aÖffnet das Geld Inventar!'
+      ActionsItem:
+        material: DIAMOND_SWORD
+        displayName: '&aAktionen Menu'
+        lore:
+          - '&aÖffnet das Aktionen Menu!'
+      BannedPlayers:
+        material: RED_CONCRETE
+        displayName: '&cGebannte Spieler'
+        lore:
+          - '&aSiehe alle Spieler ein die gebannt wurden!'
+      BanItem:
+        material: BEDROCK
+        displayName: '&cBanne den Spieler'
+        lore:
+          - '&cBanne den Spieler!'
+      BanMenu:
+        Reason:
+          material: PAPER
+          displayName: '&cSetze den Grund des Bans'
+          # %reason% = The Reason
+          lore:
+            - '&cSetze den Grund des Bans'
+            - '&c%reason%'
+        Seconds:
+          material: CLOCK
+          displayName: '&aSekunden'
+          lore:
+            - '&7Links-Klick: +10 Sekunden'
+            - '&7Rechts-Klick: -10 Sekunden'
+            - '&a%seconds%'
+        Minutes:
+          material: CLOCK
+          displayName: '&aMinuten'
+          lore:
+            - '&7Links-Klick: +5 Minuten'
+            - '&7Rechts-Klick: -5 Minuten'
+            - '&a%minutes%'
+        Hours:
+          material: CLOCK
+          displayName: '&aStunden'
+          lore:
+            - '&7Links-Klick: +1 Stunden'
+            - '&7Rechts-Klick: -1 Stunden'
+            - '&a%hours%'
+        Days:
+          material: CLOCK
+          displayName: '&aTage'
+          lore:
+            - '&7Links-Klick: +1 Tage'
+            - '&7Rechts-Klick: -1 Tage'
+            - '&a%days%'
+        Months:
+          material: CLOCK
+          displayName: '&aMonate'
+          lore:
+            - '&7Links-Klick: +1 Monate'
+            - '&7Rechts-Klick: -1 Monate'
+            - '&a%months%'
+        Years:
+          material: CLOCK
+          displayName: '&aJahre'
+          lore:
+            - '&7Links-Klick: +1 Jahre'
+            - '&7Rechts-Klick: -1 Jahre'
+            - '&a%years%'
+        Ban:
+          material: BEDROCK
+          displayName: '&cBanne den Spieler'
+          # %reason% = The Reason
+          lore:
+            - '&cBanne den Spieler:'
+            - '&cZeit: &6%time%'
+            - '&cGrund: &6%reason%'
+      KickMenu:
+        Reason:
+          material: PAPER
+          displayName: '&cSetze den Grund des Bans'
+          # %reason% = The Reason
+          lore:
+            - '&cSetze den Grund des Bans'
+            - '&c%reason%'
+        Kick:
+          material: PISTON
+          displayName: '&cKicke den Spieler'
+          # %reason% = The Reason
+          lore:
+            - '&ccKicke den Spieler:'
+            - '&cGrund: &6%reason%'
+      KickItem:
+        material: PISTON
+        displayName: '&cKicke den Spieler'
+        lore:
+          - '&aKicke den Spieler!'
+      PermissionItem:
+        material: WRITABLE_BOOK
+        displayName: '&cVerwalte die Rechte des Spielers'
+        lore:
+          - '&aVerwalte alle Rechte des Spielers!'
+      PermissionListMenu:
+        InfoItem:
+          material: PAPER
+          displayName: '&eGruppen Info'
+          # %group% = The Group Name
+          # %parent_groups% = The Parent Groups
+          # %sub_group_count% = The Sub Group Count
+          # %sub_permission_count% = The Sub Permission Count
+          # %filtered_result_count% = The Filtered Result Count
+          lore:
+            - '&7Gruppe: %group%'
+            - '&7Parent: %parent_groups%'
+            - '&7Untergruppen: %sub_group_count%'
+            - '&7Berechtigungen: %sub_permission_count%'
+            - ' '
+            - '&7Gefilterte Ergebnisanzahl: %filtered_result_count%'
+        ToTheTop:
+          material: OAK_SIGN
+          displayName: '&cZurück zur Hauptgruppe'
+          lore:
+            - '&aGehe zurück zur Hauptgruppe!'
+        PermissionActions:
+          InfoItem:
+            material: BOOK
+            displayName: '&aPermission Info'
+            # %permission% = The Permission Name
+            # %description% = The Permission Description
+            # %default% = The Default Value
+            # %value% = The Current Value
+            # %target% = The Targeted Player
+            lore:
+              - ' '
+              - '- &6Permission&f: &a%permission%'
+              - '- &6Beschreibung&f: &a%description%'
+              - '- &6Standard&f: &a%default%'
+              - '- &6aktueller Wert&f: &a%value%'
+              - '  (des Spielers: %target%)'
+          SetTrue:
+            material: EMERALD_BLOCK
+            displayName: '&aSetze auf &f''&atrue&f'''
+            lore:
+              - '&aSetze den Wert dieser Permission auf &f''&atrue&f'''
+          SetFalse:
+            material: REDSTONE_BLOCK
+            displayName: '&cSetze auf &f''&4false&f'''
+            lore:
+              - '&cSetze den Wert dieser Permission auf &f''&4false&f'''
+          Remove:
+            material: WRITABLE_BOOK
+            displayName: '&cEntferne diese Permission'
+            lore:
+              - '&aEntferne diese Permission vom Spieler!'
+          Info:
+            material: BOOKSHELF
+            displayName: '&cFinde mehr heraus über die Permission'
+            lore:
+              - '&aFinde mehr heraus über die Permission!'
+              - '&a%permission%'
+        GroupMenu:
+          # %group_name% = The Group Name
+          # %parent_groups% = The Parent Groups
+          # %sub_group_count% = The Sub Group Count
+          # %sub_permission_count% = The Sub Permission Count
+          # %permission_name% = The Permission Name (from the current Group Tree)
+          # %full_permission_name% = The Full Permission Name (from the root Group)
+          GroupItem:
+            material: CHEST
+            displayName: '&a%group_name%'
+            lore:
+              - '&7Zum Durchsuchen anklicken'
+              - ' '
+              - '&7Parent: %parent_groups%'
+              - '&7Untergruppen: %sub_group_count%'
+              - '&7Permissions: %sub_permission_count%'
+          PermissionItem:
+            material: ENCHANTED_BOOK
+            displayName: '&b%permission_name%'
+            lore:
+              - '&7Für Aktionen anklicken'
+          Sort:
+            material: OAK_SIGN
+            displayName: '&cSortieren'
+            lore:
+              - '&aSortiere nach bestimmten Permissions'
+          Mode:
+            Global:
+              material: GRASS_BLOCK
+              displayName: '&cModus ändern'
+              lore:
+                - '&aModus: &7Alle Permissions'
+            Player:
+              material: PLAYER_HEAD
+              displayName: '&cModus ändern'
+              lore:
+                - '&aModus: &7Spieler Permissions'
+    MoneyMenu:
+      Give:
+        material: GREEN_WOOL
+        displayName: '&aGive Money'
+        lore:
+          - '&aGebe dem Spieler Geld!'
+      Set:
+        material: YELLOW_WOOL
+        displayName: '&cSet Money'
+        lore:
+          - '&cSetze dem Spieler das Geld auf einen Wert!'
+      Take:
+        material: RED_WOOL
+        displayName: '&cTake Money'
+        lore:
+          - '&cNehme dem Spieler Geld Weg!'
+    WarningMenuItem:
+      material: PAPER
+      displayName: '&aVerwarnungs Menü'
+      lore:
+        - '&cÖffnet das Menü in dem alle Verwarnungen'
+        - '&cdes Spielers angezeigt werden.'
+    WarningMenu:
+      AddWarning:
+        material: PAPER
+        displayName: '&aGebe dem Spieler eine Verwarnung'
+        lore:
+          - '&5Gebe dem Spieler eine Verwarnung!'
+      WarningItem:
+        material: PAPER
+        displayName: '&aVerwarnung &6#%count%'
+        lore:
+          - '&5- &6Left-Click: Info'
+          - '&5- &6Right-Click: Remove'
+          - '&5- &6Grund: &7%reason%'
+          - '&5- &6Erstellungsdatum: &7%creationDate%'
+          - '&5- &6Ablaufdatum: &7%expirationDate%'
+          - '&5- &6Warnungs Nummer: &7%count%'
+  WorldManager:
+    Settings:
+      PVP:
+        true:
+          material: DIAMOND_SWORD
+          displayName: '&aPVP'
+          lore:
+            - '&aSchalte PVP in der Welt aus!'
+        false:
+          material: DIAMOND_SWORD
+          displayName: '&cPVP'
+          lore:
+            - '&cSchalte PVP in der Welt an!'
+      AutoSave:
+        true:
+          material: PAPER
+          displayName: '&aAuto Save'
+          lore:
+            - '&aSchalte Auto Save in der Welt aus!'
+        false:
+          material: PAPER
+          displayName: '&cAuto Save'
+          lore:
+            - '&cSchalte Auto Save in der Welt an!'
+      Load:
+        material: BEACON
+        displayName: '&aLaden'
+        lore:
+          - '&aLade die Welt!'
+      Unload:
+        material: ANVIL
+        displayName: '&cEntladen'
+        lore:
+          - '&aEntlade die Welt!'
+      Save:
+        material: ENDER_CHEST
+        displayName: '&6Save'
+        lore:
+          - '&aSpeichere die Welt!'
+      Delete:
+        material: TNT
+        displayName: '&4Löschen'
+        lore:
+          - '&4Lösche die Welt!'
+      GameRule:
+        material: COMMAND_BLOCK
+        displayName: '&aGamerules'
+        lore:
+          - '&aÄndere alle Gamerules die einen true/false Wert haben!'
+      TPToSpawn:
+        material: ENDER_PEARL
+        displayName: '&aTeleport to World Spawn'
+        lore:
+          - '&aTeleportiere dich in die Welt!'
+      Weather:
+        material: WATER_BUCKET
+        displayName: '&aWetter'
+        lore:
+          - '&aWechsle das Wetter!'
+      Time:
+        material: CLOCK
+        displayName: '&aZeit'
+        lore:
+          - '&aWechsle die Zeit!'
+    Create:
+      material: CHEST
+      displayName: '&aErstelle eine Welt'
+      lore:
+        - '&aErstelle eine neue Welt!'
+    CreateMenu:
+      Name:
+        material: PAPER
+        displayName: '&aName der Welt'
+        lore:
+          - '&aSetze den Namen der Welt!'
+          - '&a%name%'
+      Type:
+        NORMAL:
+          material: BEACON
+          displayName: '&aTyp der Welt'
+          lore:
+            - '&aSetze den Typ der Welt!'
+            - '&c%type%'
+        AMPLIFIED:
+          material: BEACON
+          displayName: '&aTyp der Welt'
+          lore:
+            - '&aSetze den Typ der Welt!'
+            - '&c%type%'
+        FLAT:
+          material: BEACON
+          displayName: '&aTyp der Welt'
+          lore:
+            - '&aSetze den Typ der Welt!'
+            - '&c%type%'
+        LARGE_BIOMES:
+          material: BEACON
+          displayName: '&aTyp der Welt'
+          lore:
+            - '&aSetze den Typ der Welt!'
+            - '&c%type%'
+      Environment:
+        NORMAL:
+          material: GRASS_BLOCK
+          displayName: '&aSetze die Umgebung'
+          lore:
+            - '&aSetze die Umgebung der Welt!'
+            - '&c%environment%'
+        NETHER:
+          material: GRASS_BLOCK
+          displayName: '&aSetze die Umgebung'
+          lore:
+            - '&aSetze die Umgebung der Welt!'
+            - '&c%environment%'
+        THE_END:
+          material: GRASS_BLOCK
+          displayName: '&aSetze die Umgebung'
+          lore:
+            - '&aSetze die Umgebung der Welt!'
+            - '&c%environment%'
+      GenerateStructures:
+        true:
+          material: END_PORTAL_FRAME
+          displayName: '&aGeneriere Strukturen'
+          lore:
+            - '&aSetze GenerateStructures auf false!'
+        false:
+          material: END_PORTAL_FRAME
+          displayName: '&cGeneriere Strukturen'
+          lore:
+            - '&aSetze GenerateStructures auf true!'
+      CreateWorld:
+        material: CHEST
+        displayName: '&aErstellt die Welt'
+        lore:
+          - '&aErstellt die neue Welt!'
+      Hardcore:
+        true:
+          material: GOLDEN_APPLE
+          displayName: '&aHardcore'
+          lore:
+            - '&aSetze die Welt in den Hardcore!'
+        false:
+          material: GOLDEN_APPLE
+          displayName: '&cHardcore'
+          lore:
+            - '&cSetze die Welt in den Hardcore!'
+    Weather:
+      CLEAR:
+        material: BUCKET
+        displayName: '&aKlar'
+        lore:
+          - '&cWechsle zu klarem Wetter!'
+      RAINING:
+        material: WATER_BUCKET
+        displayName: '&aRegen'
+        lore:
+          - '&cWechsle zu regnerischen Wetter!'
+      THUNDERING:
+        material: LAVA_BUCKET
+        displayName: '&aGewitter'
+        lore:
+          - '&cWechsle zu gewittrigem Wetter!'
+    Time:
+      SUNRISE:
+        material: MAGENTA_CONCRETE
+        displayName: '&aSonnenaufgang'
+        lore:
+          - '&cWechsle zu klarem Wetter!'
+      DAY:
+        material: LIGHT_BLUE_CONCRETE
+        displayName: '&aTag'
+        lore:
+          - '&cWechsle zu regnerischen Wetter!'
+      MORNING:
+        material: LIME_CONCRETE
+        displayName: '&aMorgen'
+        lore:
+          - '&cWechsle zu gewittrigem Wetter!'
+      NOON:
+        material: GREEN_CONCRETE
+        displayName: '&aMittag'
+        lore:
+          - '&cWechsle zu klarem Wetter!'
+      AFTERNOON:
+        material: YELLOW_CONCRETE
+        displayName: '&aNachmittag'
+        lore:
+          - '&cWechsle zu regnerischen Wetter!'
+      SUNSET:
+        material: GRAY_CONCRETE
+        displayName: '&aSonnenuntergang'
+        lore:
+          - '&cWechsle zu gewittrigem Wetter!'
+      NIGHT:
+        material: GRAY_CONCRETE
+        displayName: '&aNacht'
+        lore:
+          - '&cWechsle zu regnerischen Wetter!'
+      MIDNIGHT:
+        material: BLACK_CONCRETE
+        displayName: '&aMitternacht'
+        lore:
+          - '&cWechsle zu gewittrigem Wetter!'
+  StartMenu:
+    SwitchLanguageMenuItem:
+      material: BLUE_WOOL
+      displayName: '&aWechsle die Sprache temporär'
+      lore:
+        - '&aHiermit kannst du die Sprache ändern.'
+        - '&cLeider ist dies nur temporär und nur solange'
+        - '&cdas Plugin nicht gereloaded wird!'
+    SwitchLanguageMenu:
+      # Placeholders:
+      # %fullname% = Language Full Name
+      # %shortname% = Language Short Name (File Name)
+      # %version% = Language Version
+      # %path% = Language File Path
+      LanguageItem:
+        material: PAPER
+        displayName: '&a%fullname%'
+        lore:
+          - '&aShort Name: &6%shortname%'
+          - '&aVersion: &6%version%'
+          - '&aPfad: &6%path%'
+    ReloadConfig:
+      material: GREEN_WOOL
+      displayName: '&aReload Config'
+      lore:
+        - '&aReloade die Admin-Panel Config'
+        - '&a(Sprach Dateien, Config)'
+    WorldManager:
+      material: GRASS_BLOCK
+      displayName: '&2World Manager'
+      lore:
+        - '&aVerwaltet die Welten auf dem Server!'
+    PlayerManager:
+      material: PLAYER_HEAD
+      displayName: '&6Player Manager'
+      lore:
+        - '&aVerwaltet die Spieler auf dem Server!'
+    PluginManager:
+      material: REDSTONE_BLOCK
+      displayName: '&3Plugin Manager'
+      lore:
+        - '&aVerwaltet die Plugins auf dem Server!'
+    ServerManager:
+      material: DIAMOND_BLOCK
+      displayName: '&6Server Manager'
+      lore:
+        - '&aVerwaltet den Server!'
+    DangerZone:
+      material: BARRIER
+      displayName: '&cDanger Zone'
+      lore:
+        - '&cEnthaelt kritische Server-Aktionen.'
+        - '&eMit Vorsicht benutzen!'
+    ServerRestart:
+      material: ACACIA_BOAT
+      displayName: '&6Server restart'
+      lore:
+        - '&aRestarte den Server!'
+    ServerStop:
+      material: DIAMOND
+      displayName: '&4Server Stop'
+      lore:
+        - '&aStoppt den Server!'
+    HintItem:
+      material: PAPER
+      displayName: '&aAdmin Panel Info'
+      lore:
+        - '&aIn diesem Menu kann man auf Items klicken,'
+        - '&adie einen dann in Untermenüs weiterleiten!'
+  DangerZoneMenu:
+    ServerStop:
+      material: DIAMOND
+      displayName: '&4Server Stop'
+      lore:
+        - '&cStoppt den Server nach Bestaetigung.'
+    ServerRestart:
+      material: ACACIA_BOAT
+      displayName: '&6Server Restart'
+      lore:
+        - '&eStartet den Server nach Bestaetigung neu.'
+    BackToMain:
+      material: ARROW
+      displayName: '&aZurueck'
+      lore:
+        - '&7Zurueck zum Hauptmenue.'
+    HintItem:
+      material: PAPER
+      displayName: '&aAdmin Panel Info'
+      lore:
+        - '&aIn diesem Menu kann man auf Items klicken,'
+        - '&adie einen dann in Untermenüs weiterleiten!'
+  ServerManager:
+    WhiteListMenuItem:
+      material: OAK_FENCE_GATE
+      displayName: '&aWhitelist'
+      lore:
+        - '&aVerwalte die Whitelist!'
+    WhitelistMenu:
+      AddPlayer:
+        material: GREEN_CONCRETE
+        displayName: '&aHinzufügen'
+        lore:
+          - '&aFüge einen Spieler zur Whitelist hinzu!'
+      RemovePlayer:
+        material: RED_CONCRETE
+        displayName: '&cEntfernen'
+        lore:
+          - '&cEntferne einen Spieler von der Whitelist!'
+      ListPlayers:
+        material: BLUE_CONCRETE
+        displayName: '&3List'
+        lore:
+          - '&3Liste aller Spieler auf der Whitelist!'
+      TurnOn:
+        material: EMERALD_BLOCK
+        displayName: '&aAn'
+        lore:
+          - '&aMacht die Whitelist an!'
+      TurnOff:
+        material: COAL_BLOCK
+        displayName: '&cAus'
+        lore:
+          - '&aTurns the Whitelist aus!'
+      Reload:
+        material: BEACON
+        displayName: '&3Reload'
+        lore:
+          - '&3Reloaded die Whitelist!'
+    Broadcast:
+      material: WRITABLE_BOOK
+      displayName: '&3Broadcaste eine Nachricht'
+      lore:
+        - '&aSende eine Nachricht an den ganzen Server!'
+    ChatManagerItem:
+      material: ARMOR_STAND
+      displayName: '&aChat Manager'
+      lore:
+        - '&aÖffnet den Chat Manager!'
+    KickAllPlayers:
+      material: IRON_SWORD
+      displayName: '&cKicke alle Spieler'
+      lore:
+        - '&aKicke alle Spieler vom Server!'
+    MaintenanceMode:
+      true:
+        material: GLOWSTONE_DUST
+        displayName: '&a&lWartungsmodus'
+        lore:
+          - '&aSchalte den Wartungsmodus aus!'
+      false:
+        material: REDSTONE
+        displayName: '&c&lWartungsmodus'
+        lore:
+          - '&aSchalte den Wartungsmodus an!'
+  ChatManager:
+    ClearChat:
+      material: DIAMOND_SWORD
+      displayName: '&2Lösche den Chat'
+      lore:
+        - '&aLösche den gesamten Chat!'
+    MuteChat:
+      material: GREEN_DYE
+      displayName: '&2Mute den Chat'
+      lore:
+        - '&aMute den Chat!'
+    UnMuteChat:
+      material: RED_DYE
+      displayName: '&2Entmute den Chat'
+      lore:
+        - '&aEntmute den Chat!'
+  PluginManager:
+    Install:
+      material: 'HEAD_OBJECT(''WORLD'')'
+      displayName: '&2Plugins Installieren'
+      lore:
+        - '&2Installiere andere Spigot Plugins!'
+    Load:
+      material: CAULDRON
+      displayName: '&2Plugins laden'
+      lore:
+        - '&2Lade andere Plugins während der Server läuft!'
+        - '&2Du brauchst nur den Datei Namen!'
+    PluginItem:
+      material: 'if pluginEnabled: HEAD_OBJECT(''BLANK_GREEN'') else: HEAD_OBJECT(''BLANK_RED'')'
+      displayName: '&a%pluginName%'
+      # Available Placeholders:
+      # %name% = The Plugin Name
+      # %pluginDescription% = The Plugin Description
+      # %pluginEnabled% = Is the Plugin enabled?
+      # %pluginVersion% = The Plugin Version
+      # %pluginAuthor% = The Plugin Author
+      # %pluginWebsite% = The Plugin Website
+      # %pluginAPIVersion% = The Plugin API Version
+      # %pluginFullName% = The Plugin Full Name
+      # %pluginFileName% = The Plugin File Name
+      lore:
+        - '&6Description: &a%pluginDescription%'
+        - '&6Enabled: &a%pluginEnabled%'
+        - '&6Version: &a%pluginVersion%'
+        - '&6Author: &a%pluginAuthor%'
+        - '&6Website: &a%pluginWebsite%'
+        - '&6API-Version: &a%pluginAPIVersion%'
+    PluginDescription:
+      material: WRITABLE_BOOK
+      displayName: '&2Plugin Beschreibung'
+      lore:
+        - '&2Zeige die Beschreibung des Plugins!'
+    PluginDescriptionMenu:
+      LoadFromResourceID:
+        material: BOOKSHELF
+        displayName: '&2Resource ID'
+        lore:
+          - '&2Lade die Beschreibung von Spigot!'
+      SetWithChat:
+        material: PAPER
+        displayName: '&2Setze mit Chat'
+        lore:
+          - '&2Setze die Beschreibung mit dem Chat!'
+    AutoUpdateMenu:
+      OpenMenuItem:
+        material: CHEST
+        displayName: '&aAuto Plugin Updater Menü'
+        lore:
+          - '&aDas Auto Plugin Updater Menü'
+      PluginItem:
+        material: PAPER
+        displayName: '&a%name%'
+        lore:
+          - '&aKlicke dieses Item um das Plugin zu updaten'
+          - '&aSpigot ID: &6%spigotID%'
+          - '&aDateiname: &6%fileName%'
+          - '&aAuf Spigot: &6%onSpigot%'
+          - '&aExterne Datei: &6%externalFile%'
+      AddPlugin:
+        material: ENCHANTED_BOOK
+        displayName: '&aPlugin hinzufügen'
+        lore:
+          - '&aFüge Plugins zum Auto Updater hinzu'
+      RemovePlugin:
+        material: BOOK
+        displayName: '&aPlugin entfernen'
+        lore:
+          - '&aEntferne Plugins from Auto Updater'
+    InstallMenu:
+      ResourceID:
+        material: BOOKSHELF
+        displayName: '&2Resource ID'
+        # %resourceid% = The Resource ID of the Plugin
+        lore:
+          - '&2Bitte die Resource von Spigot eingeben!'
+          - '&6%resourceid%'
+      Name:
+        material: OAK_SIGN
+        displayName: '&2Datei Name'
+        # %filename% = The File Name of the Plugin
+        lore:
+          - '&2Bitte den Namen der Jar Datei angeben!'
+          - '&6%filename%'
+      EnableAfterInstall:
+        true:
+          material: BEACON
+          displayName: '&2Aktivieren nach Installation'
+          lore:
+            - '&2Lasse das Plugin automatisch sich aktivieren,'
+            - '&2nach der Installation!'
+        false:
+          material: BEACON
+          displayName: '&cAktivieren nach Installation'
+          lore:
+            - '&cLasse das Plugin automatisch sich aktivieren,'
+            - '&cnach der Installation!'
+      InstallButton:
+        material: CAULDRON
+        displayName: '&2Installieren'
+        lore:
+          - '&2Installiere das Plugin!'
+          - '&cWenn Argumente fehlen dann wird es nicht funktionieren!'
+    Settings:
+      Enable:
+        material: GREEN_WOOL
+        displayName: '&aAktivieren'
+        lore:
+          - '&aAktiviere das Plugin!'
+      Disable:
+        material: RED_WOOL
+        displayName: '&cDeaktivieren'
+        lore:
+          - '&cDeaktiviere das Plugin!'
+      Reload:
+        material: REDSTONE_BLOCK
+        displayName: '&3Reloaden'
+        lore:
+          - '&3Lade das Plugin neu!'
+      Restart:
+        material: BEACON
+        displayName: '&3Restarten'
+        lore:
+          - '&3Starte das Plugin neu!'
+      Unload:
+        material: COAL_BLOCK
+        displayName: '&2Entladen'
+        lore:
+          - '&2Entlade das Plugin!'
+          - '&2Nach dem Entladen ist es weg!'
+          - '&2Um das Plugin wieder zu nutzen,'
+          - '&2muss man den Server reloaden/restarten!'
+      Load:
+        material: EMERALD_BLOCK
+        displayName: '&2Laden'
+        lore:
+          - '&2Lade das Plugin!'
+      Commands:
+        Item:
+          material: COMMAND_BLOCK
+          displayName: '&2Commands'
+          lore:
+            - '&2Liste aller Commands!'
+        Settings:
+          Register:
+            material: GREEN_CONCRETE
+            displayName: '&aRegister'
+            lore:
+              - '&2Registriert den Command!'
+          Unregister:
+            material: RED_CONCRETE
+            displayName: '&aUnregister'
+            lore:
+              - '&2Entregistriert den Command!'
+          Execute:
+            material: BOOK
+            displayName: '&2Ausführen'
+            lore:
+              - '&2Führt den Command aus mit keinen Arguemten!'
+      Permissions:
+        Item:
+          material: WRITABLE_BOOK
+          displayName: '&2Permissions'
+          lore:
+            - '&2Liste aller Permissions!'
+  ConfigReloadMenu:
+    ReloadConfig:
+      material: WRITABLE_BOOK
+      displayName: '&aKonfiguration neu laden'
+      lore:
+        - '&7Lädt die Plugin-Konfiguration'
+        - '&7ohne Server-Neustart neu.'
+        - ''
+        - '&eKlicke zum Neuladen!'
+    ReloadLanguages:
+      material: BOOK
+      displayName: '&aSprachen neu laden'
+      lore:
+        - '&7Lädt alle Sprachdateien'
+        - '&7und Übersetzungen neu.'
+        - ''
+        - '&eKlicke zum Neuladen!'
+    ReloadData:
+      material: CHEST
+      displayName: '&aDaten neu laden'
+      lore:
+        - '&7Lädt den DataService und'
+        - '&7alle persistenten Daten neu.'
+        - ''
+        - '&eKlicke zum Neuladen!'
+    BackupAll:
+      material: ENDER_CHEST
+      displayName: '&6Backups erstellen'
+      lore:
+        - '&7Erstellt Backups aller'
+        - '&7registrierten Dateien.'
+        - ''
+        - '&eKlicke zum Sichern!'
+    ReloadPlugin:
+      material: REDSTONE
+      displayName: '&cPlugin neu laden'
+      lore:
+        - '&7Lädt das Plugin komplett neu'
+        - '&7(Deaktivieren + Aktivieren).'
+        - ''
+        - '&c&lWarnung: Kann Probleme verursachen!'
+        - '&eKlicke zum Neuladen!'
+  LanguageMigration:
+    Migration:
+      MigrationItem:
+        material: PAPER
+        displayName: '&6%key%'
+        lore:
+          - '&7Status: &e%migration_status%'
+          - ''
+          - '&7Benutzerwert:'
+          - '&f%user_value%'
+          - ''
+          - '&7Ressourcenwert:'
+          - '&f%resource_value%'
+          - ''
+          - '&eKlicke zum Bearbeiten!'
+      FilterItem:
+        material: HOPPER
+        displayName: '&6Filter-Modus'
+        lore:
+          - '&7Aktuell: &e%status_filter_mode%'
+          - ''
+          - '%selected_all_filter%'
+          - '%selected_changed_only_filter%'
+          - '%selected_unchanged_only_filter%'
+          - '%selected_missing_only_filter%'
+          - ''
+          - '&eKlicke zum Wechseln!'
+      ApplyChanges:
+        material: EMERALD
+        displayName: '&aÄnderungen übernehmen'
+        lore:
+          - '&7Gesamteinträge: &e%total_migration_count%'
+          - '&7Gefiltert: &e%filtered_migration_count%'
+          - '&7Übernommen: &a%actually_applied_migration_count%'
+          - ''
+          - '&eKlicke zum Übernehmen!'
+  LanguageMigrator:
+    EntryEditMenu:
+      Name:
+        material: NAME_TAG
+        displayName: '&6Eintrag: %migration_entry_name%'
+        lore:
+          - '&7Status: &e%migration_entry_status%'
+      KeepUserValue:
+        material: GREEN_WOOL
+        displayName: '&aBenutzerwert behalten'
+        lore:
+          - '&7Aktueller Benutzerwert:'
+          - '&f%migration_entry_user_value%'
+          - ''
+          - '&eKlicke für Vorschau'
+          - '&eShift-Klick zum Übernehmen!'
+      KeepResourceValue:
+        material: BLUE_WOOL
+        displayName: '&9Ressourcenwert behalten'
+        lore:
+          - '&7Ressourcenwert:'
+          - '&f%migration_entry_resource_value%'
+          - ''
+          - '&eKlicke für Vorschau'
+          - '&eShift-Klick zum Übernehmen!'
+      DeleteEntryFromFile:
+        material: RED_WOOL
+        displayName: '&cEintrag löschen'
+        lore:
+          - '&7Entfernt diesen Eintrag aus'
+          - '&7der Sprachdatei.'
+          - ''
+          - '&eKlicke für Vorschau'
+          - '&eShift-Klick zum Übernehmen!'
+      KeepRemovedFromFile:
+        material: BARRIER
+        displayName: '&cEntfernt lassen'
+        lore:
+          - '&7Lässt diesen Eintrag'
+          - '&7aus der Datei entfernt.'
+          - ''
+          - '&eKlicke für Vorschau'
+          - '&eShift-Klick zum Übernehmen!'
+      EditFinalValue:
+        material: WRITABLE_BOOK
+        displayName: '&6Eigenen Wert bearbeiten'
+        lore:
+          - '&7Gib einen eigenen Wert'
+          - '&7im Chat ein.'
+          - ''
+          - '&7Unterstützt:'
+          - '&8• &7Ganzzahlen (123)'
+          - '&8• &7Dezimalzahlen (123.45)'
+          - '&8• &7Boolesche Werte (true/false)'
+          - '&8• &7Listen ([item1, item2])'
+          - '&8• &7Zeichenketten (beliebiger Text)'
+          - ''
+          - '&eKlicke zum Bearbeiten!'
+      FinalValueDisplay:
+        material: PAPER
+        displayName: '&aEndwert-Vorschau'
+        lore:
+          - '&7Dies wird gespeichert:'
+          - '&f%migration_entry_final_value%'
+      Close:
+        material: EMERALD_BLOCK
+        displayName: '&aBestätigen & Schließen'
+        lore:
+          - '&7Speichert den Endwert und'
+          - '&7kehrt zum Migrationsmenü zurück.'
+          - ''
+          - '&7Tipp: Drücke ESC zum Abbrechen'
+          - '&7ohne Änderungen zu speichern.'
+          - ''
+          - '&eKlicke zum Bestätigen!'
+MenuTitles:
+  StartMenu: '&4&lAdmin-Panel'
+  DangerZoneMenu: '&4Danger Zone'
+  SwitchLanguageMenu: '&aSprachen'
+  PlayerManager:
+    PlayerSelector: '&aSpieler auswählen'
+    PlayerActions: '&aAktionen: %player_name%'
+    SelectPlayerAction: '&aAktionen: %player_name%'
+    SpawningMenu: '&Entitäten spawnen'
+    PotionMenu: '&aTränke geben'
+    TrollMenu: '&1T&2r&3o&4l&5l &6M&7e&8n&9ü'
+    ArmorView: '&4Rüstung'
+    MoneyMenu: '&a&lGeld'
+    BannedPlayers: '&cGebannte Spieler'
+    BanMenu: '&cBan'
+    KickMenu: '&cKick'
+    Permissions:
+      ListMenu: '&aPermission Liste: %action%'
+      ActionSelectMenu: '&aAktionen'
+      GroupMenu: '&aBerechtigungsgruppen'
+  WorldManager:
+    WorldSelector: '&aWähle eine Welt'
+    WorldSettings: '&3Einstellungen'
+    WorldCreateMenu: '&3Welt erstellen'
+    GameRuleMenu: '&3Gamerules'
+    TimeMenu: '&3Zeit'
+    WeatherMenu: '&3Wetter'
+  ServerManager:
+    Menu: '&5Server Manager'
+    ChatManagerMenu: '&aChat Manager'
+    WhitelistManager:
+      Menu: '&3Whitelist Manager'
+      PlayerList: '&3Spieler Liste'
+  PluginManager:
+    PluginDescriptionMenu: '&3Plugin Beschreibung'
+    Selector: '&aWähle ein Plugin'
+    Settings: '&3Einstellungen'
+    InstallMenu: '&6Installieren'
+    AutoUpdateMenu: '&6Auto Update Menü'
+    Commands:
+      Menu: '&6Commmands'
+      Settings: '&3Einstellungen'
+    Permissions:
+      Menu: '&6Permissions'
+      Settings: '&3Einstellungen'
+  DataClientMainMenu: '&aData Client'
+  DataClientSettingsMenu: '&aData Client Einstellungen'
+  ConfigReloadMenu: '&aKonfigurations-Manager'
+  LanguageMigration:
+    Migration: '&6Sprach-Migration'
+  LanguageMigrator:
+    EntryEditMenu: '&6Bearbeiten: %migration_entry_name%'
+  Misc:
+    ConfirmationMenu: '&aBestätigungs Menu'
