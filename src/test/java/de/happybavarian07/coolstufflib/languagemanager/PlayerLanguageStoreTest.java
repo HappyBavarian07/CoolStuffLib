@@ -46,4 +46,23 @@ class PlayerLanguageStoreTest {
         PerPlayerLanguageHandler handler = new PerPlayerLanguageHandler(lgm, new YamlPlayerLanguageStore(folder.resolve("data.yml").toFile(), new YamlConfiguration()));
         assertTrue(handler.getPlayerLanguages().isEmpty());
     }
+
+    @Test
+    void getPlayerLanguageFallsBackToCurrentLanguageWhenPlayerHasNone() throws IOException {
+        Files.writeString(folder.resolve("en.yml"), "Messages:\n  A: 'a'\n");
+        Files.writeString(folder.resolve("de.yml"), "Messages:\n  A: 'äh'\n");
+        LanguageManager lgm = new LanguageManager(mock(JavaPlugin.class), folder.toFile(), "none", "[P]");
+        lgm.addLanguagesToList(false);
+        LanguageFile en = lgm.getLang("en", true);
+        LanguageFile de = lgm.getLang("de", true);
+        assertNotNull(en);
+        assertNotNull(de);
+        lgm.setCurrentLang(de, false);
+        PerPlayerLanguageHandler handler = new PerPlayerLanguageHandler(lgm, new YamlPlayerLanguageStore(folder.resolve("data.yml").toFile(), new YamlConfiguration()));
+
+        UUID playerUuid = UUID.randomUUID();
+        LanguageFile result = handler.getPlayerLanguage(playerUuid);
+        assertNotNull(result);
+        assertEquals("de", result.getLangName());
+    }
 }
