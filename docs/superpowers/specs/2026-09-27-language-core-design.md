@@ -3,6 +3,21 @@
 Date: 2026-09-27. Release: CoolStuffLib 3.0.0 (part of the overhaul, before the release).
 Status: approved in chat (storage, retrieval; owner tools as outlined).
 
+## Changes during planning
+
+Two decisions were made while implementing this spec. Everything below is written to match them.
+
+- **No separate template compiler.** The merged layers are already in memory (`LanguageStorage.load` returns an
+  unmodifiable `Map<String, LanguageEntry>`), and `ExpressionEngine` already caches parsed expressions
+  (`getOrParseExpression` fills `parseCache`), so compiling templates on load would add code without a measurable
+  gain. The "snapshot" is that immutable merged entry map plus the `YamlConfiguration` built from it in
+  `LanguageConfig.reloadConfig()`, published with one assignment of a volatile field (`config = next`, after the new
+  `LoadResult`).
+- **L3 was not a bug.** `addPlaceholder` overwrites an existing value already (`placeholders.replace(...)` in the
+  `else` branch), so there is nothing to fix there and the item is gone from the audit. What the item really pointed at
+  is the map around it, and only that changed: it is a `Collections.synchronizedMap(new LinkedHashMap<>())` now and
+  every access runs inside `synchronized (placeholders)`. `getPlaceholders()` still hands the map itself out.
+
 ## Why
 
 The language manager reads its YAML on every call (two config lookups, a regex over the text, parsing embedded
@@ -15,7 +30,7 @@ the whole file unreadable; one broken line then turns every message into `null p
 
 This is sub-project 1 of 5:
 
-1. **Language core (this spec):** backends and migration, compiled snapshots, per-call rendering, owner tools.
+1. **Language core (this spec):** backends and migration, merged snapshots, per-call rendering, owner tools.
 2. Network store and live editing: SQL backend, in-game editor, cross-server invalidation, edit history.
 3. Translation lifecycle: stale detection by source hash, coverage report, machine fill with review queue.
 4. Rich messages beyond this spec: hover/click, ICU plural/select, locale-aware number and date formatting.
@@ -39,9 +54,8 @@ Everything below keeps compiling and returns the same results for the same langu
   through the backends instead of two files.
 - `PerPlayerLanguageHandler` keeps its constructor and methods and the `playerdata.<uuid>.language` layout in `data.yml`.
 
-Two intended behaviour changes, both bug fixes:
+One intended behaviour change, a bug fix:
 
-- `addPlaceholder` overwrites an existing value for the same key (L3).
 - Every lookup accepts the key with or without the `Messages.` root, for every kind of value (L4).
 
 ## 1. Storage
@@ -139,31 +153,33 @@ this step on demand. The owner's existing lines are never changed by it.
 
 ### Layers and snapshot
 
-Per language the layers are, highest first: writable backend (owner files) → jar. They are merged key by key into an
-immutable `LanguageSnapshot` (`Map<String, CompiledEntry>`), built off the main thread.
+Per language the layers are, highest first: writable backend (owner files) → jar. `LanguageStorage.load` merges them
+key by key into an unmodifiable `Map<String, LanguageEntry>`, and `LanguageConfig` fills a `YamlConfiguration` from it
+for the old getters. Nothing is pre-parsed; the merged map and that configuration are the snapshot.
 
 ### Entry kinds
 
-| Kind | Source value | Compiled into |
+| Kind | Source value | Read as |
 |---|---|---|
-| Text | string | `Template`: literal pieces with `&` colors translated, placeholder slots `%name%`, pre-parsed expression trees (`Parser.parse()` from the existing expression engine), `%prefix%` resolved at render |
-| TextList | list of strings | list of `Template` |
-| Item | map with `material`/`displayName`/`lore`/... (today's item format) | `ItemTemplate`: templates for name and lore, other fields kept; `MaterialCondition` evaluated at render |
-| Rich | map with any of `text`, `actionbar`, `title`, `subtitle`, `sound` | `RichTemplate`; `text` is what the old API returns |
-| Plural | map with `one` and `other` (optionally `zero`) | `PluralTemplate`; variant picked by `%count%` |
+| Text | string | a plain value; `&` colors, `%name%` slots, `%prefix%` and embedded expressions are applied at render |
+| TextList | list of strings | a list of plain values, rendered line by line |
+| Item | map with `material`/`displayName`/`lore`/... (today's item format) | a section, field by field; `MaterialCondition` evaluated at render |
+| Rich | map with any of `text`, `actionbar`, `title`, `subtitle`, `sound` | a section; the old API returns `text` |
+| Plural | map with `one` and `other` (optionally `zero`) | a section; the variant for `%count%` is picked at render |
 | Raw | anything else | kept as is, for `getCustomObject` |
 
-A value that cannot be compiled (bad expression, unknown material) produces a `LanguageProblem`; the key then falls back
-to the next layer's value if it compiles, otherwise it counts as missing.
+A file that cannot be parsed produces a `LanguageProblem` and loses only its own keys; the other files of the language
+load normally. A bad expression is left in the text as it is instead of failing the call.
 
 ### Rendering
 
 `RenderContext` = viewer (`Player` or `CommandSender`), language, call placeholders (`Map<String, String>`), count.
 
-1. Join the template pieces. A placeholder slot is resolved from the call placeholders, then the legacy global map of
+1. Format the value. A placeholder slot is resolved from the call placeholders, then the legacy global map of
    the matching `PlaceholderType`, then PlaceholderAPI (only for slots still open, only when PlaceholderAPI is present).
-2. Evaluate the pre-parsed expressions with the existing interpreter and the path expression variables of the viewer.
-3. Rich and plural templates pick their variant first, then render as above.
+2. Evaluate the embedded expressions (`EXPR(...)`) with the existing interpreter, which caches what it parses, and the
+   path expression variables of the viewer.
+3. Rich and plural values pick their variant first, then render as above.
 
 ### Lookup order
 
@@ -188,13 +204,18 @@ and are safe from any thread.
 ### Old API
 
 The old methods build a `RenderContext` from their arguments, use the legacy global map as the placeholder source and
-keep their `resetAfter` handling on that map. The global map becomes a `ConcurrentHashMap`.
+keep their `resetAfter` handling on that map. The global map keeps its insertion order and is thread-safe: a
+`Collections.synchronizedMap(new LinkedHashMap<>())` whose every access inside the library runs under
+`synchronized (placeholders)`.
 
 ### Reload
 
-`reloadLanguages` reads all layers and compiles off the main thread, then swaps the snapshot map through one
-`AtomicReference`. A file with problems keeps its keys at their last working values; the rest updates. Problems are
-logged as one report per reload (file:line, message). `LanguageCache` and its scheduled cleanup are removed (L2).
+`reloadLanguages` re-reads all layers through the storage. Each `LanguageConfig` builds the whole new merged map and
+its `YamlConfiguration` first and publishes them with one assignment, so a reader either sees the old language or the
+new one, never half of it. A file with problems keeps its keys at their last working values; the rest updates. Problems
+are logged as one report per reload (file:line, message). `LanguageCache` lost its scheduled cleanup and its plain
+`HashMap` and is deprecated; it is still handed out by `getLanguageCache(String)`, but nothing fills it any more
+because the old getters read the `LanguageConfig` directly (L2).
 
 ### Per-player language
 
@@ -222,9 +243,9 @@ map (L1).
 ## 4. Testing and rollout
 
 - Unit tests (no server): split rule; text merge keeps every untouched byte, including comments and quoting; escaping
-  round trip (`'`, `"`, `\`, `&`, unicode); broken file isolation; legacy → split migration round trip; snapshot
-  compile and render; fallback order; placeholder precedence; old API vs new API equality; concurrent rendering during
-  a reload.
+  round trip (`'`, `"`, `\`, `&`, unicode); broken file isolation; legacy → split migration round trip; merge and
+  render of a loaded snapshot; fallback order; placeholder precedence; old API vs new API equality; concurrent
+  rendering during a reload.
 - Golden test: for every key in AdminPanel's `en.yml` and `de.yml`, the old implementation's output (captured before
   the change) equals the new implementation's output.
 - CoolStuffLibTest server suite: add checks for migration on start, `/lang debug`, `/lang find`, watcher reload, and a
@@ -241,5 +262,7 @@ map (L1).
 - The text merge must understand the YAML subset the language files use (block mappings, block lists, single/double
   quoted and plain scalars, comments). Flow style (`[a, b]`, `{a: b}`) is read, but written values always use block
   style. Anything else it cannot place makes `write` report a problem instead of guessing.
-- Pre-parsing every expression on load moves that cost to reload time; with ~2000 keys this is expected to stay far
-  below a second, measured in the tests.
+- Expressions are not parsed on load. `parseEmbeddedExpressions` evaluates them per call and the expression engine
+  caches the parsed tree per expression plus the variables it uses, so a reload does not pay for parsing at all. A bad
+  expression stays in the text instead of throwing. The cache is unbounded (`InMemoryCache` with
+  `Integer.MAX_VALUE`); if a plugin ever needs more control, that is the place to bound it.
