@@ -56,3 +56,4 @@ Unit 7: minor (deferred): unit-7-report.md:5 still reads 'No deviations from bri
 Unit 7: fix round 1/5 (3 addressed, 1 open — R1N1; commits d8d0648..b172c64)
 Unit 7: fix round 2/5 (1 addressed, 0 open — R1N1; test coverage gap closed)
 Unit 7: fix round 3/5 (0 addressed, 1 open — R1N1; commits 7519947..HEAD)
+Unit 7: fix round 3/5 (0 addressed, 1 open — R1N1; commits 7519947..68b56f2)

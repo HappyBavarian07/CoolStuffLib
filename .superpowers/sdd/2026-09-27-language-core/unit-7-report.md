@@ -188,10 +188,7 @@ Also updated javadoc to reflect that the method falls back to the current langua
 
 **Why:** The old code fell back to `lgm.getCurrentLangName()` when a player had no stored language, maintaining compatibility with the previous API contract (spec:28,40). Returning null broke `LanguageManager.getLangOrPlayerLang()` and external callers that depend on fallback behavior. The fix reuses `getPlayerLanguageName()` which already implements the fallback logic.
 
-**Covering tests:**
-- PlayerLanguageStoreTest (3 tests, all passing)
-- LanguageManagerTest (8 tests, all passing)
-- GoldenLanguageOutputTest (2 tests, all passing)
+**Covering tests:** (corrected in fix round 4) none of the tests run in this round exercised the fix. It is covered by PlayerLanguageStoreTest.getPlayerLanguageFallsBackToCurrentLanguageWhenPlayerHasNone, see Fix round 4.
 
 **Test command:** `mvn -B test -Dgpg.skip -Dtest=PlayerLanguageStoreTest,LanguageFileMigratorTest,GoldenLanguageOutputTest,LanguageManagerTest`
 **Result:** 14/14 passing
@@ -212,9 +209,7 @@ return new LanguageEntry(e.getKey(), e.getValue(), jar == null ? null : jar.comm
 
 **Why:** When a key is missing in the user's file but present in the jar (MISSING_IN_USER), it should be inserted with the jar's comment to satisfy spec:58 ("comment carried along by migration"). The previous implementation inserted such keys without comments. This fix looks up the jar entry and uses its comment; `YamlDocument.set` only applies the comment on insertion, so existing keys are unaffected.
 
-**Covering tests:**
-- LanguageFileMigratorTest (1 test, passing)
-- LanguageManagerTest (8 tests, all passing)
+**Covering tests:** (corrected in fix round 4) none of the tests run in this round exercised the fix. It is covered by LanguageFileMigratorTest.migratedMissingKeysKeepTheJarComment, see Fix round 4.
 
 **Test command:** `mvn -B test -Dgpg.skip -Dtest=PlayerLanguageStoreTest,LanguageFileMigratorTest,GoldenLanguageOutputTest,LanguageManagerTest`
 **Result:** 14/14 passing
@@ -345,3 +340,29 @@ One finding from review was fixed with additional targeted tests.
 - **Focused tests:** 18/18 passing (PlayerLanguageStoreTest, LanguageManagerTest, LanguageFileMigratorTest, GoldenLanguageOutputTest)
 - **Full suite:** 505/505 passing
 - **Diff quality:** Minimal and focused - tests directly exercise the code paths identified in the finding
+
+## Fix round 4
+
+### R1N1: covering-test claims for F1 and F2
+
+**What was still wrong after round 3:** F1's round-3 test called `handler.getPlayerLanguage` directly but never went through `LanguageManager.getLangOrPlayerLang(false, ...)` with a handler set, which is the path F1 was about. The round-2 LanguageManagerTest case covers the no-handler branch, which F1 never touched. F2's round-3 test (`LanguageManagerTest.createMigratorForLanguageHandlesCommentPreservation`) only asserted that the migrator has entries, and the round-2 test (`LanguageFileMigratorTest.selectedMissingKeysAreWrittenToConsumer`) used the map constructor and never reached `createMigratorForLanguage`. Nothing asserted a comment.
+
+**Changes:**
+- F1, commit 08aeb15: `PlayerLanguageStoreTest.getPlayerLanguageFallsBackToCurrentLanguageWhenPlayerHasNone` now also sets the handler on the LanguageManager (`setPLHandler`), mocks a player with no stored language, calls `lgm.getLangOrPlayerLang(false, "en", player)` with `de` as the current language, and asserts the result is `de`. Before F1 the handler returned null and this call returned `en`.
+- F2, commit 6a19f40: new `LanguageFileMigratorTest.migratedMissingKeysKeepTheJarComment`. It uses the legacy backend in a temp folder, with `lang-fixtures/legacy` as the jar (its `Messages.Player.Greeting` has the comment `# greeting`). The owner file has only `Messages.Plain`. After startup has added the jar keys, the test rewrites the owner file without them and reloads, so Greeting is MISSING_IN_USER. It then calls `lgm.createMigratorForLanguage("en")` and `migrateSelected()`, reads the file back through `LegacyYamlBackend`, and asserts that Greeting's value is `%prefix% Hello` and its comment is `greeting`. The same commit removes the two tests that asserted nothing about comments: `selectedMissingKeysAreWrittenToConsumer`, a map-only duplicate of `comparesValuesAndWritesTheSelectedOnes`, and `LanguageManagerTest.createMigratorForLanguageHandlesCommentPreservation`.
+- Report: the F1/F2 "Covering tests" lists in Fix round 1 are corrected to name these tests. No production code changed.
+
+**RED check against the pre-fix code:** I temporarily reverted both fixes: `getPlayerLanguage` went back to returning null when nothing is stored, and the migrator writer went back to passing a null comment. Then I restored them with `git checkout` on the two main files.
+`mvn -B test -Dgpg.skip "-Dtest=PlayerLanguageStoreTest,LanguageFileMigratorTest"`
+Output: Tests run: 6, Failures: 2. `migratedMissingKeysKeepTheJarComment:61 expected: <greeting> but was: <null>` and `getPlayerLanguageFallsBackToCurrentLanguageWhenPlayerHasNone:67 expected: not <null>`. BUILD FAILURE.
+
+**Covering tests (with the fixes):**
+- F1: PlayerLanguageStoreTest.getPlayerLanguageFallsBackToCurrentLanguageWhenPlayerHasNone (`getPlayerLanguage` directly, and `getLangOrPlayerLang(false, ...)` with a handler and no stored language)
+- F2: LanguageFileMigratorTest.migratedMissingKeysKeepTheJarComment (`createMigratorForLanguage`, then the jar comment on a migrated MISSING_IN_USER key)
+- GoldenLanguageOutputTest (old API output unchanged)
+
+**Focused command:** `mvn -B test -Dgpg.skip "-Dtest=PlayerLanguageStoreTest,LanguageFileMigratorTest,LanguageManagerTest,GoldenLanguageOutputTest"`
+Output: Tests run: 17, Failures: 0, Errors: 0, Skipped: 0 (Golden 2, LanguageFileMigratorTest 2, LanguageManagerTest 9, PlayerLanguageStoreTest 4). BUILD SUCCESS.
+
+**Full suite:** `mvn -B test -Dgpg.skip`
+Output: Tests run: 504, Failures: 0, Errors: 0, Skipped: 0. BUILD SUCCESS. There are 504 tests, not 505, because one net test was removed. TestOutputs was restored with `git checkout -- TestOutputs` before each commit.
