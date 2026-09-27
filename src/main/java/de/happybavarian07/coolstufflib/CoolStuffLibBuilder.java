@@ -11,6 +11,7 @@ import de.happybavarian07.coolstufflib.commandmanagement.CommandManagerRegistry;
 import de.happybavarian07.coolstufflib.jpa.utils.DatabaseProperties;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import de.happybavarian07.coolstufflib.languagemanager.PerPlayerLanguageHandler;
+import de.happybavarian07.coolstufflib.languagemanager.storage.LanguageStorage;
 import de.happybavarian07.coolstufflib.menusystem.MenuAddonManager;
 import de.happybavarian07.coolstufflib.repository.RepositoryManager;
 import de.happybavarian07.coolstufflib.utils.PluginFileLogger;
@@ -268,9 +269,30 @@ public class CoolStuffLibBuilder {
         private File languageFolder = null;
         private String resourceDirectory;
         private boolean usePlayerLangHandler = false;
+        private String commandName;
+        private boolean watchFiles;
+        private String backend;
 
         private LanguageManagerBuilder(CoolStuffLibBuilder parent) {
             this.parent = parent;
+        }
+
+        /** Registers {@code /<name>} with reload, debug, find, missing and migrate (needs the command manager). */
+        public LanguageManagerBuilder enableCommands(String name) {
+            this.commandName = name;
+            return this;
+        }
+
+        /** Reloads a language a second after one of its files changed. */
+        public LanguageManagerBuilder watchFiles(boolean watchFiles) {
+            this.watchFiles = watchFiles;
+            return this;
+        }
+
+        /** Storage for languages without a saved choice: "yaml-split" (default) or "yaml-legacy". */
+        public LanguageManagerBuilder setBackend(String backend) {
+            this.backend = backend;
+            return this;
         }
 
         public LanguageManagerBuilder enablePlayerLanguageHandler() {
@@ -294,8 +316,11 @@ public class CoolStuffLibBuilder {
         }
 
         public CoolStuffLibBuilder build() {
+            if (backend != null) LanguageStorage.setDefaultBackend(backend);
             File folder = languageFolder != null ? languageFolder : new File(parent.javaPluginUsingLib.getDataFolder(), "languages");
             parent.languageManager = new LanguageManager(parent.javaPluginUsingLib, folder, resourceDirectory, prefix);
+            if (commandName != null) parent.languageManager.enableCommands(commandName);
+            parent.languageManager.watchFiles(watchFiles);
             parent.usePlayerLangHandler = this.usePlayerLangHandler;
             return parent;
         }

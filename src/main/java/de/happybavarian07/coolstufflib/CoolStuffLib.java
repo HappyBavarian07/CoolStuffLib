@@ -1,6 +1,7 @@
 package de.happybavarian07.coolstufflib;
 
 import de.happybavarian07.coolstufflib.commandmanagement.CommandManagerRegistry;
+import de.happybavarian07.coolstufflib.languagemanager.LanguageCommandManager;
 import de.happybavarian07.coolstufflib.languagemanager.LanguageManager;
 import de.happybavarian07.coolstufflib.menusystem.MenuAddonManager;
 import de.happybavarian07.coolstufflib.menusystem.MenuListener;
@@ -176,6 +177,9 @@ public class CoolStuffLib {
         if (commandManagerRegistry != null) {
             executeMethod(commandManagerRegistryStartingMethod, commandManagerRegistry, languageManager);
             commandManagerRegistryEnabled = true;
+        }
+        if (languageManager != null && commandManagerRegistry != null && languageManager.getCommandName() != null) {
+            commandManagerRegistry.register(new LanguageCommandManager(languageManager, javaPluginUsingLib, languageManager.getCommandName()));
         }
         if (menuAddonManager != null) {
             executeMethod(menuAddonManagerStartingMethod, menuAddonManager);

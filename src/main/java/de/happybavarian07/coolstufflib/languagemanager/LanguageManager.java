@@ -5,8 +5,7 @@ import de.happybavarian07.coolstufflib.languagemanager.expressionengine.Expressi
 import de.happybavarian07.coolstufflib.languagemanager.expressionengine.conditions.HeadMaterialCondition;
 import de.happybavarian07.coolstufflib.languagemanager.expressionengine.interfaces.FunctionCall;
 import de.happybavarian07.coolstufflib.languagemanager.expressionengine.interfaces.MaterialCondition;
-import de.happybavarian07.coolstufflib.languagemanager.storage.LanguageEntry;
-import de.happybavarian07.coolstufflib.languagemanager.storage.LoadResult;
+import de.happybavarian07.coolstufflib.languagemanager.storage.*;
 import de.happybavarian07.coolstufflib.utils.Head;
 import de.happybavarian07.coolstufflib.utils.Utils;
 import org.bukkit.Material;
@@ -52,6 +51,12 @@ public class LanguageManager implements Service {
     private LanguageFile currentLang;
     private PerPlayerLanguageHandler playerLanguageHandler;
     private volatile List<String> lastReport = List.of();
+    private final Set<UUID> debugPlayers = java.util.concurrent.ConcurrentHashMap.newKeySet();
+    private volatile boolean consoleDebug;
+    private volatile String commandName;
+
+    public record MissingKeys(List<String> missingInFiles, List<String> unknownToPlugin) {
+    }
 
     // TODO LanguageManager Menu Item Identification Optimization: inside E:\InteliJ Programs\CoolStuffLib\Menu_Item_ID_System.md
 
@@ -978,7 +983,7 @@ public class LanguageManager implements Service {
                 if (resetAfter) resetSpecificPlaceholders(PlaceholderType.MESSAGE, includedKeys);
             }
         }
-        return parseEmbeddedExpressions(message, player, langName);
+        return debugMarked(parseEmbeddedExpressions(message, player, langName), fullPath, player, langName);
     }
 
     /**
@@ -1154,6 +1159,11 @@ public class LanguageManager implements Service {
             meta.addEnchant(Enchantment.UNBREAKING, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
+        if (isDebugging(player)) {
+            List<String> debugLore = new ArrayList<>(meta.getLore() == null ? List.of() : meta.getLore());
+            debugLore.add("§8Items." + path + " @ " + langFile.getLangConfig().originOf("Items." + path + ".displayName"));
+            meta.setLore(debugLore);
+        }
         item.setItemMeta(meta);
         if (resetAfter) resetSpecificPlaceholders(PlaceholderType.ITEM, includedKeys);
         return item;
@@ -1290,7 +1300,7 @@ public class LanguageManager implements Service {
         List<String> includedKeys = new ArrayList<>(getPlaceholderKeysInMessage(title, PlaceholderType.MENUTITLE));
         title = replacePlaceholders(PlaceholderType.MENUTITLE, title);
         resetSpecificPlaceholders(PlaceholderType.MENUTITLE, includedKeys);
-        return parseEmbeddedExpressions(Utils.format(player, title, prefix), player, langName);
+        return debugMarked(parseEmbeddedExpressions(Utils.format(player, title, prefix), player, langName), "MenuTitles." + path, player, langName);
     }
 
     /**
@@ -1561,5 +1571,80 @@ public class LanguageManager implements Service {
         Map<String, Object> values = new LinkedHashMap<>();
         entries.forEach((key, entry) -> values.put(key, entry.value()));
         return values;
+    }
+
+    /** Turns the key display on or off for the sender; returns the new state. */
+    public boolean toggleDebug(CommandSender sender) {
+        if (sender instanceof Player player) {
+            if (debugPlayers.remove(player.getUniqueId())) return false;
+            debugPlayers.add(player.getUniqueId());
+            return true;
+        }
+        consoleDebug = !consoleDebug;
+        return consoleDebug;
+    }
+
+    public boolean isDebugging(@Nullable Player player) {
+        return player == null ? consoleDebug : debugPlayers.contains(player.getUniqueId());
+    }
+
+    String debugMarked(String text, String fullPath, @Nullable Player player, String langName) {
+        if (!isDebugging(player)) return text;
+        LanguageFile language = getLang(langName, false);
+        return text + " §8[" + fullPath + " @ " + (language == null ? "?" : language.getLangConfig().originOf(fullPath)) + "]";
+    }
+
+    /** Keys whose text (without colors) contains {@code text}, as {@code key @ file:line}. */
+    public List<String> findKeys(String language, String text, int limit) {
+        LanguageConfig config = getLang(language, true).getLangConfig();
+        String needle = org.bukkit.ChatColor.stripColor(Utils.chat(text)).toLowerCase(Locale.ROOT);
+        List<String> hits = new ArrayList<>();
+        for (Map.Entry<String, LanguageEntry> entry : config.getLoaded().merged().entrySet()) {
+            if (!(entry.getValue().value() instanceof String value)) continue;
+            if (org.bukkit.ChatColor.stripColor(Utils.chat(value)).toLowerCase(Locale.ROOT).contains(needle)) {
+                hits.add(entry.getKey() + " @ " + config.originOf(entry.getKey()));
+                if (hits.size() >= limit) break;
+            }
+        }
+        return hits;
+    }
+
+    public MissingKeys missingKeys(String language) {
+        LoadResult loaded = getLang(language, true).getLangConfig().getLoaded();
+        List<String> missing = loaded.defaults().keySet().stream().filter(key -> !loaded.own().containsKey(key)).sorted().toList();
+        List<String> unknown = loaded.own().keySet().stream()
+                .filter(key -> !loaded.defaults().containsKey(key) && !SplitRule.HEADER_KEYS.contains(key)).sorted().toList();
+        return new MissingKeys(missing, unknown);
+    }
+
+    /** Copies every language to {@code backendId} and uses it from now on (saved in the language folder). */
+    public List<MigrationReport> migrateAll(String backendId) {
+        LanguageBackend target = LanguageStorage.createBackend(backendId, langFolder);
+        List<MigrationReport> reports = new ArrayList<>();
+        for (LanguageFile language : registeredLanguages.values()) {
+            LanguageBackend source = language.getLangConfig().getStorage().diskFor(language.getLangName());
+            if (source.id().equals(target.id())) continue;
+            reports.add(LanguageMigration.copy(source, target, language.getLangName()));
+        }
+        if (reports.stream().allMatch(MigrationReport::ok)) {
+            LanguageStorage.useBackend(langFolder, backendId);
+            registeredLanguages.values().forEach(language -> language.getLangConfig().reloadConfig());
+        }
+        return reports;
+    }
+
+    public void enableCommands(String name) {
+        this.commandName = name;
+    }
+
+    public @Nullable String getCommandName() {
+        return commandName;
+    }
+
+    public void watchFiles(boolean watch) {
+    }
+
+    public boolean isWatchingFiles() {
+        return false;
     }
 }
