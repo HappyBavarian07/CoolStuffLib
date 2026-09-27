@@ -36,3 +36,6 @@ gen
 /target/apidocs/
 /TestOutputs/*
 /temp/
+
+# SDD workflow scratch (ledger, unit reports, review diffs)
+/.superpowers/
