@@ -68,7 +68,7 @@ public class LanguageManager implements Service {
         this.langFolder = langFolder;
         this.resourceDirectory = resourceDirectory;
         this.registeredLanguages = new LinkedHashMap<>();
-        this.placeholders = new LinkedHashMap<>();
+        this.placeholders = Collections.synchronizedMap(new LinkedHashMap<>());
         this.languageCaches = new HashMap<>();
         // Initialize default engine for current language
         ExpressionEngine defaultEngine = new ExpressionEngine();
@@ -618,11 +618,13 @@ public class LanguageManager implements Service {
      * @param resetBefore Whether to reset existing placeholders before adding
      */
     public void addPlaceholder(PlaceholderType type, String key, Object value, boolean resetBefore) {
-        if (resetBefore) resetPlaceholders(type, null);
-        if (!placeholders.containsKey(key))
-            placeholders.put(key, new Placeholder(key, value, type));
-        else
-            placeholders.replace(key, placeholders.get(key), new Placeholder(key, value, type));
+        synchronized (placeholders) {
+            if (resetBefore) resetPlaceholders(type, null);
+            if (!placeholders.containsKey(key))
+                placeholders.put(key, new Placeholder(key, value, type));
+            else
+                placeholders.replace(key, placeholders.get(key), new Placeholder(key, value, type));
+        }
     }
 
     /**
@@ -634,8 +636,10 @@ public class LanguageManager implements Service {
      *                     ones
      */
     public void addPlaceholders(Map<String, Placeholder> placeholders, boolean resetBefore) {
-        if (resetBefore) resetPlaceholders(PlaceholderType.ALL, null);
-        this.placeholders.putAll(placeholders);
+        synchronized (this.placeholders) {
+            if (resetBefore) resetPlaceholders(PlaceholderType.ALL, null);
+            this.placeholders.putAll(placeholders);
+        }
     }
 
     /**
@@ -647,11 +651,13 @@ public class LanguageManager implements Service {
      * @param key  The placeholder key
      */
     public void removePlaceholder(PlaceholderType type, String key) {
-        if (!placeholders.containsKey(key)) return;
-        if (!placeholders.get(key).type().equals(type) && !placeholders.get(key).type().equals(PlaceholderType.ALL))
-            return;
+        synchronized (placeholders) {
+            if (!placeholders.containsKey(key)) return;
+            if (!placeholders.get(key).type().equals(type) && !placeholders.get(key).type().equals(PlaceholderType.ALL))
+                return;
 
-        placeholders.remove(key);
+            placeholders.remove(key);
+        }
     }
 
     /**
@@ -661,12 +667,14 @@ public class LanguageManager implements Service {
      * @param keys The keys of the placeholders to remove
      */
     public void removePlaceholders(PlaceholderType type, List<String> keys) {
-        for (String key : keys) {
-            if (!placeholders.containsKey(key)) continue;
-            if (!placeholders.get(key).type().equals(type) && !placeholders.get(key).type().equals(PlaceholderType.ALL))
-                continue;
+        synchronized (placeholders) {
+            for (String key : keys) {
+                if (!placeholders.containsKey(key)) continue;
+                if (!placeholders.get(key).type().equals(type) && !placeholders.get(key).type().equals(PlaceholderType.ALL))
+                    continue;
 
-            this.placeholders.remove(key);
+                this.placeholders.remove(key);
+            }
         }
     }
 
@@ -679,15 +687,17 @@ public class LanguageManager implements Service {
      * @param excludeKeys A list of keys to exclude from removal, or null to remove all placeholders of the specified type.
      */
     public void resetPlaceholders(PlaceholderType type, @Nullable List<String> excludeKeys) {
-        List<String> keysToRemove = new ArrayList<>();
-        for (String key : placeholders.keySet()) {
-            if (excludeKeys != null && excludeKeys.contains(key)) continue;
-            if (!placeholders.get(key).type().equals(type) && !placeholders.get(key).type().equals(PlaceholderType.ALL))
-                continue;
+        synchronized (placeholders) {
+            List<String> keysToRemove = new ArrayList<>();
+            for (String key : placeholders.keySet()) {
+                if (excludeKeys != null && excludeKeys.contains(key)) continue;
+                if (!placeholders.get(key).type().equals(type) && !placeholders.get(key).type().equals(PlaceholderType.ALL))
+                    continue;
 
-            keysToRemove.add(key);
+                keysToRemove.add(key);
+            }
+            removePlaceholders(type, keysToRemove);
         }
-        removePlaceholders(type, keysToRemove);
     }
 
     /**
@@ -700,15 +710,17 @@ public class LanguageManager implements Service {
      * @param includeKeys A list of keys to include in removal or null to reset all placeholders of the specified type.
      */
     public void resetSpecificPlaceholders(PlaceholderType type, @Nullable List<String> includeKeys) {
-        List<String> keysToRemove = new ArrayList<>();
-        for (String key : placeholders.keySet()) {
-            if (includeKeys != null && !includeKeys.contains(key)) continue;
-            if (!placeholders.get(key).type().equals(type) && !placeholders.get(key).type().equals(PlaceholderType.ALL))
-                continue;
+        synchronized (placeholders) {
+            List<String> keysToRemove = new ArrayList<>();
+            for (String key : placeholders.keySet()) {
+                if (includeKeys != null && !includeKeys.contains(key)) continue;
+                if (!placeholders.get(key).type().equals(type) && !placeholders.get(key).type().equals(PlaceholderType.ALL))
+                    continue;
 
-            keysToRemove.add(key);
+                keysToRemove.add(key);
+            }
+            removePlaceholders(type, keysToRemove);
         }
-        removePlaceholders(type, keysToRemove);
     }
 
     /**
@@ -742,15 +754,17 @@ public class LanguageManager implements Service {
      * @return A list of placeholder keys found in the message of the specified type
      */
     private List<String> getPlaceholderKeysInMessage(String message, PlaceholderType type) {
-        List<String> keys = new ArrayList<>();
-        for (String key : placeholders.keySet()) {
-            if (!message.contains(key)) continue;
-            if (!placeholders.get(key).type().equals(type) && !placeholders.get(key).type().equals(PlaceholderType.ALL))
-                continue;
+        synchronized (placeholders) {
+            List<String> keys = new ArrayList<>();
+            for (String key : placeholders.keySet()) {
+                if (!message.contains(key)) continue;
+                if (!placeholders.get(key).type().equals(type) && !placeholders.get(key).type().equals(PlaceholderType.ALL))
+                    continue;
 
-            keys.add(key);
+                keys.add(key);
+            }
+            return keys;
         }
-        return keys;
     }
 
     /**
@@ -761,13 +775,15 @@ public class LanguageManager implements Service {
      * @return The message with placeholders replaced.
      */
     public String replacePlaceholders(PlaceholderType type, String message) {
-        for (String key : placeholders.keySet()) {
-            if (!placeholders.get(key).type().equals(type) && !placeholders.get(key).type().equals(PlaceholderType.ALL))
-                continue;
+        synchronized (placeholders) {
+            for (String key : placeholders.keySet()) {
+                if (!placeholders.get(key).type().equals(type) && !placeholders.get(key).type().equals(PlaceholderType.ALL))
+                    continue;
 
-            message = placeholders.get(key).replace(message);
+                message = placeholders.get(key).replace(message);
+            }
+            return message;
         }
-        return message;
     }
 
     /**
@@ -953,10 +969,12 @@ public class LanguageManager implements Service {
                       @Nullable Long count, boolean resetAfter) {
         String message = Utils.format(player, raw, prefix);
         message = applyLocal(message, local, count, PlaceholderType.MESSAGE);
-        if (!placeholders.isEmpty()) {
-            List<String> includedKeys = new ArrayList<>(getPlaceholderKeysInMessage(message, PlaceholderType.MESSAGE));
-            message = replacePlaceholders(PlaceholderType.MESSAGE, message);
-            if (resetAfter) resetSpecificPlaceholders(PlaceholderType.MESSAGE, includedKeys);
+        synchronized (placeholders) {
+            if (!placeholders.isEmpty()) {
+                List<String> includedKeys = new ArrayList<>(getPlaceholderKeysInMessage(message, PlaceholderType.MESSAGE));
+                message = replacePlaceholders(PlaceholderType.MESSAGE, message);
+                if (resetAfter) resetSpecificPlaceholders(PlaceholderType.MESSAGE, includedKeys);
+            }
         }
         return parseEmbeddedExpressions(message, player, langName);
     }
@@ -1041,9 +1059,14 @@ public class LanguageManager implements Service {
      * @return An ItemStack based on the specified parameters.
      */
     public ItemStack getItem(String path, Player player, String langName, boolean resetAfter, MaterialCondition condition) {
+        return renderItem(path, player, getLangOrPlayerLang(false, langName, player), Map.of(), resetAfter, condition);
+    }
+
+    ItemStack renderItem(String path, @Nullable Player player, LanguageFile start, Map<String, ?> local, boolean resetAfter,
+                         @Nullable MaterialCondition condition) {
         path = stripRoot(path, "Items");
-        LanguageFile langFile = languageWith("Items." + path, getLangOrPlayerLang(false, langName, player));
-        langName = langFile.getLangName();
+        LanguageFile langFile = languageWith("Items." + path, start);
+        String langName = langFile.getLangName();
         LanguageConfig langConfig = langFile.getLangConfig();
         ItemStack error = new ItemStack(Material.BARRIER);
         ItemMeta errorMeta = error.getItemMeta();
@@ -1063,7 +1086,7 @@ public class LanguageManager implements Service {
         }
         if (langConfig.getConfig().getBoolean("Items." + path + ".disabled", false) &&
                 !Objects.equals(path, "General.DisabledItem")) {
-            return this.getItem("General.DisabledItem", player, false);
+            return renderItem("General.DisabledItem", player, start, local, false, null);
         }
         ItemStack item;
 
@@ -1114,15 +1137,17 @@ public class LanguageManager implements Service {
         List<String> includedKeys = new ArrayList<>();
         ItemMeta meta = item.getItemMeta();
         for (String s : lore == null ? List.<String>of() : lore) {
-            includedKeys.addAll(getPlaceholderKeysInMessage(s, PlaceholderType.ITEM));
-            String temp = replacePlaceholders(PlaceholderType.ITEM, s);
+            String withLocal = applyLocal(s, local, null, PlaceholderType.ITEM);
+            includedKeys.addAll(getPlaceholderKeysInMessage(withLocal, PlaceholderType.ITEM));
+            String temp = replacePlaceholders(PlaceholderType.ITEM, withLocal);
             loreWithPlaceholders.add(Utils.format(player, temp, prefix));
         }
         assert meta != null;
         meta.setLore(loreWithPlaceholders);
         assert displayName != null;
-        includedKeys.addAll(getPlaceholderKeysInMessage(Utils.format(player, displayName, prefix), PlaceholderType.ITEM));
-        meta.setDisplayName(replacePlaceholders(PlaceholderType.ITEM, Utils.format(player, displayName, prefix)));
+        String formattedName = applyLocal(Utils.format(player, displayName, prefix), local, null, PlaceholderType.ITEM);
+        includedKeys.addAll(getPlaceholderKeysInMessage(formattedName, PlaceholderType.ITEM));
+        meta.setDisplayName(replacePlaceholders(PlaceholderType.ITEM, formattedName));
         if (getObjectFromLanguageCacheOrConfig("Items." + path + ".enchanted", langFile.getLangName(), Boolean.class)) {
             meta.addEnchant(Enchantment.UNBREAKING, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -1247,21 +1272,23 @@ public class LanguageManager implements Service {
      * @return The formatted menu title for the player.
      */
     public String getMenuTitle(String path, Player player, String langName) {
+        return renderTitle(path, player, getLangOrPlayerLang(false, langName, player), Map.of());
+    }
+
+    String renderTitle(String path, @Nullable Player player, LanguageFile start, Map<String, ?> local) {
         path = stripRoot(path, "MenuTitles");
         applyPathExpressionVariables(player, path);
-        LanguageFile langFile = languageWith("MenuTitles." + path, getLangOrPlayerLang(false, langName, player));
-        langName = langFile.getLangName();
+        LanguageFile langFile = languageWith("MenuTitles." + path, start);
+        String langName = langFile.getLangName();
         LanguageConfig langConfig = langFile.getLangConfig();
-        if (langConfig == null || langConfig.getConfig() == null)
-            return "null config";
+        if (langConfig == null || langConfig.getConfig() == null) return "null config";
         if (langConfig.getConfig().getString("MenuTitles." + path) == null || !langConfig.getConfig().contains("MenuTitles." + path))
             return "null path: MenuTitles." + path;
-        String title = getObjectFromLanguageCacheOrConfig("MenuTitles." + path, langName, String.class);
+        String title = applyLocal(getObjectFromLanguageCacheOrConfig("MenuTitles." + path, langName, String.class), local, null, PlaceholderType.MENUTITLE);
         List<String> includedKeys = new ArrayList<>(getPlaceholderKeysInMessage(title, PlaceholderType.MENUTITLE));
         title = replacePlaceholders(PlaceholderType.MENUTITLE, title);
         resetSpecificPlaceholders(PlaceholderType.MENUTITLE, includedKeys);
-        title = parseEmbeddedExpressions(Utils.format(player, title, prefix), player, langName);
-        return title;
+        return parseEmbeddedExpressions(Utils.format(player, title, prefix), player, langName);
     }
 
     /**
@@ -1327,6 +1354,68 @@ public class LanguageManager implements Service {
         }
         if (obj == null) obj = defaultValue;
         return obj;
+    }
+
+    public MessageBuilder message(String path) {
+        return new MessageBuilder(this, path);
+    }
+
+    public ItemBuilder item(String path) {
+        return new ItemBuilder(this, path);
+    }
+
+    public TitleBuilder title(String path) {
+        return new TitleBuilder(this, path);
+    }
+
+    /** An explicit language wins over the viewer's language for the new API. */
+    LanguageFile startFor(@Nullable String language, @Nullable Player viewer, boolean messages) {
+        if (language != null) return getLang(language, true);
+        return getLangOrPlayerLang(messages, getCurrentLangName(), viewer);
+    }
+
+    List<String> renderLines(String path, @Nullable Player player, LanguageFile start, Map<String, ?> local, @Nullable Long count) {
+        String fullPath = "Messages." + stripRoot(path, "Messages");
+        LanguageFile langFile = languageWith(fullPath, start);
+        Object value = langFile.getLangConfig().getConfig().get(fullPath);
+        if (!(value instanceof List<?> list)) return List.of(renderMessage(path, player, start, local, count, false));
+        List<String> lines = new ArrayList<>();
+        for (Object line : list) lines.add(renderText(String.valueOf(line), fullPath, player, langFile.getLangName(), local, count, false));
+        return lines;
+    }
+
+    void send(String path, CommandSender sender, LanguageFile start, Map<String, ?> local, @Nullable Long count) {
+        Player player = sender instanceof Player p ? p : null;
+        String fullPath = "Messages." + stripRoot(path, "Messages");
+        LanguageFile langFile = languageWith(fullPath, start);
+        ConfigurationSection rich = langFile.getLangConfig().getConfig().getConfigurationSection(fullPath);
+        boolean isRich = rich != null && (rich.contains("text") || rich.contains("actionbar") || rich.contains("title")
+                || rich.contains("subtitle") || rich.contains("sound"));
+        if (!isRich || rich.isString("text")) sender.sendMessage(renderMessage(path, player, start, local, count, false));
+        if (!isRich || player == null) return;
+        String lang = langFile.getLangName();
+        if (rich.isString("actionbar")) {
+            String bar = renderText(rich.getString("actionbar"), fullPath + ".actionbar", player, lang, local, count, false);
+            player.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR, net.md_5.bungee.api.chat.TextComponent.fromLegacyText(bar));
+        }
+        if (rich.isString("title") || rich.isString("subtitle")) {
+            String title = rich.isString("title") ? renderText(rich.getString("title"), fullPath + ".title", player, lang, local, count, false) : "";
+            String subtitle = rich.isString("subtitle") ? renderText(rich.getString("subtitle"), fullPath + ".subtitle", player, lang, local, count, false) : "";
+            player.sendTitle(title, subtitle, 10, 70, 20);
+        }
+        if (rich.isString("sound")) playSound(player, rich.getString("sound"));
+    }
+
+    /** {@code sound} is a Minecraft sound key with optional volume and pitch: {@code "entity.villager.no 0.5 1"}. */
+    static void playSound(Player player, String sound) {
+        String[] parts = sound.trim().split("\\s+");
+        try {
+            float volume = parts.length > 1 ? Float.parseFloat(parts[1]) : 1f;
+            float pitch = parts.length > 2 ? Float.parseFloat(parts[2]) : 1f;
+            player.playSound(player.getLocation(), parts[0], volume, pitch);
+        } catch (NumberFormatException e) {
+            getLogger().warning("Invalid sound in a language file: " + sound);
+        }
     }
 
     public ExpressionEnginePool getExpressionEnginePool() {
@@ -1399,7 +1488,9 @@ public class LanguageManager implements Service {
             String expr = matcher.group(2);
             Object result;
             try {
-                result = engine.parse(expr, Object.class);
+                synchronized (engine) {
+                    result = engine.parse(expr, Object.class);
+                }
                 matcher.appendReplacement(sb, result == null ? "null" : Matcher.quoteReplacement(result.toString()));
             } catch (Exception e) {
                 matcher.appendReplacement(sb, matcher.group(0));
