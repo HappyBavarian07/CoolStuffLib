@@ -1,0 +1,16 @@
+# Header comment
+LanguageFullName: 'English'
+Messages:
+  Player:
+    # greeting
+    Greeting: '%prefix% Hello'
+  Plain: 'root message'
+Items:
+  # the heal item
+  Heal:
+    material: GOLDEN_APPLE
+    displayName: '&aHeal'
+    lore:
+      - '&7Heals you'
+MenuTitles:
+  Showcase: 'Showcase'
