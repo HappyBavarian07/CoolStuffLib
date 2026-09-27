@@ -41,6 +41,21 @@ public final class LanguageFileWatcher implements AutoCloseable {
         dir.register(service, ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE);
     }
 
+    /** A whole tree can be copied in at once, so a new directory brings its own subdirectories with it. */
+    private void registerTree(Path dir) {
+        try (Stream<Path> dirs = Files.walk(dir)) {
+            dirs.filter(Files::isDirectory).forEach(this::registerQuietly);
+        } catch (IOException ignored) {
+        }
+    }
+
+    private void registerQuietly(Path dir) {
+        try {
+            register(dir);
+        } catch (IOException ignored) {
+        }
+    }
+
     private void loop() {
         Set<String> pending = new HashSet<>();
         long last = 0;
@@ -57,12 +72,7 @@ public final class LanguageFileWatcher implements AutoCloseable {
                     if (!(event.context() instanceof Path name)) continue;
                     Path changed = dir.resolve(name);
                     if (name.toString().endsWith(".tmp")) continue;
-                    if (event.kind() == ENTRY_CREATE && Files.isDirectory(changed)) {
-                        try {
-                            register(changed);
-                        } catch (IOException ignored) {
-                        }
-                    }
+                    if (event.kind() == ENTRY_CREATE && Files.isDirectory(changed)) registerTree(changed);
                     String language = languageOf(changed);
                     if (language != null) {
                         pending.add(language);

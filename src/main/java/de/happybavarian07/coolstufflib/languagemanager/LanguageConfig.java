@@ -15,8 +15,8 @@ public class LanguageConfig {
     private final String langName;
     private final LanguageStorage storage;
     private volatile String updateLanguage = "en";
-    private volatile LoadResult loaded;
-    private volatile FileConfiguration config;
+    // One volatile field so a reader can never see the load result of one reload next to the config of another.
+    private volatile Snapshot snapshot = new Snapshot(null, null);
     private volatile PrepareResult pendingPrepare;
     private List<LanguageProblem> reportedLoadProblems = List.of();
 
@@ -27,23 +27,27 @@ public class LanguageConfig {
         reloadConfig();
     }
 
-    public void reloadConfig() {
-        LoadResult result = storage.load(langName, updateLanguage, loaded);
+    public synchronized void reloadConfig() {
+        LoadResult result = storage.load(langName, updateLanguage, snapshot.loaded());
         YamlConfiguration next = new YamlConfiguration();
         for (LanguageEntry entry : result.merged().values()) next.set(entry.key(), entry.value());
-        loaded = result;
-        config = next;
+        snapshot = new Snapshot(result, next);
     }
 
     public FileConfiguration getConfig() {
-        if (config == null) reloadConfig();
-        return config;
+        FileConfiguration current = snapshot.config();
+        if (current == null) {
+            reloadConfig();
+            current = snapshot.config();
+        }
+        return current;
     }
 
     /** Writes values that were changed through {@link #getConfig()} to the owner's files. */
     public void saveConfig() {
-        FileConfiguration current = config;
-        LoadResult base = loaded;
+        Snapshot state = snapshot;
+        FileConfiguration current = state.config();
+        LoadResult base = state.loaded();
         if (current == null || base == null) return;
         List<LanguageEntry> changed = new ArrayList<>();
         for (String key : current.getKeys(true)) {
@@ -84,8 +88,12 @@ public class LanguageConfig {
     }
 
     public LoadResult getLoaded() {
-        if (loaded == null) reloadConfig();
-        return loaded;
+        LoadResult result = snapshot.loaded();
+        if (result == null) {
+            reloadConfig();
+            result = snapshot.loaded();
+        }
+        return result;
     }
 
     public LanguageStorage getStorage() {
@@ -93,7 +101,7 @@ public class LanguageConfig {
     }
 
     public String originOf(String key) {
-        LoadResult result = loaded;
+        LoadResult result = snapshot.loaded();
         LanguageEntry entry = result == null ? null : result.merged().get(key);
         return entry == null || entry.origin() == null ? "?" : entry.origin().toString();
     }
@@ -118,11 +126,15 @@ public class LanguageConfig {
             }
             prepare.problems().forEach(problem -> lines.add("Problem in " + problem));
         }
-        LoadResult result = loaded;
+        LoadResult result = snapshot.loaded();
         if (result != null && !result.problems().equals(reportedLoadProblems)) {
             result.problems().forEach(problem -> lines.add("Problem in " + problem));
             reportedLoadProblems = result.problems();
         }
         return new ArrayList<>(lines);
+    }
+
+    /** The values and the load result of one reload, published together. */
+    private record Snapshot(LoadResult loaded, FileConfiguration config) {
     }
 }

@@ -6,7 +6,9 @@ import org.junit.jupiter.api.io.TempDir;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,6 +27,25 @@ class LanguageFileWatcherTest {
             Files.writeString(folder.resolve("en/messages/Player.yml"), "A: 'a'\n");
             Files.writeString(folder.resolve("en/messages/Player.yml"), "A: 'b'\n");
             assertEquals(Set.of("en"), changed.get(10, TimeUnit.SECONDS));
+        }
+    }
+
+    @Test
+    void reportsAChangeBelowTheFirstLevelOfANewTree() throws Exception {
+        BlockingQueue<Set<String>> reported = new LinkedBlockingQueue<>();
+        try (LanguageFileWatcher watcher = new LanguageFileWatcher(folder, 200, reported::add)) {
+            watcher.start();
+            Files.createDirectories(folder.resolve("de/a/b/c"));
+            Files.writeString(folder.resolve("de/a/b/c/Deep.yml"), "A: 'a'\n");
+            drain(reported);
+            Files.writeString(folder.resolve("de/a/b/c/Deep.yml"), "A: 'b'\n");
+            assertEquals(Set.of("de"), reported.poll(10, TimeUnit.SECONDS));
+        }
+    }
+
+    /** Waits until the watcher has been quiet for one debounce, so the next report is the one under test. */
+    private static void drain(BlockingQueue<Set<String>> reported) throws InterruptedException {
+        while (reported.poll(400, TimeUnit.MILLISECONDS) != null) {
         }
     }
 }
