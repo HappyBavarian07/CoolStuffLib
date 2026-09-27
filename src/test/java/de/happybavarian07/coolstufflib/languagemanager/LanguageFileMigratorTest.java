@@ -1,5 +1,6 @@
 package de.happybavarian07.coolstufflib.languagemanager;
 
+import de.happybavarian07.coolstufflib.languagemanager.storage.LanguageEntry;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -31,5 +32,20 @@ class LanguageFileMigratorTest {
 
     private static LanguageFileMigrator.MigrationStatus status(List<LanguageFileMigrator.MigrationEntry> entries, String key) {
         return entries.stream().filter(e -> e.getKey().equals(key)).findFirst().orElseThrow().getStatus();
+    }
+
+    @Test
+    void selectedMissingKeysAreWrittenToConsumer() {
+        Map<String, Object> written = new HashMap<>();
+        LanguageFileMigrator migrator = new LanguageFileMigrator(
+                Map.of("A", "userValue"),
+                Map.of("A", "jarValue", "Missing", "jarOnly"),
+                written::putAll);
+
+        List<LanguageFileMigrator.MigrationEntry> entries = migrator.getMigrationEntries();
+        assertEquals(LanguageFileMigrator.MigrationStatus.MISSING_IN_USER, status(entries, "Missing"));
+        entries.stream().filter(e -> e.getKey().equals("Missing")).findFirst().orElseThrow().setSelectedForMigration(true);
+        migrator.migrateSelected();
+        assertEquals(Map.of("Missing", "jarOnly"), written);
     }
 }

@@ -9,6 +9,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -94,5 +96,16 @@ class LanguageManagerTest {
     void playerLookupWithoutPerPlayerHandlerFallsBackToCurrentLanguage() {
         assertSame(languageManager.getCurrentLang(),
                 assertDoesNotThrow(() -> languageManager.getLangOrPlayerLang(true, "en", mockPlayer)));
+    }
+
+    @Test
+    void playerLookupWithCurrentLangFalseAndNoHandlerReturnsSpecifiedLanguage() throws IOException {
+        Files.writeString(langFolder.toPath().resolve("en.yml"), "Messages:\n  Test: 'test'\n");
+        languageManager.addLanguagesToList(false);
+        languageManager.setCurrentLang(languageManager.getLang("en", true), false);
+
+        LanguageFile result = assertDoesNotThrow(() -> languageManager.getLangOrPlayerLang(false, "en", mockPlayer));
+        assertNotNull(result);
+        assertEquals("en", result.getLangName());
     }
 }
