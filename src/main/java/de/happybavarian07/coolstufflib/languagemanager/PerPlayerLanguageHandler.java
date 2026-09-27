@@ -43,14 +43,13 @@ public class PerPlayerLanguageHandler {
     }
 
     /**
-     * <p>Retrieves the language file for a player.</p>
+     * <p>Retrieves the language file for a player, or the current language if none is stored.</p>
      *
      * @param uuid The player UUID
-     * @return The {@link LanguageFile}
+     * @return The {@link LanguageFile}, or null if the stored or current language is no longer registered
      */
     public LanguageFile getPlayerLanguage(UUID uuid) {
-        String language = store.get(uuid);
-        return language == null ? null : lgm.getLang(language, false);
+        return lgm.getLang(getPlayerLanguageName(uuid), false);
     }
 
     /**
