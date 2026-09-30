@@ -3,6 +3,7 @@ package de.happybavarian07.coolstufflib.languagemanager;
 import de.happybavarian07.coolstufflib.languagemanager.storage.LanguageEntry;
 import de.happybavarian07.coolstufflib.languagemanager.storage.LanguageStorage;
 import de.happybavarian07.coolstufflib.languagemanager.storage.LegacyYamlBackend;
+import de.happybavarian07.coolstufflib.languagemanager.storage.SplitYamlBackend;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -40,6 +41,46 @@ class LanguageFileMigratorTest {
 
     private static LanguageFileMigrator.MigrationStatus status(List<LanguageFileMigrator.MigrationEntry> entries, String key) {
         return entries.stream().filter(e -> e.getKey().equals(key)).findFirst().orElseThrow().getStatus();
+    }
+
+    @Test
+    void theFileConstructorReadsAndWritesTheSplitFolderOfAMigratedLanguage(@TempDir Path folder) {
+        SplitYamlBackend backend = new SplitYamlBackend(folder.toFile());
+        backend.write("en", List.of(new LanguageEntry("Messages.Player.Plain", "mine", null, null)));
+        java.io.InputStream jar = new java.io.ByteArrayInputStream("""
+                Messages:
+                  Player:
+                    Plain: 'jar plain'
+                    # greeting
+                    Greeting: '%prefix% Hello'
+                """.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+        LanguageFileMigrator migrator = new LanguageFileMigrator(folder.resolve("en").toFile(), jar);
+
+        assertEquals(LanguageFileMigrator.MigrationStatus.DIFFERENT_VALUE, status(migrator.getMigrationEntries(), "Messages.Player.Plain"));
+        assertEquals(LanguageFileMigrator.MigrationStatus.MISSING_IN_USER, status(migrator.getMigrationEntries(), "Messages.Player.Greeting"));
+        assertTrue(migrator.filesDifferByHash());
+
+        migrator.migrateSelected();
+
+        Map<String, LanguageEntry> owner = backend.read("en").entries();
+        assertEquals("mine", owner.get("Messages.Player.Plain").value());
+        assertEquals("%prefix% Hello", owner.get("Messages.Player.Greeting").value());
+        assertEquals("greeting", owner.get("Messages.Player.Greeting").comment());
+    }
+
+    @Test
+    void theFileConstructorStillWorksOnALegacyFile(@TempDir Path folder) throws IOException {
+        Path file = folder.resolve("en.yml");
+        Files.writeString(file, "Messages:\n  Plain: 'mine'\n");
+        java.io.InputStream jar = new java.io.ByteArrayInputStream("Messages:\n  Plain: 'jar'\n  New: 'fresh'\n"
+                .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+        LanguageFileMigrator migrator = new LanguageFileMigrator(file.toFile(), jar);
+        assertEquals(LanguageFileMigrator.MigrationStatus.MISSING_IN_USER, status(migrator.getMigrationEntries(), "Messages.New"));
+        migrator.migrateSelected();
+
+        assertTrue(Files.readString(file).contains("New: fresh"));
     }
 
     @Test

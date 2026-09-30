@@ -1,5 +1,7 @@
 package de.happybavarian07.coolstufflib.languagemanager;
 
+import de.happybavarian07.coolstufflib.languagemanager.storage.LanguageEntry;
+import de.happybavarian07.coolstufflib.languagemanager.storage.SplitYamlBackend;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -32,19 +34,43 @@ public class LanguageFileMigrator {
      * @param resourceStream The resource input stream
      */
     public LanguageFileMigrator(File userConfigFile, InputStream resourceStream) {
-        FileConfiguration userConfig = YamlConfiguration.loadConfiguration(userConfigFile);
-        this.userConfigFile = userConfigFile;
-        this.resourceStream = resourceStream;
-        this.userValues = flattenConfig(userConfig);
-        this.resourceValues = flattenConfig(YamlConfiguration.loadConfiguration(new InputStreamReader(resourceStream)));
-        this.writer = changes -> {
-            changes.forEach(userConfig::set);
-            try {
-                userConfig.save(userConfigFile);
-            } catch (Exception ignored) {
-            }
-        };
+        FileConfiguration jarConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(resourceStream));
+        this.resourceValues = flattenConfig(jarConfig);
+        if (userConfigFile.isDirectory()) {
+            SplitYamlBackend backend = new SplitYamlBackend(userConfigFile.getParentFile());
+            String language = userConfigFile.getName();
+            this.userConfigFile = null;
+            this.resourceStream = null;
+            Map<String, Object> owned = new LinkedHashMap<>();
+            backend.read(language).entries().forEach((key, entry) -> owned.put(key, entry.value()));
+            this.userValues = owned;
+            this.writer = changes -> backend.write(language, changes.entrySet().stream()
+                    .map(change -> new LanguageEntry(change.getKey(), change.getValue(), commentOf(jarConfig, change.getKey()), null))
+                    .toList());
+        } else {
+            FileConfiguration userConfig = YamlConfiguration.loadConfiguration(userConfigFile);
+            this.userConfigFile = userConfigFile;
+            this.resourceStream = resourceStream;
+            this.userValues = flattenConfig(userConfig);
+            this.writer = changes -> {
+                changes.forEach(userConfig::set);
+                try {
+                    userConfig.save(userConfigFile);
+                } catch (Exception ignored) {
+                }
+            };
+        }
         scanForMigrations();
+    }
+
+    private static String commentOf(FileConfiguration jarConfig, String key) {
+        List<String> lines = jarConfig.getComments(key);
+        if (lines.isEmpty()) return null;
+        List<String> text = new ArrayList<>();
+        for (String line : lines) {
+            if (line != null) text.add(line.startsWith(" ") ? line.substring(1) : line);
+        }
+        return text.isEmpty() ? null : String.join("\n", text);
     }
 
     /** Compares the owner's values with the jar's; {@code writer} receives the selected keys and values. */
