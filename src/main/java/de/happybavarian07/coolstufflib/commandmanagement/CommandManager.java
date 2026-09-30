@@ -327,6 +327,8 @@ public abstract class CommandManager {
      * Sets up the main command and registers all subcommands.
      * <p> This will be called by the CMR on registration. </p>
      * <p> This is where you should register all subcommands using {@link #registerSubCommand(SubCommand)}. </p>
+     * <p> The built-in {@link HelpCommand} does not have to be registered here; it is added afterwards
+     * unless this method already registered a sub command called {@code help}. </p>
      * <p> This method should be overridden by the implementing class. </p>
      */
     public abstract void setup();
@@ -342,12 +344,25 @@ public abstract class CommandManager {
 
     /**
      * <p>All sub commands including the root command, for registration and help output.</p>
+     * <p>This is the first thing the {@link CommandManagerRegistry} calls after {@link #setup()}, so the
+     * built-in {@link HelpCommand} is added here and picked up by the usual registration (dependencies,
+     * pre-init, permissions, post-init) without the consumer doing anything.</p>
      */
     public List<SubCommand> getAllSubCommands() {
+        registerBuiltInSubCommands();
         List<SubCommand> all = new ArrayList<>();
         for (SubCommand command : commands) collectWithChildren(command, all);
         if (rootCommand != null) all.add(rootCommand);
         return all;
+    }
+
+    /**
+     * <p>Adds the built-in {@link HelpCommand} unless a sub command called {@code help} (or aliased to it)
+     * is already registered. Because this runs after {@link #setup()}, a consumer that registers its own
+     * help sub command there keeps it and is never duplicated.</p>
+     */
+    private void registerBuiltInSubCommands() {
+        if (getSubCommand("help") == null) registerSubCommand(new HelpCommand(getCommandName()));
     }
 
     private static void collectWithChildren(SubCommand command, List<SubCommand> into) {

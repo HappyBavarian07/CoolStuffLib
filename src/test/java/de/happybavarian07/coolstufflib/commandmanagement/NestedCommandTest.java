@@ -67,9 +67,9 @@ class NestedCommandTest {
     }
 
     @Test
-    void allSubCommandsIncludeNestedChildren() {
+    void allSubCommandsIncludeNestedChildrenAndBuiltInHelp() {
         List<String> names = manager.getAllSubCommands().stream().map(SubCommand::path).toList();
-        assertEquals(List.of("player", "player info", "player kick"), names);
+        assertEquals(List.of("player", "player info", "player kick", "help"), names);
     }
 
     @Test

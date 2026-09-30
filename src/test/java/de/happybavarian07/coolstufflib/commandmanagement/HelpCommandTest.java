@@ -135,4 +135,33 @@ class HelpCommandTest {
         Map<Integer, String[]> second = help.subArgs(console, 0, new String[]{"player", ""});
         assertArrayEquals(new String[]{"kick"}, second.get(2));
     }
+
+    @Test
+    void consumerThatRegistersNothingGetsHelpAutomatically() {
+        SubCommand info = new SubCommandBuilder("admin", "info").executes((s, a) -> true).build();
+        ArgumentTest.SingleSubManager manager = new ArgumentTest.SingleSubManager(info);
+        assertNull(manager.getSubCommand("help"));
+
+        List<SubCommand> all = manager.getAllSubCommands();
+
+        SubCommand registered = manager.getSubCommand("help");
+        assertInstanceOf(HelpCommand.class, registered);
+        assertSame(registered, manager.getSubCommand("help"));
+        assertTrue(all.contains(registered));
+        assertEquals("/admin help [page|command]", registered.syntax());
+    }
+
+    @Test
+    void explicitlyRegisteredHelpIsKeptAndNotDuplicated() {
+        SubCommand info = new SubCommandBuilder("admin", "info").executes((s, a) -> true).build();
+        ArgumentTest.SingleSubManager manager = new ArgumentTest.SingleSubManager(info);
+        HelpCommand explicit = new HelpCommand("admin");
+        manager.registerSubCommand(explicit);
+
+        manager.getAllSubCommands();
+        manager.getAllSubCommands();
+
+        assertEquals(1, manager.getSubCommands().stream().filter(sub -> sub.name().equals("help")).count());
+        assertSame(explicit, manager.getSubCommand("help"));
+    }
 }
