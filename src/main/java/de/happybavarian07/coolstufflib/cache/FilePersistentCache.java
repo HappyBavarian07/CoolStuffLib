@@ -2,6 +2,7 @@ package de.happybavarian07.coolstufflib.cache;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import de.happybavarian07.coolstufflib.CoolStuffLib;
 import org.checkerframework.checker.units.qual.K;
 
 import java.io.*;
@@ -21,6 +22,8 @@ import java.util.concurrent.*;
  */
 
 public class FilePersistentCache<K, V> implements PersistentCache<K, V> {
+    /** Upper bound for a legacy {@code .bin} that is still deserialized; bigger files are left alone. */
+    private static final long MAX_LEGACY_BINARY_BYTES = 32L * 1024 * 1024;
     private final ConcurrentMap<K, V> memoryCache = new ConcurrentHashMap<>();
     private final String cacheFile;
     private final int maxSize;
@@ -169,7 +172,7 @@ public class FilePersistentCache<K, V> implements PersistentCache<K, V> {
                 gson.toJson(memoryCache, writer);
                 Files.move(tempFile, path, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
-                System.err.println("Failed to save cache: " + e.getMessage());
+                CoolStuffLib.logError("Failed to save cache", e);
             }
         }
     }
@@ -200,11 +203,12 @@ public class FilePersistentCache<K, V> implements PersistentCache<K, V> {
                 memoryCache.putAll(loaded);
             }
         } catch (IOException e) {
-            System.err.println("Failed to load JSON cache: " + e.getMessage());
+            CoolStuffLib.logError("Failed to load JSON cache", e);
         }
     }
 
     private void migrateBinaryToJson(Path binaryPath, Path jsonPath) {
+        if (!isPlausibleLegacyBinary(binaryPath)) return;
         try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(Files.newInputStream(binaryPath)))) {
             ConcurrentMap<K, V> loaded = (ConcurrentMap<K, V>) ois.readObject();
             memoryCache.clear();
@@ -212,7 +216,27 @@ public class FilePersistentCache<K, V> implements PersistentCache<K, V> {
             save();
             Files.delete(binaryPath);
         } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Failed to migrate binary cache: " + e.getMessage());
+            CoolStuffLib.logError("Failed to migrate binary cache", e);
+        }
+    }
+
+    /**
+     * <p>Deserializing a legacy {@code .bin} is a gadget chain risk, because anyone who can write that file
+     * picks the class that gets instantiated. A size sanity check keeps obviously bogus or weaponized
+     * payloads out; the migration stays otherwise untouched.</p>
+     */
+    private boolean isPlausibleLegacyBinary(Path binaryPath) {
+        try {
+            long size = Files.size(binaryPath);
+            if (!Files.isRegularFile(binaryPath) || size <= 0 || size > MAX_LEGACY_BINARY_BYTES) {
+                CoolStuffLib.logError("Skipping legacy binary cache " + binaryPath,
+                        new IOException("unexpected size " + size + " bytes, expected 1.." + MAX_LEGACY_BINARY_BYTES));
+                return false;
+            }
+            return true;
+        } catch (IOException e) {
+            CoolStuffLib.logError("Failed to read legacy binary cache " + binaryPath, e);
+            return false;
         }
     }
 
@@ -220,7 +244,7 @@ public class FilePersistentCache<K, V> implements PersistentCache<K, V> {
         try {
             if (path.getParent() != null) Files.createDirectories(path.getParent());
         } catch (IOException e) {
-            System.err.println("Failed to create directories: " + e.getMessage());
+            CoolStuffLib.logError("Failed to create directories", e);
         }
     }
 

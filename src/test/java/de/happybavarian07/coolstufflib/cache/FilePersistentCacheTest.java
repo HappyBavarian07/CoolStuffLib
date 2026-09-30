@@ -1,19 +1,26 @@
 package de.happybavarian07.coolstufflib.cache;
 
 import com.google.gson.reflect.TypeToken;
+import de.happybavarian07.coolstufflib.CoolStuffLib;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Timeout;
+import org.mockito.MockedStatic;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 public class FilePersistentCacheTest {
 
@@ -209,5 +216,55 @@ public class FilePersistentCacheTest {
         FilePersistentCache<String, String> reloaded = new FilePersistentCache<>(testCacheFile, 2000, false, 0, String.class);
         assertEquals("value", reloaded.get("kept"));
         reloaded.close();
+    }
+
+    @Test
+    void unreadableCacheFileIsReportedThroughTheLibraryErrorLog() throws IOException {
+        Path notAFile = Files.createTempDirectory("file_cache_log").resolve("broken.json");
+        Files.createDirectory(notAFile);
+        try (MockedStatic<CoolStuffLib> statics = mockStatic(CoolStuffLib.class)) {
+            new FilePersistentCache<String, String>(notAFile.toString(), 20, false, 0, String.class).close();
+            statics.verify(() -> CoolStuffLib.logError(eq("Failed to load JSON cache"), any(IOException.class)));
+        }
+    }
+
+    @Test
+    void unwritableCacheFileIsReportedThroughTheLibraryErrorLog() throws IOException {
+        Path blocker = Files.writeString(Files.createTempDirectory("file_cache_save").resolve("blocker"), "x");
+        try (MockedStatic<CoolStuffLib> statics = mockStatic(CoolStuffLib.class)) {
+            new FilePersistentCache<String, String>(blocker.resolve("cache.json").toString(), 20, false, 0, String.class).save();
+            statics.verify(() -> CoolStuffLib.logError(eq("Failed to create directories"), any(IOException.class)));
+            statics.verify(() -> CoolStuffLib.logError(eq("Failed to save cache"), any(IOException.class)));
+        }
+    }
+
+    @Test
+    void emptyLegacyBinaryIsNotDeserialized() throws IOException {
+        Path directory = Files.createTempDirectory("file_cache_legacy_empty");
+        Path binary = Files.write(directory.resolve("legacy.json.bin"), new byte[0]);
+        try (MockedStatic<CoolStuffLib> statics = mockStatic(CoolStuffLib.class)) {
+            new FilePersistentCache<String, String>(directory.resolve("legacy.json").toString(), 20, false, 0, String.class).close();
+            statics.verify(() -> CoolStuffLib.logError(startsWith("Skipping legacy binary cache"), any(IOException.class)));
+        }
+        assertTrue(Files.exists(binary));
+    }
+
+    @Test
+    void legacyBinaryIsStillMigratedToJson() throws IOException {
+        Path directory = Files.createTempDirectory("file_cache_legacy_ok");
+        Path json = directory.resolve("migrated.json");
+        Path binary = directory.resolve("migrated.json.bin");
+        try (ObjectOutputStream out = new ObjectOutputStream(Files.newOutputStream(binary))) {
+            ConcurrentMap<String, String> legacy = new ConcurrentHashMap<>();
+            legacy.put("old", "value");
+            out.writeObject(legacy);
+        }
+
+        FilePersistentCache<String, String> migrated = new FilePersistentCache<>(json.toString(), 20, false, 0, String.class);
+        migrated.close();
+
+        assertEquals("value", migrated.get("old"));
+        assertFalse(Files.exists(binary));
+        assertTrue(Files.exists(json));
     }
 }
