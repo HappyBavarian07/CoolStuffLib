@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>One message with its own placeholders. Nothing is stored in the language manager, so it can be used from
- * any thread.</p>
+ * <p>One message with its own placeholders. Nothing is stored in the language manager, so {@code text} can be
+ * called from any thread. {@code send} shows titles and plays sounds through Bukkit, so call it on the main thread.</p>
  * <pre><code>lgm.message("Player.General.NoPermissions").with("%target%", name).send(sender);</code></pre>
  */
 public final class MessageBuilder {

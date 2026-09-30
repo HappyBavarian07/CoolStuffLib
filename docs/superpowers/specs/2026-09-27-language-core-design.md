@@ -18,6 +18,23 @@ Two decisions were made while implementing this spec. Everything below is writte
   is the map around it, and only that changed: it is a `Collections.synchronizedMap(new LinkedHashMap<>())` now and
   every access runs inside `synchronized (placeholders)`. `getPlaceholders()` still hands the map itself out.
 
+Where the implementation differs from the text below. The final review found these, so the next sub-project starts from
+what the code does:
+
+- **Key debug** appends ` [key @ file:line]` to the text, to titles and as extra item lore. There is no hover text and
+  no console `[key]` prefix.
+- **Choosing a backend** is `setBackend(String id)` on the builder. Other backends are added with
+  `LanguageStorage.registerBackend(id, factory)`; the default backend id is one static, JVM-wide value.
+- **Backend signatures:** `ReadResult` has three components (`entries`, `sectionComments`, `problems`) and
+  `LanguageBackend.write` takes `(language, entries, sectionComments)`; the two-argument `write` is a default method.
+- **Entries:** every leaf value is one entry. Rich, plural and item sections are assembled from their leaves in the
+  `YamlConfiguration` the snapshot builds, not stored as one entry each.
+- **Threads:** `MessageBuilder.text` can be called from any thread. `send` shows titles and plays sounds through Bukkit
+  and belongs on the main thread.
+- **Known limits, left open:** `YamlDocument` writes a list element that is itself a map or list as a string, and a
+  key whose value is empty (`Key:` or `Key: {}`) counts as missing. The `jar:` branch of `ClasspathLanguageSource` has
+  no test, and one render of an item or title can read two snapshots if a reload lands in between.
+
 ## Why
 
 The language manager reads its YAML on every call (two config lookups, a regex over the text, parsing embedded
