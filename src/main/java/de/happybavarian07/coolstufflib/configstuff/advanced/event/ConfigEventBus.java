@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 /**
@@ -33,6 +34,7 @@ import java.util.function.Predicate;
 public class ConfigEventBus {
     private final Map<Class<? extends ConfigEvent>, Map<Integer, List<ListenerEntry<?>>>> listeners;
     private final ExecutorService asyncExecutor;
+    private final AtomicBoolean shutdown = new AtomicBoolean(false);
     private boolean asyncEnabled = false;
 
     public ConfigEventBus() {
@@ -214,10 +216,12 @@ public class ConfigEventBus {
      * @param event the event to publish asynchronously
      */
     public void publishAsync(ConfigEvent event) {
+        if (shutdown.get()) return;
         asyncExecutor.submit(() -> publish(event));
     }
 
     private <T extends ConfigEvent> void executeAsync(ConfigEventListener<T> listener, T event) {
+        if (shutdown.get()) return;
         asyncExecutor.submit(() -> {
             try {
                 listener.onEvent(event);
@@ -259,7 +263,8 @@ public class ConfigEventBus {
 
     /**
      * <p>Shuts down the event bus and releases all resources including
-     * the async executor service.</p>
+     * the async executor service. Idempotent, and safe to call on a bus
+     * that never published asynchronously.</p>
      *
      * <pre><code>
      * eventBus.shutdown();
@@ -267,7 +272,19 @@ public class ConfigEventBus {
      * </code></pre>
      */
     public void shutdown() {
-        asyncExecutor.shutdown();
+        if (shutdown.compareAndSet(false, true)) {
+            asyncExecutor.shutdown();
+        }
+    }
+
+    /**
+     * <p>Checks whether {@link #shutdown()} was already called, meaning the async
+     * executor is terminated and async publishing is discarded.</p>
+     *
+     * @return true if this bus is shut down
+     */
+    public boolean isShutdown() {
+        return shutdown.get();
     }
 
     private boolean isAcceptingCancelled(ConfigEventListener<?> listener) {

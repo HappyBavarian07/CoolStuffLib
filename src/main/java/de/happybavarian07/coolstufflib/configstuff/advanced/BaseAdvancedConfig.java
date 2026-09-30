@@ -44,7 +44,7 @@ import java.util.function.Supplier;
  * String host = config.getString("database.host", "default-host");
  * </code></pre>
  */
-public abstract class BaseAdvancedConfig implements AdvancedConfig {
+public abstract class BaseAdvancedConfig implements AdvancedConfig, AutoCloseable {
     private final String name;
     private final File file;
     private final ConfigFileHandler configFileHandler;
@@ -56,6 +56,7 @@ public abstract class BaseAdvancedConfig implements AdvancedConfig {
     private final ConfigMetadataManager metadataManager;
     private final ConfigCommentManager commentManager;
     private MigrationContext migrationContext;
+    private volatile boolean closed;
 
     protected BaseAdvancedConfig(String name, File file, ConfigFileHandler configFileHandler) {
         this.name = name;
@@ -110,6 +111,35 @@ public abstract class BaseAdvancedConfig implements AdvancedConfig {
     @Override
     public ConfigEventBus getEventBus() {
         return eventBus;
+    }
+
+    /**
+     * <p>Releases the resources this config owns, currently the thread pool of its
+     * {@link ConfigEventBus}. Every config builds its own bus, so a config that is
+     * dropped without being closed leaks that pool. Call this from the plugin
+     * disable path, or use the config in a try-with-resources block. Idempotent.</p>
+     *
+     * <pre><code>
+     * AdvancedConfig config = new AdvancedPersistentConfig("config", file, ConfigFileType.YAML);
+     * // ... on plugin disable
+     * config.close();
+     * </code></pre>
+     */
+    @Override
+    public void close() {
+        if (closed) return;
+        closed = true;
+        eventBus.shutdown();
+    }
+
+    /**
+     * <p>Checks whether {@link #close()} was already called. A closed config can still be
+     * read and saved, but its event bus no longer runs asynchronous listeners.</p>
+     *
+     * @return true if this config is closed
+     */
+    public boolean isClosed() {
+        return closed;
     }
 
     /**
