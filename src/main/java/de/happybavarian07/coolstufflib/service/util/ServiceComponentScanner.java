@@ -1,5 +1,6 @@
 package de.happybavarian07.coolstufflib.service.util;
 
+import de.happybavarian07.coolstufflib.CoolStuffLib;
 import de.happybavarian07.coolstufflib.service.annotation.ServiceComponent;
 import de.happybavarian07.coolstufflib.service.api.Config;
 import de.happybavarian07.coolstufflib.service.api.Service;
@@ -104,6 +105,21 @@ public class ServiceComponentScanner {
         }
     }
 
+    /**
+     * <p>Resolves the ID of an annotated service. An explicit {@link ServiceComponent#uuid()} wins, otherwise the ID is
+     * derived from the service name, so the same annotation always yields the same ID. This is the same derivation
+     * {@link de.happybavarian07.coolstufflib.service.api.ServiceDescriptor#of(String)} uses, which keeps the annotated
+     * path and the descriptor path on one ID per service name.</p>
+     *
+     * @param meta the annotation of the service class
+     * @return the service ID
+     */
+    public static UUID resolveServiceId(ServiceComponent meta) {
+        if (meta == null) throw new IllegalArgumentException("ServiceComponent annotation cannot be null");
+        if (!meta.uuid().isEmpty()) return UUID.fromString(meta.uuid());
+        return UUID.nameUUIDFromBytes(meta.serviceName().getBytes(StandardCharsets.UTF_8));
+    }
+
     public static Service createInstance(Class<?> clazz, ServiceRegistry registry, Config config) {
         Constructor<?>[] constructors = clazz.getConstructors();
         for (Constructor<?> ctor : constructors) {
@@ -153,7 +169,9 @@ public class ServiceComponentScanner {
                         Service dep = findDependency(paramType, registry);
                         if (dep != null) m.invoke(instance, dep);
                     }
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    CoolStuffLib.logError("Failed to inject " + m.getName() + " into service "
+                            + instance.getClass().getName(), e);
                 }
             }
         }

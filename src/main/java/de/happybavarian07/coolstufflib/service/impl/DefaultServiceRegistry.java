@@ -144,7 +144,7 @@ public class DefaultServiceRegistry implements ServiceRegistry, ServiceMetrics, 
         for (Class<?> clazz : annotated) {
             ServiceComponent meta = clazz.getAnnotation(ServiceComponent.class);
             if (meta == null) continue;
-            UUID uuid = meta.uuid().isEmpty() ? UUID.randomUUID() : UUID.fromString(meta.uuid());
+            UUID uuid = ServiceComponentScanner.resolveServiceId(meta);
             ids.put(clazz, uuid);
             scannedNames.put(meta.serviceName(), uuid);
         }
