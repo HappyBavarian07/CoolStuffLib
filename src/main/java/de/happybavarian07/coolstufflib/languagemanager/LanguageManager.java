@@ -538,13 +538,17 @@ public class LanguageManager implements Service {
     public List<String> logReports() {
         List<String> lines = new ArrayList<>();
         for (LanguageFile languageFile : registeredLanguages.values()) {
-            for (String line : languageFile.getLangConfig().drainReport()) {
-                lines.add(line);
-                getLogger().log(line.startsWith("Problem") || line.startsWith("Could not") ? Level.WARNING : Level.INFO, line);
-            }
+            logLines(languageFile.getLangConfig().drainReport(), lines);
         }
         lastReport = List.copyOf(lines);
         return lines;
+    }
+
+    private void logLines(List<String> report, List<String> into) {
+        for (String line : report) {
+            into.add(line);
+            getLogger().log(line.startsWith("Problem") || line.startsWith("Could not") ? Level.WARNING : Level.INFO, line);
+        }
     }
 
     public List<String> getLastReport() {
@@ -576,8 +580,13 @@ public class LanguageManager implements Service {
      * @param langName The name of the language to be added.
      */
     public void addLang(LanguageFile langFile, String langName) {
-        if (registeredLanguages.containsKey(langName) || langName.equals("default"))
+        if (registeredLanguages.containsKey(langName) || langName.equals("default")) {
+            // a LanguageFile built before addLanguagesToList holds the migration and added-key report
+            List<String> lines = new ArrayList<>();
+            logLines(langFile.getLangConfig().drainReport(), lines);
+            if (!lines.isEmpty()) lastReport = List.copyOf(lines);
             return;
+        }
         registeredLanguages.put(langName, langFile);
         languageCaches.put(langName, new LanguageCache(langName));
         addEngineForLanguage(langName, true, true);
