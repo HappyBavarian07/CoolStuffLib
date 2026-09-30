@@ -2,10 +2,15 @@ package de.happybavarian07.coolstufflib.jpa.utils;
 
 import de.happybavarian07.coolstufflib.jpa.SQLExecutor;
 import de.happybavarian07.coolstufflib.jpa.annotations.Column;
+import de.happybavarian07.coolstufflib.jpa.annotations.Id;
+import de.happybavarian07.coolstufflib.jpa.annotations.PostLoad;
 import de.happybavarian07.coolstufflib.jpa.annotations.Table;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -97,7 +102,16 @@ public class EntityQueryBuilder<T> {
     }
 
     public List<T> findAll() {
-        String sql = buildSelectQuery();
+        return selectAll(limitValue, offsetValue);
+    }
+
+    public Optional<T> findFirst() {
+        List<T> results = selectAll(1, offsetValue);
+        return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
+    }
+
+    private List<T> selectAll(int limit, int offset) {
+        String sql = buildSelectQuery(limit, offset);
         List<T> results = new ArrayList<>();
         try (ResultSet rs = sqlExecutor.executeQuery(sql, parameters.toArray())) {
             while (rs.next()) {
@@ -109,12 +123,8 @@ public class EntityQueryBuilder<T> {
         return results;
     }
 
-    public Optional<T> findFirst() {
-        limit(1);
-        List<T> results = findAll();
-        return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
-    }
-
+    /** Counts every row the conditions match; the paging set by {@link #limit(int)} and {@link #offset(int)}
+     * is deliberately ignored, because a count describes the whole result set, not one page of it. */
     public long count() {
         String sql = buildCountQuery();
         try (ResultSet rs = sqlExecutor.executeQuery(sql, parameters.toArray())) {
@@ -140,9 +150,9 @@ public class EntityQueryBuilder<T> {
         }
     }
 
-    private String buildSelectQuery() {
+    private String buildSelectQuery(int limit, int offset) {
         StringBuilder sql = new StringBuilder("SELECT * FROM ").append(databasePrefix).append(tableName);
-        appendClauses(sql);
+        appendClauses(sql, true, limit, offset);
         return sql.toString();
     }
 
@@ -154,15 +164,36 @@ public class EntityQueryBuilder<T> {
 
     private String buildDeleteQuery() {
         StringBuilder sql = new StringBuilder("DELETE FROM ").append(databasePrefix).append(tableName);
-        appendClauses(sql, false); // No ORDER BY or LIMIT for delete
+        if (limitValue > 0 || offsetValue > 0) {
+            return buildBoundedDeleteQuery(sql);
+        }
+        appendClauses(sql, false); // No ORDER BY or LIMIT for a delete the caller did not bound
         return sql.toString();
     }
 
-    private void appendClauses(StringBuilder sql) {
-        appendClauses(sql, true);
+    /**
+     * DELETE ... LIMIT is not portable, so a paged delete deletes the rows of a bounded subquery instead.
+     * The extra derived table is what MySQL needs before it allows the target table in the subquery.
+     * Without an id column the rows cannot be bounded, and deleting them all is not what the caller asked for.
+     */
+    private String buildBoundedDeleteQuery(StringBuilder sql) {
+        String idColumn = getIdColumnName();
+        if (idColumn == null) {
+            throw new IllegalStateException("Cannot apply limit/offset to a delete on " + entityClass.getName()
+                    + " because it has no @Id field to bound the deleted rows with");
+        }
+        StringBuilder bounded = new StringBuilder("SELECT ").append(idColumn).append(" FROM (SELECT ")
+                .append(idColumn).append(" FROM ").append(databasePrefix).append(tableName);
+        appendClauses(bounded, true);
+        bounded.append(") AS bounded_rows");
+        return sql.append(" WHERE ").append(idColumn).append(" IN (").append(bounded).append(")").toString();
     }
 
     private void appendClauses(StringBuilder sql, boolean includeOrderByAndLimit) {
+        appendClauses(sql, includeOrderByAndLimit, limitValue, offsetValue);
+    }
+
+    private void appendClauses(StringBuilder sql, boolean includeOrderByAndLimit, int limit, int offset) {
         if (!conditions.isEmpty()) {
             sql.append(" WHERE ").append(String.join(" ", conditions));
         }
@@ -170,54 +201,138 @@ public class EntityQueryBuilder<T> {
             if (!orderByColumns.isEmpty()) {
                 sql.append(" ORDER BY ").append(String.join(", ", orderByColumns));
             }
-            if (limitValue > 0) {
-                sql.append(" LIMIT ").append(limitValue);
+            if (limit > 0) {
+                sql.append(" LIMIT ").append(limit);
             }
-            if (offsetValue > 0) {
-                sql.append(" OFFSET ").append(offsetValue);
+            if (offset > 0) {
+                sql.append(" OFFSET ").append(offset);
             }
         }
     }
 
     private String getTableName(Class<?> entityClass) {
         if (entityClass.isAnnotationPresent(Table.class)) {
-            return entityClass.getAnnotation(Table.class).name();
+            String annotated = entityClass.getAnnotation(Table.class).name();
+            if (annotated != null && !annotated.isEmpty()) {
+                return annotated;
+            }
         }
         return entityClass.getSimpleName().toLowerCase();
     }
 
-    private String getColumnName(String fieldName) {
-        String result;
-        try {
-            Field field = entityClass.getDeclaredField(fieldName);
-            if (field.isAnnotationPresent(Column.class)) {
-                result = field.getAnnotation(Column.class).name();
-            } else {
-                result = fieldName;
+    private String getIdColumnName() {
+        for (Field field : entityClass.getDeclaredFields()) {
+            if (field.isAnnotationPresent(Id.class)) {
+                return resolveColumnName(field);
             }
-        } catch (NoSuchFieldException e) {
-            result = fieldName;
         }
+        return null;
+    }
+
+    private String getColumnName(String fieldName) {
+        Field field = findDeclaredField(fieldName);
+        if (field == null) {
+            throw new IllegalArgumentException("Entity " + entityClass.getName() + " has no field '" + fieldName
+                    + "'; queryable fields: " + getDeclaredFieldNames());
+        }
+        String result = resolveColumnName(field);
         SqlSafe.validateIdentifier(result);
         return result;
     }
 
+    private String resolveColumnName(Field field) {
+        if (field.isAnnotationPresent(Column.class)) {
+            String annotated = field.getAnnotation(Column.class).name();
+            if (annotated != null && !annotated.isEmpty()) {
+                return annotated;
+            }
+        }
+        return field.getName();
+    }
+
+    private Field findDeclaredField(String fieldName) {
+        for (Field field : entityClass.getDeclaredFields()) {
+            if (field.getName().equals(fieldName)) {
+                return field;
+            }
+        }
+        return null;
+    }
+
+    private String getDeclaredFieldNames() {
+        List<String> names = new ArrayList<>();
+        for (Field field : entityClass.getDeclaredFields()) {
+            names.add(field.getName());
+        }
+        return names.toString();
+    }
+
+    /** Mirrors the mapping {@code RepositoryProxy} does, so both paths return equally populated entities. */
     private T mapResultSetToEntity(ResultSet rs) {
         try {
             T entity = entityClass.getDeclaredConstructor().newInstance();
             for (Field field : entityClass.getDeclaredFields()) {
-                if (field.isAnnotationPresent(Column.class)) {
-                    field.setAccessible(true);
-                    String columnName = field.getAnnotation(Column.class).name();
-                    Object value = rs.getObject(columnName);
-                    if (value != null) {
-                        field.set(entity, value);
-                    }
+                if (!field.isAnnotationPresent(Column.class) && !field.isAnnotationPresent(Id.class)) {
+                    continue;
+                }
+                field.setAccessible(true);
+                Object value = readColumn(rs, field);
+                if (value != null) {
+                    field.set(entity, FieldTypeCaster.castToFieldType(field.getType(), value));
                 }
             }
+            invokeLifecycleMethod(entity, PostLoad.class);
             return entity;
         } catch (Exception e) {
             throw new RuntimeException("Error mapping ResultSet to entity", e);
+        }
+    }
+
+    /** First value found under any column name this field may be stored as, so an id declared only with
+     * {@link Id} and a snake_case column both resolve. */
+    private Object readColumn(ResultSet rs, Field field) {
+        for (String columnName : getPossibleColumnNames(field)) {
+            try {
+                Object value = rs.getObject(columnName);
+                if (value != null) return value;
+            } catch (SQLException ignored) {
+            }
+        }
+        return null;
+    }
+
+    private List<String> getPossibleColumnNames(Field field) {
+        List<String> names = new ArrayList<>();
+        if (field.isAnnotationPresent(Column.class)) {
+            String annotated = field.getAnnotation(Column.class).name();
+            if (annotated != null && !annotated.isEmpty()) names.add(annotated);
+        }
+        String camel = field.getName();
+        names.add(camel);
+        StringBuilder snake = new StringBuilder();
+        for (int i = 0; i < camel.length(); i++) {
+            char c = camel.charAt(i);
+            if (Character.isUpperCase(c)) {
+                snake.append('_').append(Character.toLowerCase(c));
+            } else {
+                snake.append(c);
+            }
+        }
+        String snakeStr = snake.toString();
+        if (!snakeStr.equals(camel)) names.add(snakeStr);
+        return names;
+    }
+
+    private void invokeLifecycleMethod(Object entity, Class<? extends Annotation> lifecycleAnnotation) {
+        for (Method method : entity.getClass().getDeclaredMethods()) {
+            if (method.isAnnotationPresent(lifecycleAnnotation)) {
+                try {
+                    method.setAccessible(true);
+                    method.invoke(entity);
+                } catch (Exception e) {
+                    throw new RuntimeException("Error invoking lifecycle method: " + method.getName(), e);
+                }
+            }
         }
     }
 }
