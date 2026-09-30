@@ -28,7 +28,8 @@ public class BackupManager implements Service {
         return CompletableFuture.completedFuture(null);
     }
 
-    private Map<String, FileBackup> fileBackupList;
+    // always a ConcurrentHashMap: the scheduler thread iterates this while setFileBackupList may swap it
+    private volatile Map<String, FileBackup> fileBackupList;
     private int numberOfBackUpsBeforeDeleting;
     private volatile boolean backupSchedulerEnabled = true;
     private final long backupRepeatTimeInSeconds;
@@ -82,7 +83,10 @@ public class BackupManager implements Service {
         File[] filesInBackupFolder = backup.getDestinationPathToBackupToo().listFiles();
         if (filesInBackupFolder != null) {
             for (File f : filesInBackupFolder) {
-                if ((f.getParentFile().getName() + "/" + f.getName()).contains(backup.getIdentifier() + "_"))
+                // the backup folder can be deleted while we walk the listing, so nothing in it can be trusted
+                File parent = f.getParentFile();
+                if (parent == null || !f.exists()) continue;
+                if ((parent.getName() + "/" + f.getName()).contains(backup.getIdentifier() + "_"))
                     backup.addBackupDone(f);
             }
         }
@@ -139,7 +143,8 @@ public class BackupManager implements Service {
     }
 
     public void setFileBackupList(Map<String, FileBackup> fileBackupList) {
-        this.fileBackupList = fileBackupList;
+        // copied into a concurrent map, so the scheduler thread can keep iterating a weakly consistent view
+        this.fileBackupList = fileBackupList == null ? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(fileBackupList);
     }
 
     public int getNumberOfBackUpsBeforeDeleting() {
