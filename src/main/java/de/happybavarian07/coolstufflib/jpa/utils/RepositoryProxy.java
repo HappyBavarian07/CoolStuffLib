@@ -1,5 +1,6 @@
 package de.happybavarian07.coolstufflib.jpa.utils;
 
+import de.happybavarian07.coolstufflib.cache.CacheManager;
 import de.happybavarian07.coolstufflib.jpa.SQLExecutor;
 import de.happybavarian07.coolstufflib.jpa.annotations.*;
 import de.happybavarian07.coolstufflib.jpa.cache.EntityCache;
@@ -28,16 +29,18 @@ public class RepositoryProxy implements InvocationHandler {
     private final ElementCollectionHandler elementCollectionHandler;
     private String databasePrefix;
 
-    private RepositoryProxy(Class<?> repositoryInterface, String databasePrefix, SQLExecutor sqlExecutor, JavaPlugin plugin) {
+    private RepositoryProxy(Class<?> repositoryInterface, String databasePrefix, SQLExecutor sqlExecutor, JavaPlugin plugin, CacheManager cacheManager) {
         this.repositoryInterface = repositoryInterface;
         this.databasePrefix = databasePrefix;
         this.sqlExecutor = sqlExecutor;
         this.plugin = plugin;
-        this.transactionManager = new TransactionManager(sqlExecutor);
+        // A rollback discards the writes of every repository in the transaction, not just this one's, so the
+        // hook drops all entity caches; only the outermost transaction runs it.
+        this.transactionManager = new TransactionManager(sqlExecutor, EntityCache::invalidateAll);
         Class<?> entityClass = getEntityClassFromRepository();
         CacheConfig cacheConfig = entityClass.getAnnotation(CacheConfig.class);
         if (cacheConfig != null && cacheConfig.enabled()) {
-            this.entityCache = new EntityCache<>(cacheConfig.maxSize());
+            this.entityCache = EntityCache.register(entityClass, cacheConfig.maxSize(), cacheManager);
         } else {
             this.entityCache = null;
         }
@@ -45,12 +48,16 @@ public class RepositoryProxy implements InvocationHandler {
         this.persistenceHandler = new EntityPersistenceHandler(sqlExecutor, databasePrefix, elementCollectionHandler);
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends Repository<?, ?>> T create(Class<T> repositoryInterface, String databasePrefix, SQLExecutor sqlExecutor, JavaPlugin plugin) {
+        return create(repositoryInterface, databasePrefix, sqlExecutor, plugin, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends Repository<?, ?>> T create(Class<T> repositoryInterface, String databasePrefix, SQLExecutor sqlExecutor, JavaPlugin plugin, CacheManager cacheManager) {
         return (T) Proxy.newProxyInstance(
                 repositoryInterface.getClassLoader(),
                 new Class[]{repositoryInterface},
-                new RepositoryProxy(repositoryInterface, databasePrefix, sqlExecutor, plugin)
+                new RepositoryProxy(repositoryInterface, databasePrefix, sqlExecutor, plugin, cacheManager)
         );
     }
 
@@ -152,7 +159,7 @@ public class RepositoryProxy implements InvocationHandler {
         String statement = sql.toString().trim().toLowerCase(Locale.ROOT);
         if (!statement.startsWith("select") && !statement.startsWith("with")) {
             int changed = sqlExecutor.executeUpdate(sql.toString(), params.toArray());
-            if (entityCache != null) entityCache.clear();
+            EntityCache.invalidate(entityClass);
             if (returnType == int.class || returnType == Integer.class) return changed;
             if (returnType == long.class || returnType == Long.class) return (long) changed;
             if (returnType == boolean.class || returnType == Boolean.class) return changed > 0;
@@ -225,42 +232,99 @@ public class RepositoryProxy implements InvocationHandler {
                 return findAllById(entityClass, (Iterable<?>) args[0]);
             }
             if (methodName.startsWith("findBy") || methodName.startsWith("findAllBy")) {
-                List<Object> results = findByFields(entityClass, methodName.replaceFirst("find(All)?By", ""), args);
-                if (results == null) return null;
+                List<Object> results = findByFields(method, entityClass, methodName.replaceFirst("find(All)?By", ""), args);
                 if (method.getReturnType().isAssignableFrom(List.class)) return results;
                 return results.isEmpty() ? null : results.get(0);
             }
-            return null;
+            throw unparseableQuery(method, methodName, "it is not a supported find method name");
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException("Error in find method", e);
         }
     }
 
-    /** Entities whose fields (e.g. {@code NameAndCoins}) equal the arguments, or null if the argument count differs. */
-    private List<Object> findByFields(Class<?> entityClass, String fieldsPart, Object[] args) throws Exception {
-        String tableName = EntityReflectionUtil.getTableName(entityClass);
+    /** Operators the library cannot translate; only {@code And}-chained equality is built. */
+    private static final List<String> UNSUPPORTED_OPERATORS = List.of("GreaterThanEqual", "LessThanEqual", "GreaterThan",
+            "LessThan", "StartingWith", "EndingWith", "Containing", "IgnoreCase", "IsNotNull", "NotIn", "NotLike",
+            "Between", "OrderBy", "Distinct", "Or", "Not", "In", "Null", "Like", "After", "Before", "Top", "First",
+            "True", "False");
+
+    /**
+     * <p>The operator a field name encodes, if any. Index 0 is ignored so fields such as {@code Orders} or
+     * {@code Notes} keep working.</p>
+     */
+    private static String unsupportedOperator(String fieldName) {
+        for (String operator : UNSUPPORTED_OPERATORS) {
+            if (fieldName.indexOf(operator) > 0) return operator;
+        }
+        return null;
+    }
+
+    /** <p>Throws {@link UnsupportedQueryMethodException} unless the fields part is a chain of
+     * {@code And}-joined field names with one argument each.</p> */
+    private String[] validateDerivedFields(Method method, String fieldsPart, Object[] args) {
+        int argCount = args == null ? 0 : args.length;
         String[] fieldNames = fieldsPart.split("And");
-        if (fieldNames.length != (args == null ? 0 : args.length)) return null;
+        if (fieldNames.length != argCount) {
+            throw unparseableQuery(method, fieldsPart, "it names " + fieldNames.length + " field(s) but takes "
+                    + argCount + " argument(s)");
+        }
+        for (String fieldName : fieldNames) {
+            if (fieldName.isEmpty()) throw unparseableQuery(method, fieldsPart, "it names an empty field");
+        }
+        return fieldNames;
+    }
+
+    private UnsupportedQueryMethodException unparseableQuery(Method method, String methodName, String reason) {
+        for (String fieldName : methodName.split("And")) {
+            String operator = unsupportedOperator(fieldName);
+            if (operator != null) {
+                reason = "it uses the unsupported operator '" + operator + "'";
+                break;
+            }
+        }
+        return new UnsupportedQueryMethodException("Repository method " + repositoryInterface.getSimpleName() + "."
+                + method.getName() + " cannot be turned into a query: " + reason + ". Supported derived queries are "
+                + "And-chained equality only, e.g. findByField, findByFieldAndOtherField, findAllByField, "
+                + "countByField, countColumnsByField, deleteByField and deleteAllByField (each with as many "
+                + "And-chained fields as the method has parameters).");
+    }
+
+    /** <p>The declared field a derived-query name refers to, by field name or by {@link Column} name, or null.</p> */
+    private Field findQueryField(Class<?> entityClass, String name) {
+        for (Field f : entityClass.getDeclaredFields()) {
+            if (f.getName().equalsIgnoreCase(name)) {
+                return f;
+            }
+            Column col = f.getAnnotation(Column.class);
+            if (col != null && !col.name().isEmpty() && col.name().equalsIgnoreCase(name)) {
+                return f;
+            }
+        }
+        return null;
+    }
+
+    /** <p>The Java name a derived-query field token stands for, with {@code Id} answered by the id column name.</p> */
+    private String queryFieldName(Class<?> entityClass, String fieldName) {
+        String javaFieldName = Character.toLowerCase(fieldName.charAt(0)) + fieldName.substring(1);
+        if (javaFieldName.equals("id")) {
+            javaFieldName = EntityReflectionUtil.getIdColumnName(entityClass);
+        }
+        return javaFieldName;
+    }
+
+    /** Entities whose fields (e.g. {@code NameAndCoins}) equal the arguments. */
+    private List<Object> findByFields(Method method, Class<?> entityClass, String fieldsPart, Object[] args) throws Exception {
+        String tableName = EntityReflectionUtil.getTableName(entityClass);
+        String[] fieldNames = validateDerivedFields(method, fieldsPart, args);
         StringBuilder whereClause = new StringBuilder();
         List<Object> queryArgs = new ArrayList<>();
         for (int i = 0; i < fieldNames.length; i++) {
-            String javaFieldName = Character.toLowerCase(fieldNames[i].charAt(0)) + fieldNames[i].substring(1);
-            if (javaFieldName.equals("id")) {
-                javaFieldName = EntityReflectionUtil.getIdColumnName(entityClass);
-            }
-            Field field = null;
-            for (Field f : entityClass.getDeclaredFields()) {
-                if (f.getName().equalsIgnoreCase(javaFieldName)) {
-                    field = f;
-                    break;
-                }
-                Column col = f.getAnnotation(Column.class);
-                if (col != null && !col.name().isEmpty() && col.name().equalsIgnoreCase(javaFieldName)) {
-                    field = f;
-                    break;
-                }
-            }
-            if (field == null) throw new RuntimeException("Field not found: " + javaFieldName);
+            String javaFieldName = queryFieldName(entityClass, fieldNames[i]);
+            Field field = findQueryField(entityClass, javaFieldName);
+            if (field == null) throw unparseableQuery(method, fieldsPart, "'" + javaFieldName + "' is not a field of "
+                    + entityClass.getSimpleName());
             List<String> possibleNames = getPossibleColumnNames(field);
             String columnName = possibleNames.get(0);
             if (i > 0) whereClause.append(" AND ");
@@ -296,75 +360,65 @@ public class RepositoryProxy implements InvocationHandler {
     }
 
     private Object handleCountByMethod(Method method, Object[] args) {
-        Class<?> entityClass = getEntityClassFromRepository();
-        String tableName = EntityReflectionUtil.getTableName(entityClass);
-        String fieldsPart = method.getName().substring("countBy".length());
-        String[] fieldNames = fieldsPart.split("And");
-        if (args.length != fieldNames.length) {
-            throw new IllegalArgumentException("Argument count does not match field count for method: " + method.getName());
-        }
-        StringBuilder whereClause = new StringBuilder();
-        for (int i = 0; i < fieldNames.length; i++) {
-            String columnName = Character.toLowerCase(fieldNames[i].charAt(0)) + fieldNames[i].substring(1);
-            if (columnName.equals("id")) {
-                columnName = EntityReflectionUtil.getIdColumnName(entityClass);
+        try {
+            Class<?> entityClass = getEntityClassFromRepository();
+            String tableName = EntityReflectionUtil.getTableName(entityClass);
+            String fieldsPart = method.getName().substring("countBy".length());
+            String[] fieldNames = validateDerivedFields(method, fieldsPart, args);
+            StringBuilder whereClause = new StringBuilder();
+            for (int i = 0; i < fieldNames.length; i++) {
+                String columnName = queryFieldName(entityClass, fieldNames[i]);
+                if (findQueryField(entityClass, columnName) == null) {
+                    throw unparseableQuery(method, fieldsPart, "'" + columnName + "' is not a field of "
+                            + entityClass.getSimpleName());
+                }
+                if (i > 0) whereClause.append(" AND ");
+                whereClause.append(columnName).append(" = ?");
             }
-            if (i > 0) whereClause.append(" AND ");
-            whereClause.append(columnName).append(" = ?");
-        }
-        String sql = "SELECT COUNT(*) FROM " + databasePrefix + tableName + " WHERE " + whereClause;
-        try (ResultSet rs = sqlExecutor.executeQuery(sql, args)) {
-            if (rs.next()) {
-                Object count = rs.getLong(1);
-                return FieldTypeCaster.castToFieldType(method.getReturnType(), count);
+            String sql = "SELECT COUNT(*) FROM " + databasePrefix + tableName + " WHERE " + whereClause;
+            try (ResultSet rs = sqlExecutor.executeQuery(sql, args)) {
+                if (rs.next()) {
+                    Object count = rs.getLong(1);
+                    return FieldTypeCaster.castToFieldType(method.getReturnType(), count);
+                }
+                return FieldTypeCaster.castToFieldType(method.getReturnType(), 0L);
             }
-            return FieldTypeCaster.castToFieldType(method.getReturnType(), 0L);
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException("Error in countBy method", e);
         }
     }
 
     private Object handleCountColumnsMethod(Method method, Object[] args) {
-        Class<?> entityClass = getEntityClassFromRepository();
-        String tableName = EntityReflectionUtil.getTableName(entityClass);
-        String fieldsPart = method.getName().substring("countColumnsBy".length());
-        String[] fieldNames = fieldsPart.split("And");
-        if (args.length != fieldNames.length) {
-            throw new IllegalArgumentException("Argument count does not match field count for method: " + method.getName());
-        }
-        StringBuilder whereClause = new StringBuilder();
-        List<Object> queryArgs = new ArrayList<>();
-        for (int i = 0; i < fieldNames.length; i++) {
-            String javaFieldName = Character.toLowerCase(fieldNames[i].charAt(0)) + fieldNames[i].substring(1);
-            if (javaFieldName.equals("id")) {
-                javaFieldName = EntityReflectionUtil.getIdColumnName(entityClass);
+        try {
+            Class<?> entityClass = getEntityClassFromRepository();
+            String tableName = EntityReflectionUtil.getTableName(entityClass);
+            String fieldsPart = method.getName().substring("countColumnsBy".length());
+            String[] fieldNames = validateDerivedFields(method, fieldsPart, args);
+            StringBuilder whereClause = new StringBuilder();
+            List<Object> queryArgs = new ArrayList<>();
+            for (int i = 0; i < fieldNames.length; i++) {
+                String javaFieldName = queryFieldName(entityClass, fieldNames[i]);
+                Field field = findQueryField(entityClass, javaFieldName);
+                if (field == null) throw unparseableQuery(method, fieldsPart, "'" + javaFieldName + "' is not a field of "
+                        + entityClass.getSimpleName());
+                List<String> possibleNames = getPossibleColumnNames(field);
+                String columnName = possibleNames.get(0);
+                if (i > 0) whereClause.append(" AND ");
+                whereClause.append(columnName).append(" = ?");
+                queryArgs.add(args[i]);
             }
-            Field field = null;
-            for (Field f : entityClass.getDeclaredFields()) {
-                if (f.getName().equalsIgnoreCase(javaFieldName)) {
-                    field = f;
-                    break;
+            String sql = "SELECT COUNT(*) FROM " + databasePrefix + tableName + " WHERE " + whereClause;
+            try (ResultSet rs = sqlExecutor.executeQuery(sql, queryArgs.toArray())) {
+                if (rs.next()) {
+                    Object count = rs.getLong(1);
+                    return FieldTypeCaster.castToFieldType(method.getReturnType(), count);
                 }
-                Column col = f.getAnnotation(Column.class);
-                if (col != null && !col.name().isEmpty() && col.name().equalsIgnoreCase(javaFieldName)) {
-                    field = f;
-                    break;
-                }
+                return FieldTypeCaster.castToFieldType(method.getReturnType(), 0L);
             }
-            if (field == null) throw new RuntimeException("Field not found: " + javaFieldName);
-            List<String> possibleNames = getPossibleColumnNames(field);
-            String columnName = possibleNames.get(0);
-            if (i > 0) whereClause.append(" AND ");
-            whereClause.append(columnName).append(" = ?");
-            queryArgs.add(args[i]);
-        }
-        String sql = "SELECT COUNT(*) FROM " + databasePrefix + tableName + " WHERE " + whereClause;
-        try (ResultSet rs = sqlExecutor.executeQuery(sql, queryArgs.toArray())) {
-            if (rs.next()) {
-                Object count = rs.getLong(1);
-                return FieldTypeCaster.castToFieldType(method.getReturnType(), count);
-            }
-            return FieldTypeCaster.castToFieldType(method.getReturnType(), 0L);
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException("Error in countColumns method", e);
         }
@@ -399,11 +453,7 @@ public class RepositoryProxy implements InvocationHandler {
                 Iterable<?> entities = argCount == 0 ? findAll(entityClass) : (Iterable<?>) args[0];
                 for (Object entity : entities) deleteEntity(entityClass, entity);
             } else if (methodName.startsWith("deleteBy") || methodName.startsWith("deleteAllBy")) {
-                List<Object> matches = findByFields(entityClass, methodName.replaceFirst("delete(All)?By", ""), args);
-                if (matches == null) {
-                    throw new UnsupportedOperationException("Repository method " + methodName + " has " + argCount
-                            + " parameters but names a different number of fields");
-                }
+                List<Object> matches = findByFields(method, entityClass, methodName.replaceFirst("delete(All)?By", ""), args);
                 for (Object entity : matches) deleteEntity(entityClass, entity);
             } else {
                 throw new UnsupportedOperationException("Repository method " + repositoryInterface.getSimpleName() + "."
@@ -419,9 +469,7 @@ public class RepositoryProxy implements InvocationHandler {
 
     private void deleteEntity(Class<?> entityClass, Object entity) {
         persistenceHandler.deleteEntity(entityClass, entity);
-        if (entityCache != null) {
-            entityCache.remove(EntityReflectionUtil.getEntityId(entity));
-        }
+        EntityCache.invalidate(entityClass, EntityReflectionUtil.getEntityId(entity));
     }
 
     private Optional<?> findEntityById(Class<?> entityClass, Object id) {
@@ -441,9 +489,7 @@ public class RepositoryProxy implements InvocationHandler {
                     exists = (existing instanceof Optional<?> opt) && opt.isPresent();
                 }
                 Object savedEntity = exists ? persistenceHandler.updateEntity(entityClass, entity) : persistenceHandler.insertEntity(entityClass, entity);
-                if (entityCache != null) {
-                    entityCache.put(EntityReflectionUtil.getEntityId(savedEntity), savedEntity);
-                }
+                EntityCache.invalidate(entityClass, EntityReflectionUtil.getEntityId(savedEntity));
                 return savedEntity;
             } else if ("saveAll".equals(method.getName()) && args.length == 1) {
                 Class<?> entityClass = getEntityClassFromRepository();
@@ -456,9 +502,7 @@ public class RepositoryProxy implements InvocationHandler {
                         exists = (existing instanceof Optional<?> opt) && opt.isPresent();
                     }
                     Object saved = exists ? persistenceHandler.updateEntity(entityClass, entity) : persistenceHandler.insertEntity(entityClass, entity);
-                    if (entityCache != null) {
-                        entityCache.put(EntityReflectionUtil.getEntityId(saved), saved);
-                    }
+                    EntityCache.invalidate(entityClass, EntityReflectionUtil.getEntityId(saved));
                     savedEntities.add(saved);
                 }
                 return savedEntities;
@@ -505,7 +549,9 @@ public class RepositoryProxy implements InvocationHandler {
     private Object handleInsertMethod(Method method, Object[] args) {
         Class<?> entityClass = getEntityClassFromRepository();
         if (args.length == 1) {
-            return persistenceHandler.insertEntity(entityClass, args[0]);
+            Object inserted = persistenceHandler.insertEntity(entityClass, args[0]);
+            EntityCache.invalidate(entityClass, EntityReflectionUtil.getEntityId(inserted));
+            return inserted;
         }
         return null;
     }
@@ -513,7 +559,9 @@ public class RepositoryProxy implements InvocationHandler {
     private Object handleUpdateMethod(Method method, Object[] args) {
         Class<?> entityClass = getEntityClassFromRepository();
         if (args.length == 1) {
-            return persistenceHandler.updateEntity(entityClass, args[0]);
+            Object updated = persistenceHandler.updateEntity(entityClass, args[0]);
+            EntityCache.invalidate(entityClass, EntityReflectionUtil.getEntityId(updated));
+            return updated;
         }
         return null;
     }
@@ -532,6 +580,7 @@ public class RepositoryProxy implements InvocationHandler {
                             try {
                                 field.set(obj, args[1]);
                                 persistenceHandler.updateEntity(entityClass, obj);
+                                EntityCache.invalidate(entityClass, EntityReflectionUtil.getEntityId(obj));
                                 return obj;
                             } catch (Exception e) {
                                 throw new RuntimeException("Error setting field value", e);
@@ -808,5 +857,15 @@ public class RepositoryProxy implements InvocationHandler {
      */
     public TransactionManager getTransactionManager() {
         return transactionManager;
+    }
+
+    /**
+     * <p>Thrown when a repository method name cannot be turned into a query the library can build. A derived
+     * query never returns null for this reason; a method the library cannot parse has to be fixed.</p>
+     */
+    public static class UnsupportedQueryMethodException extends UnsupportedOperationException {
+        public UnsupportedQueryMethodException(String message) {
+            super(message);
+        }
     }
 }

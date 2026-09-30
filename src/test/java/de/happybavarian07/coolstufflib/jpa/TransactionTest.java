@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -40,6 +41,88 @@ class TransactionTest {
         when(statement.executeQuery()).thenReturn(resultSet);
         executor = new SQLExecutor(controller, null);
         executor.setDefaultConnection("default");
+    }
+
+    @Test
+    void rollbackListenerRunsWhenTheTransactionFails() throws Throwable {
+        AtomicInteger rollbacks = new AtomicInteger();
+        TransactionManager tm = new TransactionManager(executor, rollbacks::incrementAndGet);
+
+        assertThrows(IllegalStateException.class, () -> tm.executeInTransaction(work(), null, () -> {
+            throw new IllegalStateException("boom");
+        }));
+
+        verify(connection).rollback();
+        assertEquals(1, rollbacks.get());
+    }
+
+    @Test
+    void rollbackListenerRunsWhenRollbackOnlyIsSet() throws Throwable {
+        AtomicInteger rollbacks = new AtomicInteger();
+        TransactionManager tm = new TransactionManager(executor, rollbacks::incrementAndGet);
+
+        tm.executeInTransaction(work(), null, () -> {
+            tm.setRollbackOnly();
+            return null;
+        });
+
+        verify(connection).rollback();
+        verify(connection, never()).commit();
+        assertEquals(1, rollbacks.get());
+    }
+
+    @Test
+    void rollbackListenerRunsOnASavepointRollback() throws Throwable {
+        AtomicInteger outerRollbacks = new AtomicInteger();
+        AtomicInteger innerRollbacks = new AtomicInteger();
+        TransactionManager outer = new TransactionManager(executor, outerRollbacks::incrementAndGet);
+        TransactionManager inner = new TransactionManager(executor, innerRollbacks::incrementAndGet);
+
+        assertThrows(IllegalStateException.class, () -> outer.executeInTransaction(work(), null, () ->
+                inner.executeInTransaction(work(), null, () -> {
+                    throw new IllegalStateException("boom");
+                })));
+
+        assertEquals(1, innerRollbacks.get());
+        assertEquals(1, outerRollbacks.get());
+    }
+
+    @Test
+    void rollbackListenerIsNotCalledOnCommit() throws Throwable {
+        AtomicInteger rollbacks = new AtomicInteger();
+        TransactionManager tm = new TransactionManager(executor, rollbacks::incrementAndGet);
+
+        tm.executeInTransaction(work(), null, () -> null);
+
+        verify(connection).commit();
+        assertEquals(0, rollbacks.get());
+    }
+
+    @Test
+    void rollbackListenerIsNotCalledForACommittingCheckedException() throws Throwable {
+        AtomicInteger rollbacks = new AtomicInteger();
+        TransactionManager tm = new TransactionManager(executor, rollbacks::incrementAndGet);
+
+        assertThrows(java.io.IOException.class, () -> tm.executeInTransaction(work(), null, () -> {
+            throw new java.io.IOException("checked");
+        }));
+
+        verify(connection).commit();
+        assertEquals(0, rollbacks.get());
+    }
+
+    @Test
+    void failingRollbackListenerDoesNotReplaceTheOriginalFailure() throws Throwable {
+        TransactionManager tm = new TransactionManager(executor, () -> {
+            throw new IllegalStateException("listener failed");
+        });
+
+        IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> tm.executeInTransaction(work(), null, () -> {
+            throw new IllegalStateException("boom");
+        }));
+
+        assertEquals("boom", thrown.getMessage());
+        assertEquals(1, thrown.getSuppressed().length);
     }
 
     @Test

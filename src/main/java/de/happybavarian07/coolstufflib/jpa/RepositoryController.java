@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import de.happybavarian07.coolstufflib.CoolStuffLib;
+import de.happybavarian07.coolstufflib.cache.CacheManager;
 import de.happybavarian07.coolstufflib.jpa.annotations.*;
 import de.happybavarian07.coolstufflib.jpa.connection.ConnectionPool;
 import de.happybavarian07.coolstufflib.jpa.exceptions.MySQLSystemExceptions;
@@ -29,6 +31,7 @@ public class RepositoryController {
     private final DatabaseProperties dbProperties;
     private final File defaultRegistrationFile;
     private final Map<String, ConnectionPool> connectionPools = new HashMap<>();
+    private CacheManager cacheManager;
 
     public RepositoryController(JavaPlugin plugin, File defaultRegistrationFile, DatabaseProperties dbProperties) {
         this.plugin = plugin;
@@ -127,7 +130,7 @@ public class RepositoryController {
             throw new IllegalArgumentException("Entity class must be annotated with @Entity and @Table");
         }
 
-        T repository = RepositoryProxy.create(repositoryInterface, dbProperties.getDatabasePrefix(), sqlExecutor, plugin);
+        T repository = RepositoryProxy.create(repositoryInterface, dbProperties.getDatabasePrefix(), sqlExecutor, plugin, cacheManager());
         repositories.put(repositoryInterface, repository);
         entityClasses.put(entityClass.getName(), entityClass);
 
@@ -209,6 +212,37 @@ public class RepositoryController {
             return true;
         }
         return false;
+    }
+
+    /**
+     * <p>Sets the cache manager the entity caches of this controller's entities are registered with, so
+     * {@code clearAll}, {@code removeCache} and {@code shutdown} reach them.</p>
+     *
+     * <pre><code>controller.setCacheManager(coolStuffLib.getCacheManager());</code></pre>
+     *
+     * @param cacheManager The cache manager, or null to use the library singleton
+     */
+    public void setCacheManager(CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
+    }
+
+    public CacheManager getCacheManager() {
+        return cacheManager;
+    }
+
+    /**
+     * <p>The library singleton only exists once the plugin built it, which is after this controller was created,
+     * so the lookup happens per registration and not in the constructor.</p>
+     */
+    private CacheManager cacheManager() {
+        if (cacheManager == null) {
+            try {
+                cacheManager = CoolStuffLib.getLib().getCacheManager();
+            } catch (RuntimeException libraryNotInitialized) {
+                return null;
+            }
+        }
+        return cacheManager;
     }
 
     /**

@@ -8,15 +8,23 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class TransactionManager {
     private final SQLExecutor sqlExecutor;
     private final ThreadLocal<TransactionContext> currentTransaction = new ThreadLocal<>();
-    private final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
+    private final Runnable rollbackListener;
 
     public TransactionManager(SQLExecutor sqlExecutor) {
+        this(sqlExecutor, null);
+    }
+
+    /**
+     * @param rollbackListener Run whenever a rollback discards writes, so out-of-transaction state such as a
+     *                         cache does not keep the discarded values. May be {@code null}.
+     */
+    public TransactionManager(SQLExecutor sqlExecutor, Runnable rollbackListener) {
         this.sqlExecutor = sqlExecutor;
+        this.rollbackListener = rollbackListener;
     }
 
     public <T> T executeInTransaction(Method method, Object[] args, TransactionalOperation<T> operation) throws Throwable {
@@ -55,12 +63,14 @@ public class TransactionManager {
                 connection.commit();
             } else {
                 connection.rollback();
+                fireRollbackListener(null);
             }
 
             return result;
         } catch (Throwable e) {
+            boolean rolledBack = shouldRollback(annotation, e);
             try {
-                if (shouldRollback(annotation, e)) {
+                if (rolledBack) {
                     connection.rollback();
                 } else {
                     connection.commit();
@@ -68,6 +78,7 @@ public class TransactionManager {
             } catch (SQLException completionFailure) {
                 e.addSuppressed(completionFailure);
             }
+            if (rolledBack) fireRollbackListener(e);
             throw e;
         } finally {
             try {
@@ -91,14 +102,26 @@ public class TransactionManager {
 
             if (context != null && context.isRollbackOnly()) {
                 connection.rollback(savepoint);
+                fireRollbackListener(null);
             }
 
             return result;
         } catch (Throwable e) {
             if (savepoint != null && shouldRollback(annotation, e)) {
                 connection.rollback(savepoint);
+                fireRollbackListener(e);
             }
             throw e;
+        }
+    }
+
+    /** A failing listener must never replace the failure that caused the rollback. */
+    private void fireRollbackListener(Throwable pendingFailure) {
+        if (rollbackListener == null) return;
+        try {
+            rollbackListener.run();
+        } catch (RuntimeException listenerFailure) {
+            if (pendingFailure != null) pendingFailure.addSuppressed(listenerFailure);
         }
     }
 
