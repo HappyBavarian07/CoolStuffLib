@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -167,6 +168,39 @@ class MenuActionDecoratorTest {
         verify(input).requestInput(eq(player), callback.capture());
         callback.getValue().accept("42");
         assertEquals(java.util.List.of("42"), received);
+    }
+
+    @Test
+    void promptWithoutChatInputServiceExplainsItselfAndKeepsTheMenuOpen() {
+        CoolStuffLib lib = mock(CoolStuffLib.class);
+        when(lib.requireService("chat-input-service", ChatInputService.class))
+                .thenThrow(new IllegalStateException("Service 'chat-input-service' is not registered"));
+
+        try (MockedStatic<CoolStuffLib> statics = mockStatic(CoolStuffLib.class)) {
+            statics.when(CoolStuffLib::getLib).thenReturn(lib);
+            MenuAction.prompt("Type:", (p, text) -> fail("no chat input can arrive")).execute(player, null);
+            statics.verify(() -> CoolStuffLib.logError(startsWith("MenuAction.prompt needs the chat-input-service"), any(Throwable.class)));
+        }
+
+        verify(player, never()).closeInventory();
+        verify(player).sendMessage("&cNo chat input available. The chat-input-service is not registered.");
+    }
+
+    @Test
+    void promptResolvesTheChatInputServiceOnlyOnce() {
+        CoolStuffLib lib = mock(CoolStuffLib.class);
+        ChatInputService input = mock(ChatInputService.class);
+        when(lib.requireService("chat-input-service", ChatInputService.class)).thenReturn(input);
+
+        try (MockedStatic<CoolStuffLib> statics = mockStatic(CoolStuffLib.class)) {
+            statics.when(CoolStuffLib::getLib).thenReturn(lib);
+            MenuAction action = MenuAction.prompt("Type:", (p, text) -> {});
+            action.execute(player, null);
+            action.execute(player, null);
+        }
+
+        verify(lib, times(1)).requireService("chat-input-service", ChatInputService.class);
+        verify(input, times(2)).requestInput(eq(player), any());
     }
 
     @Test

@@ -142,14 +142,35 @@ public interface MenuAction {
     /**
      * Closes the menu, sends {@code message} (if not null) and passes the player's next chat message to
      * {@code onInput} on the main thread. Reopen a menu from the handler if needed.
+     * <p>Needs the {@code chat-input-service}. Without it the click is refused with a message to the player
+     * and the menu stays open, instead of failing inside the click handler.
      * <pre><code>MenuAction.prompt("Type the new amount:", (p, text) -&gt; { setAmount(text); open(); })</code></pre>
      */
     static MenuAction prompt(String message, BiConsumer<Player, String> onInput) {
+        // the lookup result is remembered, so a missing service is not resolved (and logged) on every click
+        ChatInputService[] resolved = new ChatInputService[1];
+        boolean[] lookedUp = new boolean[1];
         return (player, event) -> {
-            ChatInputService input = CoolStuffLib.getLib().requireService("chat-input-service", ChatInputService.class);
+            if (!lookedUp[0]) {
+                resolved[0] = chatInputService();
+                lookedUp[0] = true;
+            }
+            if (resolved[0] == null) {
+                player.sendMessage("&cNo chat input available. The chat-input-service is not registered.");
+                return;
+            }
             player.closeInventory();
             if (message != null) player.sendMessage(message);
-            input.requestInput(player, text -> onInput.accept(player, text));
+            resolved[0].requestInput(player, text -> onInput.accept(player, text));
         };
+    }
+
+    private static ChatInputService chatInputService() {
+        try {
+            return CoolStuffLib.getLib().requireService("chat-input-service", ChatInputService.class);
+        } catch (RuntimeException e) {
+            CoolStuffLib.logError("MenuAction.prompt needs the chat-input-service, register it before using prompt(...)", e);
+            return null;
+        }
     }
 }
