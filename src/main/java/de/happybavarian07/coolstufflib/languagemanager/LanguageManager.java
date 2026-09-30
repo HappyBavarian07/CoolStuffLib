@@ -1663,11 +1663,13 @@ public class LanguageManager implements Service {
 
     public synchronized void startWatching() {
         if (watcher != null) return;
+        LanguageFileWatcher created = null;
         try {
-            watcher = new LanguageFileWatcher(langFolder.toPath(), 1000, this::reloadChanged);
-            watcher.start();
+            created = new LanguageFileWatcher(langFolder.toPath(), 1000, this::reloadChanged);
+            created.start();
+            watcher = created;
         } catch (IOException e) {
-            watcher = null;
+            if (created != null) created.close();
             getLogger().log(Level.WARNING, "Could not watch the language folder", e);
         }
     }

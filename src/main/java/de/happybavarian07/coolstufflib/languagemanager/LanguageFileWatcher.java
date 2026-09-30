@@ -3,9 +3,11 @@ package de.happybavarian07.coolstufflib.languagemanager;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import static java.nio.file.StandardWatchEventKinds.*;
@@ -69,6 +71,11 @@ public final class LanguageFileWatcher implements AutoCloseable {
             if (key != null) {
                 Path dir = (Path) key.watchable();
                 for (WatchEvent<?> event : key.pollEvents()) {
+                    if (event.kind() == OVERFLOW) {
+                        addEveryLanguage(pending);
+                        last = System.currentTimeMillis();
+                        continue;
+                    }
                     if (!(event.context() instanceof Path name)) continue;
                     Path changed = dir.resolve(name);
                     if (name.toString().endsWith(".tmp")) continue;
@@ -83,8 +90,20 @@ public final class LanguageFileWatcher implements AutoCloseable {
             } else if (!pending.isEmpty() && System.currentTimeMillis() - last >= debounceMillis) {
                 Set<String> languages = Set.copyOf(pending);
                 pending.clear();
-                onChange.accept(languages);
+                try {
+                    onChange.accept(languages);
+                } catch (RuntimeException e) {
+                    LanguageManager.getLogger().log(Level.WARNING, "Reloading the changed languages failed", e);
+                }
             }
+        }
+    }
+
+    /** Lost events cannot be attributed to a language, so every language counts as changed. */
+    private void addEveryLanguage(Set<String> pending) {
+        try (Stream<Path> children = Files.list(root)) {
+            children.map(child -> languageOf(child)).filter(Objects::nonNull).forEach(pending::add);
+        } catch (IOException ignored) {
         }
     }
 
