@@ -10,13 +10,19 @@ import org.jetbrains.annotations.NotNull;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <p>Utilities for creating and manipulating ItemStacks, including custom player heads.</p>
  */
 public final class ItemUtils {
+
+    private static final Pattern TEXTURE_URL = Pattern.compile("\"url\"\\s*:\\s*\"([^\"]+)\"");
 
     private ItemUtils() {}
 
@@ -59,12 +65,44 @@ public final class ItemUtils {
         return applyItemStackToProfile(headValue, head, meta);
     }
 
+    /**
+     * <p>Turns any common way of writing a head texture into the skin URL.</p>
+     *
+     * <ul>
+     *     <li>a full URL ({@code http://} or {@code https://}) is used as it is,</li>
+     *     <li>a Base64 value as copied from minecraft-heads.com or a {@code /give} command
+     *     ({@code eyJ0ZXh0dXJlcyI6...}) is decoded and its {@code url} is used,</li>
+     *     <li>anything else is the texture hash that follows {@code textures.minecraft.net/texture/}.</li>
+     * </ul>
+     *
+     * @param value the texture in one of the forms above
+     * @return the skin URL
+     * @throws MalformedURLException if the value is not a URL, has no texture URL inside its Base64 value, or is not
+     *                               valid Base64
+     */
+    public static URL textureUrl(String value) throws MalformedURLException {
+        String trimmed = value.trim();
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return new URL(trimmed);
+        if (trimmed.startsWith("eyJ")) {
+            String json;
+            try {
+                json = new String(Base64.getMimeDecoder().decode(trimmed), StandardCharsets.UTF_8);
+            } catch (IllegalArgumentException e) {
+                throw new MalformedURLException("Head value is not valid Base64: " + e.getMessage());
+            }
+            Matcher url = TEXTURE_URL.matcher(json);
+            if (!url.find()) throw new MalformedURLException("Head value has no texture url inside: " + json);
+            return new URL(url.group(1));
+        }
+        return new URL("https://textures.minecraft.net/texture/" + trimmed);
+    }
+
     @NotNull
     public static ItemStack applyItemStackToProfile(String headValue, ItemStack head, SkullMeta meta) {
         PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID(), "CustomHead");
         try {
             PlayerTextures textures = profile.getTextures();
-            textures.setSkin(new URL("https://textures.minecraft.net/texture/" + headValue));
+            textures.setSkin(textureUrl(headValue));
             profile.setTextures(textures);
         } catch (MalformedURLException ex) {
             throw new RuntimeException(ex);
