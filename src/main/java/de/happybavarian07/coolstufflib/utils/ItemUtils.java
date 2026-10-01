@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerProfile;
+import org.bukkit.profile.PlayerTextures;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.MalformedURLException;
@@ -47,10 +48,10 @@ public final class ItemUtils {
             return headEnum.getAsItem();
         } catch (IllegalArgumentException ignored) {}
 
-        meta.setDisplayName(ChatUtils.chat(name).substring(0, Math.min(15, name.length())));
+        meta.setDisplayName(ChatUtils.chat(name));
         
         if (!isTexture) {
-            meta.setOwningPlayer(Bukkit.getOfflinePlayer(headValue.substring(0, Math.min(15, name.length()))));
+            meta.setOwningPlayer(Bukkit.getOfflinePlayer(headValue));
             head.setItemMeta(meta);
             return head;
         }
@@ -62,7 +63,9 @@ public final class ItemUtils {
     public static ItemStack applyItemStackToProfile(String headValue, ItemStack head, SkullMeta meta) {
         PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID(), "CustomHead");
         try {
-            profile.getTextures().setSkin(new URL("https://textures.minecraft.net/texture/" + headValue));
+            PlayerTextures textures = profile.getTextures();
+            textures.setSkin(new URL("https://textures.minecraft.net/texture/" + headValue));
+            profile.setTextures(textures);
         } catch (MalformedURLException ex) {
             throw new RuntimeException(ex);
         }
