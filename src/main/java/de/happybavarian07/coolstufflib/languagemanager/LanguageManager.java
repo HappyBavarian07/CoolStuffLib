@@ -1195,7 +1195,7 @@ public class LanguageManager implements Service {
         }
 
         if (materialString.startsWith("HEAD_OBJECT(") && materialString.endsWith(")")) {
-            String headName = materialString.substring(5, materialString.length() - 1).trim();
+            String headName = materialString.substring(12, materialString.length() - 1).trim();
             try {
                 try {
                     Head head = Head.valueOf(headName);
@@ -1216,7 +1216,7 @@ public class LanguageManager implements Service {
                 return Utils.createSkull("MHF_Question", "MHF_Question", false);
             }
         } else if (materialString.startsWith("HEAD(") && materialString.endsWith(")")) {
-            String headValue = materialString.substring(11, materialString.length() - 1).trim();
+            String headValue = materialString.substring(5, materialString.length() - 1).trim();
             try {
                 return Utils.createSkull(headValue, headValue, false);
             } catch (Exception e) {
@@ -1236,7 +1236,7 @@ public class LanguageManager implements Service {
                 if (headCondition.isHead()) {
                     return headCondition.getHead().getAsItem();
                 } else {
-                    return Utils.createSkull(headCondition.getHeadValue(), headCondition.getHeadValue().substring(0, 15), headCondition.isTexture());
+                    return Utils.createSkull(headCondition.getHeadValue(), headCondition.getHeadValue(), headCondition.isTexture());
                 }
             } else if (cond != null) {
                 Material material = cond.getMaterial();
