@@ -129,7 +129,7 @@ public abstract class PaginatedMenu<T> extends Menu {
         if (prevItem == null) prevItem = lgm.getItem("General.Left", null, false);
         if (nextItem == null) nextItem = lgm.getItem("General.Right", null, false);
         if (isValidSlot(leftBtnSlot)) inventory.setItem(leftBtnSlot, prevItem);
-        if (isValidSlot(closeBtnSlot)) inventory.setItem(closeBtnSlot, lgm.getItem("General.Close", null, false));
+        if (isValidSlot(closeBtnSlot)) inventory.setItem(closeBtnSlot, lgm.getItem(savedMenu != null ? "General.Back" : "General.Close", null, false));
         if (isValidSlot(rightBtnSlot)) inventory.setItem(rightBtnSlot, nextItem);
         if (isValidSlot(refreshBtnSlot)) inventory.setItem(refreshBtnSlot, lgm.getItem("General.Refresh", null, false));
         for (int i = 0; i < size; i++) {
@@ -276,7 +276,8 @@ public abstract class PaginatedMenu<T> extends Menu {
         if (prevItem == null) prevItem = lgm.getItem("General.Left", player, false);
         if (nextItem == null) nextItem = lgm.getItem("General.Right", player, false);
 
-        if (slot == closeSlot || item.isSimilar(lgm.getItem("General.Close", player, false))) {
+        if (slot == closeSlot || item.isSimilar(lgm.getItem("General.Close", player, false))
+                || item.isSimilar(lgm.getItem("General.Back", player, false))) {
             closeAndReturnOrClose();
             return true;
         } else if (slot == prevSlot || item.isSimilar(prevItem)) {
