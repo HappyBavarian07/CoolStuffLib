@@ -12,13 +12,16 @@ import org.bukkit.event.inventory.InventoryClickEvent;
  *         .right(removeEntry.confirm("Remove?"))
  *         .shift(copyEntry));
  * </code></pre>
- * Shift clicks use the shift action if set, otherwise fall through to left/right.
+ * A shift click uses {@link #shiftLeft(MenuAction)} or {@link #shiftRight(MenuAction)} if set for its side, then the
+ * shift action if set, otherwise falls through to left/right.
  * Clicks without a matching action use {@link #otherwise(MenuAction)} or do nothing.
  */
 public final class ClickAction implements MenuAction {
     private MenuAction left;
     private MenuAction right;
     private MenuAction shift;
+    private MenuAction shiftLeft;
+    private MenuAction shiftRight;
     private MenuAction middle;
     private MenuAction fallback;
 
@@ -44,6 +47,16 @@ public final class ClickAction implements MenuAction {
         return this;
     }
 
+    public ClickAction shiftLeft(MenuAction action) {
+        this.shiftLeft = action;
+        return this;
+    }
+
+    public ClickAction shiftRight(MenuAction action) {
+        this.shiftRight = action;
+        return this;
+    }
+
     public ClickAction middle(MenuAction action) {
         this.middle = action;
         return this;
@@ -62,6 +75,8 @@ public final class ClickAction implements MenuAction {
 
     private MenuAction select(ClickType click) {
         if (click == null) return left != null ? left : fallback;
+        if (click == ClickType.SHIFT_LEFT && shiftLeft != null) return shiftLeft;
+        if (click == ClickType.SHIFT_RIGHT && shiftRight != null) return shiftRight;
         if (click.isShiftClick() && shift != null) return shift;
         if (click == ClickType.MIDDLE && middle != null) return middle;
         if (click.isLeftClick() && left != null) return left;

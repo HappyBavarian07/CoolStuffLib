@@ -27,6 +27,22 @@ class ClickActionTest {
     }
 
     @Test
+    void shiftLeftAndShiftRightCanDiffer() {
+        MenuAction shiftLeft = mock(MenuAction.class);
+        MenuAction shiftRight = mock(MenuAction.class);
+        ClickAction action = ClickAction.of().left(left).right(right).shiftLeft(shiftLeft).shiftRight(shiftRight).shift(shift);
+
+        InventoryClickEvent sl = click(ClickType.SHIFT_LEFT);
+        InventoryClickEvent sr = click(ClickType.SHIFT_RIGHT);
+        action.execute(player, sl);
+        action.execute(player, sr);
+
+        verify(shiftLeft).execute(player, sl);
+        verify(shiftRight).execute(player, sr);
+        verifyNoInteractions(shift, left, right);
+    }
+
+    @Test
     void routesEachClickType() {
         ClickAction action = ClickAction.of().left(left).right(right).shift(shift).middle(middle).otherwise(fallback);
 
