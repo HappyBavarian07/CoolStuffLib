@@ -13,6 +13,15 @@ class FileBackupTest {
     private final Path tempDir = Path.of("TestOutputs");
 
     @Test
+    void newestBackupIsNullWithoutBackups() {
+        File root = new File(tempDir.toFile(), "FileBackupTest" + File.separator + "noBackups");
+        File backupDir = new File(root, "backups");
+        backupDir.mkdirs();
+        FileBackup backup = new FileBackup("noBackups", new File[]{new File(root, "none.txt")}, backupDir, root);
+        assertNull(backup.getNewestBackupFile());
+    }
+
+    @Test
     void testBackup() {
         File testsRoot = new File(tempDir.toFile() + File.separator + "FileBackupTest" + File.separator + "testBackup");
         testsRoot.mkdirs();
