@@ -167,6 +167,7 @@ public class FileBackup implements Comparable<FileBackup> {
     }
 
     public File getNewestBackupFile() {
+        if (backupsDone.isEmpty()) return null;
         Map<Long, File> backupFileDates = new HashMap<>();
         for (File backupFile : backupsDone) {
             backupFileDates.put(backupFile.lastModified(), backupFile);
