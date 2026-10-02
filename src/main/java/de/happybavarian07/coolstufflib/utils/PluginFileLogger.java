@@ -70,6 +70,8 @@ public class PluginFileLogger {
     public void createLogFile() {
         if (!logFile.exists()) {
             try {
+                File parent = logFile.getParentFile();
+                if (parent != null) parent.mkdirs();
                 logFile.createNewFile();
             } catch (IOException e) {
                 logger.log(Level.WARNING, "Could not create log file " + logFile, e);
