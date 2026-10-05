@@ -227,8 +227,35 @@ public class GiveSubCommand extends SubCommand {
   `[...]` optional, short choice lists spelled out.
 - At least 2 and at most 3 arguments are accepted (unless `@CommandData` sets `minArgs`/`maxArgs`).
 
-Available argument types: `player`, `world`, `choice`, `enumOf`, `integer`, `decimal`, `word`,
-`text` (all remaining words) and `custom(name, sender -> suggestions)`.
+Available argument types: `player`, `world`, `choice`, `typedChoice`, `asyncChoice`, `enumOf`,
+`integer`, `decimal`, `word`, `text` (all remaining words) and
+`custom(name, sender -> suggestions)`.
+
+Dynamic choices receive the actual `CommandSender`, so they can be scoped to the sender:
+
+```java
+Argument profile = Argument.typedChoice("profile", sender ->
+        profileRepository.findFor(sender).stream()
+                .map(value -> new ArgumentOption<>(value.name(), value))
+                .toList())
+        .cached(Duration.ofSeconds(10))
+        .description("A profile saved by this sender");
+```
+
+Resolve the selected value without repeating the lookup:
+
+```java
+Profile selected = args.resolved(0, profile);
+```
+
+Use `new ArgumentOption<>(value, resolved, permission)` when individual options need a
+permission. Use `.permission("myplugin.profile.use")` or `.visibleWhen(...)` to filter an
+entire argument. `.clearCache()` invalidates cached values after a change.
+
+`Argument.asyncChoice(...)` exposes a `CompletionStage` through `completeAsync(sender)` for
+integrations that support asynchronous suggestions. Bukkit's normal `TabCompleter` callback is
+synchronous, so asynchronous work must be completed by the integration rather than blocking the
+server thread.
 
 ## Registering Commands
 

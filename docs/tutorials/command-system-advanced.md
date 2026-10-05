@@ -157,6 +157,31 @@ public List<Argument> arguments() {
 
 The sender passed to a completer can be `null` (for example while rendering the help page).
 
+For typed, sender-specific values, return `ArgumentOption` instances:
+
+```java
+Argument profile = Argument.typedChoice("profile", sender ->
+        profileRepository.findFor(sender).stream()
+                .map(value -> new ArgumentOption<>(value.name(), value, "myplugin.profile.use"))
+                .toList())
+        .cached(Duration.ofSeconds(10))
+        .description(sender -> "Profiles available to " + sender.getName());
+```
+
+The first option value is shown to the sender and the resolved value is returned by
+`args.resolved(index, profile)`. Option permissions are checked before completion and resolution.
+Use `.visibleWhen(...)` for custom visibility rules.
+
+Database-backed completion can be exposed as an asynchronous stage:
+
+```java
+Argument.asyncChoice("profile", sender -> profileRepository.findNamesAsync(sender))
+        .completeAsync(sender);
+```
+
+The standard Bukkit tab-completion callback remains synchronous. Do not block it waiting for a
+database or network result; use an integration that can consume the returned `CompletionStage`.
+
 When a position depends on earlier arguments, override `subArgs` directly. Positions start at 1 for the first
 argument after the subcommand:
 
@@ -233,8 +258,22 @@ registerSubCommand(new HelpCommand(getCommandName()));
 - `/myplugin help [page]`: every command the sender may use (nested ones included), 10 per page. Commands
   the sender lacks permission for are hidden; player-only commands are hidden from the console.
 - `/myplugin help user add`: detail view with syntax, description, aliases, permission, arguments,
-  subcommands and notes (players only, cooldown, needs confirmation, runs asynchronously).
+  dynamic argument descriptions, subcommands and notes (players only, cooldown, needs confirmation,
+  runs asynchronously).
 - Tab completion offers page numbers and the command tree.
+
+Help pagination uses `PaginatedList`, which can also be reused by plugins:
+
+```java
+PaginatedList<String> pages = new PaginatedList<>(values)
+        .maxItemsPerPage(10)
+        .sort("alphabetic", true);
+List<String> firstPage = pages.page(1);
+int pageCount = pages.pageCount();
+```
+
+`page(...)` returns an empty list for an invalid page, while the legacy checked accessors remain
+available for callers that want to require preparation explicitly.
 
 Customize the look through the language file (`Messages.Player.Commands.HelpMessages.*` for the list,
 `HelpDetails.*` for the detail view, see [section 14](#14-message-keys-reference)).
