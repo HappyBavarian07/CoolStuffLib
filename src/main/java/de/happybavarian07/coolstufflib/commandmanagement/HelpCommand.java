@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -64,7 +63,7 @@ public class HelpCommand extends SubCommand {
     public Map<Integer, String[]> subArgs(CommandSender sender, int isPlayer, String[] args) {
         Map<Integer, String[]> completions = new HashMap<>();
         List<String> first = new ArrayList<>();
-        int pages = pageCount(visibleCommands(sender));
+        int pages = new PaginatedList<>(visibleCommands(sender)).maxItemsPerPage(PAGE_SIZE).pageCount();
         for (int page = 1; page <= pages; page++) first.add(String.valueOf(page));
         for (SubCommand command : manager().getSubCommands()) {
             if (sender == null || visibleTo(sender, command)) first.add(command.name());
@@ -80,8 +79,10 @@ public class HelpCommand extends SubCommand {
     }
 
     private boolean showPage(CommandSender sender, Player player, int page) {
-        List<SubCommand> commands = visibleCommands(sender);
-        int pages = pageCount(commands);
+        PaginatedList<SubCommand> commands = new PaginatedList<>(visibleCommands(sender))
+                .maxItemsPerPage(PAGE_SIZE)
+                .sort("subcommand", true);
+        int pages = commands.pageCount();
         lgm.addPlaceholder(PlaceholderType.MESSAGE, "%page%", page, false);
         lgm.addPlaceholder(PlaceholderType.MESSAGE, "%max_page%", pages, false);
         if (page < 1 || page > pages) {
@@ -89,8 +90,7 @@ public class HelpCommand extends SubCommand {
             return true;
         }
         sender.sendMessage(lgm.getMessage("Player.Commands.HelpMessages.Header", player, false));
-        int from = (page - 1) * PAGE_SIZE;
-        for (SubCommand command : commands.subList(from, Math.min(from + PAGE_SIZE, commands.size()))) {
+        for (SubCommand command : commands.page(page)) {
             sender.sendMessage(format(lgm.getMessage("Player.Commands.HelpMessages.Format", player, false), command));
         }
         sender.sendMessage(lgm.getMessage("Player.Commands.HelpMessages.Footer", player, true));
@@ -103,7 +103,12 @@ public class HelpCommand extends SubCommand {
         values.put("%description%", command.info().isEmpty() ? "-" : command.info());
         values.put("%aliases%", String.join(", ", command.aliases()));
         values.put("%permission%", command.permissionAsString().isEmpty() ? "-" : command.permissionAsString());
-        values.put("%arguments%", command.arguments().stream().map(Argument::usage).collect(Collectors.joining(" ")));
+        values.put("%arguments%", command.arguments().stream()
+                .map(argument -> {
+                    String description = argument.description(sender);
+                    return argument.usage() + (description.isEmpty() ? "" : " (" + description + ")");
+                })
+                .collect(Collectors.joining(" ")));
         values.put("%subcommands%", command.getChildren().stream()
                 .filter(child -> visibleTo(sender, child)).map(SubCommand::name).collect(Collectors.joining(", ")));
         values.put("%notes%", String.join(", ", notes(command)));
@@ -143,17 +148,12 @@ public class HelpCommand extends SubCommand {
         return manager.getAllSubCommands().stream()
                 .filter(command -> command != manager.getRootCommand())
                 .filter(command -> sender == null || visibleTo(sender, command))
-                .sorted(Comparator.comparing(SubCommand::path))
                 .toList();
     }
 
     private boolean visibleTo(CommandSender sender, SubCommand command) {
         if (command.isPlayerRequired() && !(sender instanceof Player)) return false;
         return manager().hasPermission(sender, command);
-    }
-
-    private static int pageCount(List<SubCommand> commands) {
-        return Math.max(1, (commands.size() + PAGE_SIZE - 1) / PAGE_SIZE);
     }
 
     private CommandManager manager() {

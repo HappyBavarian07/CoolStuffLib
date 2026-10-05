@@ -67,6 +67,10 @@ public final class CommandArgs {
         return has(index) ? raw[index] : defaultValue;
     }
 
+    public <T> T resolved(int index, Argument argument) {
+        return argument.resolve(sender, require(index));
+    }
+
     /** All arguments from {@code from} on, joined with spaces. */
     public String joined(int from) {
         require(from);

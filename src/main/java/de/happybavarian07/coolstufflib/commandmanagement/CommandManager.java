@@ -139,7 +139,7 @@ public abstract class CommandManager {
             return true;
         }
         if (target.allowOnlySubCommandArgsThatFitToSubArgs()) {
-            Map<Integer, String> invalidArgs = findInvalidArgs(updatedArgs, target, (sender instanceof Player) ? 1 : 0);
+            Map<Integer, String> invalidArgs = findInvalidArgs(sender, updatedArgs, target, (sender instanceof Player) ? 1 : 0);
             if (!invalidArgs.isEmpty()) {
                 lgm.addPlaceholder(PlaceholderType.MESSAGE, "%invalidArgs%", invalidArgs.toString(), false);
                 sender.sendMessage(format(lgm.getMessage("Player.Commands.CommandContainsInvalidArgs", getPlayerForSender(sender), true), target));
@@ -205,9 +205,9 @@ public abstract class CommandManager {
      * @param target The subcommand to check against.
      * @return A map of invalid arguments, with the key being the index of the argument and the value being the argument itself.
      */
-    private Map<Integer, String> findInvalidArgs(String[] args, SubCommand target, int isPlayer) {
+    private Map<Integer, String> findInvalidArgs(CommandSender sender, String[] args, SubCommand target, int isPlayer) {
         Map<Integer, String> invalidArgs = new HashMap<>();
-        Map<Integer, String[]> subArgs = target.subArgs(null, isPlayer, args);
+        Map<Integer, String[]> subArgs = target.subArgs(sender, isPlayer, args);
         if (subArgs == null || subArgs.isEmpty()) return invalidArgs;
         for (int i = 0; i < args.length; i++) {
             String[] allowed = subArgs.get(i + 1);

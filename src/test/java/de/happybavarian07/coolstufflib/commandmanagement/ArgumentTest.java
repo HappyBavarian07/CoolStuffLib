@@ -71,6 +71,28 @@ class ArgumentTest {
     }
 
     @Test
+    void typedChoicesFilterPermissionsAndResolveValues() {
+        Argument argument = Argument.typedChoice("profile", sender -> List.of(
+                new ArgumentOption<>("public", 1),
+                new ArgumentOption<>("private", 2, "profile.private")));
+        CommandSender sender = mock(CommandSender.class);
+        when(sender.hasPermission("profile.private")).thenReturn(false);
+
+        assertEquals(List.of("public"), argument.complete(sender));
+        assertEquals(Integer.valueOf(1), argument.resolve(sender, "PUBLIC"));
+        assertThrows(IllegalArgumentException.class, () -> argument.resolve(sender, "private"));
+    }
+
+    @Test
+    void typedArgumentsResolveThroughCommandArgs() {
+        Argument argument = Argument.typedChoice("profile", sender ->
+                List.of(new ArgumentOption<>("main", "profile-id")));
+        CommandArgs args = new CommandArgs(mock(CommandSender.class), new String[]{"main"}, List.of(argument));
+
+        assertEquals("profile-id", args.resolved(0, argument));
+    }
+
+    @Test
     void playerCompletionListsOnlinePlayers() {
         Player alex = mock(Player.class);
         when(alex.getName()).thenReturn("Alex");
