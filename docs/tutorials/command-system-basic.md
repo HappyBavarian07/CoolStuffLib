@@ -257,6 +257,11 @@ a `CompletionStage<List<String>>` for integrations that support asynchronous sug
 normal `TabCompleter` callback remains synchronous; do not block it waiting for a database or
 network result.
 
+Context-aware arguments can inspect the command path and previously entered values through
+`ArgumentCompletionContext`. Use `contextualChoice(...)` for immediate suggestions or
+`contextualAsyncChoice(...)` for asynchronous suggestions. The older `SubCommand.subArgs(...)`
+override remains for compatibility but is deprecated for new commands.
+
 ## Registering Commands
 
 Register subcommands in the manager's `setup()`, then register the manager:

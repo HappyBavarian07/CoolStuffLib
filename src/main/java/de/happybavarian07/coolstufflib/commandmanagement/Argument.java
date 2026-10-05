@@ -15,6 +15,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletionStage;
 import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -37,6 +38,8 @@ public final class Argument {
     private final boolean required;
     private final boolean greedy;
     private final Function<CommandSender, Collection<String>> completer;
+    private final Function<ArgumentCompletionContext, Collection<String>> contextualCompleter;
+    private final Function<ArgumentCompletionContext, CompletionStage<? extends Collection<String>>> contextualAsyncCompleter;
     private final List<String> fixedOptions;
     private final ArgumentResolver<?> resolver;
     private final Function<CommandSender, CompletionStage<? extends Collection<String>>> asyncCompleter;
@@ -46,15 +49,17 @@ public final class Argument {
     private final Map<Object, CachedCompletion> cache = new ConcurrentHashMap<>();
 
     private Argument(String name, boolean required, boolean greedy, Function<CommandSender, Collection<String>> completer) {
-        this(name, required, greedy, completer, null, null, null, sender -> "", sender -> true, 0);
+        this(name, required, greedy, completer, null, null, null, null, null, sender -> "", sender -> true, 0);
     }
 
     private Argument(String name, boolean required, boolean greedy, Function<CommandSender, Collection<String>> completer,
                      List<String> fixedOptions) {
-        this(name, required, greedy, completer, fixedOptions, null, null, sender -> "", sender -> true, 0);
+        this(name, required, greedy, completer, null, null, fixedOptions, null, null, sender -> "", sender -> true, 0);
     }
 
     private Argument(String name, boolean required, boolean greedy, Function<CommandSender, Collection<String>> completer,
+                     Function<ArgumentCompletionContext, Collection<String>> contextualCompleter,
+                     Function<ArgumentCompletionContext, CompletionStage<? extends Collection<String>>> contextualAsyncCompleter,
                      List<String> fixedOptions, ArgumentResolver<?> resolver,
                      Function<CommandSender, CompletionStage<? extends Collection<String>>> asyncCompleter,
                      Function<CommandSender, String> description, Predicate<CommandSender> visibility, long cacheMillis) {
@@ -62,6 +67,8 @@ public final class Argument {
         this.required = required;
         this.greedy = greedy;
         this.completer = completer;
+        this.contextualCompleter = contextualCompleter;
+        this.contextualAsyncCompleter = contextualAsyncCompleter;
         this.fixedOptions = fixedOptions;
         this.resolver = resolver;
         this.asyncCompleter = asyncCompleter;
@@ -93,12 +100,13 @@ public final class Argument {
     public static <T> Argument typedChoice(String name, ArgumentResolver<T> resolver) {
         Objects.requireNonNull(resolver);
         return new Argument(name, true, false, sender -> visibleOptions(sender, resolver.resolve(sender)),
-                null, resolver, null, sender -> "", sender -> true, 0);
+                null, null, null, resolver, null, sender -> "", sender -> true, 0);
     }
 
     public static Argument asyncChoice(String name,
                                        Function<CommandSender, CompletionStage<? extends Collection<String>>> choices) {
-        return new Argument(name, true, false, sender -> List.of(), null, null, choices, sender -> "", sender -> true, 0);
+        return new Argument(name, true, false, sender -> List.of(), null, null, null, null, choices,
+                sender -> "", sender -> true, 0);
     }
 
     /** Enum constant, completed in lower case. */
@@ -132,13 +140,32 @@ public final class Argument {
         return new Argument(name, true, false, completer);
     }
 
+    public static Argument contextualChoice(String name,
+                                            BiFunction<CommandSender, String[], Collection<String>> completer) {
+        return new Argument(name, true, false, sender -> List.of(),
+                context -> completer.apply(context.sender(), context.rawArguments()), null, null, null,
+                null, sender -> "", sender -> true, 0);
+    }
+
+    public static Argument contextualChoice(String name,
+                                            Function<ArgumentCompletionContext, Collection<String>> completer) {
+        return new Argument(name, true, false, sender -> List.of(), completer, null, null, null, null,
+                sender -> "", sender -> true, 0);
+    }
+
+    public static Argument contextualAsyncChoice(String name,
+                                                  Function<ArgumentCompletionContext, CompletionStage<? extends Collection<String>>> completer) {
+        return new Argument(name, true, false, sender -> List.of(), null, completer, null, null, null,
+                sender -> "", sender -> true, 0);
+    }
+
     public Argument description(String description) {
         return description(sender -> description);
     }
 
     public Argument description(Function<CommandSender, String> description) {
-        return copy(required, greedy, completer, fixedOptions, resolver, asyncCompleter,
-                Objects.requireNonNull(description), cacheMillis);
+        return copy(required, greedy, completer, contextualCompleter, fixedOptions, resolver, asyncCompleter,
+                contextualAsyncCompleter, Objects.requireNonNull(description), visibility, cacheMillis);
     }
 
     public Argument permission(String permission) {
@@ -146,13 +173,14 @@ public final class Argument {
     }
 
     public Argument visibleWhen(Predicate<CommandSender> predicate) {
-        return copy(required, greedy, completer, fixedOptions, resolver, asyncCompleter, description,
-                visibility.and(Objects.requireNonNull(predicate)), cacheMillis);
+        return copy(required, greedy, completer, contextualCompleter, fixedOptions, resolver, asyncCompleter,
+                contextualAsyncCompleter, description, visibility.and(Objects.requireNonNull(predicate)), cacheMillis);
     }
 
     public Argument cached(Duration duration) {
         if (duration.isNegative() || duration.isZero()) throw new IllegalArgumentException("Cache duration must be positive");
-        return copy(required, greedy, completer, fixedOptions, resolver, asyncCompleter, description, duration.toMillis());
+        return copy(required, greedy, completer, contextualCompleter, fixedOptions, resolver, asyncCompleter,
+                contextualAsyncCompleter, description, visibility, duration.toMillis());
     }
 
     public Argument clearCache() {
@@ -162,7 +190,8 @@ public final class Argument {
 
     /** Returns an optional copy of this argument. */
     public Argument optional() {
-        return copy(false, greedy, completer, fixedOptions, resolver, asyncCompleter, description, cacheMillis);
+        return copy(false, greedy, completer, contextualCompleter, fixedOptions, resolver, asyncCompleter,
+                contextualAsyncCompleter, description, visibility, cacheMillis);
     }
 
     public String name() {
@@ -177,10 +206,29 @@ public final class Argument {
         return greedy;
     }
 
+    boolean supportsAdditionalCompletions() {
+        return contextualCompleter != null || contextualAsyncCompleter != null;
+    }
+
     public List<String> complete(CommandSender sender) {
+        return complete(sender, new String[0]);
+    }
+
+    List<String> complete(CommandSender sender, String[] rawArguments) {
+        return completeWithContext(new ArgumentCompletionContext(sender, null, rawArguments,
+                Math.max(0, rawArguments.length - 1),
+                rawArguments.length == 0 ? "" : rawArguments[rawArguments.length - 1]));
+    }
+
+    List<String> completeWithContext(ArgumentCompletionContext context) {
+        CommandSender sender = context.sender();
         Object key = senderKey(sender);
         CachedCompletion cached = cacheMillis > 0 ? cache.get(key) : null;
         if (!visibility.test(sender)) return List.of();
+        if (contextualCompleter != null) {
+            Collection<String> values = contextualCompleter.apply(context);
+            return values == null ? List.of() : List.copyOf(values);
+        }
         if (cached != null && cached.expiresAt() > System.currentTimeMillis()) return cached.values();
         Collection<String> values = completeUncached(sender);
         List<String> result = values == null ? List.of() : List.copyOf(values);
@@ -198,8 +246,18 @@ public final class Argument {
         return stage.thenApply(values -> values == null ? List.of() : List.copyOf(values));
     }
 
+    CompletionStage<? extends Collection<String>> completeAsync(ArgumentCompletionContext context) {
+        if (!visibility.test(context.sender())) return java.util.concurrent.CompletableFuture.completedFuture(List.of());
+        if (contextualAsyncCompleter != null) {
+            CompletionStage<? extends Collection<String>> stage = contextualAsyncCompleter.apply(context);
+            if (stage == null) throw new IllegalStateException("Async completer returned null for argument '" + name + "'");
+            return stage.thenApply(values -> values == null ? List.of() : List.copyOf(values));
+        }
+        return completeAsync(context.sender());
+    }
+
     public boolean hasAsyncCompleter() {
-        return asyncCompleter != null;
+        return asyncCompleter != null || contextualAsyncCompleter != null;
     }
 
     public String description(CommandSender sender) {
@@ -250,17 +308,13 @@ public final class Argument {
     }
 
     private Argument copy(boolean required, boolean greedy, Function<CommandSender, Collection<String>> completer,
+                          Function<ArgumentCompletionContext, Collection<String>> contextualCompleter,
                           List<String> fixedOptions, ArgumentResolver<?> resolver,
                           Function<CommandSender, CompletionStage<? extends Collection<String>>> asyncCompleter,
-                          Function<CommandSender, String> description, long cacheMillis) {
-        return copy(required, greedy, completer, fixedOptions, resolver, asyncCompleter, description, visibility, cacheMillis);
-    }
-
-    private Argument copy(boolean required, boolean greedy, Function<CommandSender, Collection<String>> completer,
-                          List<String> fixedOptions, ArgumentResolver<?> resolver,
-                          Function<CommandSender, CompletionStage<? extends Collection<String>>> asyncCompleter,
+                          Function<ArgumentCompletionContext, CompletionStage<? extends Collection<String>>> contextualAsyncCompleter,
                           Function<CommandSender, String> description, Predicate<CommandSender> visibility, long cacheMillis) {
-        return new Argument(name, required, greedy, completer, fixedOptions, resolver, asyncCompleter, description, visibility, cacheMillis);
+        return new Argument(name, required, greedy, completer, contextualCompleter, contextualAsyncCompleter,
+                fixedOptions, resolver, asyncCompleter, description, visibility, cacheMillis);
     }
 
     private static Object senderKey(CommandSender sender) {

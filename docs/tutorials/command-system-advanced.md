@@ -185,6 +185,12 @@ permission, child-command and prefix filtering. The standard Bukkit tab-completi
 synchronous; an adapter or command framework integration can consume this stage without blocking
 the server thread.
 
+For completion that depends on the command path or previously entered values, use
+`Argument.contextualChoice(...)` or `Argument.contextualAsyncChoice(...)`. The
+`ArgumentCompletionContext` provides the sender, current subcommand, raw arguments, argument index,
+and current input. New commands should use these argument APIs instead of overriding the deprecated
+`SubCommand.subArgs(...)` method.
+
 When a position depends on earlier arguments, override `subArgs` directly. Positions start at 1 for the first
 argument after the subcommand:
 

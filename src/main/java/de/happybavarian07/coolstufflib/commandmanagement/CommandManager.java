@@ -311,9 +311,9 @@ public abstract class CommandManager {
             targetArgs = args;
         }
         if (target != null && targetArgs.length > 0 && hasPermission(sender, target)) {
-            Map<Integer, String[]> subArgs = target.subArgs(sender, (sender instanceof Player) ? 1 : 0, targetArgs);
-            if (subArgs != null && subArgs.containsKey(targetArgs.length)) {
-                options.addAll(Arrays.asList(subArgs.get(targetArgs.length)));
+            Map<Integer, List<String>> argumentCompletions = target.argumentCompletions(sender, targetArgs);
+            if (argumentCompletions.containsKey(targetArgs.length)) {
+                options.addAll(argumentCompletions.get(targetArgs.length));
             }
         }
 
@@ -361,24 +361,13 @@ public abstract class CommandManager {
             return CompletableFuture.completedFuture(filterCompletions(options, args[args.length - 1]));
         }
 
-        Map<Integer, String[]> subArgs = target.subArgs(sender, sender instanceof Player ? 1 : 0, targetArgs);
-        if (subArgs != null && subArgs.containsKey(targetArgs.length)) {
-            options.addAll(Arrays.asList(subArgs.get(targetArgs.length)));
-        }
-
-        int argumentIndex = targetArgs.length - 1;
-        List<Argument> arguments = target.arguments();
-        if (argumentIndex >= 0 && argumentIndex < arguments.size()) {
-            Argument argument = arguments.get(argumentIndex);
-            if (argument.hasAsyncCompleter()) {
-                Set<String> baseOptions = options;
-                return argument.completeAsync(sender).thenApply(values -> {
-                    baseOptions.addAll(values);
-                    return filterCompletions(baseOptions, args[args.length - 1]);
-                });
-            }
-        }
-        return CompletableFuture.completedFuture(filterCompletions(options, args[args.length - 1]));
+        Set<String> baseOptions = options;
+        String[] completionArgs = targetArgs;
+        return target.argumentCompletionsAsync(sender, completionArgs).thenApply(argumentCompletions -> {
+            List<String> values = argumentCompletions.get(completionArgs.length);
+            if (values != null) baseOptions.addAll(values);
+            return filterCompletions(baseOptions, args[args.length - 1]);
+        });
     }
 
     private List<String> filterCompletions(Set<String> options, String current) {

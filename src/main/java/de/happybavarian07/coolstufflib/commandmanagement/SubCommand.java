@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 /**
@@ -330,14 +332,65 @@ public abstract class SubCommand implements Comparable<SubCommand> {
      * @param args     The arguments that were passed to the command.
      * @return A map containing the sub-arguments for this command.
      */
+    /**
+     * <p>Legacy completion hook retained for source compatibility. New commands should define
+     * completion through {@link Argument} instead.</p>
+     *
+     * @param sender The command sender
+     * @param isPlayer Whether the sender is a player
+     * @param args The current command arguments
+     * @return Completion values by argument position
+     * @deprecated Use {@link #arguments()} with contextual argument completers.
+     */
+    @Deprecated
     public Map<Integer, String[]> subArgs(CommandSender sender, int isPlayer, String[] args) {
         Map<Integer, String[]> completions = new HashMap<>();
         List<Argument> arguments = arguments();
         for (int i = 0; i < arguments.size(); i++) {
-            List<String> options = arguments.get(i).complete(sender);
-            if (!options.isEmpty()) completions.put(i + 1, options.toArray(new String[0]));
+            List<String> options = arguments.get(i).complete(sender, args);
+            if (!options.isEmpty()) {
+                int position = i + 1;
+                if (i == arguments.size() - 1 && arguments.get(i).supportsAdditionalCompletions()) {
+                    position = Math.max(position, args.length);
+                }
+                completions.put(position, options.toArray(new String[0]));
+            }
         }
         return completions;
+    }
+
+    public Map<Integer, List<String>> argumentCompletions(CommandSender sender, String[] args) {
+        Map<Integer, List<String>> completions = new HashMap<>();
+        List<Argument> definitions = arguments();
+        int index = Math.max(0, args.length - 1);
+        if (index >= definitions.size()) {
+            if (definitions.isEmpty() || !definitions.get(definitions.size() - 1).supportsAdditionalCompletions()) return completions;
+            index = definitions.size() - 1;
+        }
+        ArgumentCompletionContext context = new ArgumentCompletionContext(sender, this, args, index,
+                args.length == 0 ? "" : args[args.length - 1]);
+        List<String> options = definitions.get(index).completeWithContext(context);
+        if (!options.isEmpty()) completions.put(args.length, options);
+        return completions;
+    }
+
+    public CompletionStage<Map<Integer, List<String>>> argumentCompletionsAsync(CommandSender sender, String[] args) {
+        Map<Integer, List<String>> completions = new HashMap<>();
+        List<Argument> definitions = arguments();
+        int index = Math.max(0, args.length - 1);
+        if (index >= definitions.size()) {
+            if (definitions.isEmpty() || !definitions.get(definitions.size() - 1).supportsAdditionalCompletions()) {
+                return CompletableFuture.completedFuture(completions);
+            }
+            index = definitions.size() - 1;
+        }
+        Argument argument = definitions.get(index);
+        ArgumentCompletionContext context = new ArgumentCompletionContext(sender, this, args, index,
+                args.length == 0 ? "" : args[args.length - 1]);
+        return argument.completeAsync(context).thenApply(options -> {
+            if (!options.isEmpty()) completions.put(args.length, List.copyOf(options));
+            return completions;
+        });
     }
 
     /**

@@ -9,7 +9,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,7 +39,23 @@ public class HelpCommand extends SubCommand {
 
     @Override
     public List<Argument> arguments() {
-        return List.of(Argument.word("page|command").optional());
+        return List.of(Argument.contextualChoice("page|command", (sender, args) -> {
+            List<String> suggestions = new ArrayList<>();
+            int pages = new PaginatedList<>(visibleCommands(sender)).maxItemsPerPage(PAGE_SIZE).pageCount();
+            if (args.length <= 1) {
+                for (int page = 1; page <= pages; page++) suggestions.add(String.valueOf(page));
+                for (SubCommand command : visibleCommands(sender)) suggestions.add(command.name());
+            } else {
+                SubCommand parent = resolve(java.util.Arrays.copyOf(args, args.length - 1));
+                if (parent != null) {
+                    parent.getChildren().stream()
+                            .filter(child -> visibleTo(sender, child))
+                            .map(SubCommand::name)
+                            .forEach(suggestions::add);
+                }
+            }
+            return suggestions;
+        }).optional());
     }
 
     @Override
@@ -57,25 +72,6 @@ public class HelpCommand extends SubCommand {
         }
         showDetails(sender, player, target);
         return true;
-    }
-
-    @Override
-    public Map<Integer, String[]> subArgs(CommandSender sender, int isPlayer, String[] args) {
-        Map<Integer, String[]> completions = new HashMap<>();
-        List<String> first = new ArrayList<>();
-        int pages = new PaginatedList<>(visibleCommands(sender)).maxItemsPerPage(PAGE_SIZE).pageCount();
-        for (int page = 1; page <= pages; page++) first.add(String.valueOf(page));
-        for (SubCommand command : manager().getSubCommands()) {
-            if (sender == null || visibleTo(sender, command)) first.add(command.name());
-        }
-        completions.put(1, first.toArray(new String[0]));
-        if (args.length > 1) {
-            SubCommand parent = resolve(Arrays.copyOf(args, args.length - 1));
-            if (parent != null) {
-                completions.put(args.length, parent.getChildren().stream().map(SubCommand::name).toArray(String[]::new));
-            }
-        }
-        return completions;
     }
 
     private boolean showPage(CommandSender sender, Player player, int page) {
