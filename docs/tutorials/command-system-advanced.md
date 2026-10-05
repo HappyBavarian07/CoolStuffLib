@@ -175,12 +175,15 @@ Use `.visibleWhen(...)` for custom visibility rules.
 Database-backed completion can be exposed as an asynchronous stage:
 
 ```java
-Argument.asyncChoice("profile", sender -> profileRepository.findNamesAsync(sender))
-        .completeAsync(sender);
+Argument asyncProfile = Argument.asyncChoice("profile", sender -> profileRepository.findNamesAsync(sender));
+
+manager.onTabCompleteAsync(sender, command, "myplugin", new String[]{"profile", ""});
 ```
 
-The standard Bukkit tab-completion callback remains synchronous. Do not block it waiting for a
-database or network result; use an integration that can consume the returned `CompletionStage`.
+`onTabCompleteAsync(...)` returns a `CompletionStage<List<String>>` and preserves the normal
+permission, child-command and prefix filtering. The standard Bukkit tab-completion callback remains
+synchronous; an adapter or command framework integration can consume this stage without blocking
+the server thread.
 
 When a position depends on earlier arguments, override `subArgs` directly. Positions start at 1 for the first
 argument after the subcommand:

@@ -192,7 +192,14 @@ public final class Argument {
         if (asyncCompleter == null) {
             return java.util.concurrent.CompletableFuture.completedFuture(complete(sender));
         }
-        return asyncCompleter.apply(sender);
+        if (!visibility.test(sender)) return java.util.concurrent.CompletableFuture.completedFuture(List.of());
+        CompletionStage<? extends Collection<String>> stage = asyncCompleter.apply(sender);
+        if (stage == null) throw new IllegalStateException("Async completer returned null for argument '" + name + "'");
+        return stage.thenApply(values -> values == null ? List.of() : List.copyOf(values));
+    }
+
+    public boolean hasAsyncCompleter() {
+        return asyncCompleter != null;
     }
 
     public String description(CommandSender sender) {

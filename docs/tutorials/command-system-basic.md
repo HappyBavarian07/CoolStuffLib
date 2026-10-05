@@ -252,10 +252,10 @@ Use `new ArgumentOption<>(value, resolved, permission)` when individual options 
 permission. Use `.permission("myplugin.profile.use")` or `.visibleWhen(...)` to filter an
 entire argument. `.clearCache()` invalidates cached values after a change.
 
-`Argument.asyncChoice(...)` exposes a `CompletionStage` through `completeAsync(sender)` for
-integrations that support asynchronous suggestions. Bukkit's normal `TabCompleter` callback is
-synchronous, so asynchronous work must be completed by the integration rather than blocking the
-server thread.
+`Argument.asyncChoice(...)` is consumed by `CommandManager.onTabCompleteAsync(...)`, which returns
+a `CompletionStage<List<String>>` for integrations that support asynchronous suggestions. Bukkit's
+normal `TabCompleter` callback remains synchronous; do not block it waiting for a database or
+network result.
 
 ## Registering Commands
 

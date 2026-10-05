@@ -17,6 +17,8 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * The base class for creating command managers with subcommands.
@@ -321,6 +323,69 @@ public abstract class CommandManager {
             if (option.toLowerCase(Locale.ROOT).startsWith(current)) result.add(option);
         }
         return result;
+    }
+
+    public CompletionStage<List<String>> onTabCompleteAsync(CommandSender sender, Command command, String label, String[] args) {
+        if (args.length == 0) return CompletableFuture.completedFuture(List.of());
+
+        Set<String> options = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        if (args.length == 1) {
+            for (SubCommand sub : getSubCommands()) {
+                if (!hasPermission(sender, sub)) continue;
+                options.add(sub.name());
+                options.addAll(Arrays.asList(sub.aliases()));
+            }
+        }
+
+        SubCommand target = getSubCommand(args[0]);
+        String[] targetArgs;
+        if (target != null) {
+            targetArgs = removeFirstArgument(args);
+            while (targetArgs.length > 1 && target.getChild(targetArgs[0]) != null) {
+                target = target.getChild(targetArgs[0]);
+                targetArgs = removeFirstArgument(targetArgs);
+            }
+            if (targetArgs.length == 1) {
+                for (SubCommand child : target.getChildren()) {
+                    if (!hasPermission(sender, child)) continue;
+                    options.add(child.name());
+                    options.addAll(Arrays.asList(child.aliases()));
+                }
+            }
+        } else {
+            target = rootCommand;
+            targetArgs = args;
+        }
+
+        if (target == null || targetArgs.length == 0 || !hasPermission(sender, target)) {
+            return CompletableFuture.completedFuture(filterCompletions(options, args[args.length - 1]));
+        }
+
+        Map<Integer, String[]> subArgs = target.subArgs(sender, sender instanceof Player ? 1 : 0, targetArgs);
+        if (subArgs != null && subArgs.containsKey(targetArgs.length)) {
+            options.addAll(Arrays.asList(subArgs.get(targetArgs.length)));
+        }
+
+        int argumentIndex = targetArgs.length - 1;
+        List<Argument> arguments = target.arguments();
+        if (argumentIndex >= 0 && argumentIndex < arguments.size()) {
+            Argument argument = arguments.get(argumentIndex);
+            if (argument.hasAsyncCompleter()) {
+                Set<String> baseOptions = options;
+                return argument.completeAsync(sender).thenApply(values -> {
+                    baseOptions.addAll(values);
+                    return filterCompletions(baseOptions, args[args.length - 1]);
+                });
+            }
+        }
+        return CompletableFuture.completedFuture(filterCompletions(options, args[args.length - 1]));
+    }
+
+    private List<String> filterCompletions(Set<String> options, String current) {
+        String prefix = current.toLowerCase(Locale.ROOT);
+        return options.stream()
+                .filter(option -> option.toLowerCase(Locale.ROOT).startsWith(prefix))
+                .toList();
     }
 
     /**
